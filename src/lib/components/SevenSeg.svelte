@@ -1,5 +1,5 @@
 <script lang="ts">
-	let { lines }: { lines: string[] } = $props();
+	let { lines, frags = {} }: { lines: string[]; frags?: Record<string, string> } = $props();
 
 	const SEG: Record<string, [number, number, number, number]> = {
 		a: [10, 0, 34, 7],
@@ -29,7 +29,7 @@
 	{#each lines as line (line)}
 		<div class="lrow">
 			{#each line.split('') as ch, i (i)}
-				{#if DIG[ch]}
+				{#if DIG[ch] || frags[ch] !== undefined}
 					<svg width="42" height="72" viewBox="-2 -2 58 97">
 						{#each segEntries as [k, p] (k)}
 							<rect
@@ -38,7 +38,9 @@
 								width={p[2]}
 								height={p[3]}
 								rx="3"
-								fill={DIG[ch].includes(k) ? '#3aff62' : '#111a12'}
+								fill={(frags[ch] !== undefined ? frags[ch] : DIG[ch]).includes(k)
+									? '#3aff62'
+									: '#111a12'}
 							/>
 						{/each}
 					</svg>

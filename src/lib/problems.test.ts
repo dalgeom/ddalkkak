@@ -36,8 +36,22 @@ describe('문제 은행 무결성', () => {
 		for (const p of PROBLEMS) {
 			for (const b of p.blocks) {
 				if (b.kind === 'lcd') {
+					const fragKeys = Object.keys(b.frags ?? {}).join('');
+					const re = new RegExp(`^[0-9★+=?\\s−${fragKeys}-]+$`);
 					for (const line of b.lines) {
-						expect(/^[0-9★+=?\s−-]+$/.test(line), `${p.id}: ${line}`).toBe(true);
+						expect(re.test(line), `${p.id}: ${line}`).toBe(true);
+					}
+				}
+			}
+		}
+	});
+
+	it('lcd frags는 유효한 세그먼트 문자(a~g)만 쓴다', () => {
+		for (const p of PROBLEMS) {
+			for (const b of p.blocks) {
+				if (b.kind === 'lcd' && b.frags) {
+					for (const [key, segs] of Object.entries(b.frags)) {
+						expect(/^[a-g]*$/.test(segs), `${p.id}: ${key}=${segs}`).toBe(true);
 					}
 				}
 			}
