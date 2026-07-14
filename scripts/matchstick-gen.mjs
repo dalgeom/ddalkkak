@@ -103,7 +103,7 @@ for (let a = 0; a <= 9; a++) {
 }
 
 writeFileSync(
-	new URL('./matchstick-problems.json', import.meta.url),
+	new URL('../src/lib/data/matchstick-problems.json', import.meta.url),
 	JSON.stringify(results, null, '\t')
 );
 
