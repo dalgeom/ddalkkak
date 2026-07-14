@@ -8,8 +8,9 @@
 	<header>
 		<a class="logo" href="/">딸깍<span class="spark">!</span></a>
 		<nav>
+			<a href="/" class="mode">📅 오늘의 퍼즐</a>
+			<a href="/matchstick" class="mode">🔥 성냥개비</a>
 			<a href="/about">소개</a>
-			<a href="/privacy">개인정보</a>
 		</nav>
 	</header>
 
@@ -62,6 +63,12 @@
 		color: #8d8478;
 		text-decoration: none;
 		font-weight: 700;
+	}
+	nav a.mode {
+		background: #f0ebe0;
+		border-radius: 14px;
+		padding: 4px 10px;
+		color: #6b6152;
 	}
 	footer {
 		margin-top: 18px;
