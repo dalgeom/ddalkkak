@@ -1,7 +1,7 @@
 export type Block =
 	| { kind: 'text'; html: string }
 	| { kind: 'pre'; text: string }
-	| { kind: 'lcd'; lines: string[] }
+	| { kind: 'lcd'; lines: string[]; frags?: Record<string, string> }
 	| { kind: 'colors'; rows: string[] };
 
 export interface Problem {
@@ -906,5 +906,138 @@ export const PROBLEMS: Problem[] = [
 			'7777이 7로 나누어떨어지나요?'
 		],
 		explain: '7777 = 7×1111 — 7의 배수라 요일이 그대로. <b>금요일</b>.'
+	},
+	{
+		id: 'hanja-strokes',
+		chip: '한자',
+		blocks: [{ kind: 'pre', text: '一 = 1\n二 = 2\n五 = 4\n\n四 = ?' }],
+		type: 'text',
+		answers: ['5'],
+		hints: [
+			'4가 아닙니다 — 그랬다면 五도 5였겠죠.',
+			'五=4가 열쇠입니다. 왜 五가 4일까요?',
+			'값이 아니라 글자를 "그리는 데" 드는 것을 세어 보세요.'
+		],
+		explain:
+			'<b>획수</b>입니다. 一二三은 값과 획수가 우연히 같은 미끼 — 五는 4획, 四는 <b>5획</b>. 값과 획수가 서로 엇갈리는 순간이 이 문제의 백미.'
+	},
+	{
+		id: 'anagram-numbers',
+		chip: '영단어',
+		blocks: [
+			{ kind: 'text', html: '다음 등식들이 성립한다.' },
+			{ kind: 'pre', text: 'WON + TOW = THERE\nTHERE + EVENS = NET\n\nNET − EVENS − TOW = ?' }
+		],
+		type: 'text',
+		answers: ['1', 'won', 'one', '원'],
+		hints: [
+			'글자 수를 세 봐도, 순번을 더해 봐도 안 맞습니다.',
+			'THERE를 오래 보세요 — 그 안에 숫자가 숨어 있습니다.',
+			'글자를 재배열하면 전부 수의 이름입니다. 등식은 그 수들의 덧셈.'
+		],
+		explain:
+			'재배열하면 수 이름: WON=ONE, TOW=TWO, THERE=THREE, EVENS=SEVEN, NET=TEN. 1+2=3 ✓, 3+7=10 ✓. 10−7−2 = <b>1 (WON)</b>.'
+	},
+	{
+		id: 'lcd-fragments',
+		chip: '전광판',
+		blocks: [
+			{ kind: 'text', html: '전광판에 <b>부서진 파편</b> 같은 것들이 떠 있는데, 등식은 성립한다고 한다.' },
+			{
+				kind: 'lcd',
+				lines: ['X + Y = 7', 'Z + W = 9', 'U + V = ?'],
+				frags: { X: 'ef', Y: 'ade', Z: 'adefg', W: '', U: 'b', V: 'e' }
+			}
+		],
+		type: 'text',
+		answers: ['15'],
+		hints: [
+			'파편이 아니라 "빠진 조각"입니다.',
+			'둘째 줄: 완전히 꺼진 자리가 8이라는 것 — 그게 힌트의 전부입니다.',
+			'8(모든 획)에서 파편을 빼 보세요. 꺼진 획들이 진짜 숫자입니다.'
+		],
+		explain:
+			'파편은 진짜 숫자의 <b>꺼진 획</b>(여집합)입니다. 8은 모든 획을 쓰니 파편이 없음! 예시: 3+4=7, 1+8=9. 문제: 6+9 = <b>15</b>.'
+	},
+	{
+		id: 'time-minutes',
+		chip: '시간',
+		blocks: [{ kind: 'pre', text: '1:00 = 60\n1:30 = 90\n\n2:15 = ?' }],
+		type: 'text',
+		answers: ['135', '135분'],
+		hints: [
+			'1:00이 왜 60일까요?',
+			'시각을 하나의 단위로 바꿔 보세요.',
+			'전부 분(minute)으로 환산하면?'
+		],
+		explain: '시각을 <b>분으로 환산</b>: 1시간=60분, 1시간 30분=90분. 2시간 15분 = <b>135분</b>.'
+	},
+	{
+		id: 'rotate-self',
+		chip: '탐색',
+		blocks: [
+			{
+				kind: 'text',
+				html: "카드 '68'을 거꾸로 들면 '89'가 된다.<br>거꾸로 들어도 <b>자기 자신</b>인 두 자리 수 중 가장 큰 것은?"
+			}
+		],
+		type: 'text',
+		answers: ['96'],
+		hints: [
+			'거꾸로 들어도 살아남는 숫자는 0, 1, 8, 그리고 6↔9뿐입니다.',
+			'두 자리를 돌리면 순서도 뒤집힙니다 — 96을 돌리면?',
+			'가장 큰 조합부터 돌려서 검산해 보세요.'
+		],
+		explain:
+			'96을 180° 돌리면: 순서가 뒤집히고 9→6, 6→9 — 그대로 <b>96</b>! (69, 88, 11, 00도 되지만 96이 최대)'
+	},
+	{
+		id: 'clock-face-sum',
+		chip: '시계',
+		blocks: [
+			{
+				kind: 'text',
+				html: '시계 문자판의 열두 숫자를 전부 더하면? <b>(암산 5초 컷이 가능하다)</b>'
+			}
+		],
+		type: 'text',
+		answers: ['78'],
+		hints: [
+			'1부터 12까지 하나씩 더하면 지는 겁니다.',
+			'양 끝을 짝지어 보세요: 1+12, 2+11…',
+			'13이 여섯 쌍.'
+		],
+		explain: '1+12, 2+11, 3+10… 전부 <b>13</b>, 여섯 쌍 → 13×6 = <b>78</b>. 5초 컷의 비밀은 짝짓기.'
+	},
+	{
+		id: 'flip-add',
+		chip: '탐색',
+		blocks: [
+			{
+				kind: 'text',
+				html: '두 자리 수 AB에 일의 자리 <b>B를 더했더니</b> 자리가 뒤집힌 <b>BA</b>가 됐다. AB는?'
+			}
+		],
+		type: 'text',
+		answers: ['89'],
+		hints: [
+			'아무 두 자리 수나 시도해 보세요 — 금방 감이 옵니다.',
+			'B를 더했는데 십의 자리는 1 커지고 일의 자리는 1 작아졌습니다.',
+			'9로 끝나는 큰 수부터 시험해 보세요.'
+		],
+		explain: '<b>89 + 9 = 98</b> ✓. 유일한 답입니다 (9A=8B 구조라 A=8, B=9만 가능).'
+	},
+	{
+		id: 'binary-seq',
+		chip: '수열',
+		blocks: [{ kind: 'pre', text: '1, 10, 11, 100, 101, ?' }],
+		type: 'text',
+		answers: ['110'],
+		hints: [
+			'등차도 등비도 아닙니다. 이 수열엔 0과 1밖에 없다는 게 단서.',
+			'컴퓨터가 세는 방식입니다.',
+			'1, 2, 3, 4, 5를 이진법으로 쓰면?'
+		],
+		explain: '<b>이진법으로 센 1~6</b>: 1, 10, 11, 100, 101, <b>110</b>.'
 	}
 ];

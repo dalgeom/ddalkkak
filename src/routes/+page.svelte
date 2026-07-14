@@ -188,7 +188,7 @@
 			{:else if b.kind === 'pre'}
 				<pre class="qblock">{b.text}</pre>
 			{:else if b.kind === 'lcd'}
-				<SevenSeg lines={b.lines} />
+				<SevenSeg lines={b.lines} frags={b.frags} />
 			{:else if b.kind === 'colors'}
 				<ColorBlocks rows={b.rows} />
 			{/if}
