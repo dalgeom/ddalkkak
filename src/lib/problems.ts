@@ -480,5 +480,283 @@ export const PROBLEMS: Problem[] = [
 			'金의 뜻은 돈이 아니라…'
 		],
 		explain: '요일 한자의 뜻: 金은 돈이 아니라 <b>쇠(금속)</b>. 토=흙, 일=해까지 이어집니다.'
+	},
+	{
+		id: 'square-diff',
+		chip: '이상한 연산',
+		blocks: [{ kind: 'pre', text: '9 ※ 8 = 17\n5 ※ 3 = 16\n7 ※ 2 = 45\n\n8 ※ 6 = ?' }],
+		type: 'text',
+		answers: ['28'],
+		hints: [
+			'첫 줄 9※8=17은 덧셈처럼 보이지만, 5※3=16이 부정합니다.',
+			'각 수를 제곱해 보세요.',
+			'제곱한 두 값의 차이입니다.'
+		],
+		explain: '<b>제곱의 차</b>: 81−64=17, 25−9=16, 49−4=45. 64−36 = <b>28</b>.'
+	},
+	{
+		id: 'quot-rem',
+		chip: '이상한 연산',
+		blocks: [{ kind: 'pre', text: '17 ◎ 5 = 32\n22 ◎ 7 = 31\n9 ◎ 4 = 21\n\n26 ◎ 6 = ?' }],
+		type: 'text',
+		answers: ['42'],
+		hints: [
+			'결과가 한 번의 연산으로 나온 수가 아닙니다 — 두 조각입니다.',
+			'나눗셈을 해 보세요. 몫만 쓰지 말고.',
+			'몫과 나머지를 나란히 이어 쓴 것입니다.'
+		],
+		explain: '<b>몫과 나머지 이어 쓰기</b>: 17÷5 = 3 나머지 2 → 32. 26÷6 = 4 나머지 2 → <b>42</b>.'
+	},
+	{
+		id: 'clock-add',
+		chip: '이상한 연산',
+		blocks: [{ kind: 'pre', text: '9 ◐ 5 = 2\n7 ◐ 8 = 3\n11 ◐ 11 = 10\n\n8 ◐ 9 = ?' }],
+		type: 'text',
+		answers: ['5', '5시'],
+		hints: [
+			'9+5는 14인데 답이 2 — 어디로 12가 사라졌을까요?',
+			'숫자가 12를 넘으면 다시 처음으로 돌아가는 물건이 있죠.',
+			'시계 위에서 더해 보세요.'
+		],
+		explain: '<b>시계 덧셈</b>: 합이 12를 넘으면 한 바퀴. 8+9=17 → 17−12 = <b>5시</b>.'
+	},
+	{
+		id: 'straight-strokes',
+		chip: '영단어',
+		blocks: [{ kind: 'pre', text: 'NET = 9\nTAX = 7\nMAN = 10\n\nWAX = ?' }],
+		type: 'text',
+		answers: ['9'],
+		hints: [
+			'단어의 뜻도, 알파벳 순번도 아닙니다. 글자를 "그려" 보세요.',
+			'이 단어들에 곡선 글자가 하나도 없다는 건 우연이 아닙니다.',
+			'각 글자를 긋는 데 필요한 직선 획수를 더하세요.'
+		],
+		explain:
+			'대문자의 <b>직선 획수 합</b>: N(3)+E(4)+T(2)=9, T(2)+A(3)+X(2)=7. W(4)+A(3)+X(2) = <b>9</b>.'
+	},
+	{
+		id: 'sum-to-letter',
+		chip: '알파벳',
+		blocks: [{ kind: 'pre', text: 'CAB = F\nBAD = G\nACE = I\n\nBEAD = ?' }],
+		type: 'text',
+		answers: ['l', '엘'],
+		hints: [
+			'C에서 3칸 가면 F — 하지만 그 규칙은 BAD에서 죽습니다.',
+			'글자를 순번으로 바꿔 보세요 (A=1, B=2…).',
+			'순번을 모두 더한 값을 다시 글자로 바꾸면?'
+		],
+		explain:
+			'순번 합을 글자로: CAB=3+1+2=6=<b>F</b>, BAD=7=G, ACE=9=I. BEAD=2+5+1+4=12 = <b>L</b>.'
+	},
+	{
+		id: 'jamo-count',
+		chip: '한글',
+		blocks: [{ kind: 'pre', text: '닭 = 4\n물 = 3\n삶 = 4\n\n값 = ?' }],
+		type: 'text',
+		answers: ['4'],
+		hints: [
+			'글자 수도 획수도 아닙니다. 글자를 분해해 보세요.',
+			'닭 = ㄷ, ㅏ, ㄹ, ㄱ.',
+			'자모 낱자의 개수 — 겹받침은 둘로 셉니다.'
+		],
+		explain: '<b>자모 낱자 개수</b>: 닭=ㄷㅏㄹㄱ(4), 물=ㅁㅜㄹ(3). 값=ㄱㅏㅂㅅ = <b>4</b>.'
+	},
+	{
+		id: 'sum-eq-product',
+		chip: '탐색',
+		blocks: [
+			{ kind: 'text', html: '자릿수를 <b>더해도, 곱해도</b> 결과가 같은 두 자리 수는?' }
+		],
+		type: 'text',
+		answers: ['22'],
+		hints: [
+			'두 자릿수를 각각 더한 값과 곱한 값을 비교하는 문제입니다.',
+			'덧셈과 곱셈이 같아지려면 아주 특별한 숫자여야 합니다.',
+			'같은 숫자가 두 번 들어갑니다.'
+		],
+		explain: '2+2 = 2×2 = 4. 두 자리 수 중 유일한 답 <b>22</b>.'
+	},
+	{
+		id: 'adjacent-letters',
+		chip: '영단어',
+		blocks: [{ kind: 'pre', text: 'HIGH = 2\nJOKE = 0\nDEFY = 2\n\nCLIMB = ?' }],
+		type: 'text',
+		answers: ['1'],
+		hints: [
+			'단어 안에서 이웃한 글자들의 "알파벳 거리"를 보세요.',
+			'H와 I는 알파벳에서 바로 이웃입니다. HIGH엔 그런 쌍이 둘(HI, GH).',
+			'알파벳 순서로 연속인 이웃 글자 쌍을 세어 보세요.'
+		],
+		explain:
+			'알파벳 연속 이웃 쌍: HIGH=HI·GH(2), DEFY=DE·EF(2). CLIMB엔 <b>LM</b> 하나 → <b>1</b>.'
+	},
+	{
+		id: 'top-row',
+		chip: '영단어',
+		blocks: [
+			{ kind: 'text', html: '넷 중 하나만 아주 <b>특별</b>하다. 어느 것일까?' }
+		],
+		type: 'choice',
+		choices: ['TYPEWRITER', 'KEYBOARD', 'MONITOR', 'PRINTER'],
+		answerIndex: 0,
+		hints: [
+			'단어의 뜻이 아니라 "치는 행위"를 생각해 보세요.',
+			'키보드를 내려다보고 한 글자씩 짚어 보세요.',
+			'어느 한 단어만 손가락이 한 줄을 벗어나지 않습니다.'
+		],
+		explain:
+			'<b>TYPEWRITER</b>는 키보드 맨 윗줄(QWERTYUIOP)만으로 칠 수 있는 단어입니다. 나머지는 전부 줄을 넘나듭니다.'
+	},
+	{
+		id: 'aspirated',
+		chip: '한글',
+		blocks: [{ kind: 'pre', text: 'ㄱ = ㅋ\nㄷ = ㅌ\nㅈ = ㅊ\n\nㅂ = ?' }],
+		type: 'text',
+		answers: ['ㅍ'],
+		hints: [
+			'자음 순번으로 계산하면 간격이 불규칙해서 죽습니다. 소리를 내 보세요.',
+			'ㄱ에 획을 하나 더하면 ㅋ — 소리가 어떻게 변하나요?',
+			'예사소리와 거센소리의 짝입니다.'
+		],
+		explain: '<b>거센소리 짝</b>: 획이 하나 늘며 소리가 거세집니다. ㅂ의 거센소리 = <b>ㅍ</b>.'
+	},
+	{
+		id: 'dotted-letters',
+		chip: '영단어',
+		blocks: [{ kind: 'pre', text: 'jelly = 1\nbanana = 0\nlily = 1\n\ninjury = ?' }],
+		type: 'text',
+		answers: ['2'],
+		hints: [
+			'대문자가 아니라 소문자로 쓰여 있는 것 자체가 단서입니다.',
+			'글자 위를 보세요 — 무언가 떠 있는 글자들이 있죠.',
+			'점이 붙는 소문자를 세어 보세요.'
+		],
+		explain: '<b>점이 붙는 소문자(i, j)의 개수</b>: jelly의 j, lily의 i. injury엔 i와 j → <b>2</b>.'
+	},
+	{
+		id: 'anagram-eq',
+		chip: '영단어',
+		blocks: [
+			{
+				kind: 'text',
+				html: 'ELEVEN + TWO = TWELVE + ONE<br>이 등식은 <b>두 번</b> 참이다. 산술(11+2 = 12+1) 말고 또 무엇이 참일까?'
+			}
+		],
+		type: 'choice',
+		choices: [
+			'글자를 재배열하면 양변이 똑같다',
+			'로마 숫자로 써도 같다',
+			'발음이 같다',
+			'획수가 같다'
+		],
+		answerIndex: 0,
+		hints: [
+			'양변의 "값" 말고 "표기"를 비교해 보세요.',
+			'글자를 하나씩 세어 보세요 — E가 몇 개, T가 몇 개…',
+			'양변은 같은 글자들로 되어 있습니다.'
+		],
+		explain:
+			'ELEVEN+TWO와 TWELVE+ONE은 완전한 <b>애너그램</b> — 같은 글자들의 재배열이면서 값(13)도 같습니다.'
+	},
+	{
+		id: 'weekday-add',
+		chip: '요일',
+		blocks: [{ kind: 'pre', text: '월 + 화 = 수\n화 + 수 = 금\n월 + 수 = 목\n\n화 + 목 = ?' }],
+		type: 'text',
+		answers: ['토', '토요일'],
+		hints: [
+			'"다음 날" 규칙처럼 보이지만 화+수=금에서 무너집니다.',
+			'요일을 숫자로 바꿔 보세요 (월=1).',
+			'숫자로 더한 결과를 다시 요일로 바꾸면?'
+		],
+		explain: '요일 = 순번: 월(1)+화(2)=3=수. 화(2)+목(4)=6 = <b>토</b>.'
+	},
+	{
+		id: 'month-season',
+		chip: '달력',
+		blocks: [{ kind: 'pre', text: '13월 = 겨울\n15월 = 봄\n20월 = 여름\n\n27월 = ?' }],
+		type: 'text',
+		answers: ['봄'],
+		hints: [
+			'13월은 세상에 없습니다 — 그럼 13월은 사실 몇 월일까요?',
+			'12개월이 지나면 달력은 처음으로 돌아갑니다.',
+			'12를 빼고 남는 달의 계절을 답하세요.'
+		],
+		explain: '12를 넘으면 한 바퀴: 13월=1월(겨울), 20월=8월(여름). 27월 = 27−24 = 3월 = <b>봄</b>.'
+	},
+	{
+		id: 'xmas-newyear',
+		chip: '달력',
+		blocks: [
+			{
+				kind: 'text',
+				html: '올해 크리스마스가 <b>수요일</b>이라면, 다음 새해 첫날은 무슨 요일?'
+			}
+		],
+		type: 'text',
+		answers: ['수', '수요일'],
+		hints: [
+			'12월 25일부터 1월 1일까지 날짜를 세어 보세요.',
+			'정확히 일주일입니다.',
+			'7일 뒤는 언제나 같은 요일입니다.'
+		],
+		explain: '12/25 → 1/1은 정확히 <b>7일</b>. 그래서 크리스마스와 새해 첫날은 항상 같은 요일 — <b>수요일</b>.'
+	},
+	{
+		id: 'tomorrow-yesterday',
+		chip: '시간',
+		blocks: [
+			{ kind: 'text', html: '<b>"내일의 어제의 내일의 어제"</b>는 언제일까?' }
+		],
+		type: 'text',
+		answers: ['오늘'],
+		hints: [
+			'하나씩 따라가도 되지만, 더 빠른 길이 있습니다.',
+			'"내일의 어제"는 그냥 오늘입니다.',
+			'내일과 어제가 만나면 서로 지워집니다.'
+		],
+		explain: '내일↔어제는 <b>상쇄</b>됩니다. 두 쌍이 모두 지워져 <b>오늘</b>.'
+	},
+	{
+		id: 'month-prefix',
+		chip: '영단어',
+		blocks: [{ kind: 'pre', text: 'MARCHING = 3\nJANITOR = 1\nOCTOPUS = 10\n\nMAYBE = ?' }],
+		type: 'text',
+		answers: ['5', '5월'],
+		hints: [
+			'문어 다리는 8개인데 OCTOPUS가 10 — 다리가 아닙니다.',
+			'단어의 앞부분만 떼어 읽어 보세요. MARCH, JAN, OCT…',
+			'달력의 영어 이름입니다. MAY는 몇 월?'
+		],
+		explain:
+			'단어 앞에 숨은 <b>달 이름</b>: MARCH(3월), JAN(1월), OCT(10월 — 문어 다리 8개에 낚였다면 정상입니다). MAY = <b>5</b>.'
+	},
+	{
+		id: 'alpha-order-nums',
+		chip: '수열',
+		blocks: [{ kind: 'pre', text: '8, 5, 4, 9, 1, 7, ?, 3, 2, 0' }],
+		type: 'text',
+		answers: ['6', 'six'],
+		hints: [
+			'산수로는 아무 규칙도 나오지 않습니다. 수의 "이름"을 보세요.',
+			'eight, five, four… 어떤 순서로 늘어서 있나요?',
+			'영어 이름의 사전 순입니다. 빠진 수의 이름은 s로 시작합니다.'
+		],
+		explain:
+			'0~9를 <b>영어 이름의 사전 순</b>으로: eight, five, four, nine, one, seven, <b>six</b>, three, two, zero → <b>6</b>.'
+	},
+	{
+		id: 'korean-name-len',
+		chip: '한글',
+		blocks: [{ kind: 'pre', text: '11 = 2\n21 = 3\n99 = 3\n\n105 = ?' }],
+		type: 'text',
+		answers: ['2', '2글자', '두글자'],
+		hints: [
+			'11=2는 자릿수 같지만 21=3에서 죽습니다.',
+			'숫자를 한글로 소리 내어 읽어 보세요.',
+			'십일은 두 글자, 이십일은 세 글자. 백오는?'
+		],
+		explain:
+			'<b>한글로 읽은 글자 수</b>: 십일(2), 이십일(3), 구십구(3). 105 = 백오 = <b>2글자</b> — 21보다 짧습니다!'
 	}
 ];
