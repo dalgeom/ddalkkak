@@ -5,11 +5,12 @@ export const HINT_SCORES = [100, 80, 50, 20] as const;
 
 export const ROUND_SIZE = 3;
 
-/** 답 비교용 정규화: 소문자화, 공백·구두점·연산 기호 제거 */
+/** 답 비교용 정규화: 소문자화, 공백·구두점·연산 기호 제거.
+ *  주의: 알파벳 x는 정답 문자일 수 있어 제거하지 않는다(곱셈은 유니코드 ×로 처리). */
 export function normalize(s: string): string {
 	return String(s)
 		.toLowerCase()
-		.replace(/[\s.,·×x*=+-]/g, '');
+		.replace(/[\s.,·×*=+-]/g, '');
 }
 
 export function isCorrectText(p: Problem, value: string): boolean {

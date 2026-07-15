@@ -9,6 +9,12 @@ describe('normalize', () => {
 		expect(normalize('19+72=91')).toBe('197291');
 		expect(normalize('파랑 · 남색')).toBe('파랑남색');
 	});
+
+	it('알파벳 x는 정답 문자로 보존한다(곱셈 ×만 제거)', () => {
+		expect(normalize('X')).toBe('x');
+		expect(normalize('3×4')).toBe('34');
+		expect(normalize('six')).toBe('six');
+	});
 });
 
 describe('isCorrectText', () => {
