@@ -51,13 +51,13 @@
 		width: 34px;
 		height: 34px;
 		border-radius: 7px;
-		border: 2px dashed #c4b8a4;
+		border: 2px dashed #3a4a66;
 		display: flex;
 		align-items: center;
 		justify-content: center;
 		font-size: 18px;
 		font-weight: 900;
-		color: #d33;
+		color: #ff5d73;
 		flex: none;
 	}
 </style>

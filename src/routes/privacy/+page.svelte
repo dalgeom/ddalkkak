@@ -35,22 +35,24 @@
 
 <style>
 	.page {
-		background: #fff;
-		border: 1px solid #e5dfd4;
-		border-radius: 16px;
-		padding: 24px 20px;
-		line-height: 1.7;
+		background: var(--panel);
+		border: 1px solid var(--border);
+		border-radius: var(--radius);
+		padding: 26px 22px;
+		line-height: 1.8;
 		font-size: 14px;
+		color: var(--text);
 	}
 	h1 {
-		font-size: 20px;
+		font-size: 22px;
 		margin-bottom: 8px;
 	}
 	h2 {
 		font-size: 15px;
-		margin: 16px 0 6px;
+		margin: 18px 0 6px;
+		color: var(--accent);
 	}
 	a {
-		color: #e8590c;
+		color: var(--accent-2);
 	}
 </style>

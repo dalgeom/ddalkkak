@@ -25,20 +25,22 @@
 
 <style>
 	.page {
-		background: #fff;
-		border: 1px solid #e5dfd4;
-		border-radius: 16px;
-		padding: 24px 20px;
-		line-height: 1.7;
+		background: var(--panel);
+		border: 1px solid var(--border);
+		border-radius: var(--radius);
+		padding: 26px 22px;
+		line-height: 1.8;
 		font-size: 15px;
+		color: var(--text);
 	}
 	h1 {
-		font-size: 20px;
+		font-size: 22px;
 		margin-bottom: 12px;
 	}
 	h2 {
 		font-size: 16px;
-		margin: 18px 0 8px;
+		margin: 20px 0 8px;
+		color: var(--accent);
 	}
 	ul {
 		padding-left: 20px;
