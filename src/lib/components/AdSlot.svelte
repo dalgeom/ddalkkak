@@ -12,14 +12,14 @@
 
 <style>
 	.ad-slot {
-		border: 2px dashed #d9d0c0;
-		border-radius: 8px;
-		color: #b3a894;
+		border: 1px dashed var(--border);
+		border-radius: 12px;
+		color: #4d5b73;
 		display: flex;
 		align-items: center;
 		justify-content: center;
 		font-size: 12px;
-		min-height: 80px;
-		margin: 16px 0 0;
+		min-height: 90px;
+		margin: 18px 0 0;
 	}
 </style>

@@ -1,5 +1,14 @@
 import { describe, it, expect } from 'vitest';
-import { normalize, isCorrectText, buildRound, scoreFor, emojiFor } from './game';
+import {
+	normalize,
+	isCorrectText,
+	buildRound,
+	scoreFor,
+	emojiFor,
+	seededOrder,
+	kstDayNumber,
+	dailyIndices
+} from './game';
 import { PROBLEMS } from './problems';
 
 describe('normalize', () => {
@@ -61,5 +70,35 @@ describe('scoreFor / emojiFor', () => {
 		expect(emojiFor(true, 0)).toBe('✅');
 		expect(emojiFor(true, 2)).toBe('💡');
 		expect(emojiFor(false, 0)).toBe('🔓');
+	});
+});
+
+describe('데일리 출제', () => {
+	it('seededOrder는 결정적이고 0~n-1 순열이다', () => {
+		const a = seededOrder(100);
+		const b = seededOrder(100);
+		expect(a).toEqual(b); // 매번 동일
+		expect([...a].sort((x, y) => x - y)).toEqual(Array.from({ length: 100 }, (_, i) => i));
+	});
+
+	it('kstDayNumber는 KST 자정마다 1씩 증가', () => {
+		// 2026-01-01 00:00 KST = 2025-12-31 15:00 UTC
+		const kstMidnight = Date.UTC(2025, 11, 31, 15, 0, 0);
+		const d0 = kstDayNumber(kstMidnight);
+		const d1 = kstDayNumber(kstMidnight + 86400000);
+		expect(d1).toBe(d0 + 1);
+		// 자정 직전(1초 전)은 아직 전날
+		expect(kstDayNumber(kstMidnight - 1000)).toBe(d0 - 1);
+	});
+
+	it('dailyIndices: 같은 날은 같은 3문제, 하루 안에 중복 없음', () => {
+		const day = 500;
+		const a = dailyIndices(100, day);
+		const b = dailyIndices(100, day);
+		expect(a).toEqual(b);
+		expect(a.length).toBe(3);
+		expect(new Set(a).size).toBe(3); // 중복 없음
+		// 다음 날은 다른 세트
+		expect(dailyIndices(100, day + 1)).not.toEqual(a);
 	});
 });
