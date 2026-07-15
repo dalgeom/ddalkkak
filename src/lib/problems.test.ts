@@ -37,7 +37,7 @@ describe('문제 은행 무결성', () => {
 			for (const b of p.blocks) {
 				if (b.kind === 'lcd') {
 					const fragKeys = Object.keys(b.frags ?? {}).join('');
-					const re = new RegExp(`^[0-9★+=?\\s−${fragKeys}-]+$`);
+					const re = new RegExp(`^[0-9★+=?→\\s−${fragKeys}-]+$`);
 					for (const line of b.lines) {
 						expect(re.test(line), `${p.id}: ${line}`).toBe(true);
 					}
