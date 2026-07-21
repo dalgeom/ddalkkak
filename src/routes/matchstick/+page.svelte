@@ -266,6 +266,7 @@
 	/>
 </svelte:head>
 
+<div class="mroot">
 {#if screen === 'menu'}
 	<div class="card menu">
 		<h2>🔥 성냥개비</h2>
@@ -366,12 +367,17 @@
 		<AdSlot label="모드 결과" />
 	</div>
 {/if}
+</div>
 
 {#if toastMsg}
 	<div class="toast">{toastMsg}</div>
 {/if}
 
 <style>
+	.mroot {
+		max-width: 640px;
+		margin: 0 auto;
+	}
 	.card {
 		background: var(--panel);
 		border: 1px solid var(--border);
@@ -486,7 +492,6 @@
 	}
 	.feedback.ok {
 		color: var(--accent);
-		text-shadow: 0 0 16px var(--accent-glow);
 	}
 	.controls {
 		display: flex;
@@ -500,7 +505,7 @@
 	}
 	.btn {
 		background: var(--accent);
-		color: #062015;
+		color: #fff;
 		border: none;
 		border-radius: 12px;
 		font-size: 16px;
@@ -544,7 +549,6 @@
 		font-size: 56px;
 		font-weight: 900;
 		color: var(--accent);
-		text-shadow: 0 0 26px var(--accent-glow);
 		margin: 8px 0;
 	}
 	.big-score .unit {

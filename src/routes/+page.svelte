@@ -14,22 +14,18 @@
 	import ColorBlocks from '$lib/components/ColorBlocks.svelte';
 	import AdSlot from '$lib/components/AdSlot.svelte';
 
-	// 영구 상태
-	let solved = $state<string[]>([]); // 랜덤 모드용 셔플백
+	let solved = $state<string[]>([]);
 	let stats = $state({ score: 0, dayStreak: 0, lastDay: -1 });
 
-	// 세션 상태
 	let mode = $state<'daily' | 'random'>('daily');
 	let dayNum = $state(0);
-	let queue = $state<Problem[]>([]); // 오늘/이번 세션의 문제들
+	let queue = $state<Problem[]>([]);
 	let pos = $state(0);
-	let results = $state<string[]>([]); // 이모지
+	let results = $state<string[]>([]);
 	let phase = $state<'play' | 'done'>('play');
 
-	// 문제별 상태
 	let hintsUsed = $state(0);
 	let done = $state(false);
-	let won = $state(false);
 	let answerValue = $state('');
 	let feedback = $state<{ msg: string; ok: boolean } | null>(null);
 	let toastMsg = $state('');
@@ -40,7 +36,7 @@
 	let dateLabel = $derived(formatDate(dayNum));
 
 	function formatDate(day: number): string {
-		const ms = day * 86400000 - 9 * 3600 * 1000 + 43200000; // 그 KST 날짜 정오 근처
+		const ms = day * 86400000 - 9 * 3600 * 1000 + 43200000;
 		const d = new Date(ms);
 		return `${d.getUTCFullYear()}. ${d.getUTCMonth() + 1}. ${d.getUTCDate()}`;
 	}
@@ -67,10 +63,7 @@
 	function saveDaily() {
 		if (!browser) return;
 		try {
-			localStorage.setItem(
-				'ddal.daily.' + dayNum,
-				JSON.stringify({ pos, results, phase })
-			);
+			localStorage.setItem('ddal.daily.' + dayNum, JSON.stringify({ pos, results, phase }));
 		} catch {
 			/* 무시 */
 		}
@@ -78,9 +71,7 @@
 
 	function startDaily() {
 		mode = 'daily';
-		const idxs = dailyIndices(PROBLEMS.length, dayNum);
-		queue = idxs.map((i) => PROBLEMS[i]);
-		// 오늘 진행분 복원
+		queue = dailyIndices(PROBLEMS.length, dayNum).map((i) => PROBLEMS[i]);
 		let saved: { pos: number; results: string[]; phase: 'play' | 'done' } | null = null;
 		try {
 			saved = JSON.parse(localStorage.getItem('ddal.daily.' + dayNum) || 'null');
@@ -97,7 +88,7 @@
 			phase = 'play';
 		}
 		resetProblem();
-		if (phase === 'done' || pos >= queue.length) phase = 'done';
+		if (pos >= queue.length) phase = 'done';
 	}
 
 	function startRandom() {
@@ -117,7 +108,6 @@
 	function resetProblem() {
 		hintsUsed = 0;
 		done = false;
-		won = false;
 		answerValue = '';
 		feedback = null;
 		if (browser) window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -126,13 +116,11 @@
 	function finish(win: boolean) {
 		if (done) return;
 		done = true;
-		won = win;
 		results = [...results, emojiFor(win, hintsUsed)];
-		const gained = scoreFor(win, hintsUsed);
-		stats.score += gained;
+		stats.score += scoreFor(win, hintsUsed);
 		if (mode === 'random' && current) solved = [...solved, current.id];
 		feedback = win
-			? { msg: `딸깍! ⚡ +${gained}`, ok: true }
+			? { msg: `딸깍! ⚡ +${scoreFor(win, hintsUsed)}`, ok: true }
 			: { msg: '정답 공개', ok: false };
 		persist();
 		saveDaily();
@@ -219,211 +207,210 @@
 	/>
 </svelte:head>
 
-{#if mode === 'daily'}
-	<div class="mode-banner">
-		<div class="mb-left">
-			<span class="mb-title">📅 오늘의 퍼즐</span>
-			<span class="mb-date">{dateLabel}</span>
-		</div>
-		<div class="dots">
-			{#each queue as _, i (i)}
-				<span
-					class="dot"
-					class:filled={i < results.length}
-					class:cur={i === pos && phase === 'play'}
-				></span>
-			{/each}
-		</div>
+<div class="banner">
+	<div class="b-left">
+		<span class="b-title">{mode === 'daily' ? '오늘의 퍼즐' : '랜덤 연습'}</span>
+		{#if mode === 'daily'}<span class="b-date">{dateLabel}</span>{/if}
 	</div>
-{:else}
-	<div class="mode-banner">
-		<div class="mb-left"><span class="mb-title">🎲 랜덤 연습</span></div>
-		<div class="dots">
-			{#each queue as _, i (i)}
-				<span class="dot" class:filled={i < results.length} class:cur={i === pos}></span>
-			{/each}
-		</div>
-	</div>
-{/if}
+</div>
 
-{#if phase === 'play' && current}
-	<div class="card">
-		<div class="chip">{current.chip}</div>
-
-		<div class="q">
-			{#each current.blocks as b, i (i)}
-				{#if b.kind === 'text'}
-					<div class="qtext">{@html b.html}</div>
-				{:else if b.kind === 'pre'}
-					<pre class="qblock">{b.text}</pre>
-				{:else if b.kind === 'lcd'}
-					<SevenSeg lines={b.lines} frags={b.frags} />
-				{:else if b.kind === 'colors'}
-					<ColorBlocks rows={b.rows} />
-				{/if}
-			{/each}
-		</div>
-
-		<div class="answer-area">
-			{#if current.type === 'choice'}
-				<div class="choices">
-					{#each current.choices! as c, i (i)}
-						<button class="choice" disabled={done} onclick={() => submitChoice(i)}>{c}</button>
+<div class="layout" class:single={phase === 'done'}>
+	<div class="main">
+		{#if phase === 'play' && current}
+			<div class="card">
+				<div class="chip">{current.chip}</div>
+				<div class="q">
+					{#each current.blocks as b, i (i)}
+						{#if b.kind === 'text'}
+							<div class="qtext">{@html b.html}</div>
+						{:else if b.kind === 'pre'}
+							<pre class="qblock">{b.text}</pre>
+						{:else if b.kind === 'lcd'}
+							<SevenSeg lines={b.lines} frags={b.frags} />
+						{:else if b.kind === 'colors'}
+							<ColorBlocks rows={b.rows} />
+						{/if}
 					{/each}
 				</div>
-			{:else}
-				<div class="input-row">
-					<input
-						placeholder="정답을 입력하세요"
-						autocomplete="off"
-						bind:value={answerValue}
-						disabled={done}
-						onkeydown={(e) => e.key === 'Enter' && submitText()}
-					/>
-					<button class="btn" disabled={done} onclick={submitText}>제출</button>
+
+				<div class="answer-area">
+					{#if current.type === 'choice'}
+						<div class="choices">
+							{#each current.choices! as c, i (i)}
+								<button class="choice" disabled={done} onclick={() => submitChoice(i)}>{c}</button>
+							{/each}
+						</div>
+					{:else}
+						<div class="input-row">
+							<input
+								placeholder="정답을 입력하세요"
+								autocomplete="off"
+								bind:value={answerValue}
+								disabled={done}
+								onkeydown={(e) => e.key === 'Enter' && submitText()}
+							/>
+							<button class="btn" disabled={done} onclick={submitText}>제출</button>
+						</div>
+					{/if}
 				</div>
-			{/if}
-		</div>
 
-		{#each shownHints as h, i (i)}
-			<div class="hint"><b>힌트 {i + 1}</b>{h}</div>
-		{/each}
+				{#each shownHints as h, i (i)}
+					<div class="hint"><b>힌트 {i + 1}</b>{h}</div>
+				{/each}
 
-		{#if !done}
-			<div class="controls">
-				<button class="btn ghost" disabled={hintsUsed >= current.hints.length} onclick={showHint}>
-					{hintsUsed >= current.hints.length ? '힌트 소진' : `💡 힌트 (${hintsUsed + 1}/3)`}
-				</button>
-				<button class="btn ghost" onclick={() => finish(false)}>정답 보기</button>
+				{#if !done}
+					<div class="controls">
+						<button
+							class="btn ghost"
+							disabled={hintsUsed >= current.hints.length}
+							onclick={showHint}
+						>
+							{hintsUsed >= current.hints.length ? '힌트 소진' : `💡 힌트 (${hintsUsed + 1}/3)`}
+						</button>
+						<button class="btn ghost" onclick={() => finish(false)}>정답 보기</button>
+					</div>
+				{/if}
+
+				{#if feedback}
+					<div class="feedback" class:ok={feedback.ok} class:no={!feedback.ok && !done}>
+						{feedback.msg}
+					</div>
+				{/if}
+
+				{#if done}
+					<div class="explain">{@html current.explain}</div>
+					<button class="btn wide" onclick={next}>
+						{pos + 1 < queue.length ? '다음 문제 →' : '결과 보기'}
+					</button>
+				{/if}
+			</div>
+		{:else if phase === 'done'}
+			<div class="card result">
+				{#if mode === 'daily'}
+					<h2>오늘의 퍼즐 완료!</h2>
+					<div class="emoji">{results.join(' ')}</div>
+					<div class="rscore">{results.filter((r) => r !== '🔓').length} / {results.length}</div>
+					{#if stats.dayStreak > 0}<div class="streak-line">🔥 {stats.dayStreak}일 연속</div>{/if}
+					<button class="btn wide" onclick={share}>결과 공유하기</button>
+					<div class="countdown">다음 퍼즐까지 <b>{countdown}</b></div>
+					<button class="btn ghost wide" onclick={startRandom}>🎲 더 풀기 (랜덤)</button>
+				{:else}
+					<h2>랜덤 3문제 완료!</h2>
+					<div class="emoji">{results.join(' ')}</div>
+					<div class="rscore">{results.filter((r) => r !== '🔓').length} / {results.length}</div>
+					<button class="btn wide" onclick={share}>결과 공유하기</button>
+					<button class="btn ghost wide" onclick={startRandom}>🎲 또 풀기</button>
+					<button class="btn ghost wide" onclick={startDaily}>📅 오늘의 퍼즐로</button>
+				{/if}
 			</div>
 		{/if}
+	</div>
 
-		{#if feedback}
-			<div class="feedback" class:ok={feedback.ok} class:no={!feedback.ok && !done}>
-				{feedback.msg}
+	{#if phase === 'play'}
+		<aside class="side">
+			<div class="panel">
+				<div class="panel-title">오늘의 진행</div>
+				<div class="dots">
+					{#each queue as _, i (i)}
+						<span class="dot" class:filled={i < results.length} class:cur={i === pos}></span>
+					{/each}
+				</div>
+				<div class="panel-sub">{queue.length}문제 중 {Math.min(pos + 1, queue.length)}번째</div>
 			</div>
-		{/if}
-
-		{#if done}
-			<div class="explain">{@html current.explain}</div>
-			<button class="btn wide glow" onclick={next}>
-				{pos + 1 < queue.length ? '다음 문제 →' : '결과 보기'}
-			</button>
-		{/if}
-	</div>
-{:else if phase === 'done'}
-	<div class="card result">
-		{#if mode === 'daily'}
-			<h2>오늘의 퍼즐 완료!</h2>
-			<div class="emoji">{results.join(' ')}</div>
-			<div class="rscore">{results.filter((r) => r !== '🔓').length} / {results.length}</div>
-			{#if stats.dayStreak > 0}<div class="streak">🔥 {stats.dayStreak}일 연속</div>{/if}
-			<button class="btn wide glow" onclick={share}>결과 공유하기</button>
-			<div class="countdown">다음 퍼즐까지 <b>{countdown}</b></div>
-			<button class="btn ghost wide" onclick={startRandom}>🎲 더 풀기 (랜덤)</button>
-		{:else}
-			<h2>랜덤 3문제 완료!</h2>
-			<div class="emoji">{results.join(' ')}</div>
-			<div class="rscore">{results.filter((r) => r !== '🔓').length} / {results.length}</div>
-			<button class="btn wide glow" onclick={share}>결과 공유하기</button>
-			<button class="btn ghost wide" onclick={startRandom}>🎲 또 풀기</button>
-			<button class="btn ghost wide" onclick={startDaily}>📅 오늘의 퍼즐로</button>
-		{/if}
-		<AdSlot label="결과 화면" />
-	</div>
-{/if}
+			<div class="panel center">
+				<div class="streak-num">🔥 {stats.dayStreak}<small>일 연속</small></div>
+				{#if mode === 'daily'}<div class="cd-sub">다음 퍼즐까지 {countdown}</div>{/if}
+			</div>
+			<div class="panel"><AdSlot label="사이드" /></div>
+		</aside>
+	{/if}
+</div>
 
 {#if toastMsg}
 	<div class="toast">{toastMsg}</div>
 {/if}
 
 <style>
-	.mode-banner {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		margin-bottom: 14px;
-		padding: 0 4px;
-	}
-	.mb-left {
+	.banner {
 		display: flex;
 		align-items: baseline;
 		gap: 10px;
+		margin-bottom: 16px;
+		padding: 0 2px;
 	}
-	.mb-title {
-		font-size: 17px;
+	.b-title {
+		font-size: 19px;
 		font-weight: 900;
 	}
-	.mb-date {
+	.b-date {
 		font-size: 13px;
 		color: var(--muted);
 		font-variant-numeric: tabular-nums;
 	}
-	.dots {
-		display: flex;
-		gap: 7px;
+
+	.layout {
+		display: grid;
+		grid-template-columns: minmax(0, 1.75fr) minmax(0, 1fr);
+		gap: 22px;
+		align-items: start;
 	}
-	.dot {
-		width: 11px;
-		height: 11px;
-		border-radius: 50%;
-		background: var(--border);
-		transition: all 0.2s;
+	.layout.single {
+		grid-template-columns: minmax(0, 620px);
+		justify-content: center;
 	}
-	.dot.filled {
-		background: var(--accent);
-		box-shadow: 0 0 10px var(--accent-glow);
-	}
-	.dot.cur {
-		background: var(--accent-2);
-		box-shadow: 0 0 10px #38bdf877;
-		transform: scale(1.15);
+	@media (max-width: 780px) {
+		.layout,
+		.layout.single {
+			grid-template-columns: 1fr;
+			justify-content: stretch;
+		}
 	}
 
 	.card {
 		background: var(--panel);
 		border: 1px solid var(--border);
 		border-radius: var(--radius);
-		padding: 30px 26px;
-		box-shadow:
-			0 12px 40px rgba(0, 0, 0, 0.45),
-			inset 0 1px 0 #ffffff08;
+		padding: 34px 32px;
+		box-shadow: 0 4px 22px rgba(60, 50, 30, 0.07);
+	}
+	@media (max-width: 640px) {
+		.card {
+			padding: 24px 20px;
+		}
 	}
 	.chip {
 		display: inline-block;
-		background: var(--accent-glow);
+		background: var(--accent-soft);
 		color: var(--accent);
 		font-size: 12px;
 		font-weight: 800;
-		letter-spacing: 0.5px;
+		letter-spacing: 0.4px;
 		border-radius: 999px;
-		padding: 5px 15px;
-		margin-bottom: 20px;
-		border: 1px solid #35ffa344;
+		padding: 6px 15px;
+		margin-bottom: 22px;
 	}
 	.q {
-		min-height: 120px;
+		min-height: 90px;
 	}
 	.qtext {
-		font-size: 20px;
+		font-size: 21px;
 		line-height: 1.7;
 		word-break: keep-all;
-		color: var(--text);
 	}
 	.qtext :global(b) {
 		color: var(--accent);
 	}
 	.qblock {
-		font-family: 'Consolas', 'Courier New', monospace;
-		font-size: 27px;
+		font-family: Georgia, 'Nanum Myeongjo', 'Batang', serif;
+		font-size: 30px;
 		font-weight: 700;
 		background: var(--panel-2);
 		border: 1px solid var(--border);
-		border-radius: 12px;
-		padding: 22px 20px;
-		margin: 16px 0;
-		line-height: 2;
-		letter-spacing: 1px;
+		border-radius: 14px;
+		padding: 26px 24px;
+		margin: 16px 0 22px;
+		line-height: 1.9;
+		letter-spacing: 0.5px;
 		overflow-x: auto;
 		white-space: pre-wrap;
 		color: var(--text);
@@ -433,36 +420,36 @@
 	}
 	.input-row {
 		display: flex;
-		gap: 10px;
+		gap: 11px;
 	}
 	input {
 		flex: 1;
 		min-width: 0;
 		font-size: 19px;
 		padding: 16px 18px;
-		border: 2px solid var(--border);
-		border-radius: 12px;
-		background: var(--panel-2);
+		border: 2px solid var(--border-strong);
+		border-radius: 13px;
+		background: #fff;
 		color: var(--text);
 		font-family: inherit;
 		outline: none;
 		transition: border-color 0.15s;
 	}
 	input::placeholder {
-		color: #4d5b73;
+		color: #bcae9b;
 	}
 	input:focus {
 		border-color: var(--accent);
-		box-shadow: 0 0 0 3px var(--accent-glow);
+		box-shadow: 0 0 0 3px rgba(47, 143, 91, 0.14);
 	}
 	.btn {
 		background: var(--accent);
-		color: #062015;
+		color: #fff;
 		border: none;
-		border-radius: 12px;
+		border-radius: 13px;
 		font-size: 16px;
 		font-weight: 800;
-		padding: 16px 22px;
+		padding: 16px 24px;
 		cursor: pointer;
 		font-family: inherit;
 		white-space: nowrap;
@@ -471,18 +458,15 @@
 			filter 0.15s;
 	}
 	.btn:hover:not(:disabled) {
-		filter: brightness(1.08);
+		filter: brightness(1.06);
 	}
 	.btn:active:not(:disabled) {
 		transform: translateY(1px);
 	}
-	.btn.glow {
-		box-shadow: 0 0 22px var(--accent-glow);
-	}
 	.btn.ghost {
 		background: transparent;
 		color: var(--muted);
-		border: 1px solid var(--border);
+		border: 1px solid var(--border-strong);
 	}
 	.btn.ghost:hover:not(:disabled) {
 		color: var(--text);
@@ -494,7 +478,7 @@
 		margin-top: 14px;
 	}
 	.btn:disabled {
-		opacity: 0.45;
+		opacity: 0.5;
 		cursor: default;
 	}
 	.choices {
@@ -519,15 +503,15 @@
 	}
 	.choice:hover:not(:disabled) {
 		border-color: var(--accent);
-		background: #16233a;
+		background: #fff;
 	}
 	.choice:disabled {
-		opacity: 0.5;
+		opacity: 0.55;
 		cursor: default;
 	}
 	.controls {
 		display: flex;
-		gap: 10px;
+		gap: 11px;
 		margin-top: 16px;
 	}
 	.controls .btn {
@@ -536,18 +520,18 @@
 		padding: 13px 10px;
 	}
 	.hint {
-		background: #1a2338;
-		border-left: 3px solid var(--warn);
+		background: #fbf3dd;
+		border-left: 3px solid var(--gold);
 		border-radius: 8px;
 		padding: 13px 16px;
 		font-size: 15px;
 		margin-top: 12px;
 		line-height: 1.6;
-		color: #d9e2f0;
+		color: #6a5f48;
 		animation: slidein 0.25s ease;
 	}
 	.hint b {
-		color: var(--warn);
+		color: #a9791a;
 		margin-right: 8px;
 	}
 	@keyframes slidein {
@@ -567,7 +551,6 @@
 	}
 	.feedback.ok {
 		color: var(--accent);
-		text-shadow: 0 0 16px var(--accent-glow);
 	}
 	.feedback.no {
 		color: var(--danger);
@@ -586,22 +569,23 @@
 		}
 	}
 	.explain {
-		background: #10241c;
-		border: 1px solid #1f5c43;
+		background: var(--accent-soft);
+		border: 1px solid #cfe6d8;
 		border-radius: 12px;
 		padding: 18px;
 		margin-top: 16px;
 		font-size: 15px;
 		line-height: 1.7;
 		word-break: keep-all;
-		color: #cdeadd;
+		color: #2c4d3b;
 	}
 	.explain :global(b) {
 		color: var(--accent);
 	}
+
 	.result {
 		text-align: center;
-		padding: 40px 24px;
+		padding: 40px 26px;
 	}
 	.result h2 {
 		font-size: 26px;
@@ -613,17 +597,16 @@
 		margin: 12px 0;
 	}
 	.rscore {
-		font-size: 46px;
+		font-size: 48px;
 		font-weight: 900;
 		color: var(--accent);
-		text-shadow: 0 0 26px var(--accent-glow);
 		margin: 8px 0;
 	}
-	.streak {
+	.streak-line {
 		font-size: 16px;
-		color: var(--warn);
+		color: var(--accent-2);
 		font-weight: 800;
-		margin-bottom: 8px;
+		margin-bottom: 10px;
 	}
 	.countdown {
 		font-size: 14px;
@@ -635,18 +618,84 @@
 		font-variant-numeric: tabular-nums;
 		font-size: 16px;
 	}
+
+	.side {
+		display: flex;
+		flex-direction: column;
+		gap: 16px;
+		position: sticky;
+		top: 16px;
+	}
+	@media (max-width: 780px) {
+		.side {
+			position: static;
+		}
+	}
+	.panel {
+		background: var(--panel);
+		border: 1px solid var(--border);
+		border-radius: 16px;
+		padding: 20px 18px;
+		box-shadow: 0 3px 14px rgba(60, 50, 30, 0.05);
+	}
+	.panel.center {
+		text-align: center;
+	}
+	.panel-title {
+		font-size: 14px;
+		font-weight: 800;
+		margin-bottom: 13px;
+	}
+	.dots {
+		display: flex;
+		gap: 9px;
+	}
+	.dot {
+		width: 13px;
+		height: 13px;
+		border-radius: 50%;
+		background: var(--border-strong);
+	}
+	.dot.filled {
+		background: var(--accent);
+	}
+	.dot.cur {
+		background: var(--accent-2);
+		transform: scale(1.15);
+	}
+	.panel-sub {
+		font-size: 12px;
+		color: var(--muted);
+		margin-top: 10px;
+	}
+	.streak-num {
+		font-size: 32px;
+		font-weight: 900;
+		color: var(--accent-2);
+	}
+	.streak-num small {
+		font-size: 13px;
+		font-weight: 700;
+		color: var(--muted);
+	}
+	.cd-sub {
+		font-size: 12px;
+		color: var(--muted);
+		margin-top: 6px;
+		font-variant-numeric: tabular-nums;
+	}
+
 	.toast {
 		position: fixed;
 		bottom: 32px;
 		left: 50%;
 		transform: translateX(-50%);
-		background: #1b2740;
-		color: var(--text);
-		border: 1px solid var(--border);
+		background: var(--text);
+		color: #fdfbf6;
 		border-radius: 999px;
 		padding: 12px 24px;
 		font-size: 14px;
 		z-index: 30;
-		box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+		box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
 	}
 </style>

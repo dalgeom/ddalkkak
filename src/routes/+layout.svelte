@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import AdSlot from '$lib/components/AdSlot.svelte';
+	import Logo from '$lib/components/Logo.svelte';
 
 	let { children } = $props();
 	let path = $derived(page.url.pathname);
@@ -8,16 +9,18 @@
 
 <div class="wrap">
 	<header>
-		<a class="logo" href="/">딸깍<span class="spark">!</span></a>
+		<Logo />
 		<nav>
 			<a href="/" class="tab" class:active={path === '/'}>오늘의 퍼즐</a>
 			<a href="/matchstick" class="tab" class:active={path.startsWith('/matchstick')}>성냥개비</a>
 		</nav>
 	</header>
 
-	{@render children()}
+	<main class="page">
+		{@render children()}
+	</main>
 
-	<AdSlot label="하단 배너" />
+	<div class="bottom-ad"><AdSlot label="하단 배너" /></div>
 
 	<footer>
 		<nav class="foot-nav">
@@ -31,62 +34,58 @@
 
 <style>
 	:global(:root) {
-		--bg: #080b12;
-		--bg-grad: radial-gradient(1200px 600px at 50% -10%, #101a2e 0%, #080b12 60%);
-		--panel: #121a28;
-		--panel-2: #0e1521;
-		--border: #223049;
-		--border-glow: #2c66ff33;
-		--text: #e8eff9;
-		--muted: #8695ac;
-		--accent: #35ffa3;
-		--accent-2: #38bdf8;
-		--accent-glow: rgba(53, 255, 163, 0.4);
-		--danger: #ff5d73;
-		--warn: #ffd24a;
-		--radius: 18px;
+		--bg: #efe7d8;
+		--bg-2: #e9dfcc;
+		--panel: #fdfbf6;
+		--panel-2: #f6f1e6;
+		--border: #e6dcc8;
+		--border-strong: #ddd0ba;
+		--text: #2c2822;
+		--muted: #9b9184;
+		--accent: #2f8f5b;
+		--accent-soft: #e5efe8;
+		--accent-2: #c0632e;
+		--gold: #f6d34e;
+		--danger: #c0392b;
+		--radius: 20px;
+		--maxw: 1120px;
 	}
 	:global(*) {
 		margin: 0;
 		padding: 0;
 		box-sizing: border-box;
 	}
+	:global(html) {
+		background: var(--bg);
+	}
 	:global(body) {
 		font-family:
 			-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Malgun Gothic', sans-serif;
 		background: var(--bg);
-		background-image: var(--bg-grad);
-		background-attachment: fixed;
 		color: var(--text);
 		min-height: 100vh;
 	}
 	:global(::selection) {
-		background: var(--accent-glow);
-		color: #fff;
+		background: #cfe6d8;
+		color: var(--text);
 	}
 	.wrap {
-		max-width: 640px;
+		max-width: var(--maxw);
 		margin: 0 auto;
-		padding: 18px 16px 40px;
+		padding: 20px 22px 44px;
+	}
+	@media (max-width: 640px) {
+		.wrap {
+			padding: 16px 15px 36px;
+		}
 	}
 	header {
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		padding: 4px 2px 18px;
-		gap: 12px;
+		padding: 6px 2px 22px;
+		gap: 14px;
 		flex-wrap: wrap;
-	}
-	.logo {
-		font-size: 30px;
-		font-weight: 900;
-		letter-spacing: 1px;
-		text-decoration: none;
-		color: var(--text);
-	}
-	.spark {
-		color: var(--accent);
-		text-shadow: 0 0 14px var(--accent-glow);
 	}
 	nav {
 		display: flex;
@@ -97,25 +96,29 @@
 		font-weight: 800;
 		text-decoration: none;
 		color: var(--muted);
-		padding: 7px 14px;
+		padding: 9px 16px;
 		border-radius: 999px;
 		border: 1px solid transparent;
 		transition:
 			color 0.15s,
-			border-color 0.15s,
-			background 0.15s;
+			background 0.15s,
+			border-color 0.15s;
 	}
 	.tab:hover {
 		color: var(--text);
 	}
 	.tab.active {
-		color: var(--accent);
+		color: #fff;
+		background: var(--accent);
 		border-color: var(--accent);
-		background: var(--accent-glow);
-		box-shadow: 0 0 16px var(--accent-glow);
+		box-shadow: 0 3px 12px rgba(47, 143, 91, 0.28);
+	}
+	.bottom-ad {
+		max-width: 728px;
+		margin: 0 auto;
 	}
 	footer {
-		margin-top: 26px;
+		margin-top: 30px;
 		text-align: center;
 	}
 	.foot-nav {
@@ -128,14 +131,14 @@
 		text-decoration: none;
 	}
 	.foot-nav a:hover {
-		color: var(--accent-2);
+		color: var(--accent);
 	}
 	.foot-nav span {
-		color: var(--border);
+		color: var(--border-strong);
 	}
 	.tag {
 		margin-top: 8px;
 		font-size: 12px;
-		color: #4d5b73;
+		color: #b3a894;
 	}
 </style>
