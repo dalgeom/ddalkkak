@@ -15,7 +15,8 @@
 	import AdSlot from '$lib/components/AdSlot.svelte';
 
 	let solved = $state<string[]>([]);
-	let stats = $state({ score: 0, dayStreak: 0, lastDay: -1 });
+	let stats = $state({ score: 0, dayStreak: 0, maxStreak: 0, played: 0, lastDay: -1 });
+	let calendar = $state<boolean[]>([]);
 
 	let mode = $state<'daily' | 'random'>('daily');
 	let dayNum = $state(0);
@@ -44,12 +45,33 @@
 	function load() {
 		try {
 			solved = JSON.parse(localStorage.getItem('ddal.solved') || '[]');
-			stats = JSON.parse(
-				localStorage.getItem('ddal.stats') || '{"score":0,"dayStreak":0,"lastDay":-1}'
-			);
+			const s = JSON.parse(localStorage.getItem('ddal.stats') || '{}');
+			stats = {
+				score: s.score ?? 0,
+				dayStreak: s.dayStreak ?? 0,
+				maxStreak: s.maxStreak ?? 0,
+				played: s.played ?? 0,
+				lastDay: s.lastDay ?? -1
+			};
 		} catch {
 			/* 무시 */
 		}
+	}
+
+	/** 최근 14일 각 날짜의 데일리 완료 여부 (localStorage 스캔) */
+	function buildCalendar() {
+		const out: boolean[] = [];
+		for (let d = dayNum - 13; d <= dayNum; d++) {
+			let doneDay = false;
+			try {
+				const rec = JSON.parse(localStorage.getItem('ddal.daily.' + d) || 'null');
+				doneDay = !!rec && rec.phase === 'done';
+			} catch {
+				/* 무시 */
+			}
+			out.push(doneDay);
+		}
+		calendar = out;
 	}
 	function persist() {
 		if (!browser) return;
@@ -89,6 +111,7 @@
 		}
 		resetProblem();
 		if (pos >= queue.length) phase = 'done';
+		buildCalendar();
 	}
 
 	function startRandom() {
@@ -150,10 +173,13 @@
 			phase = 'done';
 			if (mode === 'daily' && stats.lastDay !== dayNum) {
 				stats.dayStreak = stats.lastDay === dayNum - 1 ? stats.dayStreak + 1 : 1;
+				stats.maxStreak = Math.max(stats.maxStreak, stats.dayStreak);
+				stats.played += 1;
 				stats.lastDay = dayNum;
 				persist();
 			}
 			saveDaily();
+			buildCalendar();
 		}
 	}
 
@@ -214,7 +240,7 @@
 	</div>
 </div>
 
-<div class="layout" class:single={phase === 'done'}>
+<div class="layout" class:result={phase === 'done'}>
 	<div class="main">
 		{#if phase === 'play' && current}
 			<div class="card">
@@ -224,7 +250,10 @@
 						{#if b.kind === 'text'}
 							<div class="qtext">{@html b.html}</div>
 						{:else if b.kind === 'pre'}
-							<pre class="qblock">{b.text}</pre>
+							<pre
+								class="qblock"
+								style="--maxlen:{Math.max(...b.text.split('\n').map((l) => l.length), 1)}">{b.text}</pre>
+
 						{:else if b.kind === 'lcd'}
 							<SevenSeg lines={b.lines} frags={b.frags} />
 						{:else if b.kind === 'colors'}
@@ -286,19 +315,13 @@
 			</div>
 		{:else if phase === 'done'}
 			<div class="card result">
+				<h2>{mode === 'daily' ? '오늘의 퍼즐 완료!' : '랜덤 3문제 완료!'}</h2>
+				<div class="emoji">{results.join(' ')}</div>
+				<div class="rscore">{results.filter((r) => r !== '🔓').length} / {results.length}</div>
+				<button class="btn wide" onclick={share}>결과 공유하기</button>
 				{#if mode === 'daily'}
-					<h2>오늘의 퍼즐 완료!</h2>
-					<div class="emoji">{results.join(' ')}</div>
-					<div class="rscore">{results.filter((r) => r !== '🔓').length} / {results.length}</div>
-					{#if stats.dayStreak > 0}<div class="streak-line">🔥 {stats.dayStreak}일 연속</div>{/if}
-					<button class="btn wide" onclick={share}>결과 공유하기</button>
-					<div class="countdown">다음 퍼즐까지 <b>{countdown}</b></div>
 					<button class="btn ghost wide" onclick={startRandom}>🎲 더 풀기 (랜덤)</button>
 				{:else}
-					<h2>랜덤 3문제 완료!</h2>
-					<div class="emoji">{results.join(' ')}</div>
-					<div class="rscore">{results.filter((r) => r !== '🔓').length} / {results.length}</div>
-					<button class="btn wide" onclick={share}>결과 공유하기</button>
 					<button class="btn ghost wide" onclick={startRandom}>🎲 또 풀기</button>
 					<button class="btn ghost wide" onclick={startDaily}>📅 오늘의 퍼즐로</button>
 				{/if}
@@ -306,8 +329,8 @@
 		{/if}
 	</div>
 
-	{#if phase === 'play'}
-		<aside class="side">
+	<aside class="side">
+		{#if phase === 'play'}
 			<div class="panel">
 				<div class="panel-title">오늘의 진행</div>
 				<div class="dots">
@@ -322,8 +345,34 @@
 				{#if mode === 'daily'}<div class="cd-sub">다음 퍼즐까지 {countdown}</div>{/if}
 			</div>
 			<div class="panel"><AdSlot label="사이드" /></div>
-		</aside>
-	{/if}
+		{:else}
+			<div class="panel">
+				<div class="panel-title">기록</div>
+				<div class="stat-strip">
+					<div class="stat"><b>{stats.played}</b><span>플레이</span></div>
+					<div class="stat"><b>{stats.dayStreak}</b><span>연속</span></div>
+					<div class="stat"><b>{stats.maxStreak}</b><span>최고</span></div>
+				</div>
+			</div>
+			<div class="panel">
+				<div class="panel-title">최근 14일</div>
+				<div class="cal">
+					{#each calendar as d, i (i)}
+						<span class="cell" class:done={d} class:today={i === calendar.length - 1}
+							>{d ? '🔥' : ''}</span
+						>
+					{/each}
+				</div>
+			</div>
+			{#if mode === 'daily'}
+				<div class="panel center">
+					<div class="cd-title">다음 퍼즐까지</div>
+					<div class="cd-big">{countdown}</div>
+				</div>
+			{/if}
+			<div class="panel"><AdSlot label="사이드" /></div>
+		{/if}
+	</aside>
 </div>
 
 {#if toastMsg}
@@ -354,13 +403,15 @@
 		gap: 22px;
 		align-items: start;
 	}
-	.layout.single {
-		grid-template-columns: minmax(0, 620px);
-		justify-content: center;
+	.main {
+		min-width: 0;
+	}
+	.layout.result {
+		grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
 	}
 	@media (max-width: 780px) {
 		.layout,
-		.layout.single {
+		.layout.result {
 			grid-template-columns: 1fr;
 			justify-content: stretch;
 		}
@@ -390,6 +441,7 @@
 		margin-bottom: 22px;
 	}
 	.q {
+		container-type: inline-size;
 		min-height: 90px;
 	}
 	.qtext {
@@ -407,13 +459,18 @@
 		background: var(--panel-2);
 		border: 1px solid var(--border);
 		border-radius: 14px;
-		padding: 26px 24px;
+		padding: clamp(16px, 4cqi, 26px) clamp(14px, 3.5cqi, 24px);
 		margin: 16px 0 22px;
 		line-height: 1.9;
 		letter-spacing: 0.5px;
-		overflow-x: auto;
 		white-space: pre-wrap;
+		overflow-wrap: anywhere;
 		color: var(--text);
+	}
+	@supports (container-type: inline-size) {
+		.qblock {
+			font-size: clamp(15px, calc(100cqi / var(--maxlen, 10) * 1.7), 30px);
+		}
 	}
 	.answer-area {
 		margin-top: 22px;
@@ -602,27 +659,64 @@
 		color: var(--accent);
 		margin: 8px 0;
 	}
-	.streak-line {
-		font-size: 16px;
-		color: var(--accent-2);
-		font-weight: 800;
-		margin-bottom: 10px;
+	.stat-strip {
+		display: grid;
+		grid-template-columns: repeat(3, 1fr);
+		gap: 8px;
 	}
-	.countdown {
-		font-size: 14px;
+	.stat {
+		text-align: center;
+	}
+	.stat b {
+		display: block;
+		font-size: 26px;
+		font-weight: 900;
+		color: var(--accent);
+	}
+	.stat span {
+		font-size: 11px;
 		color: var(--muted);
-		margin-top: 14px;
 	}
-	.countdown b {
+	.cal {
+		display: grid;
+		grid-template-columns: repeat(7, 1fr);
+		gap: 6px;
+	}
+	.cell {
+		aspect-ratio: 1;
+		border-radius: 7px;
+		background: var(--panel-2);
+		border: 1px solid var(--border);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-size: 13px;
+	}
+	.cell.done {
+		background: var(--accent-soft);
+		border-color: #cfe6d8;
+	}
+	.cell.today {
+		border-color: var(--accent);
+		border-width: 2px;
+	}
+	.cd-title {
+		font-size: 12px;
+		color: var(--muted);
+		margin-bottom: 4px;
+	}
+	.cd-big {
+		font-size: 26px;
+		font-weight: 900;
 		color: var(--accent-2);
 		font-variant-numeric: tabular-nums;
-		font-size: 16px;
 	}
 
 	.side {
 		display: flex;
 		flex-direction: column;
 		gap: 16px;
+		min-width: 0;
 		position: sticky;
 		top: 16px;
 	}
