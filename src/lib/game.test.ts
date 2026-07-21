@@ -7,7 +7,9 @@ import {
 	emojiFor,
 	seededOrder,
 	kstDayNumber,
-	dailyIndices
+	dailyIndices,
+	buildSession,
+	comboScore
 } from './game';
 import { PROBLEMS } from './problems';
 
@@ -100,5 +102,20 @@ describe('데일리 출제', () => {
 		expect(new Set(a).size).toBe(3); // 중복 없음
 		// 다음 날은 다른 세트
 		expect(dailyIndices(100, day + 1)).not.toEqual(a);
+	});
+});
+
+describe('연속 모드', () => {
+	it('buildSession: 중복 없이 size개, 풀보다 크면 전체', () => {
+		const pool = Array.from({ length: 50 }, (_, i) => i);
+		const s = buildSession(pool, 10);
+		expect(s.length).toBe(10);
+		expect(new Set(s).size).toBe(10);
+		expect(buildSession(pool, 999).length).toBe(50);
+	});
+	it('comboScore: 콤보마다 배율 증가, 최대 2배', () => {
+		expect(comboScore(100, 0)).toBe(100);
+		expect(comboScore(100, 5)).toBe(150);
+		expect(comboScore(100, 100)).toBe(200); // 상한
 	});
 });

@@ -33,7 +33,7 @@
 	let countdown = $state('');
 
 	let current = $derived(queue[pos]);
-	let shownHints = $derived(current ? current.hints.slice(0, hintsUsed) : []);
+	let shownHints = $derived(current && current.hints ? current.hints.slice(0, hintsUsed) : []);
 	let dateLabel = $derived(formatDate(dayNum));
 
 	function formatDate(day: number): string {
@@ -160,7 +160,7 @@
 		else feedback = { msg: '땡! 다시 생각해 보세요', ok: false };
 	}
 	function showHint() {
-		if (done || hintsUsed >= current.hints.length) return;
+		if (done || !current.hints || hintsUsed >= current.hints.length) return;
 		hintsUsed += 1;
 	}
 
@@ -240,6 +240,14 @@
 	</div>
 </div>
 
+<a class="play-promo" href="/play">
+	<div class="pp-left">
+		<span class="pp-title">🎯 연속 모드 — 계속 풀기</span>
+		<span class="pp-sub">발견형 + 상식 퀴즈 200문제, 5·10·20문제 랜덤 · 콤보 점수</span>
+	</div>
+	<span class="pp-go">시작 →</span>
+</a>
+
 <div class="layout" class:result={phase === 'done'}>
 	<div class="main">
 		{#if phase === 'play' && current}
@@ -291,10 +299,12 @@
 					<div class="controls">
 						<button
 							class="btn ghost"
-							disabled={hintsUsed >= current.hints.length}
+							disabled={hintsUsed >= (current.hints?.length ?? 3)}
 							onclick={showHint}
 						>
-							{hintsUsed >= current.hints.length ? '힌트 소진' : `💡 힌트 (${hintsUsed + 1}/3)`}
+							{hintsUsed >= (current.hints?.length ?? 3)
+								? '힌트 소진'
+								: `💡 힌트 (${hintsUsed + 1}/3)`}
 						</button>
 						<button class="btn ghost" onclick={() => finish(false)}>정답 보기</button>
 					</div>
@@ -395,6 +405,50 @@
 		font-size: 13px;
 		color: var(--muted);
 		font-variant-numeric: tabular-nums;
+	}
+
+	.play-promo {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 12px;
+		background: linear-gradient(100deg, #2f8f5b, #38a06a);
+		color: #fff;
+		border-radius: 16px;
+		padding: 16px 20px;
+		margin-bottom: 16px;
+		text-decoration: none;
+		box-shadow: 0 4px 18px rgba(47, 143, 91, 0.28);
+		transition:
+			transform 0.12s,
+			filter 0.15s;
+	}
+	.play-promo:hover {
+		filter: brightness(1.05);
+		transform: translateY(-1px);
+	}
+	.pp-left {
+		display: flex;
+		flex-direction: column;
+		gap: 3px;
+	}
+	.pp-title {
+		font-size: 17px;
+		font-weight: 900;
+	}
+	.pp-sub {
+		font-size: 12.5px;
+		opacity: 0.92;
+	}
+	.pp-go {
+		font-size: 15px;
+		font-weight: 900;
+		white-space: nowrap;
+	}
+	@media (max-width: 520px) {
+		.pp-sub {
+			display: none;
+		}
 	}
 
 	.layout {

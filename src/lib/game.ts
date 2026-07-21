@@ -59,6 +59,22 @@ export function kstDayNumber(nowMs: number): number {
 	return Math.floor((nowMs + 9 * 3600 * 1000) / 86400000);
 }
 
+/** 연속 모드 세션: 풀에서 무작위 n개를 중복 없이 뽑는다(풀보다 크면 전체 셔플). */
+export function buildSession<T>(pool: T[], size: number): T[] {
+	const arr = pool.slice();
+	for (let i = arr.length - 1; i > 0; i--) {
+		const j = Math.floor(Math.random() * (i + 1));
+		[arr[i], arr[j]] = [arr[j], arr[i]];
+	}
+	return arr.slice(0, Math.min(size, arr.length));
+}
+
+/** 연속 모드 콤보 점수: 기본 + 콤보 배율(연속 정답마다 +0.1, 최대 2.0배). */
+export function comboScore(base: number, comboCount: number): number {
+	const mult = Math.min(2, 1 + comboCount * 0.1);
+	return Math.round(base * mult);
+}
+
 /** 그날의 데일리 문제 인덱스(전 방문자 동일, 매일 다음 세트로 진행). */
 export function dailyIndices(total: number, dayNum: number, size: number = ROUND_SIZE): number[] {
 	if (total <= 0) return [];
