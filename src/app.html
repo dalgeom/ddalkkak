@@ -5,14 +5,37 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<meta name="theme-color" content="#efe7d8" />
 		<link rel="icon" href="%sveltekit.assets%/favicon.svg" />
+		<link rel="manifest" href="%sveltekit.assets%/manifest.json" />
+		<link
+			rel="stylesheet"
+			href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"
+		/>
+		<!-- Open Graph / 카톡·트위터 공유 카드 -->
+		<meta property="og:type" content="website" />
+		<meta property="og:site_name" content="딸깍" />
+		<meta property="og:title" content="딸깍 — 규칙을 발견하는 두뇌 퍼즐" />
+		<meta
+			property="og:description"
+			content="매일 3문제 데일리 퍼즐 + 발견형·상식퀴즈 200문제 연속 모드. 규칙을 발견하는 순간의 그 소리, 딸깍!"
+		/>
+		<meta property="og:image" content="/og-default.png" />
+		<meta property="og:image:width" content="1200" />
+		<meta property="og:image:height" content="630" />
+		<meta name="twitter:card" content="summary_large_image" />
+		<meta name="twitter:title" content="딸깍 — 규칙을 발견하는 두뇌 퍼즐" />
+		<meta
+			name="twitter:description"
+			content="발견형 퍼즐 + 상식퀴즈, 연속 모드로 콤보 점수에 도전! 친구와 대결하세요."
+		/>
+		<meta name="twitter:image" content="/og-default.png" />
+		<!-- ▼▼▼ 애드센스 승인 후: 이 주석을 지우고 발급받은 AdSense 스크립트를 붙여넣으세요 ▼▼▼
+		<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script>
+		▲▲▲ -->
 		<style>
 			html {
 				background: #efe7d8;
 			}
 		</style>
-		<!-- ▼▼▼ 애드센스 승인 후: 이 주석을 지우고 발급받은 AdSense 스크립트를 붙여넣으세요 ▼▼▼
-		<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script>
-		▲▲▲ -->
 		%sveltekit.head%
 	</head>
 	<body data-sveltekit-preload-data="hover">

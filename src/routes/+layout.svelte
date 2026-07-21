@@ -12,6 +12,7 @@
 		<Logo />
 		<nav>
 			<a href="/" class="tab" class:active={path === '/'}>오늘의 퍼즐</a>
+			<a href="/play" class="tab" class:active={path.startsWith('/play')}>연속 모드</a>
 			<a href="/matchstick" class="tab" class:active={path.startsWith('/matchstick')}>성냥개비</a>
 		</nav>
 	</header>
@@ -27,6 +28,8 @@
 			<a href="/about">소개</a>
 			<span>·</span>
 			<a href="/privacy">개인정보처리방침</a>
+			<span>·</span>
+			<a href="/terms">이용약관</a>
 		</nav>
 		<div class="tag">딸깍 · 규칙을 발견하는 순간의 그 소리</div>
 	</footer>
@@ -60,10 +63,12 @@
 	}
 	:global(body) {
 		font-family:
-			-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Malgun Gothic', sans-serif;
+			'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, 'Segoe UI',
+			'Malgun Gothic', sans-serif;
 		background: var(--bg);
 		color: var(--text);
 		min-height: 100vh;
+		-webkit-font-smoothing: antialiased;
 	}
 	:global(::selection) {
 		background: #cfe6d8;

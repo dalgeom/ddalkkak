@@ -12,8 +12,13 @@ export interface Problem {
 	answers?: string[];
 	choices?: string[];
 	answerIndex?: number;
-	hints: [string, string, string];
+	/** 발견형 퍼즐은 3단 힌트 필수. 상식 퀴즈(trivia)는 힌트 없음. */
+	hints?: [string, string, string];
 	explain: string;
+	/** 상식 퀴즈 여부 (발견형 퍼즐과 구분) */
+	trivia?: boolean;
+	/** 상식 퀴즈 카테고리 (지리/한국사/과학 등) */
+	category?: string;
 }
 
 export const PROBLEMS: Problem[] = [

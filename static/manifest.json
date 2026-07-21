@@ -1,0 +1,12 @@
+{
+	"name": "딸깍 — 두뇌 퍼즐",
+	"short_name": "딸깍",
+	"description": "규칙을 발견하는 두뇌 퍼즐 + 상식 퀴즈. 매일 3문제, 연속 모드로 콤보 도전.",
+	"start_url": "/",
+	"display": "standalone",
+	"background_color": "#efe7d8",
+	"theme_color": "#efe7d8",
+	"icons": [
+		{ "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+	]
+}

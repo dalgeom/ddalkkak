@@ -7,8 +7,11 @@ describe('문제 은행 무결성', () => {
 		expect(new Set(ids).size).toBe(ids.length);
 	});
 
-	it('모든 문제에 힌트가 정확히 3개 있다', () => {
-		for (const p of PROBLEMS) expect(p.hints.length).toBe(3);
+	it('발견형 문제에 힌트가 정확히 3개 있다 (상식 퀴즈는 힌트 없음)', () => {
+		for (const p of PROBLEMS) {
+			if (p.trivia) continue;
+			expect(p.hints?.length, p.id).toBe(3);
+		}
 	});
 
 	it('text형은 정답 목록이, choice형은 유효한 정답 인덱스가 있다', () => {
