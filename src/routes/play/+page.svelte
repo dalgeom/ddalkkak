@@ -3,7 +3,15 @@
 	import { browser } from '$app/environment';
 	import { PROBLEMS, GRADES, type Problem, type Grade } from '$lib/problems';
 	import { TRIVIA } from '$lib/trivia';
-	import { buildSession, comboScore, isCorrectText } from '$lib/game';
+	import {
+		buildSession,
+		comboScore,
+		isCorrectText,
+		hintUnlocked,
+		isCloseAnswer,
+		wanderBonus
+	} from '$lib/game';
+	import { shareResult, outcomeMessage } from '$lib/shareCard';
 	import SevenSeg from '$lib/components/SevenSeg.svelte';
 	import ColorBlocks from '$lib/components/ColorBlocks.svelte';
 	import AdSlot from '$lib/components/AdSlot.svelte';
@@ -30,6 +38,10 @@
 	let results = $state<('o' | 'x')[]>([]);
 
 	let hintsUsed = $state(0);
+	let wrongAttempts = $state(0);
+	let startedAt = $state(0);
+	let elapsedMs = $state(0);
+	let tickIv: ReturnType<typeof setInterval> | undefined;
 	let done = $state(false);
 	let answerValue = $state('');
 	let feedback = $state<{ msg: string; ok: boolean } | null>(null);
@@ -87,6 +99,9 @@
 
 	function resetProblem() {
 		hintsUsed = 0;
+		wrongAttempts = 0;
+		startedAt = Date.now();
+		elapsedMs = 0;
 		done = false;
 		answerValue = '';
 		feedback = null;
@@ -97,7 +112,9 @@
 		if (done) return;
 		done = true;
 		if (win) {
-			const base = current.trivia ? 100 : Math.max(20, 100 - hintsUsed * 25);
+			const base =
+				(current.trivia ? 100 : Math.max(20, 100 - hintsUsed * 25)) +
+				wanderBonus(hintsUsed, wrongAttempts);
 			const gained = comboScore(base, combo);
 			score += gained;
 			combo += 1;
@@ -115,7 +132,12 @@
 	function submitText() {
 		if (done || !answerValue.trim()) return;
 		if (isCorrectText(current, answerValue)) finish(true);
-		else feedback = { msg: '땡! 다시 생각해 보세요', ok: false };
+		else {
+			wrongAttempts += 1;
+			feedback = isCloseAnswer(current, answerValue)
+				? { msg: '🔥 거의 다 왔어요!', ok: false }
+				: { msg: '아직이에요 — 다시 들여다볼까요?', ok: false };
+		}
 	}
 	function submitChoice(i: number) {
 		if (done) return;
@@ -123,6 +145,7 @@
 	}
 	function showHint() {
 		if (done || current.trivia || !current.hints || hintsUsed >= current.hints.length) return;
+		if (!hintUnlocked(hintsUsed, elapsedMs, wrongAttempts)) return;
 		hintsUsed += 1;
 	}
 
@@ -147,16 +170,23 @@
 		toastTimer = setTimeout(() => (toastMsg = ''), 2400);
 	}
 
-	function share() {
+	async function share() {
 		const fname = { all: '전체 믹스', puzzle: '발견형', trivia: '상식퀴즈' }[filter];
-		const text = `딸깍! 연속 모드 ${fname} ${sessionSize}문제 — ${correctCount}개 정답 · ${score}점 🔥\n${'⭐'.repeat(Math.min(maxCombo, 10))}\n너도 도전! ${location.origin}/play`;
-		if (navigator.share) navigator.share({ text }).catch(() => {});
-		else if (navigator.clipboard?.writeText)
-			navigator.clipboard.writeText(text).then(
-				() => toast('결과 복사됨 — 친구에게 도전장을 보내세요!'),
-				() => toast('복사 실패')
-			);
-		else toast('복사를 지원하지 않는 브라우저');
+		const gradeLabel = grade === 'all' ? '' : ` ${grade}`;
+		const catLabel = cat === 'all' ? '' : ` ${cat}`;
+		const title = `연속 모드 · ${fname}${gradeLabel}${catLabel} ${sessionSize}문제`;
+		const text = `딸깍! ${title} — ${correctCount}개 정답 · ${score}점 🔥\n너도 도전! ${location.origin}/play`;
+		const outcome = await shareResult(
+			{
+				title,
+				scoreLabel: `${score}점`,
+				emojiRow: results.map((r) => (r === 'o' ? '🟢' : '⚪')).join(''),
+				subLine: `${correctCount}/${queue.length} 정답 · 최고 콤보 ${maxCombo}`,
+				cta: '내 점수 넘어볼래?'
+			},
+			text
+		);
+		toast(outcomeMessage(outcome));
 	}
 
 	const FILTERS: { key: Filter; label: string; sub: string }[] = [
@@ -174,7 +204,13 @@
 	];
 	const SIZES = [5, 10, 20];
 
-	onMount(load);
+	onMount(() => {
+		load();
+		tickIv = setInterval(() => {
+			if (screen === 'play' && !done && startedAt) elapsedMs = Date.now() - startedAt;
+		}, 1000);
+		return () => clearInterval(tickIv);
+	});
 </script>
 
 <svelte:head>
@@ -310,8 +346,16 @@
 			{#if !done}
 				<div class="controls">
 					{#if !current.trivia && current.hints}
-						<button class="btn ghost" disabled={hintsUsed >= 3} onclick={showHint}>
-							{hintsUsed >= 3 ? '힌트 소진' : `💡 힌트 (${hintsUsed + 1}/3)`}
+						<button
+							class="btn ghost"
+							disabled={hintsUsed >= 3 || !hintUnlocked(hintsUsed, elapsedMs, wrongAttempts)}
+							onclick={showHint}
+						>
+							{hintsUsed >= 3
+								? '힌트 소진'
+								: hintUnlocked(hintsUsed, elapsedMs, wrongAttempts)
+									? `💡 힌트 (${hintsUsed + 1}/3)`
+									: '🔒 조금만 더'}
 						</button>
 					{/if}
 					<button class="btn ghost" onclick={() => finish(false)}>모르겠어요</button>

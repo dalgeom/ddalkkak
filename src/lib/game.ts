@@ -59,6 +59,64 @@ export function kstDayNumber(nowMs: number): number {
 	return Math.floor((nowMs + 9 * 3600 * 1000) / 86400000);
 }
 
+/**
+ * 힌트 해금 조건 — '방황'이 재미의 빌드업이므로 즉시 스킵을 막는다.
+ * 힌트1은 항상 열려 있고, 2·3은 시간이 지나거나 시도해 본 뒤에 열린다(OR 조건).
+ * 오답 3회부터는 다음 단계를 무료로 열어 이탈을 막는다(누를지는 사용자 선택).
+ */
+export function hintUnlocked(hintIndex: number, elapsedMs: number, wrongAttempts: number): boolean {
+	if (hintIndex <= 0) return true;
+	if (wrongAttempts >= 3) return true;
+	if (hintIndex === 1) return elapsedMs >= 25000 || wrongAttempts >= 1;
+	return elapsedMs >= 60000 || wrongAttempts >= 2;
+}
+
+/** 편집 거리(레벤슈타인) */
+export function editDistance(a: string, b: string): number {
+	const m = a.length;
+	const n = b.length;
+	if (!m) return n;
+	if (!n) return m;
+	let prev = Array.from({ length: n + 1 }, (_, j) => j);
+	for (let i = 1; i <= m; i++) {
+		const cur = [i];
+		for (let j = 1; j <= n; j++) {
+			cur[j] = Math.min(
+				prev[j] + 1,
+				cur[j - 1] + 1,
+				prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1)
+			);
+		}
+		prev = cur;
+	}
+	return prev[n];
+}
+
+/** 아깝게 빗나간 답인가 — "거의 다 왔어요" 피드백용 */
+export function isCloseAnswer(p: Problem, value: string): boolean {
+	const v = normalize(value);
+	if (!v || !p.answers) return false;
+	for (const a of p.answers) {
+		const t = normalize(a);
+		if (!t || t === v) continue;
+		const na = Number(t);
+		const nv = Number(v);
+		if (Number.isFinite(na) && Number.isFinite(nv)) {
+			const tol = Math.max(1, Math.abs(na) * 0.1);
+			if (Math.abs(na - nv) <= tol) return true;
+		} else if (t.length >= 2 && editDistance(t, v) <= 1) {
+			return true;
+		}
+	}
+	return false;
+}
+
+/** 힌트 없이 헤매다 맞힌 경우의 보너스(찍기 스팸 방지 위해 상한) */
+export function wanderBonus(hintsUsed: number, wrongAttempts: number): number {
+	if (hintsUsed > 0) return 0;
+	return wrongAttempts >= 1 ? 10 : 0;
+}
+
 /** 연속 모드 세션: 풀에서 무작위 n개를 중복 없이 뽑는다(풀보다 크면 전체 셔플). */
 export function buildSession<T>(pool: T[], size: number): T[] {
 	const arr = pool.slice();

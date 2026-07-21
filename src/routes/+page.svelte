@@ -8,8 +8,12 @@
 		scoreFor,
 		emojiFor,
 		kstDayNumber,
-		dailyIndices
+		dailyIndices,
+		hintUnlocked,
+		isCloseAnswer,
+		wanderBonus
 	} from '$lib/game';
+	import { shareResult, outcomeMessage } from '$lib/shareCard';
 	import SevenSeg from '$lib/components/SevenSeg.svelte';
 	import ColorBlocks from '$lib/components/ColorBlocks.svelte';
 	import AdSlot from '$lib/components/AdSlot.svelte';
@@ -26,6 +30,9 @@
 	let phase = $state<'play' | 'done'>('play');
 
 	let hintsUsed = $state(0);
+	let wrongAttempts = $state(0);
+	let startedAt = $state(0);
+	let elapsedMs = $state(0);
 	let done = $state(false);
 	let answerValue = $state('');
 	let feedback = $state<{ msg: string; ok: boolean } | null>(null);
@@ -130,6 +137,9 @@
 
 	function resetProblem() {
 		hintsUsed = 0;
+		wrongAttempts = 0;
+		startedAt = Date.now();
+		elapsedMs = 0;
 		done = false;
 		answerValue = '';
 		feedback = null;
@@ -140,11 +150,18 @@
 		if (done) return;
 		done = true;
 		results = [...results, emojiFor(win, hintsUsed)];
-		stats.score += scoreFor(win, hintsUsed);
+		const bonus = win ? wanderBonus(hintsUsed, wrongAttempts) : 0;
+		const gained = scoreFor(win, hintsUsed) + bonus;
+		stats.score += gained;
 		if (mode === 'random' && current) solved = [...solved, current.id];
 		feedback = win
-			? { msg: `딸깍! ⚡ +${scoreFor(win, hintsUsed)}`, ok: true }
-			: { msg: '정답 공개', ok: false };
+			? {
+					msg: bonus
+						? `딸깍! ⚡ +${gained} — 힌트 없이 끝까지 물고 늘어졌네요!`
+						: `딸깍! ⚡ +${gained}`,
+					ok: true
+				}
+			: { msg: '이번엔 여기까지 — 해설 보고 가세요', ok: false };
 		persist();
 		saveDaily();
 	}
@@ -152,15 +169,24 @@
 	function submitText() {
 		if (done || !answerValue.trim()) return;
 		if (isCorrectText(current, answerValue)) finish(true);
-		else feedback = { msg: '땡! 다시 생각해 보세요', ok: false };
+		else {
+			wrongAttempts += 1;
+			feedback = isCloseAnswer(current, answerValue)
+				? { msg: '🔥 거의 다 왔어요!', ok: false }
+				: { msg: '아직이에요 — 다시 들여다볼까요?', ok: false };
+		}
 	}
 	function submitChoice(i: number) {
 		if (done) return;
 		if (i === current.answerIndex) finish(true);
-		else feedback = { msg: '땡! 다시 생각해 보세요', ok: false };
+		else {
+			wrongAttempts += 1;
+			feedback = { msg: '아직이에요 — 다시 들여다볼까요?', ok: false };
+		}
 	}
 	function showHint() {
 		if (done || !current.hints || hintsUsed >= current.hints.length) return;
+		if (!hintUnlocked(hintsUsed, elapsedMs, wrongAttempts)) return;
 		hintsUsed += 1;
 	}
 
@@ -190,19 +216,28 @@
 		toastTimer = setTimeout(() => (toastMsg = ''), 2400);
 	}
 
-	function share() {
+	async function share() {
 		const label = mode === 'daily' ? `오늘의 퍼즐 (${dateLabel})` : '랜덤 3문제';
 		const solvedN = results.filter((r) => r !== '🔓').length;
 		let text = `딸깍! ${label} ${solvedN}/${results.length} ${results.join('')}`;
 		if (mode === 'daily' && stats.dayStreak > 1) text += `\n🔥 ${stats.dayStreak}일 연속`;
 		text += `\n${location.origin}`;
-		if (navigator.share) navigator.share({ text }).catch(() => {});
-		else if (navigator.clipboard?.writeText)
-			navigator.clipboard.writeText(text).then(
-				() => toast('결과 복사됨 — 친구에게 공유하세요!'),
-				() => toast('복사 실패')
-			);
-		else toast('복사를 지원하지 않는 브라우저');
+		const outcome = await shareResult(
+			{
+				title: label,
+				scoreLabel: `${solvedN} / ${results.length}`,
+				emojiRow: results.join(' '),
+				subLine:
+					mode === 'daily' && stats.dayStreak > 1 ? `🔥 ${stats.dayStreak}일 연속` : undefined,
+				cta: '너도 오늘의 퍼즐 풀어볼래?'
+			},
+			text
+		);
+		toast(outcomeMessage(outcome));
+	}
+
+	function tickElapsed() {
+		if (!done && startedAt) elapsedMs = Date.now() - startedAt;
 	}
 
 	function tickCountdown() {
@@ -220,7 +255,10 @@
 		dayNum = kstDayNumber(Date.now());
 		startDaily();
 		tickCountdown();
-		const iv = setInterval(tickCountdown, 1000);
+		const iv = setInterval(() => {
+			tickCountdown();
+			tickElapsed();
+		}, 1000);
 		return () => clearInterval(iv);
 	});
 </script>
@@ -232,6 +270,12 @@
 		content="매일 3문제, 규칙을 발견하는 순간의 그 소리. 모두가 같은 문제를 풀고 결과를 공유하는 데일리 두뇌 퍼즐."
 	/>
 </svelte:head>
+
+{#if mode === 'daily' && stats.dayStreak > 0 && stats.lastDay !== dayNum}
+	<div class="streak-warn">
+		🔥 <b>{stats.dayStreak}일 연속</b> 기록이 오늘 끊겨요! 남은 시간 <b>{countdown}</b>
+	</div>
+{/if}
 
 <div class="banner">
 	<div class="b-left">
@@ -299,12 +343,15 @@
 					<div class="controls">
 						<button
 							class="btn ghost"
-							disabled={hintsUsed >= (current.hints?.length ?? 3)}
+							disabled={hintsUsed >= (current.hints?.length ?? 3) ||
+								!hintUnlocked(hintsUsed, elapsedMs, wrongAttempts)}
 							onclick={showHint}
 						>
 							{hintsUsed >= (current.hints?.length ?? 3)
 								? '힌트 소진'
-								: `💡 힌트 (${hintsUsed + 1}/3)`}
+								: hintUnlocked(hintsUsed, elapsedMs, wrongAttempts)
+									? `💡 힌트 (${hintsUsed + 1}/3)`
+									: '🔒 조금만 더 만져보세요'}
 						</button>
 						<button class="btn ghost" onclick={() => finish(false)}>정답 보기</button>
 					</div>
@@ -405,6 +452,20 @@
 		font-size: 13px;
 		color: var(--muted);
 		font-variant-numeric: tabular-nums;
+	}
+
+	.streak-warn {
+		background: #fdf1e3;
+		border: 1px solid #f0d9b8;
+		color: #9a5a20;
+		border-radius: 12px;
+		padding: 11px 16px;
+		font-size: 13.5px;
+		font-weight: 700;
+		margin-bottom: 12px;
+	}
+	.streak-warn b {
+		color: var(--accent-2);
 	}
 
 	.play-promo {
