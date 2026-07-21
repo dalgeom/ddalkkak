@@ -19,7 +19,19 @@ export interface Problem {
 	trivia?: boolean;
 	/** 상식 퀴즈 카테고리 (지리/한국사/과학 등) */
 	category?: string;
+	/** 상식 퀴즈 난이도 등급 */
+	grade?: Grade;
 }
+
+/** 상식 퀴즈 난이도 등급 */
+export type Grade = '초등' | '중등' | '고등' | '어른';
+
+export const GRADES: { key: Grade; label: string }[] = [
+	{ key: '초등', label: '🌱 초등' },
+	{ key: '중등', label: '📗 중등' },
+	{ key: '고등', label: '📘 고등' },
+	{ key: '어른', label: '🎩 어른' }
+];
 
 export const PROBLEMS: Problem[] = [
 	{

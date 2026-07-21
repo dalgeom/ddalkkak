@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { browser } from '$app/environment';
-	import { PROBLEMS, type Problem } from '$lib/problems';
+	import { PROBLEMS, GRADES, type Problem, type Grade } from '$lib/problems';
 	import { TRIVIA } from '$lib/trivia';
 	import { buildSession, comboScore, isCorrectText } from '$lib/game';
 	import SevenSeg from '$lib/components/SevenSeg.svelte';
@@ -13,7 +13,13 @@
 
 	let screen = $state<Screen>('menu');
 	let filter = $state<Filter>('all');
+	let grade = $state<Grade | 'all'>('all');
+	let cat = $state<string>('all');
+	let showCats = $state(false);
 	let sessionSize = $state(10);
+
+	/** 상식 퀴즈에 존재하는 카테고리 목록 */
+	const CATS = [...new Set(TRIVIA.map((t) => t.category!))].sort();
 
 	let queue = $state<Problem[]>([]);
 	let idx = $state(0);
@@ -35,12 +41,19 @@
 	let shownHints = $derived(
 		current && !current.trivia && current.hints ? current.hints.slice(0, hintsUsed) : []
 	);
-	let bestKey = $derived(`${filter}-${sessionSize}`);
+	let bestKey = $derived(`${filter}-${grade}-${cat}-${sessionSize}`);
+	let availCount = $derived(pool(filter).length);
 
+	/** 상식 퀴즈에 난이도·카테고리 필터 적용 */
+	function triviaPool(): Problem[] {
+		return TRIVIA.filter(
+			(t) => (grade === 'all' || t.grade === grade) && (cat === 'all' || t.category === cat)
+		);
+	}
 	function pool(f: Filter): Problem[] {
 		if (f === 'puzzle') return PROBLEMS;
-		if (f === 'trivia') return TRIVIA;
-		return [...PROBLEMS, ...TRIVIA];
+		if (f === 'trivia') return triviaPool();
+		return [...PROBLEMS, ...triviaPool()];
 	}
 
 	function load() {
@@ -147,9 +160,17 @@
 	}
 
 	const FILTERS: { key: Filter; label: string; sub: string }[] = [
-		{ key: 'all', label: '전체 믹스', sub: '발견형+상식 200문제' },
-		{ key: 'puzzle', label: '발견형 퍼즐', sub: '숨은 규칙 찾기 100' },
-		{ key: 'trivia', label: '상식 퀴즈', sub: '수도·역사·과학 100' }
+		{
+			key: 'all',
+			label: '전체 믹스',
+			sub: `발견형 ${PROBLEMS.length} + 상식 ${TRIVIA.length}문제`
+		},
+		{ key: 'puzzle', label: '발견형 퍼즐', sub: `숨은 규칙 찾기 ${PROBLEMS.length}문제` },
+		{
+			key: 'trivia',
+			label: '상식 퀴즈',
+			sub: `${CATS.length}개 분야 · 4단계 난이도 ${TRIVIA.length}문제`
+		}
 	];
 	const SIZES = [5, 10, 20];
 
@@ -179,15 +200,51 @@
 				{/each}
 			</div>
 
-			<div class="label">몇 문제?</div>
+			{#if filter !== 'puzzle'}
+				<div class="label">난이도</div>
+				<div class="pills">
+					<button class="pill" class:on={grade === 'all'} onclick={() => (grade = 'all')}
+						>전체</button
+					>
+					{#each GRADES as g (g.key)}
+						<button class="pill" class:on={grade === g.key} onclick={() => (grade = g.key)}
+							>{g.label}</button
+						>
+					{/each}
+				</div>
+
+				<div class="label">
+					분야
+					<button class="more" onclick={() => (showCats = !showCats)}>
+						{showCats ? '접기' : `${cat === 'all' ? '전체' : cat} · 바꾸기`}
+					</button>
+				</div>
+				{#if showCats}
+					<div class="pills wrap">
+						<button class="pill" class:on={cat === 'all'} onclick={() => (cat = 'all')}>전체</button>
+						{#each CATS as c (c)}
+							<button class="pill" class:on={cat === c} onclick={() => (cat = c)}>{c}</button>
+						{/each}
+					</div>
+				{/if}
+			{/if}
+
+			<div class="label">몇 문제? <span class="avail">선택된 문제 {availCount}개</span></div>
 			<div class="sizes">
 				{#each SIZES as s (s)}
-					<button class="size" onclick={() => start(s)}>
+					<button class="size" disabled={availCount === 0} onclick={() => start(s)}>
 						{s}문제
-						{#if best[`${filter}-${s}`]}<span class="best">최고 {best[`${filter}-${s}`]}</span>{/if}
+						{#if best[`${filter}-${grade}-${cat}-${s}`]}<span class="best"
+								>최고 {best[`${filter}-${grade}-${cat}-${s}`]}</span
+							>{/if}
 					</button>
 				{/each}
 			</div>
+			{#if availCount === 0}
+				<div class="warn">이 조합에 문제가 없어요. 난이도나 분야를 바꿔 보세요.</div>
+			{:else if availCount < 5}
+				<div class="warn">문제가 {availCount}개뿐이라 그만큼만 출제됩니다.</div>
+			{/if}
 
 			<AdSlot label="연속 모드" />
 		</div>
@@ -198,7 +255,12 @@
 			<div class="tb-item" class:hot={combo >= 2}>🔥 콤보 {combo}</div>
 		</div>
 		<div class="card">
-			<div class="chip" class:triv={current.trivia}>{current.chip}</div>
+			<div class="chiprow">
+				<span class="chip" class:triv={current.trivia}>{current.chip}</span>
+				{#if current.grade}
+					<span class="gradechip">{GRADES.find((g) => g.key === current.grade)?.label}</span>
+				{/if}
+			</div>
 			<div class="q">
 				{#each current.blocks as b, i (i)}
 					{#if b.kind === 'text'}
@@ -322,6 +384,60 @@
 		font-weight: 800;
 		color: var(--muted);
 		margin: 16px 0 10px;
+		display: flex;
+		align-items: center;
+		gap: 8px;
+	}
+	.avail {
+		font-weight: 600;
+		color: #b3a894;
+	}
+	.more {
+		margin-left: auto;
+		background: transparent;
+		border: 1px solid var(--border-strong);
+		border-radius: 999px;
+		padding: 4px 12px;
+		font-size: 11px;
+		font-weight: 700;
+		color: var(--muted);
+		cursor: pointer;
+		font-family: inherit;
+	}
+	.pills {
+		display: flex;
+		gap: 7px;
+		flex-wrap: wrap;
+	}
+	.pills.wrap {
+		max-height: 190px;
+		overflow-y: auto;
+	}
+	.pill {
+		background: var(--panel-2);
+		border: 2px solid var(--border);
+		border-radius: 999px;
+		padding: 9px 15px;
+		font-size: 13.5px;
+		font-weight: 700;
+		color: var(--text);
+		cursor: pointer;
+		font-family: inherit;
+	}
+	.pill.on {
+		border-color: var(--accent);
+		background: var(--accent-soft);
+		color: var(--accent);
+	}
+	.warn {
+		margin-top: 10px;
+		font-size: 12.5px;
+		color: var(--accent-2);
+		font-weight: 700;
+	}
+	.size:disabled {
+		opacity: 0.45;
+		cursor: default;
 	}
 	.filters {
 		display: flex;
@@ -399,6 +515,13 @@
 	.tb-item.hot {
 		color: var(--accent-2);
 	}
+	.chiprow {
+		display: flex;
+		align-items: center;
+		gap: 7px;
+		margin-bottom: 20px;
+		flex-wrap: wrap;
+	}
 	.chip {
 		display: inline-block;
 		background: var(--accent-soft);
@@ -407,7 +530,16 @@
 		font-weight: 800;
 		border-radius: 999px;
 		padding: 6px 15px;
-		margin-bottom: 20px;
+	}
+	.gradechip {
+		display: inline-block;
+		background: var(--panel-2);
+		border: 1px solid var(--border-strong);
+		color: var(--muted);
+		font-size: 11.5px;
+		font-weight: 800;
+		border-radius: 999px;
+		padding: 5px 12px;
 	}
 	.chip.triv {
 		background: #f3ead4;
