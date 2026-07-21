@@ -9,7 +9,11 @@ import {
 	kstDayNumber,
 	dailyIndices,
 	buildSession,
-	comboScore
+	comboScore,
+	hintUnlocked,
+	editDistance,
+	isCloseAnswer,
+	wanderBonus
 } from './game';
 import { PROBLEMS } from './problems';
 
@@ -117,5 +121,38 @@ describe('연속 모드', () => {
 		expect(comboScore(100, 0)).toBe(100);
 		expect(comboScore(100, 5)).toBe(150);
 		expect(comboScore(100, 100)).toBe(200); // 상한
+	});
+});
+
+describe('힌트 게이팅 · 근접 피드백', () => {
+	it('힌트1은 항상 열림, 힌트2는 25초 또는 오답1회, 힌트3은 60초 또는 오답2회', () => {
+		expect(hintUnlocked(0, 0, 0)).toBe(true);
+		expect(hintUnlocked(1, 0, 0)).toBe(false);
+		expect(hintUnlocked(1, 25000, 0)).toBe(true);
+		expect(hintUnlocked(1, 0, 1)).toBe(true);
+		expect(hintUnlocked(2, 25000, 1)).toBe(false);
+		expect(hintUnlocked(2, 60000, 0)).toBe(true);
+		expect(hintUnlocked(2, 0, 2)).toBe(true);
+	});
+	it('오답 3회면 모든 단계 무료 해금', () => {
+		expect(hintUnlocked(2, 0, 3)).toBe(true);
+	});
+	it('editDistance', () => {
+		expect(editDistance('안중근', '안중근')).toBe(0);
+		expect(editDistance('안중근', '안중군')).toBe(1);
+		expect(editDistance('abc', 'axc')).toBe(1);
+	});
+	it('isCloseAnswer: 한 글자 차이·숫자 근접은 "거의"로 인정', () => {
+		const p = { id: 'x', chip: '', blocks: [], type: 'text', answers: ['안중근'], explain: '' } as never;
+		expect(isCloseAnswer(p, '안중군')).toBe(true);
+		expect(isCloseAnswer(p, '김구')).toBe(false);
+		const n = { id: 'y', chip: '', blocks: [], type: 'text', answers: ['100'], explain: '' } as never;
+		expect(isCloseAnswer(n, '105')).toBe(true);
+		expect(isCloseAnswer(n, '500')).toBe(false);
+	});
+	it('wanderBonus: 힌트 없이 헤맨 뒤 정답이면 +10', () => {
+		expect(wanderBonus(0, 0)).toBe(0);
+		expect(wanderBonus(0, 2)).toBe(10);
+		expect(wanderBonus(1, 2)).toBe(0);
 	});
 });
