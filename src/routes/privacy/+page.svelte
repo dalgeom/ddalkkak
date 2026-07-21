@@ -35,10 +35,12 @@
 
 <style>
 	.page {
+		max-width: 720px;
+		margin: 0 auto;
 		background: var(--panel);
 		border: 1px solid var(--border);
 		border-radius: var(--radius);
-		padding: 26px 22px;
+		padding: 30px 28px;
 		line-height: 1.8;
 		font-size: 14px;
 		color: var(--text);
