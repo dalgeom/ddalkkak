@@ -4,6 +4,8 @@
 	import { PROBLEMS, type Problem } from '$lib/problems';
 	import { TRIVIA } from '$lib/trivia';
 	import {
+		TRACKS,
+		type TrackKey,
 		buildRound,
 		isCorrectText,
 		scoreFor,
@@ -29,7 +31,12 @@
 	let queue = $state<Problem[]>([]);
 	let pos = $state(0);
 	let results = $state<string[]>([]);
-	let phase = $state<'play' | 'done'>('play');
+	let phase = $state<'landing' | 'hub' | 'play' | 'done'>('hub');
+	let track = $state<TrackKey>('discover');
+	/** 트랙별 완료 여부 (오늘 기준) */
+	let trackDone = $state<Record<string, boolean>>({});
+	/** 트랙별 진행 위치 */
+	let trackPos = $state<Record<string, number>>({});
 
 	let hintsUsed = $state(0);
 	let wrongAttempts = $state(0);
@@ -70,6 +77,23 @@
 		!feedback ? null : feedback.ok ? 'correct' : done ? 'giveup' : 'wrong'
 	);
 
+	const TRACK_META = TRACKS;
+	let trackInfo = $derived(TRACKS.find((t) => t.key === track)!);
+	/** 인라인으로 푸는 트랙만 데일리 완료 판정에 넣는다(성냥개비는 별도 라우트) */
+	const INLINE_TRACKS: TrackKey[] = ['discover', 'trivia'];
+	let allInlineDone = $derived(INLINE_TRACKS.every((k) => trackDone[k]));
+
+	/** 카드에 실제 문제를 미리 보여준다 — 이름만 보고는 뭘 하는 모드인지 알 수 없다는 지적 대응 */
+	const PEEK: Record<TrackKey, string> = {
+		discover: '11 · 31 · 55 · 66 · ?\n숫자가 아닙니다',
+		trivia: '세계에서 국토 면적이\n가장 넓은 나라는?',
+		match: '0 + 0 = 8\n한 개만 옮기세요'
+	};
+	const todayTotal = TRACKS.reduce((n, t) => n + t.size, 0);
+	let nextTrack = $derived(
+		TRACKS.find((t) => t.key !== 'match' && t.key !== track && !trackDone[t.key]) ?? null
+	);
+
 	let current = $derived(queue[pos]);
 	let shownHints = $derived(current && current.hints ? current.hints.slice(0, hintsUsed) : []);
 	let dateLabel = $derived(formatDate(dayNum));
@@ -102,8 +126,9 @@
 		for (let d = dayNum - 13; d <= dayNum; d++) {
 			let doneDay = false;
 			try {
-				const rec = JSON.parse(localStorage.getItem('ddal.daily.' + d) || 'null');
-				doneDay = !!rec && rec.phase === 'done';
+				const a = JSON.parse(localStorage.getItem(`ddal.daily.${d}.discover`) || 'null');
+				const b = JSON.parse(localStorage.getItem(`ddal.daily.${d}.trivia`) || 'null');
+				doneDay = !!a && a.phase === 'done' && !!b && b.phase === 'done';
 			} catch {
 				/* 무시 */
 			}
@@ -120,21 +145,54 @@
 			/* 무시 */
 		}
 	}
+	function dailyKey(k: TrackKey = track) {
+		return `ddal.daily.${dayNum}.${k}`;
+	}
 	function saveDaily() {
-		if (!browser) return;
+		if (!browser || mode !== 'daily') return;
 		try {
-			localStorage.setItem('ddal.daily.' + dayNum, JSON.stringify({ pos, results, phase }));
+			localStorage.setItem(dailyKey(), JSON.stringify({ pos, results, phase }));
 		} catch {
 			/* 무시 */
 		}
+		refreshTrackState();
+	}
+	/** 오늘 각 트랙이 어디까지 갔는지 다시 읽는다 */
+	function refreshTrackState() {
+		if (!browser) return;
+		const d: Record<string, boolean> = {};
+		const p: Record<string, number> = {};
+		for (const t of TRACKS) {
+			try {
+				const rec = JSON.parse(localStorage.getItem(dailyKey(t.key)) || 'null');
+				d[t.key] = !!rec && rec.phase === 'done';
+				p[t.key] = rec?.pos ?? 0;
+			} catch {
+				d[t.key] = false;
+				p[t.key] = 0;
+			}
+		}
+		trackDone = d;
+		trackPos = p;
 	}
 
-	function startDaily() {
+	function startTrack(k: TrackKey) {
 		mode = 'daily';
-		queue = dailyIndices(PROBLEMS.length, dayNum).map((i) => PROBLEMS[i]);
+		track = k;
+		// 한 번이라도 시작했으면 다음부터 랜딩을 건너뛴다
+		try {
+			localStorage.setItem('ddal.visited', '1');
+		} catch {
+			/* 무시 */
+		}
+		const meta = TRACKS.find((t) => t.key === k)!;
+		queue =
+			k === 'trivia'
+				? dailyIndices(TRIVIA.length, dayNum, meta.size).map((i) => TRIVIA[i])
+				: dailyIndices(PROBLEMS.length, dayNum, meta.size).map((i) => PROBLEMS[i]);
 		let saved: { pos: number; results: string[]; phase: 'play' | 'done' } | null = null;
 		try {
-			saved = JSON.parse(localStorage.getItem('ddal.daily.' + dayNum) || 'null');
+			saved = JSON.parse(localStorage.getItem(dailyKey(k)) || 'null');
 		} catch {
 			/* 무시 */
 		}
@@ -150,6 +208,13 @@
 		resetProblem();
 		if (pos >= queue.length) phase = 'done';
 		buildCalendar();
+	}
+
+	function goHub() {
+		phase = 'hub';
+		refreshTrackState();
+		buildCalendar();
+		if (browser) window.scrollTo({ top: 0, behavior: 'smooth' });
 	}
 
 	function startRandom() {
@@ -236,7 +301,10 @@
 			saveDaily();
 		} else {
 			phase = 'done';
-			if (mode === 'daily' && stats.lastDay !== dayNum) {
+			if (mode === 'daily') {
+				trackDone = { ...trackDone, [track]: true };
+			}
+			if (mode === 'daily' && allInlineDone && stats.lastDay !== dayNum) {
 				stats.dayStreak = stats.lastDay === dayNum - 1 ? stats.dayStreak + 1 : 1;
 				stats.maxStreak = Math.max(stats.maxStreak, stats.dayStreak);
 				stats.played += 1;
@@ -292,7 +360,15 @@
 	onMount(() => {
 		load();
 		dayNum = kstDayNumber(Date.now());
-		startDaily();
+		refreshTrackState();
+		let visited = false;
+		try {
+			visited = !!localStorage.getItem('ddal.visited');
+		} catch {
+			/* 무시 */
+		}
+		phase = visited ? 'hub' : 'landing';
+		buildCalendar();
 		tickCountdown();
 		const iv = setInterval(() => {
 			tickCountdown();
@@ -303,37 +379,89 @@
 </script>
 
 <svelte:head>
-	<title>딸깍 — 하루 3문제 두뇌 퍼즐</title>
+	<title>딸깍 — 매일 새로 열리는 두뇌 퍼즐</title>
 	<meta
 		name="description"
-		content="매일 3문제, 규칙을 발견하는 순간의 그 소리. 모두가 같은 문제를 풀고 결과를 공유하는 데일리 두뇌 퍼즐."
+		content="규칙을 발견하는 순간의 그 소리. 발견형 퍼즐·상식 퀴즈·성냥개비를 매일 새로, 모두가 같은 문제로."
 	/>
 </svelte:head>
 
-{#if mode === 'daily' && stats.dayStreak > 0 && stats.lastDay !== dayNum}
-	<div class="streak-warn">
-		<Icon name="streak" size={16} />
-		<span><b>{stats.dayStreak}일 연속</b> 기록이 오늘 끊겨요! 남은 시간 <b>{countdown}</b></span>
+{#if phase === 'landing'}
+	<!-- 첫 방문자만 보는 화면. 재방문자는 곧바로 허브로 간다. -->
+	<section class="landing">
+		<h1 class="l-h1">규칙을 발견하는 순간, 딸깍.</h1>
+		<p class="l-sub">오늘 치 {todayTotal}문제 · 매일 자정에 새로 열립니다</p>
+	</section>
+{:else}
+	{#if mode === 'daily' && stats.dayStreak > 0 && stats.lastDay !== dayNum}
+		<div class="streak-warn">
+			<Icon name="streak" size={16} />
+			<span><b>{stats.dayStreak}일 연속</b> 기록이 오늘 끊겨요! 남은 시간 <b>{countdown}</b></span>
+		</div>
+	{/if}
+
+	<div class="banner">
+		<div class="b-left">
+			<span class="b-title"
+				>{phase === 'hub' ? '오늘의 딸깍' : mode === 'daily' ? trackInfo.name : '랜덤 연습'}</span
+			>
+			<span class="b-date">{dateLabel}</span>
+		</div>
+		{#if phase !== 'hub'}
+			<button class="b-back" onclick={goHub}>← 오늘의 딸깍</button>
+		{/if}
 	</div>
 {/if}
 
-<div class="banner">
-	<div class="b-left">
-		<span class="b-title">{mode === 'daily' ? '오늘의 퍼즐' : '랜덤 연습'}</span>
-		{#if mode === 'daily'}<span class="b-date">{dateLabel}</span>{/if}
-	</div>
-</div>
+{#if phase === 'landing' || phase === 'hub'}
+	<section class="tracks">
+		{#each TRACK_META as t (t.key)}
+			{#if t.key === 'match'}
+				<a class="track" href="/matchstick">
+					<span class="t-top"><Icon name={t.icon} size={17} />{t.name}</span>
+					<span class="t-desc">{t.desc}</span>
+					<span class="t-peek">{PEEK[t.key]}</span>
+					<span class="t-foot"><span>{t.size}문제</span><span class="t-go">하러 가기 →</span></span>
+				</a>
+			{:else}
+				<button
+					class="track"
+					class:cleared={trackDone[t.key]}
+					onclick={() => startTrack(t.key)}
+				>
+					<span class="t-top">
+						<Icon name={trackDone[t.key] ? 'correct' : t.icon} size={17} />{t.name}
+					</span>
+					<span class="t-desc">{t.desc}</span>
+					<span class="t-peek">{PEEK[t.key]}</span>
+					<span class="t-foot">
+						<span class="t-dots">
+							{#each Array(t.size) as _, i (i)}
+								<span class="t-dot" class:on={trackDone[t.key] || i < (trackPos[t.key] ?? 0)}
+								></span>
+							{/each}
+						</span>
+						<span class="t-go">{trackDone[t.key] ? '다시 보기 →' : '풀어보기 →'}</span>
+					</span>
+				</button>
+			{/if}
+		{/each}
+	</section>
+{/if}
 
-<a class="play-promo" href="/play">
-	<div class="pp-left">
-		<span class="pp-title"><Icon name="arrow" size={16} /> 연속 모드 — 계속 풀기</span>
-		<span class="pp-sub"
-			>발견형 + 상식 퀴즈 {PROBLEMS.length + TRIVIA.length}문제, 5·10·20문제 랜덤 · 콤보 점수</span
-		>
-	</div>
-	<span class="pp-go">시작 →</span>
-</a>
+{#if phase === 'hub'}
+	<a class="play-promo" href="/play">
+		<div class="pp-left">
+			<span class="pp-title"><Icon name="arrow" size={16} /> 계속 풀기 — 오늘 치를 다 풀었다면</span>
+			<span class="pp-sub"
+				>발견형 + 상식 {PROBLEMS.length + TRIVIA.length}문제에서 5·10·20문제 랜덤 · 콤보 점수</span
+			>
+		</div>
+		<span class="pp-go">시작 →</span>
+	</a>
+{/if}
 
+{#if phase === 'play' || phase === 'done'}
 <div class="layout" class:result={phase === 'done'}>
 	<div class="main">
 		{#if phase === 'play' && current}
@@ -392,18 +520,21 @@
 
 				{#if !done}
 					<div class="controls">
-						<button
-							class="btn ghost"
-							disabled={hintsUsed >= (current.hints?.length ?? 3) ||
-								!hintUnlocked(hintsUsed, elapsedMs, wrongAttempts)}
-							onclick={showHint}
-						>
-							{hintsUsed >= (current.hints?.length ?? 3)
-								? '힌트 소진'
-								: hintUnlocked(hintsUsed, elapsedMs, wrongAttempts)
-									? `힌트 (${hintsUsed + 1}/3)`
-									: '조금만 더 만져보세요'}
-						</button>
+						<!-- 상식 퀴즈는 힌트가 없다. 없는 문제에 힌트 버튼을 띄우면 눌러도 아무 일이 없다. -->
+						{#if current.hints?.length}
+							<button
+								class="btn ghost"
+								disabled={hintsUsed >= current.hints.length ||
+									!hintUnlocked(hintsUsed, elapsedMs, wrongAttempts)}
+								onclick={showHint}
+							>
+								{hintsUsed >= current.hints.length
+									? '힌트 소진'
+									: hintUnlocked(hintsUsed, elapsedMs, wrongAttempts)
+										? `힌트 (${hintsUsed + 1}/${current.hints.length})`
+										: '조금만 더 만져보세요'}
+							</button>
+						{/if}
 						<button class="btn ghost" onclick={() => finish(false)}>정답 보기</button>
 					</div>
 				{/if}
@@ -433,15 +564,20 @@
 			{/key}
 		{:else if phase === 'done'}
 			<div class="card result">
-				<h2>{mode === 'daily' ? '오늘의 퍼즐 완료!' : '랜덤 3문제 완료!'}</h2>
+				<h2>{mode === 'daily' ? `${trackInfo.name} 완료!` : '랜덤 3문제 완료!'}</h2>
 				<div class="emoji">{results.join(' ')}</div>
 				<div class="rscore">{results.filter((r) => r !== '🔓').length} / {results.length}</div>
 				<button class="btn wide" onclick={share}>결과 공유하기</button>
 				{#if mode === 'daily'}
-					<button class="btn ghost wide" onclick={startRandom}>더 풀기 (랜덤)</button>
+					{#if nextTrack}
+						<button class="btn ghost wide" onclick={() => startTrack(nextTrack.key)}>
+							{nextTrack.name} 이어서 풀기 →
+						</button>
+					{/if}
+					<button class="btn ghost wide" onclick={goHub}>오늘의 딸깍으로</button>
 				{:else}
 					<button class="btn ghost wide" onclick={startRandom}>또 풀기</button>
-					<button class="btn ghost wide" onclick={startDaily}>오늘의 퍼즐로</button>
+					<button class="btn ghost wide" onclick={goHub}>오늘의 딸깍으로</button>
 				{/if}
 			</div>
 		{/if}
@@ -498,6 +634,7 @@
 		{/if}
 	</aside>
 </div>
+{/if}
 
 {#if toastMsg}
 	<div class="toast">{toastMsg}</div>
@@ -1107,5 +1244,126 @@
 		font-size: 14px;
 		z-index: 30;
 		box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
+	}
+	/* ---- 랜딩 / 트랙 허브 ---- */
+	.landing {
+		text-align: center;
+		padding: 26px 0 6px;
+	}
+	.l-h1 {
+		font-size: clamp(26px, 5vw, 38px);
+		font-weight: 900;
+		letter-spacing: -0.03em;
+		line-height: 1.25;
+		word-break: keep-all;
+	}
+	.l-sub {
+		margin-top: 10px;
+		font-size: 14.5px;
+		color: var(--muted);
+		font-weight: 600;
+	}
+	.tracks {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+		gap: 14px;
+		margin: 18px 0 0;
+	}
+	.track {
+		display: flex;
+		flex-direction: column;
+		align-items: stretch;
+		gap: 9px;
+		text-align: left;
+		text-decoration: none;
+		color: var(--text);
+		background: var(--panel);
+		border: 1px solid var(--border);
+		border-radius: var(--radius);
+		padding: 18px;
+		cursor: pointer;
+		font-family: inherit;
+		transition:
+			transform 0.16s var(--ease-out),
+			box-shadow 0.2s var(--ease-out),
+			border-color var(--dur-tap) var(--ease-out);
+	}
+	.track:hover {
+		transform: translateY(-3px);
+		border-color: var(--accent);
+		box-shadow: 0 10px 24px rgba(44, 40, 34, 0.11);
+	}
+	.track:active {
+		transform: translateY(0) scale(0.995);
+	}
+	.track.cleared {
+		border-color: #cfe6d8;
+		background: linear-gradient(180deg, var(--accent-soft), var(--panel) 46%);
+	}
+	.t-top {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		font-size: 16px;
+		font-weight: 800;
+	}
+	.t-desc {
+		font-size: 12.5px;
+		color: var(--muted);
+		line-height: 1.55;
+		word-break: keep-all;
+	}
+	.t-peek {
+		background: var(--panel-2);
+		border: 1px dashed var(--border-strong);
+		border-radius: 10px;
+		padding: 11px;
+		font-size: 12.5px;
+		line-height: 1.7;
+		white-space: pre-wrap;
+		color: #6f6555;
+		font-variant-numeric: tabular-nums;
+	}
+	.t-foot {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		font-size: 12px;
+		font-weight: 800;
+		color: var(--accent);
+	}
+	.t-dots {
+		display: flex;
+		gap: 4px;
+	}
+	.t-dot {
+		width: 7px;
+		height: 7px;
+		border-radius: 50%;
+		background: var(--border-strong);
+	}
+	.t-dot.on {
+		background: var(--accent);
+	}
+	.t-go {
+		opacity: 0.85;
+	}
+	.b-back {
+		background: none;
+		border: none;
+		font-family: inherit;
+		font-size: 13px;
+		font-weight: 700;
+		color: var(--muted);
+		cursor: pointer;
+		padding: 6px 10px;
+		border-radius: 999px;
+		transition:
+			color var(--dur-tap) var(--ease-out),
+			background var(--dur-tap) var(--ease-out);
+	}
+	.b-back:hover {
+		color: var(--text);
+		background: var(--panel-2);
 	}
 </style>

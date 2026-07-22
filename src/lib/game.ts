@@ -143,6 +143,20 @@ export function dailyIndices(total: number, dayNum: number, size: number = ROUND
 	return out;
 }
 
+/** 데일리 트랙 정의 — 하루 분량을 개수가 아니라 '유형'으로 늘린다. */
+export type TrackKey = 'discover' | 'trivia' | 'match';
+export const TRACKS: {
+	key: TrackKey;
+	name: string;
+	desc: string;
+	size: number;
+	icon: 'search' | 'book' | 'match';
+}[] = [
+	{ key: 'discover', name: '오늘의 발견', desc: '숨은 규칙을 스스로 찾아냅니다', size: 3, icon: 'search' },
+	{ key: 'trivia', name: '오늘의 상식', desc: '18개 분야 · 초등부터 어른까지', size: 5, icon: 'book' },
+	{ key: 'match', name: '오늘의 성냥개비', desc: '성냥 하나만 옮겨 식을 참으로', size: 3, icon: 'match' }
+];
+
 export function emojiFor(win: boolean, hintsUsed: number): string {
 	if (!win) return '🔓';
 	return hintsUsed === 0 ? '✅' : '💡';
