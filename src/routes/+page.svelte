@@ -686,13 +686,24 @@
 			<div class="panel center">
 				{#if stats.dayStreak > 0}
 					<div class="streak-num">
-						<Icon name="streak" size={18} /><SegNumber value={stats.dayStreak} size={38} /><small>일 연속</small>
+						<Icon name="streak" size={18} /><b>{stats.dayStreak}</b><small>일 연속</small>
 					</div>
 				{:else}
 					<div class="streak-none">오늘 풀면 연속 기록이 시작돼요</div>
 				{/if}
 				{#if mode === 'daily'}<div class="cd-sub">다음 퍼즐까지 {countdown}</div>{/if}
 			</div>
+			{#if mode === 'daily'}
+				<!-- 푸는 동안에도 오늘까지의 연속이 보여야 다음 날 다시 올 이유가 된다 -->
+				<div class="panel">
+					<div class="panel-title">최근 14일</div>
+					<div class="cal">
+						{#each calendar as d, i (i)}
+							<span class="cell" class:done={d} class:today={i === calendar.length - 1}></span>
+						{/each}
+					</div>
+				</div>
+			{/if}
 			{#if dev}<div class="panel"><AdSlot label="사이드" /></div>{/if}
 		{:else}
 			<div class="panel">
@@ -871,7 +882,8 @@
 	}
 	.q {
 		container-type: inline-size;
-		min-height: 90px;
+		/* 문제마다 높이가 달라 카드가 튀는 걸 막되, 한 줄 문제에서 크게 비지 않을 만큼만 */
+		min-height: 44px;
 	}
 	.qtext {
 		font-size: var(--fs-lg);
@@ -1327,6 +1339,14 @@
 		font-weight: var(--fw-caption);
 		color: var(--muted);
 		margin-top: 10px;
+	}
+	/* 한 자리 스트릭은 세그먼트로 그리면 획이 2~3개뿐이라 숫자로 안 읽힌다 */
+	.streak-num b {
+		font-size: 34px;
+		font-weight: var(--fw-number);
+		color: var(--accent-2);
+		font-variant-numeric: tabular-nums;
+		line-height: 1;
 	}
 	.streak-num {
 		display: flex;
