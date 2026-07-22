@@ -19,6 +19,8 @@
 	} from '$lib/game';
 	import { shareResult, outcomeMessage } from '$lib/shareCard';
 	import SevenSeg from '$lib/components/SevenSeg.svelte';
+	import MatchstickBoard from '$lib/components/MatchstickBoard.svelte';
+	import { parseEq } from '$lib/matchstick';
 	import ColorBlocks from '$lib/components/ColorBlocks.svelte';
 	import AdSlot from '$lib/components/AdSlot.svelte';
 	import Icon from '$lib/components/Icon.svelte';
@@ -92,6 +94,11 @@
 		match: '0 + 0 = 8\n한 개만 옮기세요'
 	};
 	const todayTotal = TRACKS.reduce((n, t) => n + t.size, 0);
+	/** 성냥개비 카드 미리보기용 정적 보드 — 그 모드의 고유 부품을 그대로 쓴다 */
+	const PREVIEW_BOARD = parseEq('0 + 0 = 8');
+	/** 상식 카드 미리보기용 보기 — 그 모드의 고유 형태(객관식)를 그대로 쓴다 */
+	const PREVIEW_CHOICES = ['러시아', '캐나다', '중국'];
+
 	let doneCount = $derived(TRACKS.filter((t) => trackDone[t.key]).length);
 	let nextTrack = $derived(
 		TRACKS.find((t) => t.key !== 'match' && t.key !== track && !trackDone[t.key]) ?? null
@@ -426,7 +433,10 @@
 						<Icon name={trackDone[t.key] ? 'correct' : t.icon} size={17} />{t.name}
 					</span>
 					<span class="t-desc">{t.desc}</span>
-					<span class="t-peek">{PEEK[t.key]}</span>
+					<span class="t-board">
+						<MatchstickBoard board={PREVIEW_BOARD} picked={null} onstick={() => {}} />
+					</span>
+					<span class="t-cap">한 개만 옮기세요</span>
 					<span class="t-foot">
 						<span class="t-dots">
 							{#each Array(t.size) as _, i (i)}
@@ -454,7 +464,14 @@
 						<span class="t-lcd"><SevenSeg lines={['11 31 55 66 ?']} /></span>
 						<span class="t-cap">숫자가 아닙니다</span>
 					{:else}
-						<span class="t-peek">{PEEK[t.key]}</span>
+						<span class="t-quiz">
+							<span class="tq-q">세계에서 국토 면적이 가장 넓은 나라는?</span>
+							<span class="tq-opts">
+								{#each PREVIEW_CHOICES as c (c)}
+									<span class="tq-opt">{c}</span>
+								{/each}
+							</span>
+						</span>
 					{/if}
 					<span class="t-foot">
 						<span class="t-dots">
@@ -1606,10 +1623,6 @@
 	.track.feature .t-top {
 		font-size: var(--fs-lg);
 	}
-	.track.feature .t-peek {
-		font-size: var(--fs-xs);
-		padding: 15px;
-	}
 	@media (max-width: 860px) {
 		.tracks {
 			grid-template-columns: 1fr 1fr;
@@ -1630,6 +1643,50 @@
 		border: 1px solid var(--border);
 		border-radius: 12px;
 		padding: 14px 12px;
+	}
+	/* 글리프가 4개뿐이라 원래 크기면 시그니처 카드의 전광판보다 커져 위계가 뒤집힌다.
+	   보드는 고정 픽셀 SVG라 max-width로 줄이면 잘리므로 높이 기준으로 비례 축소한다. */
+	.t-board {
+		display: block;
+		background: var(--panel-2);
+		border: 1px solid var(--border);
+		border-radius: 12px;
+		padding: 12px;
+		pointer-events: none;
+	}
+	.t-board :global(svg) {
+		height: 66px;
+		width: auto;
+	}
+	.t-quiz {
+		display: flex;
+		flex-direction: column;
+		gap: 9px;
+		background: var(--panel-2);
+		border: 1px dashed var(--border-strong);
+		border-radius: 10px;
+		padding: 12px;
+	}
+	.tq-q {
+		font-size: var(--fs-2xs);
+		font-weight: var(--fw-label);
+		color: #6f6555;
+		line-height: var(--lh-normal);
+		word-break: keep-all;
+	}
+	.tq-opts {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 5px;
+	}
+	.tq-opt {
+		font-size: 11px;
+		font-weight: var(--fw-caption);
+		color: var(--muted);
+		background: var(--panel);
+		border: 1px solid var(--border);
+		border-radius: 999px;
+		padding: 3px 9px;
 	}
 	.t-cap {
 		font-size: var(--fs-2xs);
@@ -1672,7 +1729,10 @@
 		color: var(--muted);
 		font-variant-numeric: tabular-nums;
 	}
-	.stat-strip {
-		flex-wrap: wrap;
+	/* 통계 4개가 한 줄에서 접혀 3+1로 어긋났다. 2×2로 고정해 리듬을 맞춘다. */
+	.hub-grid .stat-strip {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 14px 10px;
 	}
 </style>
