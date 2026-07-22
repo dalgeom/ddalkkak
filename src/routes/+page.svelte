@@ -21,6 +21,7 @@
 	import ColorBlocks from '$lib/components/ColorBlocks.svelte';
 	import AdSlot from '$lib/components/AdSlot.svelte';
 	import Icon from '$lib/components/Icon.svelte';
+	import SegNumber from '$lib/components/SegNumber.svelte';
 
 	let solved = $state<string[]>([]);
 	let stats = $state({ score: 0, dayStreak: 0, maxStreak: 0, played: 0, lastDay: -1 });
@@ -608,7 +609,7 @@
 			<div class="panel center">
 				{#if stats.dayStreak > 0}
 					<div class="streak-num">
-						<Icon name="streak" size={18} />{stats.dayStreak}<small>일 연속</small>
+						<Icon name="streak" size={18} /><SegNumber value={stats.dayStreak} size={38} /><small>일 연속</small>
 					</div>
 				{:else}
 					<div class="streak-none">오늘 풀면 연속 기록이 시작돼요</div>
@@ -1052,6 +1053,18 @@
 			transform: translateX(2px);
 		}
 	}
+	.btn {
+		border-bottom: 3px solid #24714a;
+	}
+	.btn:active:not(:disabled) {
+		border-bottom-width: 1px;
+	}
+	.btn.ghost {
+		border-bottom: 3px solid var(--border-strong);
+	}
+	.btn.ghost:active:not(:disabled) {
+		border-bottom-width: 1px;
+	}
 	.explain {
 		border-radius: 12px;
 		padding: 18px;
@@ -1119,12 +1132,6 @@
 	}
 	.stat {
 		text-align: center;
-	}
-	.stat b {
-		display: block;
-		font-size: 26px;
-		font-weight: 900;
-		color: var(--accent);
 	}
 	.stat span {
 		font-size: 11px;
@@ -1237,6 +1244,10 @@
 		color: var(--muted);
 	}
 	.cd-sub {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 6px;
 		font-size: 12px;
 		color: var(--muted);
 		margin-top: 6px;

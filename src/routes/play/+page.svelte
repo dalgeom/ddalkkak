@@ -937,6 +937,18 @@
 			transform: translateX(2px);
 		}
 	}
+	.btn {
+		border-bottom: 3px solid #24714a;
+	}
+	.btn:active:not(:disabled) {
+		border-bottom-width: 1px;
+	}
+	.btn.ghost {
+		border-bottom: 3px solid var(--border-strong);
+	}
+	.btn.ghost:active:not(:disabled) {
+		border-bottom-width: 1px;
+	}
 	.explain {
 		border-radius: 12px;
 		padding: 18px;

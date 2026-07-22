@@ -5,21 +5,53 @@
 
 	let { children } = $props();
 	let path = $derived(page.url.pathname);
+
+	const TABS = [
+		{ href: '/', label: '오늘의 딸깍', sub: '매일 새 문제' },
+		{ href: '/play', label: '계속 풀기', sub: '무제한 랜덤' },
+		{ href: '/matchstick', label: '성냥개비', sub: '하나만 옮기기' }
+	];
+	const isActive = (href: string) => (href === '/' ? path === '/' : path.startsWith(href));
+
+	// 활성 탭 아래로 미끄러지는 세그먼트 막대. 측정이 필요하므로 마운트 후에만 보인다.
+	let navEl = $state<HTMLElement | null>(null);
+	let barX = $state(0);
+	let barW = $state(0);
+	let barReady = $state(false);
+
+	function measure() {
+		if (!navEl) return;
+		const el = navEl.querySelector<HTMLElement>('.tab.active');
+		if (!el) return;
+		barX = el.offsetLeft + 6;
+		barW = Math.max(20, el.offsetWidth - 12);
+		barReady = true;
+	}
+	$effect(() => {
+		// path가 바뀌면 다시 잰다
+		void path;
+		measure();
+	});
 </script>
+
+<svelte:window onresize={measure} />
+
 
 <div class="wrap">
 	<header>
 		<Logo />
-		<nav>
-			<a href="/" class="tab" class:active={path === '/'}>
-				<b>오늘의 딸깍</b><span>매일 새 문제</span>
-			</a>
-			<a href="/play" class="tab" class:active={path.startsWith('/play')}>
-				<b>계속 풀기</b><span>무제한 랜덤</span>
-			</a>
-			<a href="/matchstick" class="tab" class:active={path.startsWith('/matchstick')}>
-				<b>성냥개비</b><span>하나만 옮기기</span>
-			</a>
+		<nav bind:this={navEl}>
+			{#each TABS as t (t.href)}
+				<a href={t.href} class="tab" class:active={isActive(t.href)}>
+					<b>{t.label}</b><span>{t.sub}</span>
+				</a>
+			{/each}
+			<span
+				class="segbar"
+				class:ready={barReady}
+				style="width:{barW}px; transform:translateX({barX}px)"
+				aria-hidden="true"
+			></span>
 		</nav>
 	</header>
 
@@ -32,9 +64,9 @@
 	<footer>
 		<nav class="foot-nav">
 			<a href="/about">소개</a>
-			<span>·</span>
+			<span class="seg-div" aria-hidden="true"></span>
 			<a href="/privacy">개인정보처리방침</a>
-			<span>·</span>
+			<span class="seg-div" aria-hidden="true"></span>
 			<a href="/terms">이용약관</a>
 		</nav>
 		<div class="tag">딸깍 · 규칙을 발견하는 순간의 그 소리</div>
@@ -69,6 +101,12 @@
 		--dur-judge: 480ms;
 		--ease-out: cubic-bezier(0.2, 0, 0, 1);
 		--ease-pop: cubic-bezier(0.34, 1.56, 0.64, 1);
+		/* 세그먼트 척추 — 7세그먼트 획(34×8, rx3)이 이 사이트의 유일한 조형 문법이다.
+		   카드(--radius:20px)·칩(999px)과 반경을 분리해 "이 반경은 세그먼트"라는 신호로 고정한다.
+		   적용 범위는 숫자 HUD·탭 인디케이터·구분선까지. 카드마다 뿌리지 않는다. */
+		--seg-r: 3px;
+		--seg-on-hud: var(--accent-2);
+		--seg-off: rgba(44, 40, 34, 0.12);
 		--radius: 20px;
 		--maxw: 1120px;
 	}
@@ -120,8 +158,10 @@
 		flex-wrap: wrap;
 	}
 	nav {
+		position: relative;
 		display: flex;
 		gap: 8px;
+		padding-bottom: 10px;
 	}
 	.tab {
 		display: flex;
@@ -156,11 +196,25 @@
 		letter-spacing: -0.01em;
 		opacity: 0.72;
 	}
+	/* 초록 알약 대신 세그먼트 막대가 활성 탭 아래로 미끄러진다 */
 	.tab.active {
-		color: #fff;
+		color: var(--text);
+	}
+	.segbar {
+		position: absolute;
+		left: 0;
+		bottom: -2px;
+		height: 8px;
+		border-radius: var(--seg-r);
 		background: var(--accent);
-		border-color: var(--accent);
-		box-shadow: 0 3px 12px rgba(47, 143, 91, 0.28);
+		opacity: 0;
+		transition:
+			transform var(--dur-move) var(--ease-out),
+			width var(--dur-move) var(--ease-out),
+			opacity var(--dur-move) var(--ease-out);
+	}
+	.segbar.ready {
+		opacity: 1;
 	}
 	@media (max-width: 420px) {
 		.tab {
@@ -191,8 +245,13 @@
 	.foot-nav a:hover {
 		color: var(--accent);
 	}
-	.foot-nav span {
-		color: var(--border-strong);
+	.seg-div {
+		display: inline-block;
+		width: 5px;
+		height: 13px;
+		border-radius: var(--seg-r);
+		background: var(--border-strong);
+		vertical-align: middle;
 	}
 	.tag {
 		margin-top: 8px;
