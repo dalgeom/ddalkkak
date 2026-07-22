@@ -92,6 +92,7 @@
 		match: '0 + 0 = 8\n한 개만 옮기세요'
 	};
 	const todayTotal = TRACKS.reduce((n, t) => n + t.size, 0);
+	let doneCount = $derived(TRACKS.filter((t) => trackDone[t.key]).length);
 	let nextTrack = $derived(
 		TRACKS.find((t) => t.key !== 'match' && t.key !== track && !trackDone[t.key]) ?? null
 	);
@@ -447,7 +448,14 @@
 						<Icon name={trackDone[t.key] ? 'correct' : t.icon} size={17} />{t.name}
 					</span>
 					<span class="t-desc">{t.desc}</span>
-					<span class="t-peek">{PEEK[t.key]}</span>
+					{#if t.key === 'discover'}
+						<!-- 시그니처 트랙만 실제 전광판으로 보여준다. 사이트에서 가장 특징적인
+						     부품인데 지금까지 문제 화면 안에만 있었다. -->
+						<span class="t-lcd"><SevenSeg lines={['11 31 55 66 ?']} /></span>
+						<span class="t-cap">숫자가 아닙니다</span>
+					{:else}
+						<span class="t-peek">{PEEK[t.key]}</span>
+					{/if}
 					<span class="t-foot">
 						<span class="t-dots">
 							{#each Array(t.size) as _, i (i)}
@@ -481,6 +489,15 @@
 	<section class="hub-grid">
 		<div class="panel">
 			<div class="panel-title">기록</div>
+			<div class="today-row">
+				<span class="today-label">오늘</span>
+				<span class="today-dots">
+					{#each TRACK_META as t (t.key)}
+						<span class="today-dot" class:on={trackDone[t.key]} title={t.name}></span>
+					{/each}
+				</span>
+				<span class="today-count">{doneCount} / {TRACK_META.length} 트랙</span>
+			</div>
 			{#if stats.played === 0}
 				<div class="empty-note">아직 기록이 없어요 — 오늘 첫 문제부터 시작해보세요</div>
 			{:else}
@@ -488,6 +505,7 @@
 					<div class="stat"><b>{stats.played}</b><span>플레이</span></div>
 					<div class="stat"><b>{stats.dayStreak}</b><span>연속</span></div>
 					<div class="stat"><b>{stats.maxStreak}</b><span>최고</span></div>
+					<div class="stat"><b>{stats.score.toLocaleString()}</b><span>총점</span></div>
 				</div>
 			{/if}
 		</div>
@@ -1604,5 +1622,57 @@
 		.tracks {
 			grid-template-columns: 1fr;
 		}
+	}
+	/* 시그니처 카드: 전광판 미리보기 */
+	.t-lcd {
+		display: block;
+		background: var(--panel-2);
+		border: 1px solid var(--border);
+		border-radius: 12px;
+		padding: 14px 12px;
+	}
+	.t-cap {
+		font-size: var(--fs-2xs);
+		font-weight: var(--fw-caption);
+		color: var(--muted);
+		text-align: center;
+	}
+
+	/* 기록 패널: 오늘 진행 */
+	.today-row {
+		display: flex;
+		align-items: center;
+		gap: 9px;
+		padding-bottom: 12px;
+		margin-bottom: 12px;
+		border-bottom: 1px solid var(--border);
+	}
+	.today-label {
+		font-size: var(--fs-2xs);
+		font-weight: var(--fw-emphasis);
+		color: var(--text);
+	}
+	.today-dots {
+		display: flex;
+		gap: 5px;
+	}
+	.today-dot {
+		width: 16px;
+		height: 6px;
+		border-radius: var(--seg-r);
+		background: var(--border-strong);
+	}
+	.today-dot.on {
+		background: var(--accent);
+	}
+	.today-count {
+		margin-left: auto;
+		font-size: var(--fs-2xs);
+		font-weight: var(--fw-caption);
+		color: var(--muted);
+		font-variant-numeric: tabular-nums;
+	}
+	.stat-strip {
+		flex-wrap: wrap;
 	}
 </style>
