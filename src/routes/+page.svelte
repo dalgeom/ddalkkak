@@ -80,7 +80,7 @@
 	const TRACK_META = TRACKS;
 	let trackInfo = $derived(TRACKS.find((t) => t.key === track)!);
 	/** 인라인으로 푸는 트랙만 데일리 완료 판정에 넣는다(성냥개비는 별도 라우트) */
-	const INLINE_TRACKS: TrackKey[] = ['discover', 'trivia'];
+	const INLINE_TRACKS: TrackKey[] = ['discover', 'trivia', 'match'];
 	let allInlineDone = $derived(INLINE_TRACKS.every((k) => trackDone[k]));
 
 	/** 카드에 실제 문제를 미리 보여준다 — 이름만 보고는 뭘 하는 모드인지 알 수 없다는 지적 대응 */
@@ -126,9 +126,10 @@
 		for (let d = dayNum - 13; d <= dayNum; d++) {
 			let doneDay = false;
 			try {
-				const a = JSON.parse(localStorage.getItem(`ddal.daily.${d}.discover`) || 'null');
-				const b = JSON.parse(localStorage.getItem(`ddal.daily.${d}.trivia`) || 'null');
-				doneDay = !!a && a.phase === 'done' && !!b && b.phase === 'done';
+				doneDay = INLINE_TRACKS.every((k) => {
+					const rec = JSON.parse(localStorage.getItem(`ddal.daily.${d}.${k}`) || 'null');
+					return !!rec && rec.phase === 'done';
+				});
 			} catch {
 				/* 무시 */
 			}
@@ -417,11 +418,21 @@
 	<section class="tracks">
 		{#each TRACK_META as t (t.key)}
 			{#if t.key === 'match'}
-				<a class="track" href="/matchstick">
-					<span class="t-top"><Icon name={t.icon} size={17} />{t.name}</span>
+				<a class="track" class:cleared={trackDone[t.key]} href="/matchstick?daily=1">
+					<span class="t-top">
+						<Icon name={trackDone[t.key] ? 'correct' : t.icon} size={17} />{t.name}
+					</span>
 					<span class="t-desc">{t.desc}</span>
 					<span class="t-peek">{PEEK[t.key]}</span>
-					<span class="t-foot"><span>{t.size}문제</span><span class="t-go">하러 가기 →</span></span>
+					<span class="t-foot">
+						<span class="t-dots">
+							{#each Array(t.size) as _, i (i)}
+								<span class="t-dot" class:on={trackDone[t.key] || i < (trackPos[t.key] ?? 0)}
+								></span>
+							{/each}
+						</span>
+						<span class="t-go">{trackDone[t.key] ? '다시 보기 →' : '풀어보기 →'}</span>
+					</span>
 				</a>
 			{:else}
 				<button
