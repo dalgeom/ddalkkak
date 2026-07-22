@@ -109,6 +109,30 @@
 		--seg-off: rgba(44, 40, 34, 0.12);
 		--radius: 20px;
 		--maxw: 1120px;
+		/* 타이포그래피 축 — 이 7단 스케일 밖의 font-size는 쓰지 않는다.
+		   무게는 역할별로 5단만 쓴다: 460=보조 캡션 · 500=문제 지문(이 사이트에서 유일하게 "안 굵은" 문장) ·
+		   700=구조 라벨(탭·칩·선택지·고스트버튼) · 800=화면당 하나뿐인 강조(주 CTA·배너 타이틀·판정 메시지) ·
+		   900=숫자 전용(세그먼트·스코어·타이머)과 로고/랜딩 헤드라인의 정체성 표기, 문장에는 절대 쓰지 않는다.
+		   한글 자간: 본문 문장은 0(음절 블록이 라틴처럼 조여지지 않는다) — 자간을 만지는 건 소형 라벨(--ls-label,
+		   양수: 뭉친 볼드를 풀어준다)과 38px급 대형 헤드라인(--ls-tight, 음수) 두 자리뿐이다. */
+		--fs-2xs: 12px;
+		--fs-xs: 13px;
+		--fs-sm: 15px;
+		--fs-md: 17px;
+		--fs-lg: 21px;
+		--fs-xl: 28px;
+		--fs-2xl: 38px;
+		--fw-caption: 460;
+		--fw-body: 500;
+		--fw-label: 700;
+		--fw-emphasis: 800;
+		--fw-number: 900;
+		--ls-normal: 0em;
+		--ls-label: 0.02em;
+		--ls-tight: -0.02em;
+		--lh-tight: 1.25;
+		--lh-normal: 1.5;
+		--lh-reading: 1.7;
 	}
 	@media (prefers-reduced-motion: reduce) {
 		:global(*) {
@@ -168,9 +192,10 @@
 		flex-direction: column;
 		align-items: center;
 		gap: 1px;
-		line-height: 1.25;
-		font-size: 14px;
-		font-weight: 800;
+		line-height: var(--lh-tight);
+		font-size: var(--fs-sm);
+		font-weight: var(--fw-label);
+		letter-spacing: var(--ls-label);
 		text-decoration: none;
 		color: var(--muted);
 		padding: 7px 15px;
@@ -191,9 +216,9 @@
 		transform: translateY(1px) scale(0.98);
 	}
 	.tab span {
-		font-size: 10.5px;
-		font-weight: 700;
-		letter-spacing: -0.01em;
+		font-size: var(--fs-2xs);
+		font-weight: var(--fw-caption);
+		letter-spacing: var(--ls-normal);
 		opacity: 0.72;
 	}
 	/* 초록 알약 대신 세그먼트 막대가 활성 탭 아래로 미끄러진다 */
@@ -219,10 +244,7 @@
 	@media (max-width: 420px) {
 		.tab {
 			padding: 6px 11px;
-			font-size: 13px;
-		}
-		.tab span {
-			font-size: 9.5px;
+			font-size: var(--fs-xs);
 		}
 	}
 	.bottom-ad {
@@ -236,7 +258,8 @@
 	.foot-nav {
 		justify-content: center;
 		gap: 8px;
-		font-size: 12px;
+		font-size: var(--fs-2xs);
+		font-weight: var(--fw-caption);
 	}
 	.foot-nav a {
 		color: var(--muted);
@@ -255,7 +278,8 @@
 	}
 	.tag {
 		margin-top: 8px;
-		font-size: 12px;
+		font-size: var(--fs-2xs);
+		font-weight: var(--fw-caption);
 		color: #b3a894;
 	}
 </style>
