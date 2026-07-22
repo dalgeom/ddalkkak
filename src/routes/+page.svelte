@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { browser } from '$app/environment';
+	import { browser, dev } from '$app/environment';
 	import { PROBLEMS, type Problem } from '$lib/problems';
 	import { TRIVIA } from '$lib/trivia';
 	import {
@@ -18,6 +18,7 @@
 	import SevenSeg from '$lib/components/SevenSeg.svelte';
 	import ColorBlocks from '$lib/components/ColorBlocks.svelte';
 	import AdSlot from '$lib/components/AdSlot.svelte';
+	import Icon from '$lib/components/Icon.svelte';
 
 	let solved = $state<string[]>([]);
 	let stats = $state({ score: 0, dayStreak: 0, maxStreak: 0, played: 0, lastDay: -1 });
@@ -39,6 +40,35 @@
 	let feedback = $state<{ msg: string; ok: boolean } | null>(null);
 	let toastMsg = $state('');
 	let countdown = $state('');
+
+	/** 입력창·선택지가 판정에 직접 반응하도록 하는 일시 상태 (색 + 팝/셰이크) */
+	let inputState = $state<'idle' | 'wrong' | 'correct'>('idle');
+	let flashIndex = $state<number | null>(null);
+	let flashKind = $state<'wrong' | 'correct' | null>(null);
+	let flashTimer: ReturnType<typeof setTimeout> | undefined;
+
+	function flash(kind: 'wrong' | 'correct', idx?: number) {
+		clearTimeout(flashTimer);
+		if (idx !== undefined) {
+			flashIndex = idx;
+			flashKind = kind;
+		} else {
+			inputState = kind;
+		}
+		flashTimer = setTimeout(
+			() => {
+				flashIndex = null;
+				flashKind = null;
+				inputState = 'idle';
+			},
+			kind === 'wrong' ? 420 : 600
+		);
+	}
+
+	/** 판정 3-state: 정답 / 오답(재시도 가능) / 포기(정답 공개) */
+	let judge = $derived<'correct' | 'wrong' | 'giveup' | null>(
+		!feedback ? null : feedback.ok ? 'correct' : done ? 'giveup' : 'wrong'
+	);
 
 	let current = $derived(queue[pos]);
 	let shownHints = $derived(current && current.hints ? current.hints.slice(0, hintsUsed) : []);
@@ -144,6 +174,10 @@
 		done = false;
 		answerValue = '';
 		feedback = null;
+		clearTimeout(flashTimer);
+		inputState = 'idle';
+		flashIndex = null;
+		flashKind = null;
 		if (browser) window.scrollTo({ top: 0, behavior: 'smooth' });
 	}
 
@@ -157,31 +191,35 @@
 		if (mode === 'random' && current) solved = [...solved, current.id];
 		feedback = win
 			? {
-					msg: bonus
-						? `딸깍! ⚡ +${gained} — 힌트 없이 끝까지 물고 늘어졌네요!`
-						: `딸깍! ⚡ +${gained}`,
+					msg: bonus ? `정답 · +${gained} — 힌트 없이 끝까지 물고 늘어졌네요` : `정답 · +${gained}`,
 					ok: true
 				}
-			: { msg: '이번엔 여기까지 — 해설 보고 가세요', ok: false };
+			: { msg: '정답을 확인했어요', ok: false };
 		persist();
 		saveDaily();
 	}
 
 	function submitText() {
 		if (done || !answerValue.trim()) return;
-		if (isCorrectText(current, answerValue)) finish(true);
-		else {
+		if (isCorrectText(current, answerValue)) {
+			flash('correct');
+			finish(true);
+		} else {
 			wrongAttempts += 1;
+			flash('wrong');
 			feedback = isCloseAnswer(current, answerValue)
-				? { msg: '🔥 거의 다 왔어요!', ok: false }
+				? { msg: '거의 다 왔어요', ok: false }
 				: { msg: '아직이에요 — 다시 들여다볼까요?', ok: false };
 		}
 	}
 	function submitChoice(i: number) {
 		if (done) return;
-		if (i === current.answerIndex) finish(true);
-		else {
+		if (i === current.answerIndex) {
+			flash('correct', i);
+			finish(true);
+		} else {
 			wrongAttempts += 1;
+			flash('wrong', i);
 			feedback = { msg: '아직이에요 — 다시 들여다볼까요?', ok: false };
 		}
 	}
@@ -221,7 +259,7 @@
 		const label = mode === 'daily' ? `오늘의 퍼즐 (${dateLabel})` : '랜덤 3문제';
 		const solvedN = results.filter((r) => r !== '🔓').length;
 		let text = `딸깍! ${label} ${solvedN}/${results.length} ${results.join('')}`;
-		if (mode === 'daily' && stats.dayStreak > 1) text += `\n🔥 ${stats.dayStreak}일 연속`;
+		if (mode === 'daily' && stats.dayStreak > 1) text += `\n${stats.dayStreak}일 연속`;
 		text += `\n${location.origin}`;
 		const outcome = await shareResult(
 			{
@@ -229,7 +267,7 @@
 				scoreLabel: `${solvedN} / ${results.length}`,
 				emojiRow: results.join(' '),
 				subLine:
-					mode === 'daily' && stats.dayStreak > 1 ? `🔥 ${stats.dayStreak}일 연속` : undefined,
+					mode === 'daily' && stats.dayStreak > 1 ? `${stats.dayStreak}일 연속` : undefined,
 				cta: '너도 오늘의 퍼즐 풀어볼래?'
 			},
 			text
@@ -274,7 +312,8 @@
 
 {#if mode === 'daily' && stats.dayStreak > 0 && stats.lastDay !== dayNum}
 	<div class="streak-warn">
-		🔥 <b>{stats.dayStreak}일 연속</b> 기록이 오늘 끊겨요! 남은 시간 <b>{countdown}</b>
+		<Icon name="streak" size={16} />
+		<span><b>{stats.dayStreak}일 연속</b> 기록이 오늘 끊겨요! 남은 시간 <b>{countdown}</b></span>
 	</div>
 {/if}
 
@@ -287,7 +326,7 @@
 
 <a class="play-promo" href="/play">
 	<div class="pp-left">
-		<span class="pp-title">🎯 연속 모드 — 계속 풀기</span>
+		<span class="pp-title"><Icon name="arrow" size={16} /> 연속 모드 — 계속 풀기</span>
 		<span class="pp-sub"
 			>발견형 + 상식 퀴즈 {PROBLEMS.length + TRIVIA.length}문제, 5·10·20문제 랜덤 · 콤보 점수</span
 		>
@@ -298,7 +337,8 @@
 <div class="layout" class:result={phase === 'done'}>
 	<div class="main">
 		{#if phase === 'play' && current}
-			<div class="card">
+			{#key current.id}
+			<div class="card slide">
 				<div class="chip">{current.chip}</div>
 				<div class="q">
 					{#each current.blocks as b, i (i)}
@@ -321,12 +361,20 @@
 					{#if current.type === 'choice'}
 						<div class="choices">
 							{#each current.choices! as c, i (i)}
-								<button class="choice" disabled={done} onclick={() => submitChoice(i)}>{c}</button>
+								<button
+									class="choice"
+									class:flash-wrong={flashIndex === i && flashKind === 'wrong'}
+									class:flash-correct={flashIndex === i && flashKind === 'correct'}
+									disabled={done}
+									onclick={() => submitChoice(i)}>{c}</button
+								>
 							{/each}
 						</div>
 					{:else}
 						<div class="input-row">
 							<input
+								class:flash-wrong={inputState === 'wrong'}
+								class:flash-correct={inputState === 'correct'}
 								placeholder="정답을 입력하세요"
 								autocomplete="off"
 								bind:value={answerValue}
@@ -353,26 +401,36 @@
 							{hintsUsed >= (current.hints?.length ?? 3)
 								? '힌트 소진'
 								: hintUnlocked(hintsUsed, elapsedMs, wrongAttempts)
-									? `💡 힌트 (${hintsUsed + 1}/3)`
-									: '🔒 조금만 더 만져보세요'}
+									? `힌트 (${hintsUsed + 1}/3)`
+									: '조금만 더 만져보세요'}
 						</button>
 						<button class="btn ghost" onclick={() => finish(false)}>정답 보기</button>
 					</div>
 				{/if}
 
-				{#if feedback}
-					<div class="feedback" class:ok={feedback.ok} class:no={!feedback.ok && !done}>
-						{feedback.msg}
-					</div>
+				{#if feedback && judge}
+					{#key feedback.msg + judge}
+						<div class="feedback {judge}">
+							<Icon name={judge} size={20} />
+							<span>{feedback.msg}</span>
+						</div>
+					{/key}
 				{/if}
 
 				{#if done}
-					<div class="explain">{@html current.explain}</div>
+					<div class="explain" class:win={feedback?.ok} class:giveup={!feedback?.ok}>
+						<div class="explain-head">
+							<Icon name={feedback?.ok ? 'correct' : 'giveup'} size={15} />
+							<span>{feedback?.ok ? '정답 풀이' : '정답 공개'}</span>
+						</div>
+						{@html current.explain}
+					</div>
 					<button class="btn wide" onclick={next}>
 						{pos + 1 < queue.length ? '다음 문제 →' : '결과 보기'}
 					</button>
 				{/if}
 			</div>
+			{/key}
 		{:else if phase === 'done'}
 			<div class="card result">
 				<h2>{mode === 'daily' ? '오늘의 퍼즐 완료!' : '랜덤 3문제 완료!'}</h2>
@@ -380,10 +438,10 @@
 				<div class="rscore">{results.filter((r) => r !== '🔓').length} / {results.length}</div>
 				<button class="btn wide" onclick={share}>결과 공유하기</button>
 				{#if mode === 'daily'}
-					<button class="btn ghost wide" onclick={startRandom}>🎲 더 풀기 (랜덤)</button>
+					<button class="btn ghost wide" onclick={startRandom}>더 풀기 (랜덤)</button>
 				{:else}
-					<button class="btn ghost wide" onclick={startRandom}>🎲 또 풀기</button>
-					<button class="btn ghost wide" onclick={startDaily}>📅 오늘의 퍼즐로</button>
+					<button class="btn ghost wide" onclick={startRandom}>또 풀기</button>
+					<button class="btn ghost wide" onclick={startDaily}>오늘의 퍼즐로</button>
 				{/if}
 			</div>
 		{/if}
@@ -401,10 +459,16 @@
 				<div class="panel-sub">{queue.length}문제 중 {Math.min(pos + 1, queue.length)}번째</div>
 			</div>
 			<div class="panel center">
-				<div class="streak-num">🔥 {stats.dayStreak}<small>일 연속</small></div>
+				{#if stats.dayStreak > 0}
+					<div class="streak-num">
+						<Icon name="streak" size={18} />{stats.dayStreak}<small>일 연속</small>
+					</div>
+				{:else}
+					<div class="streak-none">오늘 풀면 연속 기록이 시작돼요</div>
+				{/if}
 				{#if mode === 'daily'}<div class="cd-sub">다음 퍼즐까지 {countdown}</div>{/if}
 			</div>
-			<div class="panel"><AdSlot label="사이드" /></div>
+			{#if dev}<div class="panel"><AdSlot label="사이드" /></div>{/if}
 		{:else}
 			<div class="panel">
 				<div class="panel-title">기록</div>
@@ -430,7 +494,7 @@
 					<div class="cd-big">{countdown}</div>
 				</div>
 			{/if}
-			<div class="panel"><AdSlot label="사이드" /></div>
+			{#if dev}<div class="panel"><AdSlot label="사이드" /></div>{/if}
 		{/if}
 	</aside>
 </div>
@@ -458,6 +522,9 @@
 	}
 
 	.streak-warn {
+		display: flex;
+		align-items: center;
+		gap: 8px;
 		background: #fdf1e3;
 		border: 1px solid #f0d9b8;
 		color: #9a5a20;
@@ -497,6 +564,9 @@
 		gap: 3px;
 	}
 	.pp-title {
+		display: flex;
+		align-items: center;
+		gap: 7px;
 		font-size: 17px;
 		font-weight: 900;
 	}
@@ -541,6 +611,19 @@
 		border-radius: var(--radius);
 		padding: 34px 32px;
 		box-shadow: 0 4px 22px rgba(60, 50, 30, 0.07);
+	}
+	.card.slide {
+		animation: card-in var(--dur-move) var(--ease-out);
+	}
+	@keyframes card-in {
+		from {
+			opacity: 0;
+			transform: translateX(26px);
+		}
+		to {
+			opacity: 1;
+			transform: none;
+		}
 	}
 	@media (max-width: 640px) {
 		.card {
@@ -617,6 +700,14 @@
 		border-color: var(--accent);
 		box-shadow: 0 0 0 3px rgba(47, 143, 91, 0.14);
 	}
+	input.flash-wrong {
+		border-color: var(--danger);
+		animation: shake 0.4s ease;
+	}
+	input.flash-correct {
+		border-color: var(--accent);
+		animation: judge-pop var(--dur-judge) var(--ease-pop);
+	}
 	.btn {
 		background: var(--accent);
 		color: #fff;
@@ -629,14 +720,25 @@
 		font-family: inherit;
 		white-space: nowrap;
 		transition:
-			transform 0.1s,
-			filter 0.15s;
+			transform var(--dur-tap) var(--ease-out),
+			box-shadow 0.18s var(--ease-out),
+			filter 0.18s var(--ease-out);
+		box-shadow: 0 1px 2px rgba(44, 40, 34, 0.16);
 	}
 	.btn:hover:not(:disabled) {
 		filter: brightness(1.06);
+		transform: translateY(-1.5px);
+		box-shadow: 0 5px 14px rgba(47, 143, 91, 0.26);
 	}
 	.btn:active:not(:disabled) {
-		transform: translateY(1px);
+		transform: translateY(1px) scale(0.985);
+		box-shadow: 0 1px 1px rgba(44, 40, 34, 0.2);
+	}
+	.btn.ghost {
+		box-shadow: none;
+	}
+	.btn.ghost:hover:not(:disabled) {
+		box-shadow: 0 4px 10px rgba(44, 40, 34, 0.08);
 	}
 	.btn.ghost {
 		background: transparent;
@@ -673,12 +775,24 @@
 		font-family: inherit;
 		color: var(--text);
 		transition:
-			border-color 0.15s,
-			background 0.15s;
+			border-color var(--dur-tap) var(--ease-out),
+			background var(--dur-tap) var(--ease-out),
+			transform var(--dur-tap) var(--ease-out);
+	}
+	.choice.flash-wrong {
+		border-color: var(--danger);
+		background: var(--danger-soft);
+		animation: shake 0.4s ease;
+	}
+	.choice.flash-correct {
+		border-color: var(--accent);
+		background: var(--accent-soft);
+		animation: judge-pop var(--dur-judge) var(--ease-pop);
 	}
 	.choice:hover:not(:disabled) {
 		border-color: var(--accent);
 		background: #fff;
+		transform: translateY(-1px);
 	}
 	.choice:disabled {
 		opacity: 0.55;
@@ -718,44 +832,117 @@
 			opacity: 1;
 		}
 	}
+	/* 판정은 색만으로 알리지 않는다 — 아이콘 모양과 움직임을 함께 쓴다(색각 이상 대응) */
 	.feedback {
+		display: flex;
+		align-items: center;
+		gap: 10px;
 		margin-top: 16px;
-		font-size: 17px;
+		padding: 13px 16px;
+		border-radius: 13px;
+		font-size: 16px;
 		font-weight: 800;
-		min-height: 24px;
+		border: 1.5px solid transparent;
+		word-break: keep-all;
 	}
-	.feedback.ok {
-		color: var(--accent);
+	.feedback.correct {
+		background: var(--accent-soft);
+		border-color: #cfe6d8;
+		color: #1f6b41;
+		animation: judge-pop var(--dur-judge) var(--ease-pop);
 	}
-	.feedback.no {
-		color: var(--danger);
-		animation: shake 0.3s ease;
+	.feedback.wrong {
+		background: var(--danger-soft);
+		border-color: var(--danger-border);
+		color: #9c2f22;
+		animation: shake 0.4s ease;
+	}
+	.feedback.giveup {
+		background: var(--giveup-soft);
+		border-color: var(--giveup-border);
+		color: #8a5f1f;
+		animation: judge-fade var(--dur-move) var(--ease-out);
+	}
+	@keyframes judge-pop {
+		0% {
+			transform: scale(0.93);
+			opacity: 0;
+		}
+		55% {
+			transform: scale(1.035);
+			opacity: 1;
+		}
+		100% {
+			transform: scale(1);
+		}
+	}
+	@keyframes judge-fade {
+		from {
+			opacity: 0;
+			transform: translateY(5px);
+		}
+		to {
+			opacity: 1;
+			transform: none;
+		}
 	}
 	@keyframes shake {
 		0%,
 		100% {
 			transform: translateX(0);
 		}
-		25% {
+		18% {
 			transform: translateX(-7px);
 		}
-		75% {
-			transform: translateX(7px);
+		38% {
+			transform: translateX(6px);
+		}
+		62% {
+			transform: translateX(-4px);
+		}
+		82% {
+			transform: translateX(2px);
 		}
 	}
 	.explain {
-		background: var(--accent-soft);
-		border: 1px solid #cfe6d8;
 		border-radius: 12px;
 		padding: 18px;
 		margin-top: 16px;
 		font-size: 15px;
 		line-height: 1.7;
 		word-break: keep-all;
+		animation: judge-fade var(--dur-move) var(--ease-out);
+	}
+	.explain-head {
+		display: flex;
+		align-items: center;
+		gap: 7px;
+		font-size: 12.5px;
+		font-weight: 800;
+		letter-spacing: 0.3px;
+		margin-bottom: 10px;
+	}
+	.explain.win {
+		background: var(--accent-soft);
+		border: 1px solid #cfe6d8;
 		color: #2c4d3b;
 	}
-	.explain :global(b) {
+	.explain.win .explain-head {
+		color: #1f6b41;
+	}
+	.explain.win :global(b) {
 		color: var(--accent);
+	}
+	.explain.giveup {
+		background: var(--giveup-soft);
+		border: 1px solid var(--giveup-border);
+		color: #6b4d1c;
+	}
+	.explain.giveup .explain-head {
+		color: var(--giveup);
+	}
+	.explain.giveup :global(b) {
+		color: #8a5f1f;
 	}
 
 	.result {
@@ -881,9 +1068,20 @@
 		margin-top: 10px;
 	}
 	.streak-num {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 7px;
 		font-size: 32px;
 		font-weight: 900;
 		color: var(--accent-2);
+		font-variant-numeric: tabular-nums;
+	}
+	.streak-none {
+		font-size: 13px;
+		font-weight: 700;
+		color: var(--muted);
+		word-break: keep-all;
 	}
 	.streak-num small {
 		font-size: 13px;

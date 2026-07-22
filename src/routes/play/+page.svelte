@@ -15,6 +15,7 @@
 	import SevenSeg from '$lib/components/SevenSeg.svelte';
 	import ColorBlocks from '$lib/components/ColorBlocks.svelte';
 	import AdSlot from '$lib/components/AdSlot.svelte';
+	import Icon from '$lib/components/Icon.svelte';
 
 	type Filter = 'all' | 'puzzle' | 'trivia';
 	type Screen = 'menu' | 'play' | 'result';
@@ -45,6 +46,31 @@
 	let done = $state(false);
 	let answerValue = $state('');
 	let feedback = $state<{ msg: string; ok: boolean } | null>(null);
+	let judge = $state<'correct' | 'wrong' | 'giveup' | null>(null);
+
+	/** 입력창·선택지가 판정에 직접 반응하도록 하는 일시 상태 */
+	let inputState = $state<'idle' | 'wrong' | 'correct'>('idle');
+	let flashIndex = $state<number | null>(null);
+	let flashKind = $state<'wrong' | 'correct' | null>(null);
+	let flashTimer: ReturnType<typeof setTimeout> | undefined;
+
+	function flash(kind: 'wrong' | 'correct', idx?: number) {
+		clearTimeout(flashTimer);
+		if (idx !== undefined) {
+			flashIndex = idx;
+			flashKind = kind;
+		} else {
+			inputState = kind;
+		}
+		flashTimer = setTimeout(
+			() => {
+				flashIndex = null;
+				flashKind = null;
+				inputState = 'idle';
+			},
+			kind === 'wrong' ? 420 : 600
+		);
+	}
 	let toastMsg = $state('');
 
 	let best = $state<Record<string, number>>({});
@@ -105,12 +131,18 @@
 		done = false;
 		answerValue = '';
 		feedback = null;
+		judge = null;
+		clearTimeout(flashTimer);
+		inputState = 'idle';
+		flashIndex = null;
+		flashKind = null;
 		if (browser) window.scrollTo({ top: 0, behavior: 'smooth' });
 	}
 
-	function finish(win: boolean) {
+	function finish(win: boolean, reason: 'answered' | 'giveup' = 'answered') {
 		if (done) return;
 		done = true;
+		judge = win ? 'correct' : reason === 'giveup' ? 'giveup' : 'wrong';
 		if (win) {
 			const base =
 				(current.trivia ? 100 : Math.max(20, 100 - hintsUsed * 25)) +
@@ -121,27 +153,36 @@
 			maxCombo = Math.max(maxCombo, combo);
 			correctCount += 1;
 			results = [...results, 'o'];
-			feedback = { msg: `정답! +${gained}${combo > 1 ? ` (콤보 x${combo})` : ''}`, ok: true };
+			feedback = { msg: `정답 · +${gained}${combo > 1 ? ` (콤보 x${combo})` : ''}`, ok: true };
 		} else {
 			combo = 0;
 			results = [...results, 'x'];
-			feedback = { msg: '아쉬워요', ok: false };
+			feedback = {
+				msg: reason === 'giveup' ? '정답을 확인했어요' : '오답이에요',
+				ok: false
+			};
 		}
 	}
 
 	function submitText() {
 		if (done || !answerValue.trim()) return;
-		if (isCorrectText(current, answerValue)) finish(true);
-		else {
+		if (isCorrectText(current, answerValue)) {
+			flash('correct');
+			finish(true);
+		} else {
 			wrongAttempts += 1;
+			flash('wrong');
+			judge = 'wrong';
 			feedback = isCloseAnswer(current, answerValue)
-				? { msg: '🔥 거의 다 왔어요!', ok: false }
+				? { msg: '거의 다 왔어요', ok: false }
 				: { msg: '아직이에요 — 다시 들여다볼까요?', ok: false };
 		}
 	}
 	function submitChoice(i: number) {
 		if (done) return;
-		finish(i === current.answerIndex);
+		const ok = i === current.answerIndex;
+		flash(ok ? 'correct' : 'wrong', i);
+		finish(ok);
 	}
 	function showHint() {
 		if (done || current.trivia || !current.hints || hintsUsed >= current.hints.length) return;
@@ -175,7 +216,7 @@
 		const gradeLabel = grade === 'all' ? '' : ` ${grade}`;
 		const catLabel = cat === 'all' ? '' : ` ${cat}`;
 		const title = `연속 모드 · ${fname}${gradeLabel}${catLabel} ${sessionSize}문제`;
-		const text = `딸깍! ${title} — ${correctCount}개 정답 · ${score}점 🔥\n너도 도전! ${location.origin}/play`;
+		const text = `딸깍! ${title} — ${correctCount}개 정답 · ${score}점\n너도 도전! ${location.origin}/play`;
 		const outcome = await shareResult(
 			{
 				title,
@@ -224,7 +265,7 @@
 <div class="mroot">
 	{#if screen === 'menu'}
 		<div class="card menu">
-			<h2>🎯 연속 모드</h2>
+			<h2>연속 모드</h2>
 			<p class="desc">문제은행에서 랜덤 출제. <b>콤보</b>를 이어 최고 점수에 도전하세요.</p>
 
 			<div class="label">무엇을 풀까요?</div>
@@ -288,9 +329,10 @@
 		<div class="topbar">
 			<div class="tb-item">문제 {idx + 1} / {queue.length}</div>
 			<div class="tb-item score">{score}점</div>
-			<div class="tb-item" class:hot={combo >= 2}>🔥 콤보 {combo}</div>
+			<div class="tb-item" class:hot={combo >= 2}>콤보 {combo}</div>
 		</div>
-		<div class="card">
+		{#key current.id}
+		<div class="card slide">
 			<div class="chiprow">
 				<span class="chip" class:triv={current.trivia}>{current.chip}</span>
 				{#if current.grade}
@@ -320,6 +362,8 @@
 							<button
 								class="choice"
 								class:correct={done && i === current.answerIndex}
+								class:flash-wrong={flashIndex === i && flashKind === 'wrong'}
+								class:flash-correct={flashIndex === i && flashKind === 'correct'}
 								disabled={done}
 								onclick={() => submitChoice(i)}>{c}</button
 							>
@@ -328,6 +372,8 @@
 				{:else}
 					<div class="input-row">
 						<input
+							class:flash-wrong={inputState === 'wrong'}
+							class:flash-correct={inputState === 'correct'}
 							placeholder="정답을 입력하세요"
 							autocomplete="off"
 							bind:value={answerValue}
@@ -354,34 +400,46 @@
 							{hintsUsed >= 3
 								? '힌트 소진'
 								: hintUnlocked(hintsUsed, elapsedMs, wrongAttempts)
-									? `💡 힌트 (${hintsUsed + 1}/3)`
-									: '🔒 조금만 더'}
+									? `힌트 (${hintsUsed + 1}/3)`
+									: '조금만 더'}
 						</button>
 					{/if}
-					<button class="btn ghost" onclick={() => finish(false)}>모르겠어요</button>
+					<button class="btn ghost" onclick={() => finish(false, 'giveup')}>모르겠어요</button>
 				</div>
 			{/if}
 
-			{#if feedback}
-				<div class="feedback" class:ok={feedback.ok} class:no={!feedback.ok && !done}>
-					{feedback.msg}
-				</div>
+			{#if feedback && judge}
+				{#key feedback.msg + judge}
+					<div class="feedback {judge}">
+						<Icon name={judge} size={20} />
+						<span>{feedback.msg}</span>
+					</div>
+				{/key}
 			{/if}
 
 			{#if done}
-				<div class="explain">{@html current.explain}</div>
+				<div class="explain" class:win={feedback?.ok} class:giveup={!feedback?.ok}>
+					<div class="explain-head">
+						<Icon name={feedback?.ok ? 'correct' : 'giveup'} size={15} />
+						<span>{feedback?.ok ? '정답 풀이' : '정답 공개'}</span>
+					</div>
+					{@html current.explain}
+				</div>
 				<button class="btn wide" onclick={next}>
 					{idx + 1 < queue.length ? '다음 문제 →' : '결과 보기'}
 				</button>
 			{/if}
 		</div>
+		{/key}
 	{:else if screen === 'result'}
 		<div class="card result">
 			<h2>세션 완료!</h2>
 			<div class="emoji">{results.map((r) => (r === 'o' ? '🟢' : '⚪')).join(' ')}</div>
 			<div class="rscore">{score}<span class="unit">점</span></div>
 			<div class="rmeta">{correctCount}/{queue.length} 정답 · 최고 콤보 {maxCombo}</div>
-			{#if score >= (best[bestKey] ?? 0) && score > 0}<div class="newbest">🏆 신기록!</div>{/if}
+			{#if score >= (best[bestKey] ?? 0) && score > 0}
+				<div class="newbest"><Icon name="trophy" size={16} /> 신기록!</div>
+			{/if}
 			<button class="btn wide" onclick={share}>결과 공유 — 친구에게 도전장</button>
 			<button class="btn ghost wide" onclick={() => start(sessionSize)}>다시 하기</button>
 			<button class="btn ghost wide" onclick={() => (screen = 'menu')}>모드 선택으로</button>
@@ -398,6 +456,19 @@
 	.mroot {
 		max-width: 640px;
 		margin: 0 auto;
+	}
+	.card.slide {
+		animation: card-in var(--dur-move) var(--ease-out);
+	}
+	@keyframes card-in {
+		from {
+			opacity: 0;
+			transform: translateX(26px);
+		}
+		to {
+			opacity: 1;
+			transform: none;
+		}
 	}
 	.card {
 		background: var(--panel);
@@ -467,6 +538,19 @@
 		color: var(--text);
 		cursor: pointer;
 		font-family: inherit;
+		transition:
+			border-color var(--dur-tap) var(--ease-out),
+			background var(--dur-tap) var(--ease-out),
+			color var(--dur-tap) var(--ease-out),
+			transform var(--dur-tap) var(--ease-out);
+	}
+	.pill:hover:not(.on) {
+		border-color: var(--border-strong);
+		background: #fff;
+		transform: translateY(-1px);
+	}
+	.pill:active {
+		transform: translateY(1px) scale(0.98);
 	}
 	.pill.on {
 		border-color: var(--accent);
@@ -501,6 +585,20 @@
 		font-family: inherit;
 		text-align: left;
 		color: var(--text);
+		transition:
+			border-color var(--dur-tap) var(--ease-out),
+			background var(--dur-tap) var(--ease-out),
+			transform var(--dur-tap) var(--ease-out),
+			box-shadow 0.18s var(--ease-out);
+	}
+	.filter:hover:not(.on) {
+		border-color: var(--border-strong);
+		background: #fff;
+		transform: translateY(-2px);
+		box-shadow: 0 6px 16px rgba(44, 40, 34, 0.08);
+	}
+	.filter:active {
+		transform: translateY(0) scale(0.995);
 	}
 	.filter b {
 		font-size: 16px;
@@ -646,6 +744,14 @@
 		border-color: var(--accent);
 		box-shadow: 0 0 0 3px rgba(47, 143, 91, 0.14);
 	}
+	input.flash-wrong {
+		border-color: var(--danger);
+		animation: shake 0.4s ease;
+	}
+	input.flash-correct {
+		border-color: var(--accent);
+		animation: judge-pop var(--dur-judge) var(--ease-pop);
+	}
 	.btn {
 		background: var(--accent);
 		color: #fff;
@@ -657,9 +763,26 @@
 		cursor: pointer;
 		font-family: inherit;
 		white-space: nowrap;
+		box-shadow: 0 1px 2px rgba(44, 40, 34, 0.16);
+		transition:
+			transform var(--dur-tap) var(--ease-out),
+			box-shadow 0.18s var(--ease-out),
+			filter 0.18s var(--ease-out);
 	}
 	.btn:hover:not(:disabled) {
 		filter: brightness(1.06);
+		transform: translateY(-1.5px);
+		box-shadow: 0 5px 14px rgba(47, 143, 91, 0.26);
+	}
+	.btn:active:not(:disabled) {
+		transform: translateY(1px) scale(0.985);
+		box-shadow: 0 1px 1px rgba(44, 40, 34, 0.2);
+	}
+	.btn.ghost {
+		box-shadow: none;
+	}
+	.btn.ghost:hover:not(:disabled) {
+		box-shadow: 0 4px 10px rgba(44, 40, 34, 0.08);
 	}
 	.btn.ghost {
 		background: transparent;
@@ -690,10 +813,25 @@
 		text-align: left;
 		font-family: inherit;
 		color: var(--text);
+		transition:
+			border-color var(--dur-tap) var(--ease-out),
+			background var(--dur-tap) var(--ease-out),
+			transform var(--dur-tap) var(--ease-out);
 	}
 	.choice:hover:not(:disabled) {
 		border-color: var(--accent);
 		background: #fff;
+		transform: translateY(-1px);
+	}
+	.choice.flash-wrong {
+		border-color: var(--danger);
+		background: var(--danger-soft);
+		animation: shake 0.4s ease;
+	}
+	.choice.flash-correct {
+		border-color: var(--accent);
+		background: var(--accent-soft);
+		animation: judge-pop var(--dur-judge) var(--ease-pop);
 	}
 	.choice.correct {
 		border-color: var(--accent);
@@ -727,28 +865,111 @@
 		color: #a9791a;
 		margin-right: 8px;
 	}
+	/* 판정은 색만으로 알리지 않는다 — 아이콘 모양과 움직임을 함께 쓴다(색각 이상 대응) */
 	.feedback {
+		display: flex;
+		align-items: center;
+		gap: 10px;
 		margin-top: 16px;
-		font-size: 17px;
+		padding: 13px 16px;
+		border-radius: 13px;
+		font-size: 16px;
 		font-weight: 800;
-		min-height: 24px;
+		border: 1.5px solid transparent;
+		word-break: keep-all;
 	}
-	.feedback.ok {
-		color: var(--accent);
+	.feedback.correct {
+		background: var(--accent-soft);
+		border-color: #cfe6d8;
+		color: #1f6b41;
+		animation: judge-pop var(--dur-judge) var(--ease-pop);
 	}
-	.feedback.no {
-		color: var(--danger);
+	.feedback.wrong {
+		background: var(--danger-soft);
+		border-color: var(--danger-border);
+		color: #9c2f22;
+		animation: shake 0.4s ease;
+	}
+	.feedback.giveup {
+		background: var(--giveup-soft);
+		border-color: var(--giveup-border);
+		color: #8a5f1f;
+		animation: judge-fade var(--dur-move) var(--ease-out);
+	}
+	@keyframes judge-pop {
+		0% {
+			transform: scale(0.93);
+			opacity: 0;
+		}
+		55% {
+			transform: scale(1.035);
+			opacity: 1;
+		}
+		100% {
+			transform: scale(1);
+		}
+	}
+	@keyframes judge-fade {
+		from {
+			opacity: 0;
+			transform: translateY(5px);
+		}
+		to {
+			opacity: 1;
+			transform: none;
+		}
+	}
+	@keyframes shake {
+		0%,
+		100% {
+			transform: translateX(0);
+		}
+		18% {
+			transform: translateX(-7px);
+		}
+		38% {
+			transform: translateX(6px);
+		}
+		62% {
+			transform: translateX(-4px);
+		}
+		82% {
+			transform: translateX(2px);
+		}
 	}
 	.explain {
-		background: var(--accent-soft);
-		border: 1px solid #cfe6d8;
 		border-radius: 12px;
 		padding: 18px;
 		margin-top: 16px;
 		font-size: 15px;
 		line-height: 1.7;
 		word-break: keep-all;
+		animation: judge-fade var(--dur-move) var(--ease-out);
+	}
+	.explain-head {
+		display: flex;
+		align-items: center;
+		gap: 7px;
+		font-size: 12.5px;
+		font-weight: 800;
+		letter-spacing: 0.3px;
+		margin-bottom: 10px;
+	}
+	.explain.win {
+		background: var(--accent-soft);
+		border: 1px solid #cfe6d8;
 		color: #2c4d3b;
+	}
+	.explain.win .explain-head {
+		color: #1f6b41;
+	}
+	.explain.giveup {
+		background: var(--giveup-soft);
+		border: 1px solid var(--giveup-border);
+		color: #6b4d1c;
+	}
+	.explain.giveup .explain-head {
+		color: var(--giveup);
 	}
 	.result {
 		text-align: center;
@@ -780,6 +1001,10 @@
 		margin-bottom: 8px;
 	}
 	.newbest {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 6px;
 		font-size: 17px;
 		font-weight: 900;
 		color: var(--accent-2);
