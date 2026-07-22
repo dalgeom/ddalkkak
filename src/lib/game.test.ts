@@ -156,3 +156,46 @@ describe('힌트 게이팅 · 근접 피드백', () => {
 		expect(wanderBonus(1, 2)).toBe(0);
 	});
 });
+
+describe('신규 배치 정답 판정', () => {
+	const byId = (id: string) => PROBLEMS.find((p) => p.id === id)!;
+
+	it('복수 정답 클럽: 순서·구분자가 달라도 인정', () => {
+		const c = byId('club-double-letter');
+		expect(isCorrectText(c, 'ELEVEN FIFTEEN')).toBe(true);
+		expect(isCorrectText(c, 'fifteen, eleven')).toBe(true);
+		expect(isCorrectText(c, 'ELEVEN')).toBe(false); // 하나만 쓰면 오답
+	});
+
+	it('대소문자 쌍둥이: ZV / V, Z 모두 인정', () => {
+		const c = byId('club-case-twin');
+		expect(isCorrectText(c, 'ZV')).toBe(true);
+		expect(isCorrectText(c, 'V, Z')).toBe(true);
+		expect(isCorrectText(c, 'Z')).toBe(false);
+	});
+
+	it('시각 표기: 15:45 / 1545 모두 인정', () => {
+		const c = byId('subway-board');
+		expect(isCorrectText(c, '15:45')).toBe(true);
+		expect(isCorrectText(c, '1545')).toBe(true);
+		expect(isCorrectText(c, '15시 45분')).toBe(true);
+	});
+
+	it('신규 7문제 모두 힌트 3단과 정답을 갖는다', () => {
+		const added = [
+			'alpha-ascend',
+			'weekday-batchim',
+			'subway-board',
+			'fold-sum',
+			'club-double-letter',
+			'club-case-twin',
+			'calendar-length'
+		];
+		for (const id of added) {
+			const p = byId(id);
+			expect(p.hints?.length, id).toBe(3);
+			expect(p.answers?.length, id).toBeGreaterThan(0);
+			expect(isCorrectText(p, p.answers![0]), id).toBe(true);
+		}
+	});
+});
