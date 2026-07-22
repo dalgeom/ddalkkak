@@ -147,7 +147,7 @@ export const PROBLEMS: Problem[] = [
 		answers: ['dl', '이', '2'],
 		hints: [
 			'암호가 아닙니다. 키보드를 내려다보세요.',
-			'한/영 키를 안 누르고 친 겁니다. dl = 이, dlf = 일…',
+			'한/영 키를 안 누르고 친 겁니다. rk = 가, sk = 나…',
 			'전부 숫자의 이름입니다. 이+일=삼 ✓. 그럼 십−팔은?'
 		],
 		explain:
@@ -596,7 +596,7 @@ export const PROBLEMS: Problem[] = [
 	{
 		id: 'adjacent-letters',
 		chip: '영단어',
-		blocks: [{ kind: 'pre', text: 'HIGH = 2\nJOKE = 0\nDEFY = 2\n\nCLIMB = ?' }],
+		blocks: [{ kind: 'pre', text: 'HIGH = 2\nJOKE = 0\nDEFY = 2\n\nCALM = ?' }],
 		type: 'text',
 		answers: ['1'],
 		hints: [
@@ -605,7 +605,7 @@ export const PROBLEMS: Problem[] = [
 			'알파벳 순서로 연속인 이웃 글자 쌍을 세어 보세요.'
 		],
 		explain:
-			'알파벳 연속 이웃 쌍: HIGH=HI·GH(2), DEFY=DE·EF(2). CLIMB엔 <b>LM</b> 하나 → <b>1</b>.'
+			'알파벳 연속 이웃 쌍: HIGH=HI·GH(2), DEFY=DE·EF(2). CALM엔 <b>LM</b> 하나 → <b>1</b>.'
 	},
 	{
 		id: 'top-row',
@@ -729,7 +729,7 @@ export const PROBLEMS: Problem[] = [
 		answers: ['오늘'],
 		hints: [
 			'하나씩 따라가도 되지만, 더 빠른 길이 있습니다.',
-			'"내일의 어제"는 그냥 오늘입니다.',
+			'붙어 있는 "내일의 어제"부터 한 덩어리로 묶어 보세요.',
 			'내일과 어제가 만나면 서로 지워집니다.'
 		],
 		explain: '내일↔어제는 <b>상쇄</b>됩니다. 두 쌍이 모두 지워져 <b>오늘</b>.'
@@ -943,17 +943,17 @@ export const PROBLEMS: Problem[] = [
 		chip: '영단어',
 		blocks: [
 			{ kind: 'text', html: '다음 등식들이 성립한다.' },
-			{ kind: 'pre', text: 'WON + TOW = THERE\nTHERE + EVENS = NET\n\nNET − EVENS − TOW = ?' }
+			{ kind: 'pre', text: 'EON + TOW = THERE\nTHERE + EVENS = NET\n\nNET − EVENS − TOW = ?' }
 		],
 		type: 'text',
-		answers: ['1', 'won', 'one', '원'],
+		answers: ['1', 'eon', 'one', '일'],
 		hints: [
 			'글자 수를 세 봐도, 순번을 더해 봐도 안 맞습니다.',
 			'THERE를 오래 보세요 — 그 안에 숫자가 숨어 있습니다.',
 			'글자를 재배열하면 전부 수의 이름입니다. 등식은 그 수들의 덧셈.'
 		],
 		explain:
-			'재배열하면 수 이름: WON=ONE, TOW=TWO, THERE=THREE, EVENS=SEVEN, NET=TEN. 1+2=3 ✓, 3+7=10 ✓. 10−7−2 = <b>1 (WON)</b>.'
+			'재배열하면 수 이름: EON=ONE, TOW=TWO, THERE=THREE, EVENS=SEVEN, NET=TEN. 1+2=3 ✓, 3+7=10 ✓. 10−7−2 = <b>1 (EON)</b>.'
 	},
 	{
 		id: 'lcd-fragments',
@@ -1002,7 +1002,7 @@ export const PROBLEMS: Problem[] = [
 		answers: ['96'],
 		hints: [
 			'거꾸로 들어도 살아남는 숫자는 0, 1, 8, 그리고 6↔9뿐입니다.',
-			'두 자리를 돌리면 순서도 뒤집힙니다 — 96을 돌리면?',
+			'두 자리를 돌리면 순서까지 뒤집힙니다. 앞자리와 뒷자리가 서로 자리를 바꾸는 셈이죠.',
 			'가장 큰 조합부터 돌려서 검산해 보세요.'
 		],
 		explain:
@@ -1241,7 +1241,7 @@ export const PROBLEMS: Problem[] = [
 		hints: [
 			'알파벳 순번이나 글자 수로는 절대 안 맞는다. 글자의 \'생김새\'를 보라.',
 			'A, B, E, I, O, S, T 이 일곱 글자는 각각 어떤 숫자와 모양이 닮았는지 생각해보라 (O는 0, I는 1처럼).',
-			'닮은 숫자로 각 글자를 바꿔서 전부 더하면 정답이다. TOAST = 7+0+4+5+7.'
+			'닮은 숫자로 각 글자를 바꾼 뒤 전부 더하면 정답이다.'
 		],
 		explain: 'TASTE=T(7)+A(4)+S(5)+T(7)+E(3)=26. BAIT=B(8)+A(4)+I(1)+T(7)=20. SEAT=S(5)+E(3)+A(4)+T(7)=19. TOAST=T(7)+O(0)+A(4)+S(5)+T(7)=23.'
 	},
@@ -1257,7 +1257,7 @@ export const PROBLEMS: Problem[] = [
 		hints: [
 			'혹시 이 코드, 익숙한 기념일이나 특별한 날과 관련 있지 않을까? 하나씩 대입해보자.',
 			'14.3에서 앞의 14가 \'월\'이 될 수 있을까? 될 수 없다면, 그게 순서를 정하는 열쇠다.',
-			'코드는 \'일.월\' 순서다(일이 먼저, 월이 나중). 3.6 → 일=3, 월=6.'
+			'코드는 \'일.월\' 순서다 — 앞자리가 일, 뒷자리가 월이다.'
 		],
 		explain: '코드는 \'일.월\' 순서다. 14.3→3월14일(파이데이), 1.5→5월1일(근로자의날), 25.12→12월25일(크리스마스). 앞자리가 14나 25처럼 13을 넘으면 월이 될 수 없으므로 \'일\'로 확정된다. 3.6은 일=3, 월=6이므로 6월3일이다.'
 	},
@@ -1282,7 +1282,7 @@ export const PROBLEMS: Problem[] = [
 		chip: '달력',
 		blocks: [
 			{ kind: 'text', html: '차이가 정확히 2인 짝 중 곱이 가장 큰 값은?' },
-			{ kind: 'pre', text: '1년 열두 달 중 31일까지 있는 달의 번호와 30일까지 있는 달의 번호가 있다(2월은 제외).\n이 두 종류의 달 번호 중에서 서로 차이가 정확히 2인 짝을 모두 찾아, 그 중 곱이 가장 큰 값을 구하라.' }
+			{ kind: 'pre', text: '1년 열두 달 중 31일까지 있는 달의 번호와 30일까지 있는 달의 번호가 있다(2월은 제외).\n31일 달 번호 하나와 30일 달 번호 하나를 짝지어 차이가 정확히 2가 되는 짝을 모두 찾고, 그 중 곱이 가장 큰 값을 구하라.' }
 		],
 		type: 'text',
 		answers: ['63'],
@@ -1384,8 +1384,8 @@ export const PROBLEMS: Problem[] = [
 		answers: ['보라'],
 		hints: [
 			'정답은 가장 흔한 색도, 마지막 칸도 아닙니다. 색끼리 \'짝을 지어 사라진다\'고 생각해보세요.',
-			'세 예시를 겹쳐 보면 항상 같은 두 색끼리 짝지어 사라집니다: 빨강-초록, 주황-파랑, 노랑-남색.',
-			'보라는 세 예시 어디에도 없었습니다 — 어떤 색과도 짝이 없으니, 나오면 항상 혼자 남습니다.'
+			'세 예시를 겹쳐 보면 늘 같은 두 색끼리 짝을 지어 사라집니다. 어떤 색과 어떤 색이 한 짝인지 찾아보세요.',
+			'짝은 빨강-초록, 주황-파랑, 노랑-남색입니다. 마지막 줄에서 짝지은 색을 모두 지우면 무엇이 남을까요?'
 		],
 		explain: '빨강↔초록, 주황↔파랑, 노랑↔남색이 서로 짝을 지어 사라지고, 짝 없이 혼자 남은 색이 정답이다. 예시들을 겹치면 이 세 짝이 확정된다(보라는 등장한 적 없어 짝이 없다). 마지막 줄: 빨강-초록이 지워지고 주황-파랑이 지워지면 보라만 혼자 남는다. 답 보라.'
 	},
@@ -1565,7 +1565,7 @@ export const PROBLEMS: Problem[] = [
 		answers: ['열'],
 		hints: [
 			'세 가지 뜻을 모두 가진 한 글자를 찾는 문제입니다.',
-			'열 개, 열이 나다, 열을 맞추다…',
+			'손가락을 다 펴면 몇 개? 감기 걸리면 몸에서 나는 건? 줄을 설 때 맞추는 건?',
 			'받침이 ㄹ인 한 글자입니다.'
 		],
 		explain: '<b>열</b> — 숫자 10, 몸의 열(발열), 줄(열을 맞추다). 한 글자가 세 뜻을 모두 가집니다.'
@@ -1583,7 +1583,7 @@ export const PROBLEMS: Problem[] = [
 		answers: ['X', '엑스'],
 		hints: [
 			'알파벳 한 글자입니다.',
-			'"3 ✕ 4", "x를 구하시오"…',
+			'곱셈 기호와, 방정식에서 모르는 수를 부를 때 쓰는 글자가 똑같이 생겼습니다.',
 			'로마 숫자 10을 나타내는 글자.'
 		],
 		explain: '<b>X</b> — 곱셈 기호(×), 미지수(x), 로마 숫자 10. 세 가지가 모두 X입니다.'
@@ -1676,10 +1676,10 @@ export const PROBLEMS: Problem[] = [
 		hints: [
 			'수의 크기나 홀짝이 아닙니다 — NINE은 4글자인데 회원입니다.',
 			'철자를 한 글자씩 짚으며 <b>같은 글자</b>가 또 나오는지 보세요.',
-			'THREE에는 E가 둘, NINE에는 N이 셋. ONE·FOUR·SIX에는 그런 글자가 없죠.'
+			'THREE에는 E가 둘, NINE에는 N이 둘. ONE·FOUR·SIX에는 그런 글자가 없죠.'
 		],
 		explain:
-			'가입 기준은 <b>같은 알파벳이 두 번 이상</b> 나오는 것. THREE(E×2)·SEVEN(E×2)·NINE(N×3)·TWELVE(E×2)는 회원, ONE·FOUR·FIVE·SIX는 전부 중복 없음. 후보 중엔 <b>ELEVEN</b>(E×3)과 <b>FIFTEEN</b>(F×2,E×3)만 통과 — EIGHT·TEN은 중복이 없습니다.'
+			'가입 기준은 <b>같은 알파벳이 두 번 이상</b> 나오는 것. THREE(E×2)·SEVEN(E×2)·NINE(N×2)·TWELVE(E×2)는 회원, ONE·FOUR·FIVE·SIX는 전부 중복 없음. 후보 중엔 <b>ELEVEN</b>(E×3)과 <b>FIFTEEN</b>(F×2,E×2)만 통과 — EIGHT·TEN은 중복이 없습니다.'
 	},
 	{
 		id: 'club-case-twin',
