@@ -6,6 +6,7 @@
 	import { parseEq, cloneBoard, isSolved, bit, type Board } from '$lib/matchstick';
 	import MatchstickBoard, { type PickLoc } from '$lib/components/MatchstickBoard.svelte';
 	import AdSlot from '$lib/components/AdSlot.svelte';
+	import Icon from '$lib/components/Icon.svelte';
 
 	type Mode =
 		| { type: 'free' }
@@ -233,14 +234,14 @@
 	function shareResult() {
 		let text: string;
 		if (mode.type === 'time') {
-			text = `딸깍! 성냥개비 타임어택 ⏱️ ${mode.seconds / 60}분 · ${runSolved}문제 🔥`;
+			text = `딸깍! 성냥개비 타임어택 ${mode.seconds / 60}분 · ${runSolved}문제`;
 		} else if (mode.type === 'count') {
 			const wins = runResults.filter((r) => r === 'win').length;
-			text = `딸깍! 성냥개비 도전 🎯 ${mode.total}문제 중 ${wins}개 ${runResults
+			text = `딸깍! 성냥개비 도전 ${mode.total}문제 중 ${wins}개 ${runResults
 				.map((r) => (r === 'win' ? '✅' : '🔓'))
 				.join('')}`;
 		} else {
-			text = `딸깍! 성냥개비 🔥 연속 ${stats.streak}판 · 통산 ${stats.solved}판`;
+			text = `딸깍! 성냥개비 — 연속 ${stats.streak}판 · 통산 ${stats.solved}판`;
 		}
 		text += `\n${location.origin}/matchstick`;
 		if (navigator.share) navigator.share({ text }).catch(() => {});
@@ -269,16 +270,16 @@
 <div class="mroot">
 {#if screen === 'menu'}
 	<div class="card menu">
-		<h2>🔥 성냥개비</h2>
+		<h2>성냥개비</h2>
 		<p class="desc">성냥개비 <b>하나만 옮겨</b> 등식을 참으로 만드세요.</p>
 
 		<div class="mode-sec">
-			<div class="mode-title">♾️ 무한 연습</div>
+			<div class="mode-title">무한 연습</div>
 			<button class="btn wide" onclick={() => startMode({ type: 'free' })}>시작</button>
 		</div>
 
 		<div class="mode-sec">
-			<div class="mode-title">⏱️ 타임어택 <span class="hintTxt">제한시간 안에 최대한 많이!</span></div>
+			<div class="mode-title"><Icon name="timer" size={16} /> 타임어택 <span class="hintTxt">제한시간 안에 최대한 많이!</span></div>
 			<div class="opt-row">
 				{#each [180, 300, 600] as s (s)}
 					<button class="btn opt" onclick={() => startMode({ type: 'time', seconds: s })}>
@@ -290,7 +291,7 @@
 		</div>
 
 		<div class="mode-sec">
-			<div class="mode-title">🎯 개수 도전 <span class="hintTxt">시간 무제한, 몇 개나 풀까?</span></div>
+			<div class="mode-title"><Icon name="trophy" size={16} /> 개수 도전 <span class="hintTxt">시간 무제한, 몇 개나 풀까?</span></div>
 			<div class="opt-row">
 				{#each [5, 10, 20] as n (n)}
 					<button class="btn opt" onclick={() => startMode({ type: 'count', total: n })}>
@@ -306,8 +307,8 @@
 {:else if screen === 'play'}
 	<div class="topbar">
 		{#if mode.type === 'time'}
-			<div class="timer" class:danger={timeLeft <= 10}>⏱️ {timeStr}</div>
-			<div class="run-score">✅ {runSolved}</div>
+			<div class="timer" class:danger={timeLeft <= 10}><Icon name="timer" size={15} />{timeStr}</div>
+			<div class="run-score"><Icon name="correct" size={15} />{runSolved}</div>
 		{:else if mode.type === 'count'}
 			<div class="run-score">문제 {runResults.length + 1} / {mode.total}</div>
 			<div class="emoji-mini">{runResults.map((r) => (r === 'win' ? '✅' : '🔓')).join('')}</div>
@@ -334,7 +335,7 @@
 			<div class="controls">
 				<button class="btn ghost" onclick={revert}>처음부터</button>
 				{#if mode.type === 'time'}
-					<button class="btn ghost" onclick={skip}>⏭ 건너뛰기</button>
+					<button class="btn ghost" onclick={skip}>건너뛰기</button>
 					<button class="btn ghost" onclick={endRun}>끝내기</button>
 				{:else}
 					<button class="btn ghost" onclick={reveal}>정답 보기</button>
@@ -343,7 +344,7 @@
 			</div>
 		{:else if mode.type === 'free'}
 			<button class="btn wide" onclick={() => nextProblem()}>다음 문제 →</button>
-			<button class="btn ghost wide" onclick={shareResult}>🔥 기록 공유하기</button>
+			<button class="btn ghost wide" onclick={shareResult}>기록 공유하기</button>
 			<button class="btn ghost wide" onclick={toMenu}>모드 선택으로</button>
 		{/if}
 	</div>
@@ -361,7 +362,7 @@
 		{#if bests[modeKey(mode)]}
 			<div class="best-line">이 모드 최고 기록: {bests[modeKey(mode)]}문제</div>
 		{/if}
-		<button class="btn wide" onclick={shareResult}>🔥 결과 공유 — 친구에게 도전장</button>
+		<button class="btn wide" onclick={shareResult}>결과 공유 — 친구에게 도전장</button>
 		<button class="btn ghost wide" onclick={() => startMode(mode)}>다시 하기</button>
 		<button class="btn ghost wide" onclick={toMenu}>모드 선택으로</button>
 		<AdSlot label="모드 결과" />

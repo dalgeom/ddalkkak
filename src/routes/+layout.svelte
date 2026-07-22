@@ -50,8 +50,29 @@
 		--accent-2: #c0632e;
 		--gold: #f6d34e;
 		--danger: #c0392b;
+		/* 판정 3-state: 정답=accent(초록) / 오답=danger(빨강) / 포기=giveup(앰버).
+		   포기를 힌트(--gold 노랑)와 구분하려고 더 어둡고 채도 낮은 브라운-앰버로 잡았다. */
+		--danger-soft: #f9e4e1;
+		--danger-border: #f0c8c2;
+		--giveup: #a9762c;
+		--giveup-soft: #f5ecd8;
+		--giveup-border: #e8d6ad;
+		/* 모션 토큰 3단계 */
+		--dur-tap: 130ms;
+		--dur-move: 260ms;
+		--dur-judge: 480ms;
+		--ease-out: cubic-bezier(0.2, 0, 0, 1);
+		--ease-pop: cubic-bezier(0.34, 1.56, 0.64, 1);
 		--radius: 20px;
 		--maxw: 1120px;
+	}
+	@media (prefers-reduced-motion: reduce) {
+		:global(*) {
+			animation-duration: 0.001ms !important;
+			animation-iteration-count: 1 !important;
+			transition-duration: 0.001ms !important;
+			scroll-behavior: auto !important;
+		}
 	}
 	:global(*) {
 		margin: 0;
@@ -105,12 +126,18 @@
 		border-radius: 999px;
 		border: 1px solid transparent;
 		transition:
-			color 0.15s,
-			background 0.15s,
-			border-color 0.15s;
+			color var(--dur-tap) var(--ease-out),
+			background var(--dur-tap) var(--ease-out),
+			border-color var(--dur-tap) var(--ease-out),
+			transform var(--dur-tap) var(--ease-out);
 	}
 	.tab:hover {
 		color: var(--text);
+		background: var(--panel-2);
+		transform: translateY(-1px);
+	}
+	.tab:active {
+		transform: translateY(1px) scale(0.98);
 	}
 	.tab.active {
 		color: #fff;
