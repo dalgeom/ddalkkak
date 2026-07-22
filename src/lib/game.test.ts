@@ -181,16 +181,8 @@ describe('신규 배치 정답 판정', () => {
 		expect(isCorrectText(c, '15시 45분')).toBe(true);
 	});
 
-	it('신규 7문제 모두 힌트 3단과 정답을 갖는다', () => {
-		const added = [
-			'alpha-ascend',
-			'weekday-batchim',
-			'subway-board',
-			'fold-sum',
-			'club-double-letter',
-			'club-case-twin',
-			'calendar-length'
-		];
+	it('신규 4문제 모두 힌트 3단과 정답을 갖는다', () => {
+		const added = ['subway-board', 'fold-sum', 'club-double-letter', 'club-case-twin'];
 		for (const id of added) {
 			const p = byId(id);
 			expect(p.hints?.length, id).toBe(3);
