@@ -2,6 +2,9 @@
 	import { page } from '$app/state';
 	import AdSlot from '$lib/components/AdSlot.svelte';
 	import Logo from '$lib/components/Logo.svelte';
+	import { PROBLEMS } from '$lib/problems';
+	import { TRIVIA } from '$lib/trivia';
+	import { MATCH_TOTAL } from '$lib/game';
 
 	let { children } = $props();
 	let path = $derived(page.url.pathname);
@@ -12,6 +15,9 @@
 		{ href: '/matchstick', label: '성냥개비', sub: '하나만 옮기기' }
 	];
 	const isActive = (href: string) => (href === '/' ? path === '/' : path.startsWith(href));
+
+	const TOTAL_PROBLEMS = PROBLEMS.length + TRIVIA.length + MATCH_TOTAL;
+	const year = new Date().getFullYear();
 
 	// 활성 탭 아래로 미끄러지는 세그먼트 막대. 측정이 필요하므로 마운트 후에만 보인다.
 	let navEl = $state<HTMLElement | null>(null);
@@ -62,14 +68,32 @@
 	<div class="bottom-ad"><AdSlot label="하단 배너" /></div>
 
 	<footer>
-		<nav class="foot-nav">
-			<a href="/about">소개</a>
+		<div class="foot-top">
+			<div class="foot-brand">
+				<span class="fb-name">딸깍</span>
+				<span class="fb-tag">규칙을 발견하는 순간의 그 소리</span>
+				<span class="fb-desc">
+					발견형 퍼즐 · 상식 퀴즈 · 성냥개비를 매일 새로. 모두가 같은 문제를 풉니다.
+				</span>
+			</div>
+			<nav class="foot-col">
+				<span class="foot-h">즐기기</span>
+				{#each TABS as t (t.href)}
+					<a href={t.href}>{t.label}</a>
+				{/each}
+			</nav>
+			<nav class="foot-col">
+				<span class="foot-h">안내</span>
+				<a href="/about">소개</a>
+				<a href="/privacy">개인정보처리방침</a>
+				<a href="/terms">이용약관</a>
+			</nav>
+		</div>
+		<div class="foot-bottom">
+			<span>© {year} 딸깍</span>
 			<span class="seg-div" aria-hidden="true"></span>
-			<a href="/privacy">개인정보처리방침</a>
-			<span class="seg-div" aria-hidden="true"></span>
-			<a href="/terms">이용약관</a>
-		</nav>
-		<div class="tag">딸깍 · 규칙을 발견하는 순간의 그 소리</div>
+			<span>문제 {TOTAL_PROBLEMS.toLocaleString()}개</span>
+		</div>
 	</footer>
 </div>
 
@@ -163,10 +187,17 @@
 		background: #cfe6d8;
 		color: var(--text);
 	}
+	/* 콘텐츠가 짧아도 푸터는 화면 바닥에 붙는다 — 아래가 텅 비어 보이지 않게 */
 	.wrap {
 		max-width: var(--maxw);
 		margin: 0 auto;
-		padding: 20px 22px 44px;
+		padding: 20px 22px 0;
+		min-height: 100dvh;
+		display: flex;
+		flex-direction: column;
+	}
+	.page {
+		flex: 1 0 auto;
 	}
 	@media (max-width: 640px) {
 		.wrap {
@@ -248,25 +279,88 @@
 		}
 	}
 	.bottom-ad {
+		flex: none;
 		max-width: 728px;
+		width: 100%;
 		margin: 0 auto;
 	}
 	footer {
-		margin-top: 30px;
-		text-align: center;
+		flex: none;
+		margin-top: 34px;
+		border-top: 1px solid var(--border);
+		padding: 26px 0 30px;
 	}
-	.foot-nav {
-		justify-content: center;
-		gap: 8px;
+	.foot-top {
+		display: grid;
+		grid-template-columns: 2fr 1fr 1fr;
+		gap: 22px;
+	}
+	@media (max-width: 640px) {
+		.foot-top {
+			grid-template-columns: 1fr 1fr;
+		}
+		.foot-brand {
+			grid-column: 1 / -1;
+		}
+	}
+	.foot-brand {
+		display: flex;
+		flex-direction: column;
+		gap: 5px;
+		max-width: 34ch;
+	}
+	.fb-name {
+		font-size: var(--fs-md);
+		font-weight: var(--fw-number);
+		letter-spacing: -0.5px;
+		color: var(--text);
+	}
+	.fb-tag {
+		font-size: var(--fs-2xs);
+		font-weight: var(--fw-label);
+		color: var(--accent);
+	}
+	.fb-desc {
+		margin-top: 3px;
 		font-size: var(--fs-2xs);
 		font-weight: var(--fw-caption);
+		color: var(--muted);
+		line-height: var(--lh-reading);
+		word-break: keep-all;
 	}
-	.foot-nav a {
+	.foot-col {
+		display: flex;
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 7px;
+	}
+	.foot-h {
+		font-size: var(--fs-2xs);
+		font-weight: var(--fw-emphasis);
+		letter-spacing: var(--ls-label);
+		color: var(--text);
+		margin-bottom: 1px;
+	}
+	.foot-col a {
+		font-size: var(--fs-2xs);
+		font-weight: var(--fw-caption);
 		color: var(--muted);
 		text-decoration: none;
+		transition: color var(--dur-tap) var(--ease-out);
 	}
-	.foot-nav a:hover {
+	.foot-col a:hover {
 		color: var(--accent);
+	}
+	.foot-bottom {
+		display: flex;
+		align-items: center;
+		gap: 9px;
+		margin-top: 24px;
+		padding-top: 16px;
+		border-top: 1px solid var(--border);
+		font-size: var(--fs-2xs);
+		font-weight: var(--fw-caption);
+		color: var(--muted);
 	}
 	.seg-div {
 		display: inline-block;
@@ -275,11 +369,5 @@
 		border-radius: var(--seg-r);
 		background: var(--border-strong);
 		vertical-align: middle;
-	}
-	.tag {
-		margin-top: 8px;
-		font-size: var(--fs-2xs);
-		font-weight: var(--fw-caption);
-		color: #b3a894;
 	}
 </style>
