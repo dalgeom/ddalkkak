@@ -11,9 +11,15 @@
 	<header>
 		<Logo />
 		<nav>
-			<a href="/" class="tab" class:active={path === '/'}>오늘의 퍼즐</a>
-			<a href="/play" class="tab" class:active={path.startsWith('/play')}>연속 모드</a>
-			<a href="/matchstick" class="tab" class:active={path.startsWith('/matchstick')}>성냥개비</a>
+			<a href="/" class="tab" class:active={path === '/'}>
+				<b>오늘의 딸깍</b><span>매일 새 문제</span>
+			</a>
+			<a href="/play" class="tab" class:active={path.startsWith('/play')}>
+				<b>계속 풀기</b><span>무제한 랜덤</span>
+			</a>
+			<a href="/matchstick" class="tab" class:active={path.startsWith('/matchstick')}>
+				<b>성냥개비</b><span>하나만 옮기기</span>
+			</a>
 		</nav>
 	</header>
 
@@ -118,12 +124,17 @@
 		gap: 8px;
 	}
 	.tab {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 1px;
+		line-height: 1.25;
 		font-size: 14px;
 		font-weight: 800;
 		text-decoration: none;
 		color: var(--muted);
-		padding: 9px 16px;
-		border-radius: 999px;
+		padding: 7px 15px;
+		border-radius: 14px;
 		border: 1px solid transparent;
 		transition:
 			color var(--dur-tap) var(--ease-out),
@@ -139,11 +150,26 @@
 	.tab:active {
 		transform: translateY(1px) scale(0.98);
 	}
+	.tab span {
+		font-size: 10.5px;
+		font-weight: 700;
+		letter-spacing: -0.01em;
+		opacity: 0.72;
+	}
 	.tab.active {
 		color: #fff;
 		background: var(--accent);
 		border-color: var(--accent);
 		box-shadow: 0 3px 12px rgba(47, 143, 91, 0.28);
+	}
+	@media (max-width: 420px) {
+		.tab {
+			padding: 6px 11px;
+			font-size: 13px;
+		}
+		.tab span {
+			font-size: 9.5px;
+		}
 	}
 	.bottom-ad {
 		max-width: 728px;
