@@ -5,6 +5,7 @@
 	import { TRIVIA } from '$lib/trivia';
 	import {
 		TRACKS,
+		MATCH_TOTAL,
 		type TrackKey,
 		buildRound,
 		isCorrectText,
@@ -438,6 +439,7 @@
 			{:else}
 				<button
 					class="track"
+					class:feature={t.key === 'discover'}
 					class:cleared={trackDone[t.key]}
 					onclick={() => startTrack(t.key)}
 				>
@@ -461,15 +463,55 @@
 	</section>
 {/if}
 
-{#if phase === 'hub'}
-	<a class="play-promo" href="/play">
-		<div class="pp-left">
-			<span class="pp-title"><Icon name="arrow" size={16} /> 계속 풀기 — 오늘 치를 다 풀었다면</span>
-			<span class="pp-sub"
-				>발견형 + 상식 {PROBLEMS.length + TRIVIA.length}문제에서 5·10·20문제 랜덤 · 콤보 점수</span
-			>
+{#if phase === 'landing' || phase === 'hub'}
+	<!-- 문제 은행 규모. 숫자를 크게 박는 대신 이미 아이덴티티인 세그먼트 부품으로 센다. -->
+	<section class="bank">
+		<div class="bank-item"><b>{PROBLEMS.length}</b><span>발견형</span></div>
+		<div class="bank-item"><b>{TRIVIA.length}</b><span>상식 · 18개 분야</span></div>
+		<div class="bank-item"><b>{MATCH_TOTAL}</b><span>성냥개비</span></div>
+		<div class="bank-total">
+			<span>모두 합쳐</span>
+			<SegNumber value={PROBLEMS.length + TRIVIA.length + MATCH_TOTAL} size={34} />
+			<span>문제</span>
 		</div>
-		<span class="pp-go">시작 →</span>
+	</section>
+{/if}
+
+{#if phase === 'hub'}
+	<section class="hub-grid">
+		<div class="panel">
+			<div class="panel-title">기록</div>
+			{#if stats.played === 0}
+				<div class="empty-note">아직 기록이 없어요 — 오늘 첫 문제부터 시작해보세요</div>
+			{:else}
+				<div class="stat-strip">
+					<div class="stat"><b>{stats.played}</b><span>플레이</span></div>
+					<div class="stat"><b>{stats.dayStreak}</b><span>연속</span></div>
+					<div class="stat"><b>{stats.maxStreak}</b><span>최고</span></div>
+				</div>
+			{/if}
+		</div>
+		<div class="panel">
+			<div class="panel-title">최근 14일</div>
+			<div class="cal">
+				{#each calendar as d, i (i)}
+					<span class="cell" class:done={d} class:today={i === calendar.length - 1}></span>
+				{/each}
+			</div>
+		</div>
+		<div class="panel center">
+			<div class="cd-title">다음 퍼즐까지</div>
+			<div class="cd-big">{countdown}</div>
+		</div>
+	</section>
+
+	<!-- 오늘 치를 다 풀기 전에는 조용한 줄, 다 푼 뒤에만 다음 행동으로 올라온다 -->
+	<a class="next-bar" class:ready={allInlineDone} href="/play">
+		<span class="nb-main">
+			<Icon name="arrow" size={15} />
+			{allInlineDone ? '오늘 치 완료 — 계속 풀기로' : '계속 풀기'}
+		</span>
+		<span class="nb-sub">{PROBLEMS.length + TRIVIA.length}문제 무제한 랜덤 · 콤보 점수</span>
 	</a>
 {/if}
 
@@ -630,9 +672,7 @@
 				<div class="panel-title">최근 14일</div>
 				<div class="cal">
 					{#each calendar as d, i (i)}
-						<span class="cell" class:done={d} class:today={i === calendar.length - 1}
-							>{d ? '🔥' : ''}</span
-						>
+						<span class="cell" class:done={d} class:today={i === calendar.length - 1}></span>
 					{/each}
 				</div>
 			</div>
@@ -1172,6 +1212,14 @@
 		justify-content: center;
 		font-size: 13px;
 	}
+	/* 완료 표시는 이모지 대신 세그먼트 획 하나 — 사이트 조형 문법과 같은 부품 */
+	.cell.done::after {
+		content: '';
+		width: 55%;
+		height: 5px;
+		border-radius: var(--seg-r);
+		background: var(--accent);
+	}
 	.cell.done {
 		background: var(--accent-soft);
 		border-color: #cfe6d8;
@@ -1416,5 +1464,145 @@
 	.b-back:hover {
 		color: var(--text);
 		background: var(--panel-2);
+	}
+	/* ---- 문제 은행 스트립 ---- */
+	.bank {
+		display: flex;
+		align-items: center;
+		flex-wrap: wrap;
+		gap: 10px 26px;
+		margin-top: 14px;
+		padding: 14px 20px;
+		background: var(--panel-2);
+		border: 1px solid var(--border);
+		border-radius: 14px;
+	}
+	.bank-item b {
+		font-size: var(--fs-sm);
+		font-weight: var(--fw-number);
+		color: var(--text);
+		font-variant-numeric: tabular-nums;
+	}
+	.bank-item,
+	.bank-total {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		font-size: var(--fs-2xs);
+		font-weight: var(--fw-label);
+		color: var(--muted);
+	}
+	.bank-total {
+		margin-left: auto;
+		color: var(--text);
+		font-weight: var(--fw-emphasis);
+	}
+	@media (max-width: 700px) {
+		.bank-total {
+			margin-left: 0;
+			width: 100%;
+			padding-top: 10px;
+			border-top: 1px solid var(--border);
+		}
+	}
+
+	/* ---- 허브 하단 3열 ---- */
+	.hub-grid {
+		display: grid;
+		grid-template-columns: 1.1fr 1.3fr 0.9fr;
+		gap: 14px;
+		margin-top: 14px;
+		align-items: stretch;
+	}
+	@media (max-width: 860px) {
+		.hub-grid {
+			grid-template-columns: 1fr 1fr;
+		}
+		.hub-grid > :last-child {
+			grid-column: 1 / -1;
+		}
+	}
+	@media (max-width: 560px) {
+		.hub-grid {
+			grid-template-columns: 1fr;
+		}
+	}
+	.empty-note {
+		font-size: var(--fs-2xs);
+		font-weight: var(--fw-caption);
+		color: var(--muted);
+		line-height: var(--lh-reading);
+		word-break: keep-all;
+	}
+
+	/* ---- 계속 풀기: 평소엔 조용한 줄, 오늘 치 완료 시에만 승격 ---- */
+	.next-bar {
+		display: flex;
+		align-items: center;
+		gap: 12px;
+		flex-wrap: wrap;
+		margin-top: 14px;
+		padding: 13px 18px;
+		border: 1px solid var(--border);
+		border-radius: 14px;
+		background: var(--panel);
+		text-decoration: none;
+		color: var(--muted);
+		transition:
+			border-color var(--dur-tap) var(--ease-out),
+			background var(--dur-tap) var(--ease-out),
+			transform var(--dur-tap) var(--ease-out);
+	}
+	.next-bar:hover {
+		border-color: var(--accent);
+		transform: translateY(-1px);
+	}
+	.nb-main {
+		display: flex;
+		align-items: center;
+		gap: 7px;
+		font-size: var(--fs-xs);
+		font-weight: var(--fw-emphasis);
+		color: var(--text);
+	}
+	.nb-sub {
+		font-size: var(--fs-2xs);
+		font-weight: var(--fw-caption);
+	}
+	.next-bar.ready {
+		background: var(--accent-soft);
+		border-color: #cfe6d8;
+	}
+	.next-bar.ready .nb-main {
+		color: #1f6b41;
+	}
+
+	/* ---- 트랙 벤토: 발견형이 시그니처다 ---- */
+	.tracks {
+		grid-template-columns: 1.35fr 1fr 1fr;
+	}
+	.track.feature {
+		gap: 12px;
+		padding: 22px;
+	}
+	.track.feature .t-top {
+		font-size: var(--fs-lg);
+	}
+	.track.feature .t-peek {
+		font-size: var(--fs-xs);
+		padding: 15px;
+	}
+	@media (max-width: 860px) {
+		.tracks {
+			grid-template-columns: 1fr 1fr;
+		}
+		.track.feature {
+			grid-column: 1 / -1;
+		}
+	}
+	@media (max-width: 560px) {
+		.tracks {
+			grid-template-columns: 1fr;
+		}
 	}
 </style>
