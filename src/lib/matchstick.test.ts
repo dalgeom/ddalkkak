@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { parseEq, isTrue, isSolved, eqString, moveDiff } from './matchstick';
 import problems from './data/matchstick-problems.json';
+import { MATCH_TOTAL } from './game';
 
 describe('matchstick 로직', () => {
 	it('파싱과 문자열 왕복', () => {
@@ -121,5 +122,10 @@ describe('유일해 (독립 구현 재검산)', () => {
 	it('표시식이 중복되지 않는다', () => {
 		const seen = new Set(problems.map((p) => p.displayed));
 		expect(seen.size).toBe(problems.length);
+	});
+
+	it('game.ts의 MATCH_TOTAL이 실제 데이터 개수와 같다', () => {
+		// 홈은 45KB JSON을 import하지 않고 이 상수만 쓴다 — 어긋나면 화면에 틀린 수가 뜬다
+		expect(MATCH_TOTAL).toBe(problems.length);
 	});
 });

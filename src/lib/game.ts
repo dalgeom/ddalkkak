@@ -143,6 +143,10 @@ export function dailyIndices(total: number, dayNum: number, size: number = ROUND
 	return out;
 }
 
+/** 성냥개비 문제 수. 홈에서 45KB짜리 JSON을 통째로 import하지 않으려고 상수로 둔다.
+ *  matchstick.test.ts가 실제 데이터 길이와 일치하는지 검사한다. */
+export const MATCH_TOTAL = 741;
+
 /** 데일리 트랙 정의 — 하루 분량을 개수가 아니라 '유형'으로 늘린다. */
 export type TrackKey = 'discover' | 'trivia' | 'match';
 export const TRACKS: {
