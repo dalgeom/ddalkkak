@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import { browser } from '$app/environment';
 	import { PROBLEMS, type Problem } from '$lib/problems';
+	import { TRIVIA } from '$lib/trivia';
 	import {
 		buildRound,
 		isCorrectText,
@@ -287,7 +288,9 @@
 <a class="play-promo" href="/play">
 	<div class="pp-left">
 		<span class="pp-title">🎯 연속 모드 — 계속 풀기</span>
-		<span class="pp-sub">발견형 + 상식 퀴즈 200문제, 5·10·20문제 랜덤 · 콤보 점수</span>
+		<span class="pp-sub"
+			>발견형 + 상식 퀴즈 {PROBLEMS.length + TRIVIA.length}문제, 5·10·20문제 랜덤 · 콤보 점수</span
+		>
 	</div>
 	<span class="pp-go">시작 →</span>
 </a>
