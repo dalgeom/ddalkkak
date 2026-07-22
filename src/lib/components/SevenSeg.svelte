@@ -27,7 +27,7 @@
 	const H = 93; // 디지트 높이
 	const DW = 53; // 디지트 셀 폭
 	const SYMW = 40; // 기호/물음표 셀 폭
-	const SPW = 16; // 공백 폭
+	const SPW = 26; // 공백 폭 — 16이면 "11 31 55"가 "113155"처럼 붙어 읽힌다
 	const GAP = 9;
 
 	type Cell =
