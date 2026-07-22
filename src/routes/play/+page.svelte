@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { page } from '$app/state';
 	import { browser } from '$app/environment';
 	import { PROBLEMS, GRADES, type Problem, type Grade } from '$lib/problems';
 	import { TRIVIA } from '$lib/trivia';
@@ -247,6 +248,17 @@
 
 	onMount(() => {
 		load();
+		// 허브의 분야·난이도 링크로 들어오면 메뉴를 미리 맞춰준다(문제 수는 사용자가 고른다)
+		const q = page.url.searchParams;
+		const f = q.get('filter');
+		if (f === 'all' || f === 'puzzle' || f === 'trivia') filter = f;
+		const g = q.get('grade');
+		if (g && GRADES.some((x) => x.key === g)) grade = g as Grade;
+		const c = q.get('cat');
+		if (c && CATS.includes(c)) {
+			cat = c;
+			showCats = true;
+		}
 		tickIv = setInterval(() => {
 			if (screen === 'play' && !done && startedAt) elapsedMs = Date.now() - startedAt;
 		}, 1000);

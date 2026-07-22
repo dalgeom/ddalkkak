@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { browser, dev } from '$app/environment';
-	import { PROBLEMS, type Problem } from '$lib/problems';
+	import { PROBLEMS, GRADES, type Problem } from '$lib/problems';
 	import { TRIVIA } from '$lib/trivia';
 	import {
 		TRACKS,
@@ -98,6 +98,18 @@
 	const PREVIEW_BOARD = parseEq('0 + 0 = 8');
 	/** 상식 카드 미리보기용 보기 — 그 모드의 고유 형태(객관식)를 그대로 쓴다 */
 	const PREVIEW_CHOICES = ['러시아', '캐나다', '중국'];
+
+	/** 18개 분야가 "18개 분야"라는 글자 하나로만 존재했다. 실제 분포를 보여준다. */
+	const CAT_COUNTS = (() => {
+		const m = new Map<string, number>();
+		for (const t of TRIVIA) m.set(t.category!, (m.get(t.category!) ?? 0) + 1);
+		return [...m.entries()].sort((a, b) => b[1] - a[1]);
+	})();
+	const GRADE_COUNTS = GRADES.map((g) => ({
+		key: g.key,
+		count: TRIVIA.filter((t) => t.grade === g.key).length
+	}));
+	let showCats = $state(false);
 
 	let doneCount = $derived(TRACKS.filter((t) => trackDone[t.key]).length);
 	let nextTrack = $derived(
@@ -498,6 +510,39 @@
 			<span>모두 합쳐</span>
 			<SegNumber value={PROBLEMS.length + TRIVIA.length + MATCH_TOTAL} size={34} />
 			<span>문제</span>
+		</div>
+	</section>
+
+	<!-- 기본은 조용한 밀도 바 하나. 파고들 사람만 칩을 펼친다. -->
+	<section class="fields">
+		<div class="fields-head">
+			<span class="fields-title">상식 {TRIVIA.length}문제 · {CAT_COUNTS.length}개 분야 · 4단계</span>
+			<a class="fields-more" href="/play?filter=trivia">연속으로 풀기 →</a>
+		</div>
+		<div class="field-bar" aria-hidden="true">
+			{#each CAT_COUNTS as [name, count] (name)}
+				<span class="field-seg" style="flex-grow:{count}" title="{name} · {count}문제"></span>
+			{/each}
+		</div>
+		<button class="fields-toggle" onclick={() => (showCats = !showCats)}>
+			{showCats ? '접기' : '분야별로 보기'}
+		</button>
+		{#if showCats}
+			<div class="field-pills">
+				{#each CAT_COUNTS as [name, count] (name)}
+					<a class="field-pill" href="/play?filter=trivia&cat={encodeURIComponent(name)}"
+						>{name}<span>{count}</span></a
+					>
+				{/each}
+			</div>
+		{/if}
+		<div class="grade-bar">
+			{#each GRADE_COUNTS as g (g.key)}
+				<a class="grade-seg" style="flex-grow:{g.count}" href="/play?filter=trivia&grade={g.key}">
+					<span class="grade-seg-label">{g.key}</span>
+					<span class="grade-seg-n">{g.count}</span>
+				</a>
+			{/each}
 		</div>
 	</section>
 {/if}
@@ -1754,5 +1799,126 @@
 		display: grid;
 		grid-template-columns: 1fr 1fr;
 		gap: 14px 10px;
+	}
+	/* ---- 분야·난이도 밀도 ---- */
+	.fields {
+		margin-top: 12px;
+		padding: 15px 20px;
+		background: var(--panel-2);
+		border: 1px solid var(--border);
+		border-radius: 14px;
+	}
+	.fields-head {
+		display: flex;
+		align-items: baseline;
+		justify-content: space-between;
+		gap: 10px;
+		margin-bottom: 10px;
+	}
+	.fields-title {
+		font-size: var(--fs-2xs);
+		font-weight: var(--fw-label);
+		color: var(--muted);
+	}
+	.fields-more {
+		font-size: var(--fs-2xs);
+		font-weight: var(--fw-label);
+		color: var(--accent);
+		text-decoration: none;
+		white-space: nowrap;
+	}
+	.field-bar {
+		display: flex;
+		gap: 2px;
+		height: 10px;
+	}
+	.field-seg {
+		flex-shrink: 0;
+		flex-basis: 0;
+		border-radius: var(--seg-r);
+		background: var(--border-strong);
+	}
+	.fields-toggle {
+		margin-top: 9px;
+		background: none;
+		border: none;
+		font-family: inherit;
+		font-size: var(--fs-2xs);
+		font-weight: var(--fw-label);
+		color: var(--muted);
+		cursor: pointer;
+		padding: 3px 0;
+		transition: color var(--dur-tap) var(--ease-out);
+	}
+	.fields-toggle:hover {
+		color: var(--text);
+	}
+	.field-pills {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 6px;
+		margin-top: 8px;
+	}
+	.field-pill {
+		display: flex;
+		align-items: center;
+		gap: 5px;
+		padding: 7px 13px;
+		border-radius: 999px;
+		background: var(--panel);
+		border: 1px solid var(--border);
+		font-size: var(--fs-2xs);
+		font-weight: var(--fw-label);
+		color: var(--text);
+		text-decoration: none;
+		transition:
+			border-color var(--dur-tap) var(--ease-out),
+			color var(--dur-tap) var(--ease-out),
+			transform var(--dur-tap) var(--ease-out);
+	}
+	.field-pill:hover {
+		border-color: var(--accent);
+		color: var(--accent);
+		transform: translateY(-1px);
+	}
+	.field-pill span {
+		color: var(--muted);
+		font-variant-numeric: tabular-nums;
+	}
+	.grade-bar {
+		display: flex;
+		gap: 4px;
+		margin-top: 10px;
+	}
+	.grade-seg {
+		flex-shrink: 0;
+		flex-basis: 0;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 6px;
+		padding: 8px 4px;
+		border-radius: 10px;
+		background: var(--panel);
+		border: 1px solid var(--border);
+		text-decoration: none;
+		color: var(--text);
+		transition:
+			border-color var(--dur-tap) var(--ease-out),
+			transform var(--dur-tap) var(--ease-out);
+	}
+	.grade-seg:hover {
+		border-color: var(--accent);
+		transform: translateY(-1px);
+	}
+	.grade-seg-label {
+		font-size: var(--fs-2xs);
+		font-weight: var(--fw-label);
+	}
+	.grade-seg-n {
+		font-size: var(--fs-2xs);
+		font-weight: var(--fw-number);
+		color: var(--muted);
+		font-variant-numeric: tabular-nums;
 	}
 </style>

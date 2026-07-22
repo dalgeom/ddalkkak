@@ -27,10 +27,10 @@ export interface Problem {
 export type Grade = '초등' | '중등' | '고등' | '어른';
 
 export const GRADES: { key: Grade; label: string }[] = [
-	{ key: '초등', label: '🌱 초등' },
-	{ key: '중등', label: '📗 중등' },
-	{ key: '고등', label: '📘 고등' },
-	{ key: '어른', label: '🎩 어른' }
+	{ key: '초등', label: '초등' },
+	{ key: '중등', label: '중등' },
+	{ key: '고등', label: '고등' },
+	{ key: '어른', label: '어른' }
 ];
 
 export const PROBLEMS: Problem[] = [
