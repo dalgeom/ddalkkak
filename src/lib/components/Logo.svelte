@@ -1,30 +1,63 @@
 <script lang="ts">
+	/**
+	 * 딸깍 로고 — 느낌표 자리의 전구를 7세그먼트 부품으로 그린다.
+	 *
+	 * 유리는 SevenSeg/SegNumber와 **완전히 같은 SEG 좌표**의 숫자 '0'(6획)이고,
+	 * 필라멘트는 그 가운데 g획을 꺼진 색으로 둔 것이다. 즉 로고와 문제 화면 전광판이
+	 * 같은 부품에서 나온다 — 새 조형을 발명하지 않는 것이 이 아이덴티티의 규칙이다.
+	 *
+	 * 전구를 느낌표로 쓰는 발상 자체는 유지하되(대표가 직접 낸 안), 재료만 베지어 곡선에서
+	 * 세그먼트 획으로 바꿨다.
+	 */
 	let { size = 27 }: { size?: number } = $props();
+
+	const SEG: Record<string, [number, number, number, number]> = {
+		a: [10, 0, 34, 7],
+		b: [46, 8, 7, 34],
+		c: [46, 50, 7, 34],
+		d: [10, 86, 34, 7],
+		e: [0, 50, 7, 34],
+		f: [0, 8, 7, 34],
+		g: [10, 43, 34, 7]
+	};
+	const GLASS = ['a', 'b', 'c', 'd', 'e', 'f'];
 </script>
 
 <a class="logo" href="/" aria-label="딸깍 홈">
 	<span class="word" style="font-size:{size}px">딸깍</span>
 	<svg
 		class="excl"
-		style="height:{Math.round(size * 1.34)}px"
-		viewBox="0 0 22 52"
+		style="height:{Math.round(size * 1.52)}px"
+		viewBox="0 0 53 158"
 		aria-hidden="true"
 	>
-		<path
-			d="M11 2c5 0 8.5 3.7 8.5 8.4 0 2.9-1.4 4.8-2.8 6.5-1.1 1.3-2 2.5-2.3 4.3l-.9 5.6a1.4 1.4 0 0 1-1.4 1.2H8.9a1.4 1.4 0 0 1-1.4-1.2l-.9-5.6c-.3-1.8-1.2-3-2.3-4.3C2.9 15.2 1.5 13.3 1.5 10.4 1.5 5.7 5 2 11 2z"
-			fill="#f6d34e"
-			stroke="#d8ab34"
-			stroke-width=".7"
+		<!-- 유리 = 숫자 0의 6획. 좌표를 그대로 재사용한다 -->
+		{#each GLASS as k (k)}
+			<rect
+				x={SEG[k][0]}
+				y={SEG[k][1]}
+				width={SEG[k][2]}
+				height={SEG[k][3]}
+				rx="3"
+				fill="var(--gold)"
+			/>
+		{/each}
+		<!-- 필라멘트 = g획 자리. 꺼져 있다가 켜지는 그 획이다 -->
+		<rect
+			x={SEG.g[0]}
+			y={SEG.g[1]}
+			width={SEG.g[2]}
+			height={SEG.g[3]}
+			rx="3"
+			fill="#d8ab34"
 		/>
-		<path
-			d="M8 10.5l3 3 3-3"
-			fill="none"
-			stroke="#2c2822"
-			stroke-width="1.7"
-			stroke-linecap="round"
-			stroke-linejoin="round"
-		/>
-		<circle cx="11" cy="46.5" r="3.4" fill="currentColor" />
+		<!-- 소켓 두 줄 -->
+		<rect x="14" y="98" width="25" height="6" rx="3" fill="var(--border-strong)" />
+		<rect x="16" y="108" width="21" height="6" rx="3" fill="var(--border-strong)" />
+		<!-- 줄기 = 세그먼트 세로획과 같은 폭·라운드 -->
+		<rect x="23" y="118" width="7" height="20" rx="3" fill="currentColor" />
+		<!-- 점 = 원이 아니라 세그먼트와 같은 코너 -->
+		<rect x="19.5" y="144" width="14" height="14" rx="3" fill="currentColor" />
 	</svg>
 </a>
 
@@ -32,20 +65,20 @@
 	.logo {
 		display: inline-flex;
 		align-items: center;
-		gap: 4px;
+		gap: 5px;
 		text-decoration: none;
 		color: var(--text);
 	}
+	/* Georgia 세리프를 버렸다 — 사이트 전체가 Pretendard인데 로고만 세리프일 이유가 없다.
+	   무게는 900(--fw-number: 숫자·로고 전용)으로 아이콘과 균형을 맞춘다. */
 	.word {
-		font-family: Georgia, 'Nanum Myeongjo', 'Batang', serif;
-		font-weight: 900;
-		letter-spacing: -1px;
+		font-weight: var(--fw-number);
+		letter-spacing: -1.5px;
 		color: var(--text);
 		line-height: 1;
 	}
 	.excl {
 		display: block;
-		margin-left: 1px;
-		transform: translateY(-2px);
+		transform: translateY(-1px);
 	}
 </style>
