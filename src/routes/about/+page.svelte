@@ -32,6 +32,8 @@
 	<p>문제 제보·문의·제휴는 이메일 <b>ddalkkak.puzzle@gmail.com</b> 으로 보내 주세요.</p>
 </div>
 
+<a class="start-cta" href="/">오늘의 딸깍 풀어보기 →</a>
+
 <style>
 	.page {
 		max-width: 720px;
@@ -43,6 +45,27 @@
 		line-height: 1.8;
 		font-size: 15px;
 		color: var(--text);
+	}
+	.start-cta {
+		display: block;
+		max-width: 720px;
+		margin: 18px auto 0;
+		padding: 15px 24px;
+		text-align: center;
+		background: var(--accent);
+		color: #fff;
+		border-radius: 13px;
+		font-size: var(--fs-md);
+		font-weight: var(--fw-emphasis);
+		text-decoration: none;
+		box-shadow: 0 1px 2px rgba(44, 40, 34, 0.16);
+		transition:
+			filter 0.18s var(--ease-out),
+			transform var(--dur-tap) var(--ease-out);
+	}
+	.start-cta:hover {
+		filter: brightness(1.06);
+		transform: translateY(-1.5px);
 	}
 	h1 {
 		font-size: 22px;
