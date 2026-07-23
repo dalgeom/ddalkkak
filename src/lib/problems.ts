@@ -3,7 +3,8 @@ export type Block =
 	| { kind: 'pre'; text: string }
 	| { kind: 'lcd'; lines: string[]; frags?: Record<string, string> }
 	| { kind: 'colors'; rows: string[] }
-	| { kind: 'glyph'; lines: string[]; axis?: boolean };
+	| { kind: 'glyph'; lines: string[]; axis?: boolean }
+	| { kind: 'figure'; svg: string; caption?: string };
 
 export interface Problem {
 	id: string;
@@ -1878,5 +1879,21 @@ export const PROBLEMS: Problem[] = [
 			'서로 다른 소인수의 \'종류\' 개수를 셉니다. 8은 소인수가 2 하나뿐이라 1, 30은 2·3·5 세 종류라 3.'
 		],
 		explain: '값은 소인수분해했을 때 나오는 서로 다른 소인수의 개수(종류 수)다. 6=2×3→2종류, 10=2×5→2종류, 8=2×2×2→2 하나뿐이라 1(총 곱해진 횟수 3이 아니라는 점이 여기서 드러남), 30=2×3×5→3종류. 60=2×2×3×5=2²×3×5는 소인수 종류가 2,3,5 세 가지 → 답 3.'
+	},
+	{
+		id: 'bus-dir',
+		chip: '탐색',
+		blocks: [
+			{ kind: 'text', html: '이 버스는 <b>왼쪽</b>과 <b>오른쪽</b> 중 어느 쪽으로 가고 있을까?' },
+			{ kind: 'figure', svg: '<svg viewBox=\'0 0 300 150\' role=\'img\' aria-label=\'옆에서 본 버스\'><rect x=\'18\' y=\'34\' width=\'264\' height=\'78\' rx=\'16\' fill=\'var(--accent-soft)\' stroke=\'var(--accent)\' stroke-width=\'3\'/><rect x=\'36\' y=\'48\' width=\'46\' height=\'34\' rx=\'5\' fill=\'#fff\' stroke=\'var(--accent)\' stroke-width=\'2\'/><rect x=\'92\' y=\'48\' width=\'46\' height=\'34\' rx=\'5\' fill=\'#fff\' stroke=\'var(--accent)\' stroke-width=\'2\'/><rect x=\'148\' y=\'48\' width=\'46\' height=\'34\' rx=\'5\' fill=\'#fff\' stroke=\'var(--accent)\' stroke-width=\'2\'/><rect x=\'204\' y=\'48\' width=\'46\' height=\'34\' rx=\'5\' fill=\'#fff\' stroke=\'var(--accent)\' stroke-width=\'2\'/><circle cx=\'74\' cy=\'118\' r=\'18\' fill=\'var(--text)\'/><circle cx=\'74\' cy=\'118\' r=\'7\' fill=\'var(--panel)\'/><circle cx=\'226\' cy=\'118\' r=\'18\' fill=\'var(--text)\'/><circle cx=\'226\' cy=\'118\' r=\'7\' fill=\'var(--panel)\'/><rect x=\'20\' y=\'92\' width=\'10\' height=\'12\' rx=\'2\' fill=\'var(--gold)\'/><rect x=\'270\' y=\'92\' width=\'10\' height=\'12\' rx=\'2\' fill=\'var(--accent-2)\'/></svg>', caption: '옆에서 본 버스 (한국 도로)' }
+		],
+		type: 'text',
+		answers: ['왼쪽', '왼', '좌'],
+		hints: [
+			'버스에 있어야 할 무언가가 이 그림엔 안 보입니다. 승객이 타고 내리는 곳이요.',
+			'문이 안 보인다는 건, 문이 우리 반대편(먼 쪽)에 있다는 뜻입니다.',
+			'한국은 우측통행이라 버스 문은 인도 쪽 — 진행 방향의 오른쪽에 있습니다. 문이 먼 쪽에 있으려면 버스 앞은 어디를 향해야 할까요?'
+		],
+		explain: '그림엔 창문·바퀴만 있고 <b>승객용 문</b>이 없다 — 문이 우리 반대편에 있다는 뜻. 한국은 우측통행이라 버스 문은 진행 방향 기준 오른쪽(인도 쪽)에 있다. 문이 우리에게서 먼 쪽에 있으려면 버스 앞이 <b>왼쪽</b>을 향해야 한다. 답 <b>왼쪽</b>.'
 	}
 ];

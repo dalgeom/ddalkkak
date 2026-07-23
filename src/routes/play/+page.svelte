@@ -16,6 +16,7 @@
 	import SevenSeg from '$lib/components/SevenSeg.svelte';
 	import ColorBlocks from '$lib/components/ColorBlocks.svelte';
 	import Glyph from '$lib/components/Glyph.svelte';
+	import Figure from '$lib/components/Figure.svelte';
 	import AdSlot from '$lib/components/AdSlot.svelte';
 	import Icon from '$lib/components/Icon.svelte';
 
@@ -366,6 +367,8 @@
 						<ColorBlocks rows={b.rows} />
 					{:else if b.kind === 'glyph'}
 						<Glyph lines={b.lines} axis={b.axis} />
+					{:else if b.kind === 'figure'}
+						<Figure svg={b.svg} caption={b.caption} />
 					{/if}
 				{/each}
 			</div>
