@@ -22,6 +22,7 @@
 	import MatchstickBoard from '$lib/components/MatchstickBoard.svelte';
 	import { parseEq } from '$lib/matchstick';
 	import ColorBlocks from '$lib/components/ColorBlocks.svelte';
+	import Glyph from '$lib/components/Glyph.svelte';
 	import AdSlot from '$lib/components/AdSlot.svelte';
 	import Icon from '$lib/components/Icon.svelte';
 	import SegNumber from '$lib/components/SegNumber.svelte';
@@ -744,6 +745,8 @@
 							<SevenSeg lines={b.lines} frags={b.frags} />
 						{:else if b.kind === 'colors'}
 							<ColorBlocks rows={b.rows} />
+						{:else if b.kind === 'glyph'}
+							<Glyph lines={b.lines} axis={b.axis} />
 						{/if}
 					{/each}
 				</div>

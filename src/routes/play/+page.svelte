@@ -15,6 +15,7 @@
 	import { shareResult, outcomeMessage } from '$lib/shareCard';
 	import SevenSeg from '$lib/components/SevenSeg.svelte';
 	import ColorBlocks from '$lib/components/ColorBlocks.svelte';
+	import Glyph from '$lib/components/Glyph.svelte';
 	import AdSlot from '$lib/components/AdSlot.svelte';
 	import Icon from '$lib/components/Icon.svelte';
 
@@ -363,6 +364,8 @@
 						<SevenSeg lines={b.lines} frags={b.frags} />
 					{:else if b.kind === 'colors'}
 						<ColorBlocks rows={b.rows} />
+					{:else if b.kind === 'glyph'}
+						<Glyph lines={b.lines} axis={b.axis} />
 					{/if}
 				{/each}
 			</div>
