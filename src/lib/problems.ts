@@ -2,7 +2,8 @@ export type Block =
 	| { kind: 'text'; html: string }
 	| { kind: 'pre'; text: string }
 	| { kind: 'lcd'; lines: string[]; frags?: Record<string, string> }
-	| { kind: 'colors'; rows: string[] };
+	| { kind: 'colors'; rows: string[] }
+	| { kind: 'glyph'; lines: string[]; axis?: boolean };
 
 export interface Problem {
 	id: string;
@@ -996,7 +997,10 @@ export const PROBLEMS: Problem[] = [
 	{
 		id: 'hanja-strokes',
 		chip: '한자',
-		blocks: [{ kind: 'pre', text: '一 = 1\n二 = 2\n五 = 4\n\n四 = ?' }],
+		blocks: [
+			{ kind: 'text', html: '물음표에 들어갈 수는?' },
+			{ kind: 'glyph', lines: ['一 = 1', '二 = 2', '五 = 4', '四 = ?'] }
+		],
 		type: 'text',
 		answers: ['5'],
 		hints: [
