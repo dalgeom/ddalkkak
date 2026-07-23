@@ -287,10 +287,42 @@
 		buildCalendar();
 	}
 
+	/** 방금 끝낸 트랙에만 완료 축하 모션을 준다 — 허브 로드 시 모든 완료 카드가 튀는 잡음을 피한다 */
+	let pulseKey = $state<TrackKey | null>(null);
+	let celebrateAll = $state(false);
+	let pulseTimer: ReturnType<typeof setTimeout> | undefined;
+
 	function goHub() {
+		const justFinished = phase === 'done' && mode === 'daily';
+		const finishedTrack = track;
 		phase = 'hub';
 		refreshTrackState();
 		buildCalendar();
+		if (justFinished && trackDone[finishedTrack]) {
+			clearTimeout(pulseTimer);
+			pulseKey = finishedTrack;
+			// 3트랙 완주 축하는 하루 한 번만 — trackDone은 플레이 중 실시간 갱신돼
+			// '방금 완성됐는지'를 못 가리므로 localStorage 플래그로 판정한다
+			const celKey = `ddal.celebrated.${dayNum}`;
+			let already = true;
+			try {
+				already = !!localStorage.getItem(celKey);
+			} catch {
+				/* 무시 */
+			}
+			if (allInlineDone && !already) {
+				celebrateAll = true;
+				try {
+					localStorage.setItem(celKey, '1');
+				} catch {
+					/* 무시 */
+				}
+			}
+			pulseTimer = setTimeout(() => {
+				pulseKey = null;
+				celebrateAll = false;
+			}, 900);
+		}
 		if (browser) window.scrollTo({ top: 0, behavior: 'smooth' });
 	}
 
@@ -490,11 +522,23 @@
 	</div>
 {/if}
 
+{#if celebrateAll}
+	<div class="celebrate">
+		<Icon name="correct" size={17} />
+		<span>오늘의 딸깍 완주! 내일 또 만나요</span>
+	</div>
+{/if}
+
 {#if phase === 'landing' || phase === 'hub'}
 	<section class="tracks">
 		{#each TRACK_META as t (t.key)}
 			{#if t.key === 'match'}
-				<a class="track" class:cleared={trackDone[t.key]} href="/matchstick?daily=1">
+				<a
+					class="track"
+					class:cleared={trackDone[t.key]}
+					class:pulse={pulseKey === t.key}
+					href="/matchstick?daily=1"
+				>
 					<span class="t-top">
 						<Icon name={trackDone[t.key] ? 'correct' : t.icon} size={17} />{t.name}
 					</span>
@@ -518,6 +562,7 @@
 					class="track"
 					class:feature={t.key === 'discover'}
 					class:cleared={trackDone[t.key]}
+					class:pulse={pulseKey === t.key}
 					onclick={() => startTrack(t.key)}
 				>
 					<span class="t-top">
@@ -1574,6 +1619,34 @@
 	}
 	.track:active {
 		transform: translateY(0) scale(0.995);
+	}
+	/* 방금 완료한 트랙만 한 번 튄다 (transform/opacity, reduce-motion 전역 룰이 무력화) */
+	.track.pulse {
+		animation: track-pop 0.6s var(--ease-pop);
+	}
+	@keyframes track-pop {
+		0% { transform: scale(1); }
+		40% { transform: scale(1.035); }
+		100% { transform: scale(1); }
+	}
+	.celebrate {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 8px;
+		margin-top: 14px;
+		padding: 12px;
+		border-radius: 14px;
+		background: var(--accent-soft);
+		border: 1px solid #cfe6d8;
+		color: #1f6b41;
+		font-size: var(--fs-sm);
+		font-weight: var(--fw-emphasis);
+		animation: celebrate-in 0.5s var(--ease-pop);
+	}
+	@keyframes celebrate-in {
+		0% { opacity: 0; transform: translateY(-8px) scale(0.96); }
+		100% { opacity: 1; transform: none; }
 	}
 	.track.cleared {
 		border-color: #cfe6d8;
