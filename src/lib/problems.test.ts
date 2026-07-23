@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { PROBLEMS } from './problems';
+import { PROBLEMS, DISCOVER_FIELDS, fieldOfChip } from './problems';
 
 describe('문제 은행 무결성', () => {
 	it('id가 중복되지 않는다', () => {
@@ -59,5 +59,20 @@ describe('문제 은행 무결성', () => {
 				}
 			}
 		}
+	});
+});
+describe('발견형 분야 태깅', () => {
+	it('모든 발견형 chip이 정의된 6개 분야 중 하나로 매핑된다', () => {
+		for (const p of PROBLEMS) {
+			expect(DISCOVER_FIELDS, p.chip).toContain(fieldOfChip(p.chip));
+		}
+	});
+	it('빈 분야가 없다 — 6개 분야 각각 최소 1문제', () => {
+		const counts = new Map<string, number>();
+		for (const p of PROBLEMS) {
+			const f = fieldOfChip(p.chip);
+			counts.set(f, (counts.get(f) ?? 0) + 1);
+		}
+		for (const f of DISCOVER_FIELDS) expect(counts.get(f) ?? 0, f).toBeGreaterThan(0);
 	});
 });

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { browser, dev } from '$app/environment';
-	import { PROBLEMS, GRADES, type Problem } from '$lib/problems';
+	import { PROBLEMS, GRADES, DISCOVER_FIELDS, fieldOfChip, type Problem } from '$lib/problems';
 	import { TRIVIA } from '$lib/trivia';
 	import {
 		TRACKS,
@@ -104,6 +104,17 @@
 		const m = new Map<string, number>();
 		for (const t of TRIVIA) m.set(t.category!, (m.get(t.category!) ?? 0) + 1);
 		return [...m.entries()].sort((a, b) => b[1] - a[1]);
+	})();
+	/** 발견형은 chip이 35종이라 그대로 보여주면 시끄럽다. 6개 상위 분야로 묶어 보여준다. */
+	const FIELD_COUNTS = (() => {
+		const m = new Map<string, number>();
+		for (const p of PROBLEMS) {
+			const f = fieldOfChip(p.chip);
+			m.set(f, (m.get(f) ?? 0) + 1);
+		}
+		return DISCOVER_FIELDS.map((f) => [f, m.get(f) ?? 0] as [string, number]).filter(
+			([, c]) => c > 0
+		);
 	})();
 	const GRADE_COUNTS = GRADES.map((g) => ({
 		key: g.key,
@@ -553,6 +564,24 @@
 			<span>모두 합쳐</span>
 			<SegNumber value={PROBLEMS.length + TRIVIA.length + MATCH_TOTAL} size={34} />
 			<span>문제</span>
+		</div>
+	</section>
+
+	<!-- 발견형 분야 밀도 (chip 35종을 6개 분야로) -->
+	<section class="fields">
+		<div class="fields-head">
+			<span class="fields-title">발견형 {PROBLEMS.length}문제 · {FIELD_COUNTS.length}개 분야</span>
+			<a class="fields-more" href="/play?filter=puzzle">연속으로 풀기 →</a>
+		</div>
+		<div class="field-bar" aria-hidden="true">
+			{#each FIELD_COUNTS as [name, count] (name)}
+				<span class="field-seg" style="flex-grow:{count}" title="{name} · {count}문제"></span>
+			{/each}
+		</div>
+		<div class="field-pills compact">
+			{#each FIELD_COUNTS as [name, count] (name)}
+				<span class="field-pill static">{name}<span>{count}</span></span>
+			{/each}
 		</div>
 	</section>
 
@@ -1974,6 +2003,17 @@
 			border-color var(--dur-tap) var(--ease-out),
 			color var(--dur-tap) var(--ease-out),
 			transform var(--dur-tap) var(--ease-out);
+	}
+	.field-pills.compact {
+		margin-top: 10px;
+	}
+	.field-pill.static {
+		cursor: default;
+	}
+	.field-pill.static:hover {
+		border-color: var(--border);
+		color: var(--text);
+		transform: none;
 	}
 	.field-pill:hover {
 		border-color: var(--accent);
