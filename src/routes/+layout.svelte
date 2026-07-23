@@ -81,6 +81,7 @@
 				{#each TABS as t (t.href)}
 					<a href={t.href}>{t.label}</a>
 				{/each}
+				<a href="/archive">지난 문제</a>
 			</nav>
 			<nav class="foot-col">
 				<span class="foot-h">안내</span>
