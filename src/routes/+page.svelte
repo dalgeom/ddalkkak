@@ -851,10 +851,17 @@
 						<button class="btn ghost wide" onclick={() => startTrack(nextTrack.key)}>
 							{nextTrack.name} 이어서 풀기 →
 						</button>
+					{:else if !trackDone['match']}
+						<a class="btn ghost wide" href="/matchstick?daily=1">오늘의 성냥개비 풀기 →</a>
+					{:else}
+						<!-- 오늘 3트랙 완주 → 더 풀 거리로 유도(세션 PV·광고 노출↑, 내부링크 SEO) -->
+						<a class="btn ghost wide" href="/play">연속 모드로 더 풀기 →</a>
+						<a class="btn ghost wide" href="/archive">지난 문제 다시 풀기 →</a>
 					{/if}
 					<button class="btn ghost wide" onclick={goHub}>오늘의 딸깍으로</button>
 				{:else}
 					<button class="btn ghost wide" onclick={startRandom}>또 풀기</button>
+					<a class="btn ghost wide" href="/archive">지난 문제 풀기 →</a>
 					<button class="btn ghost wide" onclick={goHub}>오늘의 딸깍으로</button>
 				{/if}
 			</div>
@@ -1186,6 +1193,13 @@
 	.btn.wide {
 		width: 100%;
 		margin-top: 14px;
+	}
+	/* funnel 링크를 버튼처럼 — <a>는 실제 내부링크라 크롤러도 따라간다(PV·SEO) */
+	a.btn {
+		display: block;
+		box-sizing: border-box;
+		text-align: center;
+		text-decoration: none;
 	}
 	.btn:disabled {
 		opacity: 0.5;
