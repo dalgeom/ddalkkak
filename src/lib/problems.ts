@@ -49,6 +49,10 @@ const CHIP_FIELD: Record<string, DiscoverField> = {
 	'숫자의 정체': '수·연산',
 	'큰 수': '수·연산',
 	접기: '수·연산',
+	이어붙이기: '수·연산',
+	'순서 규칙': '수·연산',
+	끼워넣기: '수·연산',
+	'수 뒤집기': '수·연산',
 	// 언어·문자
 	영단어: '언어·문자',
 	한글: '언어·문자',
@@ -58,15 +62,22 @@ const CHIP_FIELD: Record<string, DiscoverField> = {
 	사자성어: '언어·문자',
 	알파벳: '언어·문자',
 	한자: '언어·문자',
+	자판: '언어·문자',
+	'숨은 단어': '언어·문자',
+	'단어 겹침': '언어·문자',
+	거꾸로: '언어·문자',
 	// 달력·시간
 	달력: '달력·시간',
 	시계: '달력·시간',
 	요일: '달력·시간',
 	시간: '달력·시간',
+	'시계 간격': '달력·시간',
 	// 규칙·분류
 	클럽: '규칙·분류',
 	사슬: '규칙·분류',
 	함정: '규칙·분류',
+	'이웃 합': '규칙·분류',
+	'이웃 순환': '규칙·분류',
 	// 도형·전광판
 	전광판: '도형·전광판',
 	색깔: '도형·전광판',
@@ -78,6 +89,9 @@ const CHIP_FIELD: Record<string, DiscoverField> = {
 	'삐딱한 선': '도형·전광판',
 	끝점: '도형·전광판',
 	곡선: '도형·전광판',
+	'모음 획': '도형·전광판',
+	세그먼트: '도형·전광판',
+	'글자 높낮이': '도형·전광판',
 	// 관찰·추리
 	탐색: '관찰·추리',
 	관찰: '관찰·추리',
@@ -2063,5 +2077,229 @@ export const PROBLEMS: Problem[] = [
 			'CODE를 보세요. C, O, D는 둥근 부분이 있고 E는 곧은 선뿐이죠. 그래서 둥근 글자가 3개라 값은 3입니다. SNAKE에서도 둥근 부분이 있는 글자가 몇 개인지 하나씩 짚어보세요.'
 		],
 		explain: '값은 단어 속 <b>둥근 부분이 있는 글자의 수</b>. MATH와 CODE는 똑같이 4글자인데 0과 3으로 갈리니, 글자 수가 아니라 생김새가 기준. SNAKE는 S만 둥글고 N·A·K·E는 곧은 선뿐 → <b>1</b>.'
+	},
+	{
+		id: 'num-diffsum',
+		chip: '이어붙이기',
+		blocks: [
+			{ kind: 'text', html: '물음표에 들어갈 수는?' },
+			{ kind: 'pre', text: '5+3=28\n9+1=810\n8+6=214\n5+4=19\n7+3=?' }
+		],
+		type: 'text',
+		answers: ['410'],
+		hints: [
+			'오른쪽 숫자를 앞부분과 뒷부분 두 조각으로 나눠서 봐.',
+			'앞 조각은 두 수의 차, 뒷 조각은 두 수의 합이야.',
+			'7+3이면 차는 4, 합은 10이니까 이어붙이면?'
+		],
+		explain: '규칙: 두 수의 차와 합을 구해 \'차합\' 순서로 이어붙인다. 5+3→차2,합8→28. 9+1→차8,합10→810(합이 두 자리라 전체가 세 자리). 7+3→차4,합10→410.'
+	},
+	{
+		id: 'num-parityorder',
+		chip: '순서 규칙',
+		blocks: [
+			{ kind: 'text', html: '물음표에 들어갈 수는?' },
+			{ kind: 'pre', text: '4+6=46\n3+5=35\n3+4=43\n6+2=62\n5+8=?' }
+		],
+		type: 'text',
+		answers: ['85'],
+		hints: [
+			'두 수를 더한 값이 짝수인 줄과 홀수인 줄을 나눠서 봐.',
+			'홀수 합인 줄에서는 답의 숫자 순서가 반대야.',
+			'5+8=13은 홀수니까, 8과 5 중 뭐가 먼저 올까?'
+		],
+		explain: '규칙: 합이 짝수면 a→b, 홀수면 b→a 순서로 이어붙인다. 3+4=7(홀수)→43. 5+8=13(홀수)→85.'
+	},
+	{
+		id: 'num-insertdiff',
+		chip: '끼워넣기',
+		blocks: [
+			{ kind: 'text', html: '물음표에 들어갈 수는?' },
+			{ kind: 'pre', text: '3+7=347\n5+2=532\n6+6=606\n8+3=853\n9+4=?' }
+		],
+		type: 'text',
+		answers: ['954'],
+		hints: [
+			'세 자리 답의 맨 앞과 맨 뒤 숫자를 a, b와 비교해봐.',
+			'가운데 한 자리 숫자는 a와 b의 차이야.',
+			'9+4는 차이가 5니까, 9와 4 사이에 5를 끼우면?'
+		],
+		explain: '규칙: a와 b 사이에 |a-b|를 끼워 넣는다. 3+7→차4→347. 6+6→차0→606. 9+4→차5→954.'
+	},
+	{
+		id: 'num-reverse1',
+		chip: '수 뒤집기',
+		blocks: [
+			{ kind: 'text', html: '물음표에 들어갈 수는?' },
+			{ kind: 'pre', text: '2+5=53\n3+6=64\n1+9=92\n9+2=30\n8+9=?' }
+		],
+		type: 'text',
+		answers: ['99'],
+		hints: [
+			'a와 b를 붙여 만든 두 자리 수를 뒤집어봐.',
+			'뒤집은 값에 1을 더하는 것까지가 규칙이야.',
+			'8+9를 붙이면 89, 뒤집으면 98, 1을 더하면?'
+		],
+		explain: '규칙: concat(a,b)를 뒤집고 1을 더한다. 2+5→52+1=53. 9+2→29+1=30(자리올림 발생). 8+9→98+1=99.'
+	},
+	{
+		id: 'glyph-vowel-branch',
+		chip: '모음 획',
+		blocks: [
+			{ kind: 'text', html: '물음표에 들어갈 수는?' },
+			{ kind: 'glyph', lines: ['ㅡ = 0', 'ㅑ = 2', 'ㅗ = 1', 'ㅠ = ?'] }
+		],
+		type: 'text',
+		answers: ['2', '2개'],
+		hints: [
+			'ㅡ는 모음 순서로 치면 뒤쪽인데 값은 0이에요.',
+			'긴 선 하나에 짧은 가지가 몇 개 붙어있는지 세어보세요.',
+			'ㅑㅕㅛㅠ는 가지가 2개, ㅏㅓㅗㅜ는 1개, ㅡㅣ는 0개예요.'
+		],
+		explain: '규칙: 기본 모음은 긴 선(ㅡ 또는 ㅣ)에 짧은 가지가 몇 개 붙었는지로 구별된다. ㅡㅣ는 가지가 0개, ㅏㅓㅗㅜ는 1개, ㅑㅕㅛㅠ는 2개. ㅠ는 가지가 2개다.'
+	},
+	{
+		id: 'glyph-seg-vertical',
+		chip: '세그먼트',
+		blocks: [
+			{ kind: 'text', html: '물음표에 들어갈 수는?' },
+			{ kind: 'lcd', lines: ['8 = 4', '1 = 2', '0 = 4', '7 = ?'] }
+		],
+		type: 'text',
+		answers: ['2', '2개'],
+		hints: [
+			'8은 불이 다 켜지는 숫자로 유명한데 값은 4예요.',
+			'가로로 누운 칸은 빼고, 세로로 선 칸만 세어보세요.',
+			'0은 세로칸이 4개, 1은 2개예요.'
+		],
+		explain: '규칙: 전자시계 숫자 모양에서 세로로 놓인 칸(선)만 센다. 8은 불이 다 켜져 총 7칸이지만 그중 세로칸은 4개. 7은 총 3칸 중 세로칸이 2개뿐이다.'
+	},
+	{
+		id: 'glyph-ascdesc',
+		chip: '글자 높낮이',
+		blocks: [
+			{ kind: 'text', html: '물음표에 들어갈 수는?' },
+			{ kind: 'glyph', lines: ['dog = 2', 'queen = 1', 'happy = ?'] }
+		],
+		type: 'text',
+		answers: ['4', '4개'],
+		hints: [
+			'queen엔 모음이 3개나 있는데 값은 1이에요.',
+			'보통 글자 키를 넘어 위로 솟거나 아래로 내려가는 글자를 찾아보세요.',
+			'dog에서는 d와 g, 딱 그 둘이 삐져나와 있어요.'
+		],
+		explain: '규칙: 단어에서 보통 글자 높이를 넘어 위로 솟거나(b,d,f,h,k,l,t) 아래로 내려가는(g,j,p,q,y) 글자 수를 센다. queen은 모음이 3개나 되지만 삐져나온 글자는 q 하나라 1. happy는 h,p,p,y 네 글자가 삐져나와 4다.'
+	},
+	{
+		id: 'word-keyboard',
+		chip: '자판',
+		blocks: [
+			{ kind: 'text', html: '이 중 나머지와 규칙이 다른 하나는?' },
+			{ kind: 'pre', text: 'POTTER\nTYPE\nPEPPER\nQUIET\nSTEWARD' }
+		],
+		type: 'text',
+		answers: ['STEWARD', 'steward'],
+		hints: [
+			'같은 글자가 겹치는지부터 세어봐도 답이 안 나온다',
+			'손가락을 키보드 위에 얹고 실제로 한 단어씩 쳐보라',
+			'네 단어는 자판 맨 윗줄 글자로만 쳐지는데, 하나만 다른 줄 글자가 섞여 있다'
+		],
+		explain: 'POTTER, TYPE, PEPPER, QUIET는 모두 자판 맨 윗줄(QWERTYUIOP)에 있는 글자만으로 이루어져 있다. STEWARD는 S가 가운뎃줄에 있어 윗줄만으로 칠 수 없다.'
+	},
+	{
+		id: 'word-hidden-number',
+		chip: '숨은 단어',
+		blocks: [
+			{ kind: 'text', html: '이 중 나머지와 규칙이 다른 하나는?' },
+			{ kind: 'pre', text: 'MONEY\nLISTEN\nCANINE\nOUTWORN\nGARDEN' }
+		],
+		type: 'text',
+		answers: ['GARDEN', 'garden'],
+		hints: [
+			'글자 수를 세어봐도 뚜렷한 규칙이 없다',
+			'각 단어를 통째로 읽지 말고, 이어진 몇 글자만 따로 떼어 읽어보라',
+			'MONEY 안엔 ONE이, LISTEN 안엔 TEN이 숨어 있다 — 하나만 숫자가 안 산다'
+		],
+		explain: 'MONEY(m-ONE-y), LISTEN(lis-TEN), CANINE(ca-NINE), OUTWORN(ou-TWO-rn)에는 각각 영어 숫자 단어가 연속된 글자로 숨어 있다. GARDEN 안에는 그런 숫자가 하나도 숨어 있지 않다.'
+	},
+	{
+		id: 'word-overlap',
+		chip: '단어 겹침',
+		blocks: [
+			{ kind: 'text', html: '물음표에 들어갈 단어는?' },
+			{ kind: 'pre', text: 'LEMON + ONION = LEMONION\nCARPET + PETAL = CARPETAL\nSPINACH + CHAIR = ?' }
+		],
+		type: 'text',
+		answers: ['SPINACHAIR', 'spinachair'],
+		hints: [
+			'합쳐진 단어의 글자 수를 세어보면 두 단어를 그냥 이어붙인 것보다 짧다.',
+			'앞 단어의 끝부분과 뒷 단어의 앞부분이 서로 겹쳐 포개진다.',
+			'SPINACH의 끝 CH와 CHAIR의 앞 CH가 겹친다 — SPINA + CH + AIR.'
+		],
+		explain: '두 단어의 끝과 시작이 겹치는 만큼 포개어 하나로 합친다. LEMON+ONION은 ON이 겹쳐 LEMONION, CARPET+PETAL은 PET이 겹쳐 CARPETAL. SPINACH와 CHAIR는 CH가 겹쳐 <b>SPINACHAIR</b>.'
+	},
+	{
+		id: 'word-reverse',
+		chip: '거꾸로',
+		blocks: [
+			{ kind: 'text', html: '이 중 나머지와 규칙이 다른 하나는?' },
+			{ kind: 'pre', text: 'STRAW\nSPIT\nDRAWER\nDEER\nTABLE' }
+		],
+		type: 'text',
+		answers: ['TABLE', 'table'],
+		hints: [
+			'각 단어를 손으로 직접 거꾸로 써 보라',
+			'STRAW를 거꾸로 쓰면 WARTS, SPIT을 거꾸로 쓰면 TIPS가 된다',
+			'다섯 단어 중 하나만 거꾸로 써도 진짜 단어가 안 나온다'
+		],
+		explain: 'STRAW→WARTS, SPIT→TIPS, DRAWER→REWARD, DEER→REED는 거꾸로 읽으면 모두 다른 뜻의 진짜 단어가 된다. TABLE만 거꾸로 읽으면 ELBAT로 실제 단어가 아니다.'
+	},
+	{
+		id: 'struct-add',
+		chip: '이웃 합',
+		blocks: [
+			{ kind: 'text', html: '물음표에 들어갈 수는?' },
+			{ kind: 'pre', text: '  2     6     3     9     4\n2    8    9    ?   13    4' }
+		],
+		type: 'text',
+		answers: ['12'],
+		hints: [
+			'위와 아래 숫자 개수가 다르다 — 그냥 한 칸씩 짝지으면 하나가 남는다.',
+			'아래 첫 값과 마지막 값은 위쪽 끝 숫자와 똑같다 — 왜 끝에서는 그대로일까?',
+			'각 아래 값을 바로 위 인접한 두 수의 합으로 계산해보라(끝은 한쪽이 0).'
+		],
+		explain: '각 아래 수는 바로 위 이웃한 두 수의 합(끝은 0을 더한 것과 같음)이다. 물음표 자리는 3과 9 사이이므로 3+9=12.'
+	},
+	{
+		id: 'struct-clock',
+		chip: '시계 간격',
+		blocks: [
+			{ kind: 'text', html: '물음표에 들어갈 수는?' },
+			{ kind: 'pre', text: '11시   2시   7시   4시\n  3    ?    3' }
+		],
+		type: 'text',
+		answers: ['5'],
+		hints: [
+			'위는 시각 4개, 아래는 숫자 3개 — 시각 사이사이의 값처럼 보인다.',
+			'11시와 2시는 숫자로는 9칸 차이지만, 시계 반대 방향으로 돌면 더 가깝다.',
+			'7시와 4시 사이의 짧은 쪽 거리를 시계 방향/반대 방향 둘 다 재보라.'
+		],
+		explain: '이웃한 두 시각 사이 더 짧은 간격: 2시와 7시는 시계방향 5칸, 반대방향 7칸 중 짧은 쪽인 5.'
+	},
+	{
+		id: 'struct-alpha-mod',
+		chip: '이웃 순환',
+		blocks: [
+			{ kind: 'text', html: '물음표에 들어갈 글자는?' },
+			{ kind: 'pre', text: 'S    V    D    X    B\n  O    Z    ?    Z' }
+		],
+		type: 'text',
+		answers: ['B', 'b'],
+		hints: [
+			'위 5글자, 아래 4글자 — 이웃한 두 글자씩 짝지으면 딱 맞는다.',
+			'S(19)와 V(22)를 더하면 26을 넘는다 — 그 다음엔 어떻게 될까?',
+			'D(4)와 X(24)의 순번 합을 26으로 나눈 나머지를 글자로 바꿔보라.'
+		],
+		explain: '이웃한 두 글자 순번 합의 26 나머지 글자: D(4)+X(24)=28→28-26=2→B.'
 	}
 ];
