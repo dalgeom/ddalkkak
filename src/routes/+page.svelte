@@ -112,6 +112,49 @@
 	let showCats = $state(false);
 
 	let doneCount = $derived(TRACKS.filter((t) => trackDone[t.key]).length);
+
+	/** 하루 전체 결과를 Wordle식 3줄 그리드로 공유한다 — 데일리 정체성의 핵심 바이럴 장치 */
+	async function shareToday() {
+		if (!browser) return;
+		const rowFor = (k: TrackKey): string => {
+			try {
+				const rec = JSON.parse(localStorage.getItem(`ddal.daily.${dayNum}.${k}`) || 'null');
+				if (!rec?.results) return '';
+				// 발견/상식은 이모지(✅💡🔓), 성냥개비는 win/fail 문자열 — 정규화한다
+				return (rec.results as string[])
+					.map((r) => (r === 'win' ? '✅' : r === 'fail' ? '🔓' : r))
+					.join('');
+			} catch {
+				return '';
+			}
+		};
+		const rows = [
+			{ key: 'discover' as TrackKey, label: '발견' },
+			{ key: 'trivia' as TrackKey, label: '상식' },
+			{ key: 'match' as TrackKey, label: '성냥' }
+		]
+			.map((r) => ({ label: r.label, emoji: rowFor(r.key) }))
+			.filter((r) => r.emoji);
+		const solvedN = rows.reduce(
+			(n, r) => n + [...r.emoji].filter((e) => e === '✅' || e === '💡').length,
+			0
+		);
+		const totalN = TRACKS.reduce((n, t) => n + t.size, 0);
+		let text = `딸깍 ${dateLabel}\n${rows.map((r) => `${r.label} ${r.emoji}`).join('\n')}\n${solvedN}/${totalN}`;
+		if (stats.dayStreak > 1) text += ` · 🔥 ${stats.dayStreak}일 연속`;
+		text += `\n${location.origin}`;
+		const outcome = await shareResult(
+			{
+				title: `오늘의 딸깍 · ${dateLabel}`,
+				scoreLabel: `${solvedN} / ${totalN}`,
+				gridRows: rows,
+				subLine: stats.dayStreak > 1 ? `🔥 ${stats.dayStreak}일 연속` : undefined,
+				cta: '너도 오늘의 딸깍 풀어볼래?'
+			},
+			text
+		);
+		toast(outcomeMessage(outcome));
+	}
 	let nextTrack = $derived(
 		TRACKS.find((t) => t.key !== 'match' && t.key !== track && !trackDone[t.key]) ?? null
 	);
@@ -347,10 +390,10 @@
 	}
 
 	async function share() {
-		const label = mode === 'daily' ? `오늘의 퍼즐 (${dateLabel})` : '랜덤 3문제';
+		const label = mode === 'daily' ? `${trackInfo.name} · ${dateLabel}` : '랜덤 3문제';
 		const solvedN = results.filter((r) => r !== '🔓').length;
 		let text = `딸깍! ${label} ${solvedN}/${results.length} ${results.join('')}`;
-		if (mode === 'daily' && stats.dayStreak > 1) text += `\n${stats.dayStreak}일 연속`;
+		if (mode === 'daily' && stats.dayStreak > 1) text += `\n🔥 ${stats.dayStreak}일 연속`;
 		text += `\n${location.origin}`;
 		const outcome = await shareResult(
 			{
@@ -358,8 +401,8 @@
 				scoreLabel: `${solvedN} / ${results.length}`,
 				emojiRow: results.join(' '),
 				subLine:
-					mode === 'daily' && stats.dayStreak > 1 ? `${stats.dayStreak}일 연속` : undefined,
-				cta: '너도 오늘의 퍼즐 풀어볼래?'
+					mode === 'daily' && stats.dayStreak > 1 ? `🔥 ${stats.dayStreak}일 연속` : undefined,
+				cta: '너도 오늘의 딸깍 풀어볼래?'
 			},
 			text
 		);
@@ -569,6 +612,12 @@
 					<div class="stat"><b>{stats.maxStreak}</b><span>최고</span></div>
 					<div class="stat"><b>{stats.score.toLocaleString()}</b><span>총점</span></div>
 				</div>
+			{/if}
+			{#if doneCount > 0}
+				<button class="share-today" class:ready={allInlineDone} onclick={shareToday}>
+					<Icon name="share" size={15} />
+					{allInlineDone ? '오늘 결과 공유하기' : '지금까지 결과 공유'}
+				</button>
 			{/if}
 		</div>
 		<div class="panel">
@@ -1777,6 +1826,40 @@
 	}
 
 	/* 기록 패널: 오늘 진행 */
+	.share-today {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 7px;
+		width: 100%;
+		margin-top: 12px;
+		padding: 10px;
+		border-radius: 12px;
+		border: 1.5px solid var(--border-strong);
+		border-bottom-width: 3px;
+		background: var(--panel-2);
+		color: var(--muted);
+		font-family: inherit;
+		font-size: var(--fs-2xs);
+		font-weight: var(--fw-emphasis);
+		cursor: pointer;
+		transition:
+			color var(--dur-tap) var(--ease-out),
+			border-color var(--dur-tap) var(--ease-out),
+			background var(--dur-tap) var(--ease-out);
+	}
+	.share-today:hover {
+		color: var(--text);
+		border-color: var(--accent);
+	}
+	.share-today:active {
+		border-bottom-width: 1px;
+	}
+	.share-today.ready {
+		background: var(--accent-soft);
+		border-color: #cfe6d8;
+		color: #1f6b41;
+	}
 	.today-row {
 		display: flex;
 		align-items: center;
