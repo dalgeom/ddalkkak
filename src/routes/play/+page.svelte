@@ -10,7 +10,8 @@
 		isCorrectText,
 		hintUnlocked,
 		isCloseAnswer,
-		wanderBonus
+		wanderBonus,
+		displayChoices
 	} from '$lib/game';
 	import { shareResult, outcomeMessage } from '$lib/shareCard';
 	import SevenSeg from '$lib/components/SevenSeg.svelte';
@@ -78,7 +79,7 @@
 
 	let best = $state<Record<string, number>>({});
 
-	let current = $derived(queue[idx]);
+	let current = $derived(displayChoices(queue[idx]));
 	let shownHints = $derived(
 		current && !current.trivia && current.hints ? current.hints.slice(0, hintsUsed) : []
 	);
@@ -274,6 +275,7 @@
 		name="description"
 		content="문제은행에서 랜덤으로 계속! 발견형 퍼즐과 상식 퀴즈를 5·10·20문제 연속으로 풀고 콤보 점수에 도전하세요."
 	/>
+	<link rel="canonical" href="https://ddalkkak-1c2.pages.dev/play" />
 </svelte:head>
 
 <div class="mroot">

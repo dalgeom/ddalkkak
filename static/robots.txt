@@ -1,2 +1,4 @@
 User-agent: *
 Allow: /
+
+Sitemap: https://ddalkkak-1c2.pages.dev/sitemap.xml

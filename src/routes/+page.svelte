@@ -15,7 +15,9 @@
 		dailyIndices,
 		hintUnlocked,
 		isCloseAnswer,
-		wanderBonus
+		wanderBonus,
+		displayChoices,
+		advanceStreakIfComplete
 	} from '$lib/game';
 	import { shareResult, outcomeMessage } from '$lib/shareCard';
 	import SevenSeg from '$lib/components/SevenSeg.svelte';
@@ -28,12 +30,17 @@
 	import Icon from '$lib/components/Icon.svelte';
 	import SegNumber from '$lib/components/SegNumber.svelte';
 
+	// SSR 시점 load에서 계산한 오늘 날짜(FOUC·크롤러 stale 방지). 클라이언트에서 재확인.
+	let { data }: { data: { dayNum: number } } = $props();
+
 	let solved = $state<string[]>([]);
 	let stats = $state({ score: 0, dayStreak: 0, maxStreak: 0, played: 0, lastDay: -1 });
 	let calendar = $state<boolean[]>([]);
 
 	let mode = $state<'daily' | 'random'>('daily');
-	let dayNum = $state(0);
+	// SSR 초기 HTML은 이 seed 값으로 그린다(FOUC 방지). 클라이언트에선 onMount가 재계산하므로 초기값 캡처가 의도된 동작.
+	// svelte-ignore state_referenced_locally
+	let dayNum = $state(data.dayNum ?? 0);
 	let queue = $state<Problem[]>([]);
 	let pos = $state(0);
 	let results = $state<string[]>([]);
@@ -172,7 +179,7 @@
 		TRACKS.find((t) => t.key !== 'match' && t.key !== track && !trackDone[t.key]) ?? null
 	);
 
-	let current = $derived(queue[pos]);
+	let current = $derived(displayChoices(queue[pos]));
 	let shownHints = $derived(current && current.hints ? current.hints.slice(0, hintsUsed) : []);
 	let dateLabel = $derived(formatDate(dayNum));
 
@@ -253,6 +260,13 @@
 		}
 		trackDone = d;
 		trackPos = p;
+		syncStreak();
+	}
+
+	/** 오늘 3트랙 완료 시 연속 기록 갱신. 어느 트랙을 마지막에 끝내든(홈·성냥개비) 동작. */
+	function syncStreak() {
+		const s = advanceStreakIfComplete(dayNum);
+		if (s) stats = { ...s };
 	}
 
 	function startTrack(k: TrackKey) {
@@ -415,13 +429,7 @@
 			if (mode === 'daily') {
 				trackDone = { ...trackDone, [track]: true };
 			}
-			if (mode === 'daily' && allInlineDone && stats.lastDay !== dayNum) {
-				stats.dayStreak = stats.lastDay === dayNum - 1 ? stats.dayStreak + 1 : 1;
-				stats.maxStreak = Math.max(stats.maxStreak, stats.dayStreak);
-				stats.played += 1;
-				stats.lastDay = dayNum;
-				persist();
-			}
+			// 스트릭 갱신은 saveDaily()가 이 트랙의 done 레코드를 쓴 뒤 refreshTrackState→syncStreak에서.
 			saveDaily();
 			buildCalendar();
 		}
@@ -495,6 +503,7 @@
 		name="description"
 		content="규칙을 발견하는 순간의 그 소리. 발견형 퍼즐·상식 퀴즈·성냥개비를 매일 새로, 모두가 같은 문제로."
 	/>
+	<link rel="canonical" href="https://ddalkkak-1c2.pages.dev/" />
 </svelte:head>
 
 {#if phase === 'landing'}
@@ -1604,6 +1613,7 @@
 		flex-direction: column;
 		align-items: stretch;
 		gap: 9px;
+		min-width: 0;
 		text-align: left;
 		text-decoration: none;
 		color: var(--text);
@@ -1881,6 +1891,8 @@
 		border: 1px solid var(--border);
 		border-radius: 12px;
 		padding: 14px 12px;
+		min-width: 0;
+		overflow: hidden;
 	}
 	/* 글리프가 4개뿐이라 원래 크기면 시그니처 카드의 전광판보다 커져 위계가 뒤집힌다.
 	   보드는 고정 픽셀 SVG라 max-width로 줄이면 잘리므로 높이 기준으로 비례 축소한다. */
@@ -2019,7 +2031,9 @@
 		display: flex;
 		align-items: baseline;
 		justify-content: space-between;
-		gap: 10px;
+		flex-wrap: wrap;
+		gap: 4px 10px;
+		min-width: 0;
 		margin-bottom: 10px;
 	}
 	.fields-title {
@@ -2104,13 +2118,17 @@
 		font-variant-numeric: tabular-nums;
 	}
 	.grade-bar {
-		display: flex;
+		display: grid;
+		grid-template-columns: repeat(4, 1fr);
 		gap: 4px;
 		margin-top: 10px;
 	}
+	@media (max-width: 520px) {
+		.grade-bar {
+			grid-template-columns: repeat(2, 1fr);
+		}
+	}
 	.grade-seg {
-		flex-shrink: 0;
-		flex-basis: 0;
 		display: flex;
 		align-items: center;
 		justify-content: center;

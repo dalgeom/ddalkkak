@@ -1,5 +1,6 @@
 <script lang="ts">
 	import Icon from '$lib/components/Icon.svelte';
+	import AdSlot from '$lib/components/AdSlot.svelte';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
@@ -33,7 +34,12 @@
 	{/each}
 </ul>
 
+<div class="arch-ad"><AdSlot label="아카이브" /></div>
+
 <style>
+	.arch-ad {
+		margin-top: 22px;
+	}
 	.head {
 		padding: 8px 0 18px;
 	}

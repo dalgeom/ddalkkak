@@ -1,5 +1,6 @@
 <svelte:head>
 	<title>개인정보처리방침 — 딸깍</title>
+	<link rel="canonical" href="https://ddalkkak-1c2.pages.dev/privacy" />
 </svelte:head>
 
 <div class="page">
@@ -30,7 +31,7 @@
 	</p>
 
 	<h2>4. 문의</h2>
-	<p>개인정보 처리에 관한 문의는 사이트 운영자 이메일로 연락해 주세요.</p>
+	<p>개인정보 처리에 관한 문의는 이메일 <b>ddalkkak.puzzle@gmail.com</b> 으로 연락해 주세요.</p>
 </div>
 
 <style>

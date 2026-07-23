@@ -1,6 +1,7 @@
 <svelte:head>
 	<title>이용약관 — 딸깍</title>
 	<meta name="description" content="딸깍 서비스 이용약관" />
+	<link rel="canonical" href="https://ddalkkak-1c2.pages.dev/terms" />
 </svelte:head>
 
 <div class="page">
