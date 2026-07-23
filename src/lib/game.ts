@@ -16,7 +16,31 @@ export function normalize(s: string): string {
 export function isCorrectText(p: Problem, value: string): boolean {
 	const n = normalize(value);
 	if (!n || !p.answers) return false;
-	return p.answers.some((a) => normalize(a) === n);
+	const inputNeg = /^\s*-/.test(value);
+	return p.answers.some((a) => {
+		if (normalize(a) !== n) return false;
+		// 음수 정답 보호: normalize가 '-'를 지우므로 정답이 음수인데 입력에 부호가 없으면
+		// '1'이 '-1'로 오판정된다. 부호가 규칙의 핵심인 문제(예: jungle=-1)를 지킨다.
+		if (/^\s*-/.test(a) && !inputNeg) return false;
+		return true;
+	});
+}
+
+/** 문자열 → 32비트 해시(FNV-1a). 보기 셔플 시드용. */
+function hashStr(s: string): number {
+	let h = 2166136261;
+	for (let i = 0; i < s.length; i++) h = Math.imul(h ^ s.charCodeAt(i), 16777619);
+	return h >>> 0;
+}
+
+/** 객관식 보기 순서를 문제 id로 시드해 고정 셔플한다(정답이 항상 1번에 몰리는 편향 제거).
+ *  같은 문제는 항상 같은 순서 → 전 방문자 동일. text형·비객관식은 그대로 반환. */
+export function displayChoices<T extends Problem>(p: T): T {
+	if (!p || p.type !== 'choice' || !p.choices || p.answerIndex == null) return p;
+	const perm = seededOrder(p.choices.length, hashStr(p.id));
+	const choices = perm.map((i) => p.choices![i]);
+	const answerIndex = perm.indexOf(p.answerIndex);
+	return { ...p, choices, answerIndex };
 }
 
 /** 안 푼 문제 우선으로 라운드 구성. 다 풀었으면 처음부터 재순환. */
@@ -181,4 +205,54 @@ export const TRACKS: {
 export function emojiFor(win: boolean, hintsUsed: number): string {
 	if (!win) return '🔓';
 	return hintsUsed === 0 ? '✅' : '💡';
+}
+
+type DailyStats = {
+	score: number;
+	dayStreak: number;
+	maxStreak: number;
+	played: number;
+	lastDay: number;
+};
+
+/**
+ * 오늘 3트랙(발견·상식·성냥개비)을 모두 done 했으면 연속(streak)을 갱신한다.
+ * localStorage를 직접 읽고 쓰므로 홈·성냥개비 어느 라우트에서 마지막 트랙을 끝내든 동작한다.
+ * (기존엔 홈 next() 안에서만 갱신돼, 성냥개비를 마지막에 풀면 스트릭이 영영 안 올랐다.)
+ * 갱신이 일어났으면 새 stats를 반환하고, 아니면 null.
+ */
+export function advanceStreakIfComplete(dayNum: number): DailyStats | null {
+	if (typeof localStorage === 'undefined') return null;
+	const allDone = TRACKS.every((t) => {
+		try {
+			const rec = JSON.parse(localStorage.getItem(`ddal.daily.${dayNum}.${t.key}`) || 'null');
+			return !!rec && rec.phase === 'done';
+		} catch {
+			return false;
+		}
+	});
+	if (!allDone) return null;
+	let stats: DailyStats;
+	try {
+		stats = JSON.parse(localStorage.getItem('ddal.stats') || 'null') || {
+			score: 0,
+			dayStreak: 0,
+			maxStreak: 0,
+			played: 0,
+			lastDay: -1
+		};
+	} catch {
+		stats = { score: 0, dayStreak: 0, maxStreak: 0, played: 0, lastDay: -1 };
+	}
+	if (stats.lastDay === dayNum) return null; // 오늘 이미 갱신함
+	stats.dayStreak = stats.lastDay === dayNum - 1 ? (stats.dayStreak || 0) + 1 : 1;
+	stats.maxStreak = Math.max(stats.maxStreak || 0, stats.dayStreak);
+	stats.played = (stats.played || 0) + 1;
+	stats.lastDay = dayNum;
+	try {
+		localStorage.setItem('ddal.stats', JSON.stringify(stats));
+	} catch {
+		/* 저장 실패는 무시 */
+	}
+	return stats;
 }

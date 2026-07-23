@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { Problem } from '$lib/problems';
+	import { displayChoices } from '$lib/game';
 	import SevenSeg from '$lib/components/SevenSeg.svelte';
 	import ColorBlocks from '$lib/components/ColorBlocks.svelte';
 	import Glyph from '$lib/components/Glyph.svelte';
@@ -11,7 +12,9 @@
 	 * 게임 상태를 쓰지 않으므로 localStorage를 건드리지 않는다 — 데일리 공정성과 완전히 분리된다.
 	 * 정답은 기본으로 가려져 있고, 눌러야 열린다.
 	 */
-	let { problem }: { problem: Problem } = $props();
+	let { problem: rawProblem }: { problem: Problem } = $props();
+	// 객관식 보기를 고정 셔플(정답 1번 몰림 제거) — 플레이 화면과 동일한 순서.
+	let problem = $derived(displayChoices(rawProblem));
 
 	let revealed = $state(false);
 

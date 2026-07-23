@@ -196,6 +196,7 @@
 		min-height: 100dvh;
 		display: flex;
 		flex-direction: column;
+		overflow-x: hidden;
 	}
 	.page {
 		flex: 1 0 auto;

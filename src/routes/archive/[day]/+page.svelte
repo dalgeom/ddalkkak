@@ -2,6 +2,7 @@
 	import ProblemView from '$lib/components/ProblemView.svelte';
 	import MatchstickBoard from '$lib/components/MatchstickBoard.svelte';
 	import Icon from '$lib/components/Icon.svelte';
+	import AdSlot from '$lib/components/AdSlot.svelte';
 	import { parseEq } from '$lib/matchstick';
 	import type { PageData } from './$types';
 
@@ -45,6 +46,8 @@
 		{/each}
 	</div>
 </section>
+
+<div class="mid-ad"><AdSlot label="지난 문제" /></div>
 
 <section class="grp">
 	<div class="grp-h"><Icon name="match" size={16} /><h2>오늘의 성냥개비</h2></div>
@@ -92,6 +95,9 @@
 	}
 	.grp {
 		margin-bottom: 30px;
+	}
+	.mid-ad {
+		margin: 6px 0 30px;
 	}
 	.grp-h {
 		display: flex;

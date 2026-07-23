@@ -4,7 +4,7 @@
 	import { page } from '$app/state';
 	import problems from '$lib/data/matchstick-problems.json';
 	import { parseEq, cloneBoard, isSolved, bit, type Board } from '$lib/matchstick';
-	import { kstDayNumber, dailyIndices } from '$lib/game';
+	import { kstDayNumber, dailyIndices, advanceStreakIfComplete } from '$lib/game';
 	import MatchstickBoard, { type PickLoc } from '$lib/components/MatchstickBoard.svelte';
 	import AdSlot from '$lib/components/AdSlot.svelte';
 	import Icon from '$lib/components/Icon.svelte';
@@ -138,7 +138,11 @@
 	function endRun() {
 		clearInterval(timerId);
 		timerId = undefined;
-		if (mode.type === 'daily') saveDailyProgress('done');
+		if (mode.type === 'daily') {
+			saveDailyProgress('done');
+			// 성냥개비를 마지막에 끝냈을 때도 오늘 3트랙 완료면 연속 기록이 갱신되도록.
+			advanceStreakIfComplete(dayNum);
+		}
 		const key = modeKey(mode);
 		const score =
 			mode.type === 'count' || mode.type === 'daily'
@@ -342,6 +346,7 @@
 		name="description"
 		content="성냥개비 하나만 옮겨 등식을 참으로! 타임어택·개수 도전 모드로 친구와 대결하세요."
 	/>
+	<link rel="canonical" href="https://ddalkkak-1c2.pages.dev/matchstick" />
 </svelte:head>
 
 <div class="mroot">

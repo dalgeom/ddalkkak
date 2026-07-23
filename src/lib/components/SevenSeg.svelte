@@ -65,7 +65,7 @@
 		<svg
 			class="lrow"
 			viewBox="0 0 {L.w} {H}"
-			style="width:{((L.w / maxW) * 100).toFixed(2)}%; max-width:{Math.round(L.w * 0.76)}px"
+			style="width:{((L.w / maxW) * 100).toFixed(2)}%; max-width:min({Math.round(L.w * 0.76)}px, 100%)"
 			aria-hidden="true"
 		>
 			{#each L.cells as c, ci (ci)}
@@ -115,6 +115,8 @@
 		flex-direction: column;
 		align-items: center;
 		gap: 10px;
+		max-width: 100%;
+		box-sizing: border-box;
 	}
 	.lrow {
 		display: block;

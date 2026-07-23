@@ -1,7 +1,8 @@
 import { kstDayNumber, archiveDays } from '$lib/game';
 import type { RequestHandler } from './$types';
 
-export const prerender = true;
+// 요청 시점에 오늘 기준 아카이브 30일을 나열한다(prerender 시 빌드 날짜에 고정됨).
+export const prerender = false;
 
 const SITE = 'https://ddalkkak-1c2.pages.dev';
 

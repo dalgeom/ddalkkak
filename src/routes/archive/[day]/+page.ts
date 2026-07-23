@@ -2,16 +2,12 @@ import { error } from '@sveltejs/kit';
 import { PROBLEMS } from '$lib/problems';
 import { TRIVIA } from '$lib/trivia';
 import matchData from '$lib/data/matchstick-problems.json';
-import { kstDayNumber, archiveDays, dailyIndices, dayLabel } from '$lib/game';
-import type { PageLoad, EntryGenerator } from './$types';
+import { kstDayNumber, dailyIndices, dayLabel } from '$lib/game';
+import type { PageLoad } from './$types';
 
-export const prerender = true;
-
-/** 빌드 시점 기준 지난 30일만 정적 생성. 오늘·미래 날짜는 파일이 존재하지 않아 스포일러가 원천 차단된다. */
-export const entries: EntryGenerator = () => {
-	const today = kstDayNumber(Date.now());
-	return archiveDays(today).map((d) => ({ day: String(d) }));
-};
+// 요청 시점에 '오늘'을 계산한다. prerender 하면 빌드 시점 기준으로 고정돼 날짜가 넘어가도
+// 새 날짜 페이지가 생기지 않고(진짜 404), 스포일러 가드도 갱신되지 않는다.
+export const prerender = false;
 
 export const load: PageLoad = ({ params }) => {
 	const day = Number(params.day);

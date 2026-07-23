@@ -1,5 +1,6 @@
 <svelte:head>
 	<title>소개 — 딸깍</title>
+	<link rel="canonical" href="https://ddalkkak-1c2.pages.dev/about" />
 </svelte:head>
 
 <div class="page">
