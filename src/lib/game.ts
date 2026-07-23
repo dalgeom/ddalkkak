@@ -147,6 +147,23 @@ export function dailyIndices(total: number, dayNum: number, size: number = ROUND
  *  matchstick.test.ts가 실제 데이터 길이와 일치하는지 검사한다. */
 export const MATCH_TOTAL = 741;
 
+/** 아카이브에 노출하는 지난 날짜 수. 발견형 재순환 주기(104÷3≈35일)보다 짧게 둬 반복을 피한다. */
+export const ARCHIVE_DAYS = 30;
+
+/** 아카이브가 다룰 지난 날짜 목록(오늘 제외, 최신순). 빌드 시점 today 기준. */
+export function archiveDays(todayNum: number): number[] {
+	const out: number[] = [];
+	for (let d = todayNum - 1; d >= todayNum - ARCHIVE_DAYS; d--) out.push(d);
+	return out;
+}
+
+/** epoch day → "YYYY. M. D" 라벨 (KST 정오 기준으로 안전하게 변환) */
+export function dayLabel(dayNum: number): string {
+	const ms = dayNum * 86400000 - 9 * 3600 * 1000 + 43200000;
+	const d = new Date(ms);
+	return `${d.getUTCFullYear()}. ${d.getUTCMonth() + 1}. ${d.getUTCDate()}`;
+}
+
 /** 데일리 트랙 정의 — 하루 분량을 개수가 아니라 '유형'으로 늘린다. */
 export type TrackKey = 'discover' | 'trivia' | 'match';
 export const TRACKS: {

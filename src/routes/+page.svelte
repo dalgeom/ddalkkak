@@ -586,13 +586,19 @@
 	</section>
 
 	<!-- 오늘 치를 다 풀기 전에는 조용한 줄, 다 푼 뒤에만 다음 행동으로 올라온다 -->
-	<a class="next-bar" class:ready={allInlineDone} href="/play">
-		<span class="nb-main">
-			<Icon name="arrow" size={15} />
-			{allInlineDone ? '오늘 치 완료 — 계속 풀기로' : '계속 풀기'}
-		</span>
-		<span class="nb-sub">{PROBLEMS.length + TRIVIA.length}문제 무제한 랜덤 · 콤보 점수</span>
-	</a>
+	<div class="hub-links">
+		<a class="next-bar" class:ready={allInlineDone} href="/play">
+			<span class="nb-main">
+				<Icon name="arrow" size={15} />
+				{allInlineDone ? '오늘 치 완료 — 계속 풀기로' : '계속 풀기'}
+			</span>
+			<span class="nb-sub">{PROBLEMS.length + TRIVIA.length}문제 무제한 랜덤 · 콤보 점수</span>
+		</a>
+		<a class="next-bar archive-link" href="/archive">
+			<span class="nb-main"><Icon name="search" size={15} /> 지난 문제</span>
+			<span class="nb-sub">놓친 날의 오늘의 딸깍 다시 풀기</span>
+		</a>
+	</div>
 {/if}
 
 {#if phase === 'play' || phase === 'done'}
@@ -1636,12 +1642,22 @@
 	}
 
 	/* ---- 계속 풀기: 평소엔 조용한 줄, 오늘 치 완료 시에만 승격 ---- */
+	.hub-links {
+		display: grid;
+		grid-template-columns: 1.4fr 1fr;
+		gap: 12px;
+		margin-top: 14px;
+	}
+	@media (max-width: 560px) {
+		.hub-links {
+			grid-template-columns: 1fr;
+		}
+	}
 	.next-bar {
 		display: flex;
 		align-items: center;
 		gap: 12px;
 		flex-wrap: wrap;
-		margin-top: 14px;
 		padding: 13px 18px;
 		border: 1px solid var(--border);
 		border-radius: 14px;
