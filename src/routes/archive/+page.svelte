@@ -1,9 +1,31 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
+	import { browser } from '$app/environment';
 	import Icon from '$lib/components/Icon.svelte';
 	import AdSlot from '$lib/components/AdSlot.svelte';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
+
+	// 그날 3트랙을 모두 완료했으면 체크 배지 — '빈칸 채우기' 수집욕으로 재방문 유도(Wordle 캘린더).
+	// 완료 데이터는 이미 localStorage에 쌓여 있어 읽기만 하면 된다(SSR이라 하이드레이션 후 채움).
+	let doneDays = $state<Set<number>>(new Set());
+	onMount(() => {
+		if (!browser) return;
+		const s = new Set<number>();
+		for (const { day } of data.days) {
+			const all = ['discover', 'trivia', 'match'].every((t) => {
+				try {
+					const rec = JSON.parse(localStorage.getItem(`ddal.daily.${day}.${t}`) || 'null');
+					return !!rec && rec.phase === 'done';
+				} catch {
+					return false;
+				}
+			});
+			if (all) s.add(day);
+		}
+		doneDays = s;
+	});
 </script>
 
 <svelte:head>
@@ -26,8 +48,13 @@
 <ul class="days">
 	{#each data.days as d (d.day)}
 		<li>
-			<a href="/archive/{d.day}">
-				<span class="d-label">{d.label}</span>
+			<a href="/archive/{d.day}" class:done={doneDays.has(d.day)}>
+				<span class="d-label"
+						>{d.label}{#if doneDays.has(d.day)}<span class="d-badge" title="완료"><Icon
+									name="correct"
+									size={13}
+								/></span>{/if}</span
+					>
 				<span class="d-meta">
 					<span>발견 3 · 상식 5 · 성냥개비 3</span>
 					<Icon name="arrow" size={15} />
@@ -84,10 +111,28 @@
 		border-color: var(--accent);
 		box-shadow: 0 8px 20px rgba(44, 40, 34, 0.09);
 	}
+	.days a.done {
+		border-color: #cfe6d8;
+		background: var(--accent-soft);
+	}
 	.d-label {
+		display: flex;
+		align-items: center;
+		gap: 7px;
 		font-size: var(--fs-md);
 		font-weight: var(--fw-emphasis);
 		font-variant-numeric: tabular-nums;
+	}
+	.d-badge {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 20px;
+		height: 20px;
+		border-radius: 50%;
+		background: var(--accent);
+		color: #fff;
+		flex: none;
 	}
 	.d-meta {
 		display: flex;
