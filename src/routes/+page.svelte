@@ -557,7 +557,7 @@
 					</span>
 					<span class="t-desc">{t.desc}</span>
 					<span class="t-board">
-						<MatchstickBoard board={PREVIEW_BOARD} picked={null} onstick={() => {}} />
+						<MatchstickBoard board={PREVIEW_BOARD} picked={null} onstick={() => {}} interactive={false} />
 					</span>
 					<span class="t-cap">한 개만 옮기세요</span>
 					<span class="t-foot">
@@ -784,6 +784,7 @@
 								class:flash-wrong={inputState === 'wrong'}
 								class:flash-correct={inputState === 'correct'}
 								placeholder="정답을 입력하세요"
+								aria-label="정답 입력"
 								autocomplete="off"
 								bind:value={answerValue}
 								disabled={done}
@@ -821,7 +822,7 @@
 
 				{#if feedback && judge}
 					{#key feedback.msg + judge}
-						<div class="feedback {judge}">
+						<div class="feedback {judge}" role="alert" aria-live="assertive">
 							<Icon name={judge} size={20} />
 							<span>{feedback.msg}</span>
 						</div>
@@ -933,7 +934,7 @@
 {/if}
 
 {#if toastMsg}
-	<div class="toast">{toastMsg}</div>
+	<div class="toast" role="status" aria-live="polite">{toastMsg}</div>
 {/if}
 
 <style>

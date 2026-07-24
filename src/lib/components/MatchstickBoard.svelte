@@ -10,12 +10,26 @@
 	let {
 		board,
 		picked,
-		onstick
+		onstick,
+		label,
+		interactive = true
 	}: {
 		board: Board;
 		picked: PickLoc | null;
 		onstick: (loc: PickLoc, lit: boolean) => void;
+		/** 스크린리더용 방정식 텍스트(예: '8 + 3 = 5'). 성냥은 SVG뿐이라 텍스트 대체가 필요하다. */
+		label?: string;
+		/** false면 읽기전용(허브 미리보기·아카이브) — role/tabindex/키보드 핸들러를 렌더하지 않아 죽은 탭 정지점을 없앤다. */
+		interactive?: boolean;
 	} = $props();
+
+	/** Enter·Space로 세그먼트 활성화(WAI-ARIA button 패턴) */
+	function onKey(e: KeyboardEvent, loc: PickLoc, lit: boolean) {
+		if (e.key === 'Enter' || e.key === ' ') {
+			e.preventDefault();
+			onstick(loc, lit);
+		}
+	}
 
 	const SEG_RECT: Record<SegKey, [number, number, number, number]> = {
 		a: [10, 0, 34, 8],
@@ -41,11 +55,13 @@
 </script>
 
 <div class="mboard">
+	{#if label}<span class="sr-only">{label}</span>{/if}
 	{#each board.glyphs as mask, gi (gi)}
 		{#if gi === 1}
 			<!-- 연산자 -->
 			<svg class="op" width="44" height="95" viewBox="-2 -2 48 99">
 				<rect x="4" y="43.5" width="34" height="8" rx="3" class="fixed" />
+				<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
 				<rect
 					x="17"
 					y="30"
@@ -55,11 +71,13 @@
 					class="stick {board.opPlus ? 'lit' : 'ghost'} {isPicked({ kind: 'op' })
 						? 'picked'
 						: ''}"
-					role="button"
-					tabindex="0"
+					class:ro={!interactive}
+					role={interactive ? 'button' : undefined}
+					tabindex={interactive ? 0 : undefined}
+					aria-label={interactive ? '연산자 세로 성냥' : undefined}
 					data-loc="op-v"
-					onclick={() => onstick({ kind: 'op' }, board.opPlus)}
-					onkeydown={(e) => e.key === 'Enter' && onstick({ kind: 'op' }, board.opPlus)}
+					onclick={interactive ? () => onstick({ kind: 'op' }, board.opPlus) : undefined}
+					onkeydown={interactive ? (e) => onKey(e, { kind: 'op' }, board.opPlus) : undefined}
 				/>
 			</svg>
 		{/if}
@@ -70,6 +88,7 @@
 			{#each SEG_KEYS as seg (seg)}
 				{@const r = SEG_RECT[seg]}
 				{@const lit = segLit(gi, seg)}
+				<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
 				<rect
 					x={r[0]}
 					y={r[1]}
@@ -79,11 +98,13 @@
 					class="stick {lit ? 'lit' : 'ghost'} {isPicked({ kind: 'glyph', gi, seg })
 						? 'picked'
 						: ''}"
-					role="button"
-					tabindex="0"
+					class:ro={!interactive}
+					role={interactive ? 'button' : undefined}
+					tabindex={interactive ? 0 : undefined}
+					aria-label={interactive ? `${gi + 1}번째 자리 성냥` : undefined}
 					data-loc="g{gi}-{seg}"
-					onclick={() => onstick({ kind: 'glyph', gi, seg }, lit)}
-					onkeydown={(e) => e.key === 'Enter' && onstick({ kind: 'glyph', gi, seg }, lit)}
+					onclick={interactive ? () => onstick({ kind: 'glyph', gi, seg }, lit) : undefined}
+					onkeydown={interactive ? (e) => onKey(e, { kind: 'glyph', gi, seg }, lit) : undefined}
 				/>
 			{/each}
 		</svg>
@@ -106,6 +127,9 @@
 	}
 	.stick {
 		cursor: pointer;
+	}
+	.stick.ro {
+		cursor: default;
 	}
 	.stick.lit {
 		fill: #3aff62;

@@ -10,6 +10,16 @@
 		N: '#232a7c',
 		P: '#8e24aa'
 	};
+	// 색 블록은 배경색으로만 표현되므로 스크린리더용 한글 색이름을 붙인다.
+	const NAME: Record<string, string> = {
+		R: '빨강',
+		O: '주황',
+		Y: '노랑',
+		G: '초록',
+		B: '파랑',
+		N: '남색',
+		P: '보라'
+	};
 
 	/** 폭 가중치 합: 색 블록=1, 연산자/물음표=0.55 */
 	function rowUnits(row: string): number {
@@ -30,7 +40,7 @@
 			{:else if it === '?'}
 				<div class="cunk">?</div>
 			{:else}
-				<div class="csq" style="background:{COL[it]}"></div>
+				<div class="csq" style="background:{COL[it]}" role="img" aria-label={NAME[it] ?? it}></div>
 			{/if}
 		{/each}
 	</div>

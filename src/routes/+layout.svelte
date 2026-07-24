@@ -184,6 +184,18 @@
 		background: #cfe6d8;
 		color: var(--text);
 	}
+	/* 시각적으로 숨기되 스크린리더에는 읽히는 텍스트(전광판·색블록·성냥 방정식 대체) */
+	:global(.sr-only) {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		padding: 0;
+		margin: -1px;
+		overflow: hidden;
+		clip: rect(0, 0, 0, 0);
+		white-space: nowrap;
+		border: 0;
+	}
 	/* 콘텐츠가 짧아도 푸터는 화면 바닥에 붙는다 — 아래가 텅 비어 보이지 않게 */
 	.wrap {
 		max-width: var(--maxw);
