@@ -290,8 +290,10 @@
 			/* 무시 */
 		}
 		if (saved) {
-			pos = Math.min(saved.pos, queue.length);
-			results = saved.results || [];
+			// 손상된 pos(NaN 등)면 current=undefined가 되어 화면이 통째로 멈춘다 — 정수 가드.
+			pos =
+				Number.isInteger(saved.pos) && saved.pos >= 0 ? Math.min(saved.pos, queue.length) : 0;
+			results = Array.isArray(saved.results) ? saved.results : [];
 			phase = saved.phase || 'play';
 		} else {
 			pos = 0;

@@ -2,11 +2,8 @@
 	import { page } from '$app/state';
 	import AdSlot from '$lib/components/AdSlot.svelte';
 	import Logo from '$lib/components/Logo.svelte';
-	import { PROBLEMS } from '$lib/problems';
-	import { TRIVIA } from '$lib/trivia';
-	import { MATCH_TOTAL } from '$lib/game';
 
-	let { children } = $props();
+	let { children, data } = $props();
 	let path = $derived(page.url.pathname);
 
 	const TABS = [
@@ -16,7 +13,6 @@
 	];
 	const isActive = (href: string) => (href === '/' ? path === '/' : path.startsWith(href));
 
-	const TOTAL_PROBLEMS = PROBLEMS.length + TRIVIA.length + MATCH_TOTAL;
 	const year = new Date().getFullYear();
 
 	// 활성 탭 아래로 미끄러지는 세그먼트 막대. 측정이 필요하므로 마운트 후에만 보인다.
@@ -93,7 +89,7 @@
 		<div class="foot-bottom">
 			<span>© {year} 딸깍</span>
 			<span class="seg-div" aria-hidden="true"></span>
-			<span>문제 {TOTAL_PROBLEMS.toLocaleString()}개</span>
+			<span>문제 {data.totalProblems.toLocaleString()}개</span>
 		</div>
 	</footer>
 </div>
@@ -107,7 +103,7 @@
 		--border: #e6dcc8;
 		--border-strong: #ddd0ba;
 		--text: #2c2822;
-		--muted: #9b9184;
+		--muted: #6b6258;
 		--accent: #2f8f5b;
 		--accent-soft: #e5efe8;
 		--accent-2: #c0632e;
