@@ -3,13 +3,14 @@ import { PROBLEMS } from '$lib/problems';
 import { TRIVIA } from '$lib/trivia';
 import matchData from '$lib/data/matchstick-problems.json';
 import { kstDayNumber, dailyIndices, dayLabel } from '$lib/game';
-import type { PageLoad } from './$types';
+import type { PageServerLoad } from './$types';
 
 // 요청 시점에 '오늘'을 계산한다. prerender 하면 빌드 시점 기준으로 고정돼 날짜가 넘어가도
 // 새 날짜 페이지가 생기지 않고(진짜 404), 스포일러 가드도 갱신되지 않는다.
+// server load라 PROBLEMS·TRIVIA 원본 배열이 클라이언트 번들에 실리지 않고, 11문제 슬라이스만 직렬화된다.
 export const prerender = false;
 
-export const load: PageLoad = ({ params }) => {
+export const load: PageServerLoad = ({ params }) => {
 	const day = Number(params.day);
 	const today = kstDayNumber(Date.now());
 	// 미래·오늘은 answers를 품고 있어 넘기지 않는다. 아카이브 창 밖도 막는다.
