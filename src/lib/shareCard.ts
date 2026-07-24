@@ -144,7 +144,13 @@ export async function buildShareCard(d: ShareCardData): Promise<Blob | null> {
 export type ShareOutcome = 'shared' | 'copied-image' | 'downloaded' | 'copied-text' | 'failed';
 
 /**
- * 이미지 카드 우선 공유. 지원 안 되면 이미지 복사 → 다운로드 → 텍스트 복사 순으로 폴백.
+ * 공유. Wordle이 폭발한 핵심은 '이미지'가 아니라 '링크가 텍스트에 살아남는' 결과였다 —
+ * 파일만 공유되면 받은 사람이 게임을 열 경로(URL)가 사라진다. 그래서 어떤 경로로 끝나든
+ * 링크가 담긴 텍스트가 반드시 보존되도록 우선순위를 잡는다.
+ *
+ * 1) 모바일 네이티브: 이미지 카드 + 텍스트(링크) 함께 — 대부분 앱에서 최적.
+ * 2) 그 외: 텍스트(그리드·회차·링크)를 우선 공유/복사해 링크를 반드시 살린다.
+ * 3) 텍스트마저 막히면 이미지 복사/다운로드로 최후 폴백.
  */
 export async function shareResult(card: ShareCardData, text: string): Promise<ShareOutcome> {
 	let blob: Blob | null = null;
@@ -154,6 +160,7 @@ export async function shareResult(card: ShareCardData, text: string): Promise<Sh
 		blob = null;
 	}
 
+	// 1) 모바일 네이티브 공유 — 이미지 + 텍스트(링크)를 함께 넘긴다
 	if (blob) {
 		try {
 			const file = new File([blob], 'ddalkkak.png', { type: 'image/png' });
@@ -163,8 +170,30 @@ export async function shareResult(card: ShareCardData, text: string): Promise<Sh
 				return 'shared';
 			}
 		} catch {
-			/* 사용자가 공유 취소 등 — 아래 폴백 */
+			/* 취소/실패 → 텍스트 경로로 */
 		}
+	}
+
+	// 2) 텍스트(그리드+회차+링크) 우선 — 링크를 반드시 보존
+	try {
+		if (navigator.share) {
+			await navigator.share({ text });
+			return 'shared';
+		}
+	} catch {
+		/* 취소 */
+	}
+	try {
+		if (navigator.clipboard?.writeText) {
+			await navigator.clipboard.writeText(text);
+			return 'copied-text';
+		}
+	} catch {
+		/* 실패 → 이미지 최후 폴백 */
+	}
+
+	// 3) 텍스트 클립보드도 막힌 환경: 이미지라도 남긴다
+	if (blob) {
 		try {
 			const CI = (window as unknown as { ClipboardItem?: typeof ClipboardItem }).ClipboardItem;
 			if (navigator.clipboard && CI) {
@@ -186,23 +215,6 @@ export async function shareResult(card: ShareCardData, text: string): Promise<Sh
 			/* 다운로드 실패 */
 		}
 	}
-
-	try {
-		if (navigator.share) {
-			await navigator.share({ text });
-			return 'shared';
-		}
-	} catch {
-		/* 취소 */
-	}
-	try {
-		if (navigator.clipboard?.writeText) {
-			await navigator.clipboard.writeText(text);
-			return 'copied-text';
-		}
-	} catch {
-		/* 실패 */
-	}
 	return 'failed';
 }
 
@@ -215,7 +227,7 @@ export function outcomeMessage(o: ShareOutcome): string {
 		case 'downloaded':
 			return '결과 이미지를 저장했어요 — 친구에게 보내보세요!';
 		case 'copied-text':
-			return '결과가 복사됐어요 — 친구에게 도전장을 보내세요!';
+			return '결과가 복사됐어요 (링크 포함) — 붙여넣어 친구에게 보내세요!';
 		default:
 			return '공유에 실패했어요';
 	}
