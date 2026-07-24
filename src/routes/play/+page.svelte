@@ -395,6 +395,7 @@
 							class:flash-wrong={inputState === 'wrong'}
 							class:flash-correct={inputState === 'correct'}
 							placeholder="정답을 입력하세요"
+							aria-label="정답 입력"
 							autocomplete="off"
 							bind:value={answerValue}
 							disabled={done}
@@ -430,7 +431,7 @@
 
 			{#if feedback && judge}
 				{#key feedback.msg + judge}
-					<div class="feedback {judge}">
+					<div class="feedback {judge}" role="alert" aria-live="assertive">
 						<Icon name={judge} size={20} />
 						<span>{feedback.msg}</span>
 					</div>
@@ -469,7 +470,7 @@
 </div>
 
 {#if toastMsg}
-	<div class="toast">{toastMsg}</div>
+	<div class="toast" role="status" aria-live="polite">{toastMsg}</div>
 {/if}
 
 <style>

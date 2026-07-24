@@ -415,12 +415,12 @@
 	<div class="card">
 		{#if cur}
 			<div class:shaking>
-				<MatchstickBoard board={cur} {picked} onstick={handleStick} />
+				<MatchstickBoard board={cur} {picked} onstick={handleStick} label={pIdx >= 0 ? problems[pIdx].displayed : undefined} />
 			</div>
 		{/if}
 
 		{#if feedback}
-			<div class="feedback" class:ok={solvedThis === 'won'}>{feedback}</div>
+			<div class="feedback" class:ok={solvedThis === 'won'} role="alert" aria-live="assertive">{feedback}</div>
 		{/if}
 
 		{#if solvedThis === 'no'}
@@ -463,7 +463,7 @@
 </div>
 
 {#if toastMsg}
-	<div class="toast">{toastMsg}</div>
+	<div class="toast" role="status" aria-live="polite">{toastMsg}</div>
 {/if}
 
 <style>

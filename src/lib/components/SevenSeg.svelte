@@ -61,6 +61,7 @@
 </script>
 
 <div class="lcd">
+	<span class="sr-only">{lines.join('. ')}</span>
 	{#each laid as L, li (li)}
 		<svg
 			class="lrow"

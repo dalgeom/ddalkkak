@@ -54,12 +54,12 @@
 	<div class="grid">
 		{#each data.match as m, i (i)}
 			<article class="mv">
-				<div class="mv-board"><MatchstickBoard board={parseEq(m.displayed)} picked={null} onstick={() => {}} /></div>
+				<div class="mv-board"><MatchstickBoard board={parseEq(m.displayed)} picked={null} onstick={() => {}} interactive={false} label={m.displayed} /></div>
 				<div class="mv-cap">성냥 하나만 옮겨 참으로</div>
 				{#if matchReveal[i]}
 					<div class="mv-answer">
 						<div class="mv-answer-head"><Icon name="correct" size={15} /><span>정답</span></div>
-						<div class="mv-board sol"><MatchstickBoard board={parseEq(m.solution)} picked={null} onstick={() => {}} /></div>
+						<div class="mv-board sol"><MatchstickBoard board={parseEq(m.solution)} picked={null} onstick={() => {}} interactive={false} label={"정답 " + m.solution} /></div>
 					</div>
 				{:else}
 					<button class="mv-reveal" onclick={() => (matchReveal[i] = true)}>정답 보기</button>
