@@ -263,3 +263,38 @@ export function advanceStreakIfComplete(dayNum: number): DailyStats | null {
 	}
 	return stats;
 }
+
+/** 풀이 통계 — 힌트 사용 분포(0~3단)·정답 수·포기 수. '내 실력' 히스토그램(통계 모달)용. */
+export type SolveStats = { hintDist: [number, number, number, number]; solved: number; gaveUp: number };
+
+const EMPTY_SOLVE_STATS = (): SolveStats => ({ hintDist: [0, 0, 0, 0], solved: 0, gaveUp: 0 });
+
+export function readSolveStats(): SolveStats {
+	if (typeof localStorage === 'undefined') return EMPTY_SOLVE_STATS();
+	try {
+		const s = JSON.parse(localStorage.getItem('ddal.solveStats') || 'null');
+		if (s && Array.isArray(s.hintDist) && s.hintDist.length === 4)
+			return { hintDist: s.hintDist, solved: s.solved || 0, gaveUp: s.gaveUp || 0 };
+	} catch {
+		/* 무시 */
+	}
+	return EMPTY_SOLVE_STATS();
+}
+
+/** 문제 하나를 끝낼 때마다 호출 — 맞히면 힌트 단계별 카운트+정답 수, 못 맞히면 포기 수를 쌓는다.
+ *  홈 데일리·연속 모드 양쪽에서 호출한다. 오늘부터 쌓이므로 히스토그램은 시간이 지나며 채워진다. */
+export function recordSolve(win: boolean, hintsUsed: number): void {
+	if (typeof localStorage === 'undefined') return;
+	const s = readSolveStats();
+	if (win) {
+		s.solved += 1;
+		s.hintDist[Math.min(Math.max(hintsUsed, 0), 3)] += 1;
+	} else {
+		s.gaveUp += 1;
+	}
+	try {
+		localStorage.setItem('ddal.solveStats', JSON.stringify(s));
+	} catch {
+		/* 무시 */
+	}
+}

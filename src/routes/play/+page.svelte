@@ -11,7 +11,8 @@
 		hintUnlocked,
 		isCloseAnswer,
 		wanderBonus,
-		displayChoices
+		displayChoices,
+		recordSolve
 	} from '$lib/game';
 	import { shareResult, outcomeMessage } from '$lib/shareCard';
 	import SevenSeg from '$lib/components/SevenSeg.svelte';
@@ -152,6 +153,7 @@
 		if (done) return;
 		done = true;
 		judge = win ? 'correct' : reason === 'giveup' ? 'giveup' : 'wrong';
+		recordSolve(win, hintsUsed);
 		if (win) {
 			const base =
 				(current.trivia ? 100 : Math.max(20, 100 - hintsUsed * 25)) +
