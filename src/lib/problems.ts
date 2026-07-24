@@ -89,6 +89,9 @@ const CHIP_FIELD: Record<string, DiscoverField> = {
 	'삐딱한 선': '도형·전광판',
 	끝점: '도형·전광판',
 	곡선: '도형·전광판',
+	교차점: '도형·전광판',
+	종이접기: '도형·전광판',
+	팩맨: '도형·전광판',
 	'모음 획': '도형·전광판',
 	세그먼트: '도형·전광판',
 	'글자 높낮이': '도형·전광판',
@@ -102,6 +105,7 @@ const CHIP_FIELD: Record<string, DiscoverField> = {
 	'가족 찾기': '관찰·추리',
 	'생활 상식': '관찰·추리',
 	자리값: '관찰·추리',
+	시소: '관찰·추리',
 	중복제거: '관찰·추리'
 };
 
@@ -2301,5 +2305,69 @@ export const PROBLEMS: Problem[] = [
 			'D(4)와 X(24)의 순번 합을 26으로 나눈 나머지를 글자로 바꿔보라.'
 		],
 		explain: '이웃한 두 글자 순번 합의 26 나머지 글자: D(4)+X(24)=28→28-26=2→B.'
+	},
+	{
+		id: 'fig-intersect',
+		chip: '교차점',
+		blocks: [
+			{ kind: 'text', html: '물음표에 들어갈 수는?' },
+			{ kind: 'figure', svg: '<svg viewBox=\'0 0 460 130\' role=\'img\' aria-label=\'선이 만나는 점 세기\'><line x1=\'15\' y1=\'45\' x2=\'95\' y2=\'45\' style=\'stroke:#2c2822;stroke-width:3;fill:none\'/><line x1=\'15\' y1=\'75\' x2=\'95\' y2=\'75\' style=\'stroke:#2c2822;stroke-width:3;fill:none\'/><text x=\'55\' y=\'118\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:19px;font-weight:800;fill:#2c2822\'>= 0</text><line x1=\'135\' y1=\'42\' x2=\'205\' y2=\'82\' style=\'stroke:#2c2822;stroke-width:3;fill:none\'/><line x1=\'135\' y1=\'82\' x2=\'205\' y2=\'42\' style=\'stroke:#2c2822;stroke-width:3;fill:none\'/><text x=\'170\' y=\'118\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:19px;font-weight:800;fill:#2c2822\'>= 1</text><path d=\'M285 36 L250 88 L320 88 Z\' style=\'stroke:#2c2822;stroke-width:3;fill:none\'/><text x=\'285\' y=\'118\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:19px;font-weight:800;fill:#2c2822\'>= 3</text><path d=\'M400 28 L417.6 82.3 L371.5 48.7 L428.5 48.7 L382.4 82.3 Z\' style=\'stroke:#2c2822;stroke-width:3;fill:none\'/><text x=\'400\' y=\'118\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:22px;font-weight:800;fill:#c0392b\'>= ?</text></svg>', caption: '선끼리 만나는 곳' }
+		],
+		type: 'text',
+		answers: ['5', '5개', '다섯'],
+		hints: [
+			'선이 몇 가닥인지 세는 게 아니에요.',
+			'평행하면 아무리 길게 그려도 절대 안 만나요.',
+			'선끼리 실제로 겹쳐 X자로 만나는 지점마다 점을 찍어 세어보세요.'
+		],
+		explain: '값은 선의 개수가 아니라 선끼리 겹쳐 만나는 <b>교차점</b>의 수. 평행선은 0(영영 안 만남), X는 1, 삼각형은 3. 별(펜타그램)을 한붓그리기로 그리면 안쪽에 교차점이 <b>5개</b> 생긴다.'
+	},
+	{
+		id: 'fig-fold',
+		chip: '종이접기',
+		blocks: [
+			{ kind: 'text', html: '점선을 접는 선으로 종이를 반 접으면, 물감 자국은 모두 몇 개가 될까?' },
+			{ kind: 'figure', svg: '<svg viewBox=\'0 0 460 124\' role=\'img\' aria-label=\'종이를 접으면 물감자국이 몇 개\'><rect x=\'6\' y=\'12\' width=\'62\' height=\'74\' rx=\'3\' style=\'stroke:#2c2822;stroke-width:3;fill:none\'/><line x1=\'43\' y1=\'12\' x2=\'43\' y2=\'86\' style=\'stroke:#c0392b;stroke-width:2;stroke-dasharray:5 4\'/><circle cx=\'24\' cy=\'49\' r=\'11\' fill=\'#7fb2e6\'/><text x=\'37\' y=\'112\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:19px;font-weight:800;fill:#2c2822\'>= 2</text><rect x=\'96\' y=\'12\' width=\'62\' height=\'74\' rx=\'3\' style=\'stroke:#2c2822;stroke-width:3;fill:none\'/><line x1=\'133\' y1=\'12\' x2=\'133\' y2=\'86\' style=\'stroke:#c0392b;stroke-width:2;stroke-dasharray:5 4\'/><circle cx=\'128\' cy=\'49\' r=\'11\' fill=\'#7fb2e6\'/><text x=\'127\' y=\'112\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:19px;font-weight:800;fill:#2c2822\'>= 1</text><rect x=\'186\' y=\'12\' width=\'62\' height=\'74\' rx=\'3\' style=\'stroke:#2c2822;stroke-width:3;fill:none\'/><line x1=\'223\' y1=\'12\' x2=\'223\' y2=\'86\' style=\'stroke:#c0392b;stroke-width:2;stroke-dasharray:5 4\'/><circle cx=\'204\' cy=\'34\' r=\'11\' fill=\'#7fb2e6\'/><circle cx=\'204\' cy=\'66\' r=\'11\' fill=\'#7fb2e6\'/><text x=\'217\' y=\'112\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:19px;font-weight:800;fill:#2c2822\'>= 4</text><rect x=\'276\' y=\'12\' width=\'62\' height=\'74\' rx=\'3\' style=\'stroke:#2c2822;stroke-width:3;fill:none\'/><line x1=\'313\' y1=\'12\' x2=\'313\' y2=\'86\' style=\'stroke:#c0392b;stroke-width:2;stroke-dasharray:5 4\'/><circle cx=\'311\' cy=\'40\' r=\'11\' fill=\'#7fb2e6\'/><circle cx=\'292\' cy=\'68\' r=\'11\' fill=\'#7fb2e6\'/><text x=\'307\' y=\'112\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:19px;font-weight:800;fill:#2c2822\'>= 3</text><rect x=\'366\' y=\'12\' width=\'62\' height=\'74\' rx=\'3\' style=\'stroke:#2c2822;stroke-width:3;fill:none\'/><line x1=\'403\' y1=\'12\' x2=\'403\' y2=\'86\' style=\'stroke:#c0392b;stroke-width:2;stroke-dasharray:5 4\'/><circle cx=\'401\' cy=\'32\' r=\'11\' fill=\'#7fb2e6\'/><circle cx=\'401\' cy=\'62\' r=\'11\' fill=\'#7fb2e6\'/><circle cx=\'384\' cy=\'78\' r=\'11\' fill=\'#7fb2e6\'/><text x=\'397\' y=\'112\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:22px;font-weight:800;fill:#c0392b\'>= ?</text></svg>', caption: '접기 전 (물감은 왼쪽에만)' }
+		],
+		type: 'text',
+		answers: ['4', '4개', '넷'],
+		hints: [
+			'접는 선에서 떨어진 자국은 반대편에도 똑같이 찍혀 2개가 돼요.',
+			'접는 선에 걸친 자국은 접어도 반대편과 합쳐져 계속 1개예요.',
+			'걸친 자국 2개(각 1개) + 떨어진 자국 1개(2개) = ?'
+		],
+		explain: '접으면 접는 선에서 <b>떨어진</b> 자국은 반대편에도 찍혀 2개가 되고, 선에 <b>걸친</b> 자국은 합쳐져 1개로 남는다. 걸친 자국 2개(=2) + 떨어진 자국 1개(=2) → <b>4개</b>.'
+	},
+	{
+		id: 'fig-seesaw',
+		chip: '시소',
+		blocks: [
+			{ kind: 'text', html: '물음표 시소는 어느 쪽으로 기울까? (왼쪽 · 오른쪽 · 균형)' },
+			{ kind: 'figure', svg: '<svg viewBox=\'0 0 470 100\' role=\'img\' aria-label=\'시소가 어느 쪽으로 기우나\'><line x1=\'9\' y1=\'44\' x2=\'109\' y2=\'60\' style=\'stroke:#2c2822;stroke-width:3;fill:none\'/><path d=\'M50 66 L68 66 L59 52 Z\' style=\'stroke:#2c2822;stroke-width:2;fill:#c9a24a\'/><circle cx=\'35\' cy=\'35\' r=\'6\' fill=\'#2c2822\'/><circle cx=\'71\' cy=\'51\' r=\'6\' fill=\'#2c2822\'/><text x=\'59\' y=\'90\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:19px;font-weight:800;fill:#2c2822\'>왼쪽</text><line x1=\'125\' y1=\'60\' x2=\'225\' y2=\'44\' style=\'stroke:#2c2822;stroke-width:3;fill:none\'/><path d=\'M166 66 L184 66 L175 52 Z\' style=\'stroke:#2c2822;stroke-width:2;fill:#c9a24a\'/><circle cx=\'163\' cy=\'51\' r=\'6\' fill=\'#2c2822\'/><circle cx=\'163\' cy=\'38\' r=\'6\' fill=\'#2c2822\'/><circle cx=\'163\' cy=\'25\' r=\'6\' fill=\'#2c2822\'/><circle cx=\'223\' cy=\'35\' r=\'6\' fill=\'#2c2822\'/><text x=\'175\' y=\'90\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:19px;font-weight:800;fill:#2c2822\'>오른쪽</text><line x1=\'241\' y1=\'52\' x2=\'341\' y2=\'52\' style=\'stroke:#2c2822;stroke-width:3;fill:none\'/><path d=\'M282 66 L300 66 L291 52 Z\' style=\'stroke:#2c2822;stroke-width:2;fill:#c9a24a\'/><circle cx=\'255\' cy=\'43\' r=\'6\' fill=\'#2c2822\'/><circle cx=\'255\' cy=\'30\' r=\'6\' fill=\'#2c2822\'/><circle cx=\'315\' cy=\'43\' r=\'6\' fill=\'#2c2822\'/><circle cx=\'315\' cy=\'30\' r=\'6\' fill=\'#2c2822\'/><circle cx=\'315\' cy=\'17\' r=\'6\' fill=\'#2c2822\'/><text x=\'291\' y=\'90\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:19px;font-weight:800;fill:#2c2822\'>균형</text><line x1=\'357\' y1=\'52\' x2=\'457\' y2=\'52\' style=\'stroke:#2c2822;stroke-width:3;fill:none\'/><path d=\'M398 66 L416 66 L407 52 Z\' style=\'stroke:#2c2822;stroke-width:2;fill:#c9a24a\'/><circle cx=\'395\' cy=\'43\' r=\'6\' fill=\'#2c2822\'/><circle cx=\'395\' cy=\'30\' r=\'6\' fill=\'#2c2822\'/><circle cx=\'443\' cy=\'43\' r=\'6\' fill=\'#2c2822\'/><text x=\'407\' y=\'90\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:22px;font-weight:800;fill:#c0392b\'>?</text></svg>', caption: '추 하나의 무게는 모두 같음' }
+		],
+		type: 'text',
+		answers: ['오른쪽', '오른', '우', '오른쪽으로'],
+		hints: [
+			'원(추) 개수만 세면 안 돼요 — 셋째 예시는 개수가 다른데도 균형이에요.',
+			'받침점에서 멀수록 무겁게 작용해요. 거리 × 개수를 비교하세요.',
+			'왼쪽 = 거리1×2개 = 2, 오른쪽 = 거리3×1개 = 3. 큰 쪽이 내려가요.'
+		],
+		explain: '값은 추의 개수가 아니라 <b>받침점에서의 거리 × 개수</b>(모멘트). 왼쪽 1×2=2, 오른쪽 3×1=3 → 오른쪽이 더 커서 <b>오른쪽</b>이 내려간다. 균형 예시(3×2 vs 2×3, 둘 다 6)가 개수 착각을 깨는 열쇠.'
+	},
+	{
+		id: 'fig-pacman',
+		chip: '팩맨',
+		blocks: [
+			{ kind: 'text', html: '물음표에 들어갈 수는?' },
+			{ kind: 'figure', svg: '<svg viewBox=\'0 0 470 110\' role=\'img\' aria-label=\'팩맨 입이 중심을 향한 것 세기\'><path d=\'M55.0 20.0 L62.1 27.1 A10 10 0 1 1 47.9 27.1 Z\' fill=\'#2c2822\'/><path d=\'M81.0 65.0 L71.3 67.6 A10 10 0 1 1 78.4 55.3 Z\' fill=\'#2c2822\'/><path d=\'M29.0 65.0 L31.6 55.3 A10 10 0 1 1 38.7 67.6 Z\' fill=\'#2c2822\'/><text x=\'55\' y=\'100\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:19px;font-weight:800;fill:#2c2822\'>= 3</text><path d=\'M170.0 20.0 L177.1 27.1 A10 10 0 1 1 162.9 27.1 Z\' fill=\'#2c2822\'/><path d=\'M198.5 40.7 L203.1 31.8 A10 10 0 1 1 207.4 45.3 Z\' fill=\'#2c2822\'/><path d=\'M187.6 74.3 L177.8 72.7 A10 10 0 1 1 189.2 64.4 Z\' fill=\'#2c2822\'/><path d=\'M152.4 74.3 L150.8 64.4 A10 10 0 1 1 162.2 72.7 Z\' fill=\'#2c2822\'/><path d=\'M141.5 40.7 L132.6 45.3 A10 10 0 1 1 136.9 31.8 Z\' fill=\'#2c2822\'/><text x=\'170\' y=\'100\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:19px;font-weight:800;fill:#2c2822\'>= 3</text><path d=\'M285.0 20.0 L292.1 27.1 A10 10 0 1 1 277.9 27.1 Z\' fill=\'#2c2822\'/><path d=\'M315.0 50.0 L307.9 57.1 A10 10 0 1 1 307.9 42.9 Z\' fill=\'#2c2822\'/><path d=\'M285.0 80.0 L277.9 72.9 A10 10 0 1 1 292.1 72.9 Z\' fill=\'#2c2822\'/><path d=\'M255.0 50.0 L262.1 42.9 A10 10 0 1 1 262.1 57.1 Z\' fill=\'#2c2822\'/><text x=\'285\' y=\'100\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:19px;font-weight:800;fill:#2c2822\'>= 4</text><path d=\'M400.0 20.0 L407.1 27.1 A10 10 0 1 1 392.9 27.1 Z\' fill=\'#2c2822\'/><path d=\'M426.0 35.0 L423.4 44.7 A10 10 0 1 1 416.3 32.4 Z\' fill=\'#2c2822\'/><path d=\'M426.0 65.0 L435.6 62.4 A10 10 0 1 1 428.6 74.7 Z\' fill=\'#2c2822\'/><path d=\'M400.0 80.0 L392.9 72.9 A10 10 0 1 1 407.1 72.9 Z\' fill=\'#2c2822\'/><path d=\'M374.0 65.0 L371.4 74.7 A10 10 0 1 1 364.4 62.4 Z\' fill=\'#2c2822\'/><path d=\'M374.0 35.0 L383.7 32.4 A10 10 0 1 1 376.6 44.7 Z\' fill=\'#2c2822\'/><text x=\'400\' y=\'100\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:22px;font-weight:800;fill:#c0392b\'>= ?</text></svg>', caption: '입이 향한 방향을 보라' }
+		],
+		type: 'text',
+		answers: ['4', '4개', '넷'],
+		hints: [
+			'팩맨을 다 세는 게 아니에요.',
+			'입(잘린 부분)이 어디를 향하는지 보세요.',
+			'입이 가운데(중심)를 향한 팩맨만 세면 돼요 — 그것들이 보이지 않는 도형의 꼭짓점이에요.'
+		],
+		explain: '입이 <b>중심을 향한</b> 팩맨만 모여, 실제로는 그려지지 않은 도형(삼각형·사각형…)의 꼭짓점처럼 보인다. 그 개수가 값. 바깥이나 옆을 향한 팩맨은 착시에 끼지 않는다. 6개 중 중심을 향한 건 <b>4개</b>.'
 	}
 ];
