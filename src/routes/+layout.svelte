@@ -82,6 +82,7 @@
 			<nav class="foot-col">
 				<span class="foot-h">안내</span>
 				<a href="/about">소개</a>
+				<a href="/guide">풀이 가이드</a>
 				<a href="/privacy">개인정보처리방침</a>
 				<a href="/terms">이용약관</a>
 			</nav>
