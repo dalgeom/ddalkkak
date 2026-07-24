@@ -53,15 +53,15 @@
 		</ul>
 	{/if}
 
-	{#if revealed}
+	<!-- details로 두면 해설이 항상 DOM에 있어 검색엔진이 읽는다(고유 콘텐츠). 사용자에겐 접힌 상태. -->
+	<details class="pv-details" bind:open={revealed}>
+		<summary class="pv-reveal">정답 보기</summary>
 		<div class="pv-answer">
 			<div class="pv-answer-head"><Icon name="correct" size={15} /><span>정답</span></div>
 			<div class="pv-answer-val">{answerText}</div>
 			<div class="pv-explain">{@html problem.explain}</div>
 		</div>
-	{:else}
-		<button class="pv-reveal" onclick={() => (revealed = true)}>정답 보기</button>
-	{/if}
+	</details>
 </article>
 
 <style>
@@ -122,7 +122,13 @@
 		background: var(--accent-soft);
 		color: #1f6b41;
 	}
+	.pv-details {
+		align-self: stretch;
+	}
+	/* summary 기본 삼각형 마커 제거 */
 	.pv-reveal {
+		list-style: none;
+		display: inline-block;
 		align-self: flex-start;
 		font-family: inherit;
 		font-size: var(--fs-xs);
@@ -137,6 +143,13 @@
 		transition:
 			color var(--dur-tap) var(--ease-out),
 			border-color var(--dur-tap) var(--ease-out);
+	}
+	.pv-reveal::-webkit-details-marker {
+		display: none;
+	}
+	/* 열리면 '정답 보기' 요약은 감추고 해설만 보이게 */
+	.pv-details[open] > .pv-reveal {
+		display: none;
 	}
 	.pv-reveal:hover {
 		color: var(--text);
