@@ -22,6 +22,12 @@
 		content="{data.label}의 오늘의 딸깍. 발견형 퍼즐 3, 상식 퀴즈 5, 성냥개비 3문제를 다시 풀어보세요."
 	/>
 	<link rel="canonical" href="https://ddalkkak-1c2.pages.dev/archive/{data.day}" />
+	<meta property="og:title" content="{data.label} 오늘의 딸깍 — 지난 문제" />
+	<meta
+		property="og:description"
+		content="{data.label}의 발견형 퍼즐 3, 상식 퀴즈 5, 성냥개비 3문제를 다시 풀어보세요."
+	/>
+	<meta property="og:url" content="https://ddalkkak-1c2.pages.dev/archive/{data.day}" />
 </svelte:head>
 
 <nav class="crumb">

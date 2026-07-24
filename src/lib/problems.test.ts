@@ -1,9 +1,15 @@
 import { describe, it, expect } from 'vitest';
 import { PROBLEMS, DISCOVER_FIELDS, fieldOfChip } from './problems';
+import { TRIVIA } from './trivia';
 
 describe('문제 은행 무결성', () => {
 	it('id가 중복되지 않는다', () => {
 		const ids = PROBLEMS.map((p) => p.id);
+		expect(new Set(ids).size).toBe(ids.length);
+	});
+
+	it('상식 퀴즈 id도 중복되지 않는다 (Svelte {#each} 키 충돌 방지)', () => {
+		const ids = TRIVIA.map((p) => p.id);
 		expect(new Set(ids).size).toBe(ids.length);
 	});
 

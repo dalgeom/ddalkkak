@@ -1,6 +1,9 @@
 <svelte:head>
 	<title>개인정보처리방침 — 딸깍</title>
 	<link rel="canonical" href="https://ddalkkak-1c2.pages.dev/privacy" />
+	<meta property="og:title" content="개인정보처리방침 — 딸깍" />
+	<meta property="og:description" content="딸깍 개인정보처리방침" />
+	<meta property="og:url" content="https://ddalkkak-1c2.pages.dev/privacy" />
 </svelte:head>
 
 <div class="page">

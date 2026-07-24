@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import {
 	normalize,
 	isCorrectText,
@@ -13,9 +13,11 @@ import {
 	hintUnlocked,
 	editDistance,
 	isCloseAnswer,
-	wanderBonus
+	wanderBonus,
+	displayChoices,
+	advanceStreakIfComplete
 } from './game';
-import { PROBLEMS } from './problems';
+import { PROBLEMS, type Problem } from './problems';
 
 describe('normalize', () => {
 	it('공백과 기호를 제거하고 소문자화한다', () => {
@@ -189,5 +191,92 @@ describe('신규 배치 정답 판정', () => {
 			expect(p.answers?.length, id).toBeGreaterThan(0);
 			expect(isCorrectText(p, p.answers![0]), id).toBe(true);
 		}
+	});
+});
+
+describe('isCorrectText 음수 정답 가드', () => {
+	// normalize가 '-'를 지우므로 정답이 음수인데 부호 없이 입력하면 오답이어야 한다(jungle=-1).
+	const neg = { id: 'neg', chip: '', blocks: [], type: 'text', answers: ['-1'], explain: '' } as Problem;
+	it("부호 없는 '1'은 오답", () => {
+		expect(isCorrectText(neg, '1')).toBe(false);
+	});
+	it("'-1'은 정답", () => {
+		expect(isCorrectText(neg, '-1')).toBe(true);
+		expect(isCorrectText(neg, ' -1 ')).toBe(true);
+	});
+});
+
+describe('displayChoices (객관식 보기 셔플)', () => {
+	const q = {
+		id: 'shuf-q',
+		chip: '',
+		blocks: [],
+		type: 'choice',
+		choices: ['정답', 'B', 'C', 'D'],
+		answerIndex: 0,
+		explain: ''
+	} as Problem;
+
+	it('셔플 후에도 answerIndex가 원래 정답 텍스트를 가리킨다', () => {
+		const d = displayChoices(q);
+		expect(d.choices![d.answerIndex!]).toBe('정답');
+	});
+	it('같은 id는 항상 같은 순서 — 전 방문자 동일', () => {
+		expect(displayChoices(q).choices).toEqual(displayChoices(q).choices);
+	});
+	it('편향 제거: 여러 문제에서 정답이 항상 0번에 몰리지 않는다', () => {
+		const positions = new Set<number>();
+		for (let i = 0; i < 12; i++) {
+			const p = { ...q, id: `shuf-${i}` } as Problem;
+			positions.add(displayChoices(p).answerIndex!);
+		}
+		expect(positions.size).toBeGreaterThan(1);
+	});
+	it('text형은 손대지 않고 그대로 반환한다', () => {
+		const t = { id: 't', chip: '', blocks: [], type: 'text', answers: ['x'], explain: '' } as Problem;
+		expect(displayChoices(t)).toBe(t);
+	});
+});
+
+describe('advanceStreakIfComplete (연속 기록)', () => {
+	function mockLS() {
+		const store = new Map<string, string>();
+		return {
+			getItem: (k: string) => (store.has(k) ? store.get(k)! : null),
+			setItem: (k: string, v: string) => void store.set(k, String(v)),
+			removeItem: (k: string) => void store.delete(k),
+			clear: () => store.clear(),
+			key: () => null,
+			length: 0
+		};
+	}
+	beforeEach(() => vi.stubGlobal('localStorage', mockLS()));
+	afterEach(() => vi.unstubAllGlobals());
+
+	function finishAll(day: number) {
+		for (const k of ['discover', 'trivia', 'match'])
+			localStorage.setItem(`ddal.daily.${day}.${k}`, JSON.stringify({ phase: 'done' }));
+	}
+
+	it('3트랙 모두 done이면 streak가 1로 시작한다', () => {
+		finishAll(100);
+		expect(advanceStreakIfComplete(100)?.dayStreak).toBe(1);
+	});
+	it('한 트랙이라도 안 끝나면 갱신하지 않는다', () => {
+		localStorage.setItem('ddal.daily.100.discover', JSON.stringify({ phase: 'done' }));
+		expect(advanceStreakIfComplete(100)).toBeNull();
+	});
+	it('오늘 이미 갱신했으면 중복 증가하지 않는다', () => {
+		finishAll(100);
+		advanceStreakIfComplete(100);
+		expect(advanceStreakIfComplete(100)).toBeNull();
+	});
+	it('연속된 다음 날이면 +1, 하루라도 건너뛰면 1로 리셋', () => {
+		finishAll(100);
+		advanceStreakIfComplete(100);
+		finishAll(101);
+		expect(advanceStreakIfComplete(101)?.dayStreak).toBe(2);
+		finishAll(105);
+		expect(advanceStreakIfComplete(105)?.dayStreak).toBe(1);
 	});
 });

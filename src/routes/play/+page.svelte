@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { onMount, tick } from 'svelte';
 	import { page } from '$app/state';
 	import { browser } from '$app/environment';
 	import { PROBLEMS, GRADES, type Problem, type Grade } from '$lib/problems';
@@ -49,6 +49,7 @@
 	let tickIv: ReturnType<typeof setInterval> | undefined;
 	let done = $state(false);
 	let answerValue = $state('');
+	let inputEl = $state<HTMLInputElement | null>(null);
 	let feedback = $state<{ msg: string; ok: boolean } | null>(null);
 	let judge = $state<'correct' | 'wrong' | 'giveup' | null>(null);
 
@@ -141,6 +142,10 @@
 		flashIndex = null;
 		flashKind = null;
 		if (browser) window.scrollTo({ top: 0, behavior: 'smooth' });
+		// 데스크톱에서만 새 문제의 입력창에 포커스(모바일은 키보드가 튀어 방해되므로 제외)
+		if (browser && window.matchMedia?.('(hover: hover)').matches) {
+			tick().then(() => inputEl?.focus());
+		}
 	}
 
 	function finish(win: boolean, reason: 'answered' | 'giveup' = 'answered') {
@@ -276,6 +281,9 @@
 		content="문제은행에서 랜덤으로 계속! 발견형 퍼즐과 상식 퀴즈를 5·10·20문제 연속으로 풀고 콤보 점수에 도전하세요."
 	/>
 	<link rel="canonical" href="https://ddalkkak-1c2.pages.dev/play" />
+	<meta property="og:title" content="연속 모드 — 딸깍" />
+	<meta property="og:description" content="문제은행에서 랜덤으로 계속! 발견형 퍼즐과 상식 퀴즈를 5·10·20문제 연속으로 풀고 콤보 점수에 도전하세요." />
+	<meta property="og:url" content="https://ddalkkak-1c2.pages.dev/play" />
 </svelte:head>
 
 <div class="mroot">
@@ -392,6 +400,7 @@
 				{:else}
 					<div class="input-row">
 						<input
+							bind:this={inputEl}
 							class:flash-wrong={inputState === 'wrong'}
 							class:flash-correct={inputState === 'correct'}
 							placeholder="정답을 입력하세요"
