@@ -108,6 +108,7 @@ const CHIP_FIELD: Record<string, DiscoverField> = {
 	'생활 상식': '관찰·추리',
 	자리값: '관찰·추리',
 	시소: '관찰·추리',
+	'레이저 반사': '관찰·추리',
 	중복제거: '관찰·추리'
 };
 
@@ -2403,5 +2404,21 @@ export const PROBLEMS: Problem[] = [
 			'물음표 짝은 그냥 90도 돌린 것뿐이라, 그 방향 관계가 그대로예요.'
 		],
 		explain: '핵심은 잘린 모서리와 점의 <b>상대 방향(손잡이 방향)</b>이다. 돌리기(회전)는 이 관계를 절대 바꾸지 못하지만, 좌우로 뒤집으면(거울) 반드시 반전된다 — 오른손과 왼손처럼. 물음표 짝은 반시계 90도로 돌린 것이라 손잡이 방향이 그대로이므로 <b>회전</b>이다.'
+	},
+	{
+		id: 'fig-laser',
+		chip: '레이저 반사',
+		blocks: [
+			{ kind: 'text', html: '레이저가 상자에서 나가는 방향은? (위 · 아래 · 왼쪽 · 오른쪽)' },
+			{ kind: 'figure', svg: '<svg viewBox=\'0 0 448 132\' role=\'img\' aria-label=\'레이저가 거울에 튕겨 어느 쪽으로 나가나\'><rect x=\'8\' y=\'22\' width=\'84\' height=\'84\' rx=\'4\' style=\'stroke:#2c2822;stroke-width:2.5;fill:none\'/><line x1=\'41\' y1=\'73\' x2=\'59\' y2=\'55\' style=\'stroke:#1e88ff;stroke-width:4;fill:none;stroke-linecap:round\'/><polyline points=\'8 64 50 64 50 22\' style=\'stroke:#c0392b;stroke-width:2.5;fill:none;stroke-dasharray:5 4\'/><polyline points=\'2 58 8 64 2 70\' style=\'stroke:#c0392b;stroke-width:2.5;fill:none\'/><line x1=\'50\' y1=\'22\' x2=\'50\' y2=\'10\' style=\'stroke:#c0392b;stroke-width:2.5;fill:none\'/><polyline points=\'44 16 50 10 56 16\' style=\'stroke:#c0392b;stroke-width:2.5;fill:none\'/><rect x=\'122\' y=\'22\' width=\'84\' height=\'84\' rx=\'4\' style=\'stroke:#2c2822;stroke-width:2.5;fill:none\'/><line x1=\'155\' y1=\'55\' x2=\'173\' y2=\'73\' style=\'stroke:#1e88ff;stroke-width:4;fill:none;stroke-linecap:round\'/><polyline points=\'122 64 164 64 164 106\' style=\'stroke:#c0392b;stroke-width:2.5;fill:none;stroke-dasharray:5 4\'/><polyline points=\'116 58 122 64 116 70\' style=\'stroke:#c0392b;stroke-width:2.5;fill:none\'/><line x1=\'164\' y1=\'106\' x2=\'164\' y2=\'118\' style=\'stroke:#c0392b;stroke-width:2.5;fill:none\'/><polyline points=\'158 112 164 118 170 112\' style=\'stroke:#c0392b;stroke-width:2.5;fill:none\'/><rect x=\'236\' y=\'22\' width=\'84\' height=\'84\' rx=\'4\' style=\'stroke:#2c2822;stroke-width:2.5;fill:none\'/><line x1=\'279\' y1=\'87\' x2=\'297\' y2=\'69\' style=\'stroke:#1e88ff;stroke-width:4;fill:none;stroke-linecap:round\'/><line x1=\'279\' y1=\'35\' x2=\'297\' y2=\'53\' style=\'stroke:#1e88ff;stroke-width:4;fill:none;stroke-linecap:round\'/><polyline points=\'236 78 288 78 288 44 236 44\' style=\'stroke:#c0392b;stroke-width:2.5;fill:none;stroke-dasharray:5 4\'/><polyline points=\'230 72 236 78 230 84\' style=\'stroke:#c0392b;stroke-width:2.5;fill:none\'/><line x1=\'236\' y1=\'44\' x2=\'224\' y2=\'44\' style=\'stroke:#c0392b;stroke-width:2.5;fill:none\'/><polyline points=\'230 38 224 44 230 50\' style=\'stroke:#c0392b;stroke-width:2.5;fill:none\'/><rect x=\'350\' y=\'22\' width=\'84\' height=\'84\' rx=\'4\' style=\'stroke:#2c2822;stroke-width:2.5;fill:none\'/><line x1=\'393\' y1=\'55\' x2=\'411\' y2=\'73\' style=\'stroke:#1e88ff;stroke-width:4;fill:none;stroke-linecap:round\'/><line x1=\'359\' y1=\'73\' x2=\'377\' y2=\'55\' style=\'stroke:#1e88ff;stroke-width:4;fill:none;stroke-linecap:round\'/><line x1=\'402\' y1=\'118\' x2=\'402\' y2=\'106\' style=\'stroke:#c0392b;stroke-width:2.5;fill:none\'/><polyline points=\'396 112 402 106 408 112\' style=\'stroke:#c0392b;stroke-width:2.5;fill:none\'/><line x1=\'402\' y1=\'106\' x2=\'402\' y2=\'84\' style=\'stroke:#c0392b;stroke-width:2.5;fill:none;stroke-dasharray:5 4\'/><text x=\'370\' y=\'72\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:24px;font-weight:800;fill:#c0392b\'>?</text></svg>', caption: '파란선은 거울, 빨간 점선은 빛의 경로' }
+		],
+		type: 'text',
+		answers: ['아래', '아래쪽', '↓', '밑', '아래로', '하'],
+		hints: [
+			'빛은 거울(파란 사선)에 부딪히면 90도 꺾여요. 예시 3칸에서 어떻게 꺾이는지 먼저 보세요.',
+			'기울기가 반대인 두 거울은 꺾는 방향도 반대예요 — 예시 1번(위로)과 2번(아래로)을 비교하세요.',
+			'물음표는 아래에서 위로 들어가, 첫 거울에서 왼쪽으로, 그 다음 거울에서 아래로 꺾여요.'
+		],
+		explain: '거울은 빛을 90도로 튕긴다. 오른쪽으로 향하던 빛이 / 거울을 만나면 위로, \\ 거울을 만나면 아래로 꺾인다(기울기가 반대면 결과도 반대). 물음표는 아래에서 위로 들어가 첫 거울에서 왼쪽으로, 이어 다음 거울에서 아래로 꺾여 <b>아래로</b> 나간다. 거울이 둘이면 예시 3번처럼 들어온 쪽으로 되돌아나갈 수도 있다.'
 	}
 ];
