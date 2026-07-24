@@ -15,7 +15,9 @@ import {
 	isCloseAnswer,
 	wanderBonus,
 	displayChoices,
-	advanceStreakIfComplete
+	advanceStreakIfComplete,
+	recordSolve,
+	readSolveStats
 } from './game';
 import { PROBLEMS, type Problem } from './problems';
 
@@ -278,5 +280,40 @@ describe('advanceStreakIfComplete (연속 기록)', () => {
 		expect(advanceStreakIfComplete(101)?.dayStreak).toBe(2);
 		finishAll(105);
 		expect(advanceStreakIfComplete(105)?.dayStreak).toBe(1);
+	});
+});
+
+describe('recordSolve / readSolveStats (통계)', () => {
+	function mockLS() {
+		const store = new Map<string, string>();
+		return {
+			getItem: (k: string) => (store.has(k) ? store.get(k)! : null),
+			setItem: (k: string, v: string) => void store.set(k, String(v)),
+			removeItem: (k: string) => void store.delete(k),
+			clear: () => store.clear(),
+			key: () => null,
+			length: 0
+		};
+	}
+	beforeEach(() => vi.stubGlobal('localStorage', mockLS()));
+	afterEach(() => vi.unstubAllGlobals());
+
+	it('맞히면 정답 수 + 힌트 단계별 카운트가 오른다', () => {
+		recordSolve(true, 0);
+		recordSolve(true, 2);
+		recordSolve(true, 2);
+		const s = readSolveStats();
+		expect(s.solved).toBe(3);
+		expect(s.hintDist).toEqual([1, 0, 2, 0]);
+	});
+	it('못 맞히면 포기 수만 오른다', () => {
+		recordSolve(false, 0);
+		const s = readSolveStats();
+		expect(s.solved).toBe(0);
+		expect(s.gaveUp).toBe(1);
+	});
+	it('힌트 3개 초과는 3으로 clamp된다', () => {
+		recordSolve(true, 9);
+		expect(readSolveStats().hintDist[3]).toBe(1);
 	});
 });

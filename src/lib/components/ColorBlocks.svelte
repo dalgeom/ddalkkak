@@ -21,6 +21,15 @@
 		P: '보라'
 	};
 
+	/** 색약 사용자도 구분할 수 있게 블록 안에 색 코드 글자를 띄운다(WCAG 1.4.1: 색만으로 정보 전달 금지).
+	 *  배경 밝기에 따라 글자색을 검정/흰색으로 골라 대비를 확보한다. */
+	function txtColor(hex: string): string {
+		const r = parseInt(hex.slice(1, 3), 16);
+		const g = parseInt(hex.slice(3, 5), 16);
+		const b = parseInt(hex.slice(5, 7), 16);
+		return 0.299 * r + 0.587 * g + 0.114 * b > 150 ? '#2c2822' : '#fff';
+	}
+
 	/** 폭 가중치 합: 색 블록=1, 연산자/물음표=0.55 */
 	function rowUnits(row: string): number {
 		let n = 0;
@@ -40,7 +49,14 @@
 			{:else if it === '?'}
 				<div class="cunk">?</div>
 			{:else}
-				<div class="csq" style="background:{COL[it]}" role="img" aria-label={NAME[it] ?? it}></div>
+				<div
+						class="csq"
+						style="background:{COL[it]}; color:{txtColor(COL[it])}"
+						role="img"
+						aria-label={NAME[it] ?? it}
+					>
+						{it}
+					</div>
 			{/if}
 		{/each}
 	</div>
@@ -65,6 +81,13 @@
 		height: auto;
 		border-radius: 7px;
 		box-shadow: inset 0 -3px 5px rgba(0, 0, 0, 0.16);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-size: clamp(11px, 4.5cqi, 15px);
+		font-weight: 800;
+		line-height: 1;
+		user-select: none;
 	}
 	.cop {
 		font-size: clamp(14px, 5cqi, 21px);

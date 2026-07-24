@@ -18,7 +18,10 @@
 		isCloseAnswer,
 		wanderBonus,
 		displayChoices,
-		advanceStreakIfComplete
+		advanceStreakIfComplete,
+		recordSolve,
+		readSolveStats,
+		type SolveStats
 	} from '$lib/game';
 	import { shareResult, outcomeMessage } from '$lib/shareCard';
 	import SevenSeg from '$lib/components/SevenSeg.svelte';
@@ -30,6 +33,7 @@
 	import AdSlot from '$lib/components/AdSlot.svelte';
 	import Icon from '$lib/components/Icon.svelte';
 	import SegNumber from '$lib/components/SegNumber.svelte';
+	import StatsModal from '$lib/components/StatsModal.svelte';
 
 	// SSR 시점 load에서 계산한 오늘 날짜(FOUC·크롤러 stale 방지). 클라이언트에서 재확인.
 	let { data }: { data: { dayNum: number } } = $props();
@@ -59,6 +63,14 @@
 	let done = $state(false);
 	let answerValue = $state('');
 	let inputEl = $state<HTMLInputElement | null>(null);
+
+	// 통계 모달(내 기록) — 열 때 최신 풀이 통계를 읽는다.
+	let showStats = $state(false);
+	let solveStats = $state<SolveStats>({ hintDist: [0, 0, 0, 0], solved: 0, gaveUp: 0 });
+	function openStats() {
+		solveStats = readSolveStats();
+		showStats = true;
+	}
 	let feedback = $state<{ msg: string; ok: boolean } | null>(null);
 	let toastMsg = $state('');
 	let countdown = $state('');
@@ -394,6 +406,7 @@
 					ok: true
 				}
 			: { msg: '정답을 확인했어요', ok: false };
+		recordSolve(win, hintsUsed);
 		persist();
 		saveDaily();
 	}
@@ -696,7 +709,10 @@
 {#if phase === 'hub'}
 	<section class="hub-grid">
 		<div class="panel">
-			<div class="panel-title">기록</div>
+			<div class="panel-head">
+				<div class="panel-title">기록</div>
+				<button class="stats-open" onclick={openStats}>내 기록 자세히 →</button>
+			</div>
 			<div class="today-row">
 				<span class="today-label">오늘</span>
 				<span class="today-dots">
@@ -952,6 +968,10 @@
 
 {#if toastMsg}
 	<div class="toast" role="status" aria-live="polite">{toastMsg}</div>
+{/if}
+
+{#if showStats}
+	<StatsModal {stats} {solveStats} onclose={() => (showStats = false)} />
 {/if}
 
 <style>
@@ -1539,6 +1559,28 @@
 		font-weight: var(--fw-label);
 		letter-spacing: var(--ls-label);
 		margin-bottom: 13px;
+	}
+	.panel-head {
+		display: flex;
+		align-items: baseline;
+		justify-content: space-between;
+		gap: 8px;
+	}
+	.panel-head .panel-title {
+		margin-bottom: 13px;
+	}
+	.stats-open {
+		background: none;
+		border: none;
+		padding: 0;
+		font-family: inherit;
+		font-size: var(--fs-2xs);
+		font-weight: var(--fw-label);
+		color: var(--accent);
+		cursor: pointer;
+	}
+	.stats-open:hover {
+		text-decoration: underline;
 	}
 	.dots {
 		display: flex;
