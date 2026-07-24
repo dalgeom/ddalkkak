@@ -13,6 +13,9 @@
 		content="딸깍의 지난 오늘의 딸깍을 다시 풀어보세요. 매일 발견형 퍼즐·상식 퀴즈·성냥개비 11문제."
 	/>
 	<link rel="canonical" href="https://ddalkkak-1c2.pages.dev/archive" />
+	<meta property="og:title" content="지난 문제 — 딸깍" />
+	<meta property="og:description" content="딸깍의 지난 오늘의 딸깍을 다시 풀어보세요. 매일 발견형 퍼즐·상식 퀴즈·성냥개비 11문제." />
+	<meta property="og:url" content="https://ddalkkak-1c2.pages.dev/archive" />
 </svelte:head>
 
 <div class="head">

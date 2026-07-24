@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { onMount, tick } from 'svelte';
 	import { browser, dev } from '$app/environment';
 	import { PROBLEMS, GRADES, DISCOVER_FIELDS, fieldOfChip, type Problem } from '$lib/problems';
 	import { TRIVIA } from '$lib/trivia';
@@ -57,6 +57,7 @@
 	let elapsedMs = $state(0);
 	let done = $state(false);
 	let answerValue = $state('');
+	let inputEl = $state<HTMLInputElement | null>(null);
 	let feedback = $state<{ msg: string; ok: boolean } | null>(null);
 	let toastMsg = $state('');
 	let countdown = $state('');
@@ -371,6 +372,10 @@
 		flashIndex = null;
 		flashKind = null;
 		if (browser) window.scrollTo({ top: 0, behavior: 'smooth' });
+		// 데스크톱에서만 새 문제의 입력창에 포커스(모바일은 키보드가 튀어 방해되므로 제외)
+		if (browser && window.matchMedia?.('(hover: hover)').matches) {
+			tick().then(() => inputEl?.focus());
+		}
 	}
 
 	function finish(win: boolean) {
@@ -506,6 +511,9 @@
 		content="규칙을 발견하는 순간의 그 소리. 발견형 퍼즐·상식 퀴즈·성냥개비를 매일 새로, 모두가 같은 문제로."
 	/>
 	<link rel="canonical" href="https://ddalkkak-1c2.pages.dev/" />
+	<meta property="og:title" content="딸깍 — 매일 새로 열리는 두뇌 퍼즐" />
+	<meta property="og:description" content="규칙을 발견하는 순간의 그 소리. 발견형 퍼즐·상식 퀴즈·성냥개비를 매일 새로, 모두가 같은 문제로." />
+	<meta property="og:url" content="https://ddalkkak-1c2.pages.dev/" />
 </svelte:head>
 
 {#if phase === 'landing'}
@@ -781,6 +789,7 @@
 					{:else}
 						<div class="input-row">
 							<input
+								bind:this={inputEl}
 								class:flash-wrong={inputState === 'wrong'}
 								class:flash-correct={inputState === 'correct'}
 								placeholder="정답을 입력하세요"

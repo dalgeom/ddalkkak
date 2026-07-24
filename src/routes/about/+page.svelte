@@ -1,6 +1,9 @@
 <svelte:head>
 	<title>소개 — 딸깍</title>
 	<link rel="canonical" href="https://ddalkkak-1c2.pages.dev/about" />
+	<meta property="og:title" content="소개 — 딸깍" />
+	<meta property="og:description" content="딸깍은 숨은 규칙을 발견하는 두뇌 퍼즐 게임입니다." />
+	<meta property="og:url" content="https://ddalkkak-1c2.pages.dev/about" />
 </svelte:head>
 
 <div class="page">
