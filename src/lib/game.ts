@@ -83,6 +83,13 @@ export function kstDayNumber(nowMs: number): number {
 	return Math.floor((nowMs + 9 * 3600 * 1000) / 86400000);
 }
 
+/** 데일리 모델 시작일(2026-07-15)의 epoch day. 공유 카드 회차 번호(딸깍 #N)용. */
+export const SITE_START_DAY = 20649;
+/** 그날이 몇 번째 '딸깍'인지 — Wordle의 회차 번호처럼 SNS 공유·비교를 유도한다. */
+export function puzzleNumber(dayNum: number): number {
+	return dayNum - SITE_START_DAY + 1;
+}
+
 /**
  * 힌트 해금 조건 — '방황'이 재미의 빌드업이므로 즉시 스킵을 막는다.
  * 힌트1은 항상 열려 있고, 2·3은 시간이 지나거나 시도해 본 뒤에 열린다(OR 조건).

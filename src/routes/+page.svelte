@@ -12,6 +12,7 @@
 		scoreFor,
 		emojiFor,
 		kstDayNumber,
+		puzzleNumber,
 		dailyIndices,
 		hintUnlocked,
 		isCloseAnswer,
@@ -161,12 +162,13 @@
 			0
 		);
 		const totalN = TRACKS.reduce((n, t) => n + t.size, 0);
-		let text = `딸깍 ${dateLabel}\n${rows.map((r) => `${r.label} ${r.emoji}`).join('\n')}\n${solvedN}/${totalN}`;
+		const pn = puzzleNumber(dayNum);
+		let text = `딸깍 #${pn} · ${dateLabel}\n${rows.map((r) => `${r.label} ${r.emoji}`).join('\n')}\n${solvedN}/${totalN}`;
 		if (stats.dayStreak > 1) text += ` · 🔥 ${stats.dayStreak}일 연속`;
 		text += `\n${location.origin}`;
 		const outcome = await shareResult(
 			{
-				title: `오늘의 딸깍 · ${dateLabel}`,
+				title: `오늘의 딸깍 #${pn}`,
 				scoreLabel: `${solvedN} / ${totalN}`,
 				gridRows: rows,
 				subLine: stats.dayStreak > 1 ? `🔥 ${stats.dayStreak}일 연속` : undefined,
