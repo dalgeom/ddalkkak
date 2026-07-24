@@ -89,6 +89,8 @@ const CHIP_FIELD: Record<string, DiscoverField> = {
 	'삐딱한 선': '도형·전광판',
 	끝점: '도형·전광판',
 	곡선: '도형·전광판',
+	'겹친 테두리': '도형·전광판',
+	'손잡이 방향': '도형·전광판',
 	교차점: '도형·전광판',
 	종이접기: '도형·전광판',
 	팩맨: '도형·전광판',
@@ -2369,5 +2371,37 @@ export const PROBLEMS: Problem[] = [
 			'입이 가운데(중심)를 향한 팩맨만 세면 돼요 — 그것들이 보이지 않는 도형의 꼭짓점이에요.'
 		],
 		explain: '입이 <b>중심을 향한</b> 팩맨만 모여, 실제로는 그려지지 않은 도형(삼각형·사각형…)의 꼭짓점처럼 보인다. 그 개수가 값. 바깥이나 옆을 향한 팩맨은 착시에 끼지 않는다. 6개 중 중심을 향한 건 <b>4개</b>.'
+	},
+	{
+		id: 'fig-border',
+		chip: '겹친 테두리',
+		blocks: [
+			{ kind: 'text', html: '물음표에 들어갈 수는?' },
+			{ kind: 'figure', svg: '<svg viewBox=\'0 0 460 130\' role=\'img\' aria-label=\'겹친 도형의 테두리 꼭짓점 세기\'><rect x=\'25\' y=\'35\' width=\'60\' height=\'60\' style=\'stroke:#2c2822;stroke-width:3;fill:none\'/><text x=\'55\' y=\'120\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:19px;font-weight:800;fill:#2c2822\'>= 4</text><path d=\'M170 33 L140 93 L200 93 Z\' style=\'stroke:#2c2822;stroke-width:3;fill:none\'/><text x=\'170\' y=\'120\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:19px;font-weight:800;fill:#2c2822\'>= 3</text><path d=\'M275 33 L295 33 L295 53 L315 53 L315 73 L295 73 L295 93 L275 93 L275 73 L255 73 L255 53 L275 53 Z\' style=\'stroke:#2c2822;stroke-width:3;fill:none\'/><text x=\'285\' y=\'120\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:19px;font-weight:800;fill:#2c2822\'>= 12</text><path d=\'M400.0 31.0 L406.7 51.4 L427.7 47.0 L413.4 63.0 L427.7 79.0 L406.7 74.6 L400.0 95.0 L393.3 74.6 L372.3 79.0 L386.6 63.0 L372.3 47.0 L393.3 51.4 Z\' style=\'stroke:#2c2822;stroke-width:3;fill:none\'/><text x=\'400\' y=\'120\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:22px;font-weight:800;fill:#c0392b\'>= ?</text></svg>', caption: '겹쳐서 생긴 테두리' }
+		],
+		type: 'text',
+		answers: ['12', '12개', '열둘'],
+		hints: [
+			'도형 각각의 변 개수를 그냥 더하는 게 아니에요.',
+			'겹쳐서 생긴 하나의 커다란 테두리만 놓고 보세요.',
+			'테두리를 손가락으로 따라가며 뾰족하게·오목하게 꺾이는 지점마다 하나씩 세어보세요.'
+		],
+		explain: '값은 원래 도형들의 변을 더한 게 아니라, 겹쳐서 만들어진 <b>하나의 바깥 테두리</b>를 따라갈 때 꺾이는 꼭짓점의 수다. 사각형은 4, 삼각형은 3. 십자(+)는 뾰족한 점 4 + 오목한 점 8 = 12. 육각별도 뾰족한 점 6 + 오목한 점 6 = <b>12</b> — 전혀 다르게 생겼는데 세어보면 같다.'
+	},
+	{
+		id: 'fig-chiral',
+		chip: '손잡이 방향',
+		blocks: [
+			{ kind: 'text', html: '오른쪽 그림은 왼쪽을 <b>돌린 것</b>(회전)일까, <b>뒤집은 것</b>(거울)일까?' },
+			{ kind: 'figure', svg: '<svg viewBox=\'0 0 470 84\' role=\'img\' aria-label=\'돌린 것인가 뒤집은 것인가\'><g transform=\'translate(6 12)\'><path d=\'M0 0 L26 0 L38 12 L38 38 L0 38 Z\' style=\'stroke:#2c2822;stroke-width:3;fill:none\'/><circle cx=\'9\' cy=\'30\' r=\'4\' style=\'fill:#2c2822;stroke:none\'/></g><g transform=\'translate(58 12)\'><g transform=\'translate(19 19) rotate(90) translate(-19 -19)\'><path d=\'M0 0 L26 0 L38 12 L38 38 L0 38 Z\' style=\'stroke:#2c2822;stroke-width:3;fill:none\'/><circle cx=\'9\' cy=\'30\' r=\'4\' style=\'fill:#2c2822;stroke:none\'/></g></g><text x=\'51\' y=\'72\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:19px;font-weight:800;fill:#2c2822\'>회전</text><g transform=\'translate(98 12)\'><path d=\'M0 0 L26 0 L38 12 L38 38 L0 38 Z\' style=\'stroke:#2c2822;stroke-width:3;fill:none\'/><circle cx=\'9\' cy=\'30\' r=\'4\' style=\'fill:#2c2822;stroke:none\'/></g><g transform=\'translate(150 12)\'><g transform=\'translate(19 19) scale(-1 1) translate(-19 -19)\'><path d=\'M0 0 L26 0 L38 12 L38 38 L0 38 Z\' style=\'stroke:#2c2822;stroke-width:3;fill:none\'/><circle cx=\'9\' cy=\'30\' r=\'4\' style=\'fill:#2c2822;stroke:none\'/></g></g><text x=\'143\' y=\'72\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:19px;font-weight:800;fill:#2c2822\'>거울</text><g transform=\'translate(190 12)\'><path d=\'M0 0 L26 0 L38 12 L38 38 L0 38 Z\' style=\'stroke:#2c2822;stroke-width:3;fill:none\'/><circle cx=\'9\' cy=\'30\' r=\'4\' style=\'fill:#2c2822;stroke:none\'/></g><g transform=\'translate(242 12)\'><g transform=\'translate(19 19) rotate(180) translate(-19 -19)\'><path d=\'M0 0 L26 0 L38 12 L38 38 L0 38 Z\' style=\'stroke:#2c2822;stroke-width:3;fill:none\'/><circle cx=\'9\' cy=\'30\' r=\'4\' style=\'fill:#2c2822;stroke:none\'/></g></g><text x=\'235\' y=\'72\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:19px;font-weight:800;fill:#2c2822\'>회전</text><g transform=\'translate(282 12)\'><path d=\'M0 0 L26 0 L38 12 L38 38 L0 38 Z\' style=\'stroke:#2c2822;stroke-width:3;fill:none\'/><circle cx=\'9\' cy=\'30\' r=\'4\' style=\'fill:#2c2822;stroke:none\'/></g><g transform=\'translate(334 12)\'><g transform=\'translate(19 19) scale(-1 1) rotate(90) translate(-19 -19)\'><path d=\'M0 0 L26 0 L38 12 L38 38 L0 38 Z\' style=\'stroke:#2c2822;stroke-width:3;fill:none\'/><circle cx=\'9\' cy=\'30\' r=\'4\' style=\'fill:#2c2822;stroke:none\'/></g></g><text x=\'327\' y=\'72\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:19px;font-weight:800;fill:#2c2822\'>거울</text><g transform=\'translate(374 12)\'><path d=\'M0 0 L26 0 L38 12 L38 38 L0 38 Z\' style=\'stroke:#2c2822;stroke-width:3;fill:none\'/><circle cx=\'9\' cy=\'30\' r=\'4\' style=\'fill:#2c2822;stroke:none\'/></g><g transform=\'translate(426 12)\'><g transform=\'translate(19 19) rotate(-90) translate(-19 -19)\'><path d=\'M0 0 L26 0 L38 12 L38 38 L0 38 Z\' style=\'stroke:#2c2822;stroke-width:3;fill:none\'/><circle cx=\'9\' cy=\'30\' r=\'4\' style=\'fill:#2c2822;stroke:none\'/></g></g><text x=\'419\' y=\'72\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:22px;font-weight:800;fill:#c0392b\'>?</text></svg>', caption: '점과 잘린 모서리의 관계를 보라' }
+		],
+		type: 'text',
+		answers: ['회전', '돌린것', '돌린 것', '돌리기'],
+		hints: [
+			'겉모양(윤곽)이 같다고 같은 도형은 아니에요 — 안쪽 점의 위치를 보세요.',
+			'점이 잘린 모서리를 기준으로 시계방향에 있는지 반시계방향에 있는지, 그 관계는 돌려도 절대 안 바뀌어요.',
+			'물음표 짝은 그냥 90도 돌린 것뿐이라, 그 방향 관계가 그대로예요.'
+		],
+		explain: '핵심은 잘린 모서리와 점의 <b>상대 방향(손잡이 방향)</b>이다. 돌리기(회전)는 이 관계를 절대 바꾸지 못하지만, 좌우로 뒤집으면(거울) 반드시 반전된다 — 오른손과 왼손처럼. 물음표 짝은 반시계 90도로 돌린 것이라 손잡이 방향이 그대로이므로 <b>회전</b>이다.'
 	}
 ];
