@@ -521,6 +521,12 @@
 	<section class="landing">
 		<h1 class="l-h1">규칙을 발견하는 순간, 딸깍.</h1>
 		<p class="l-sub">오늘 치 {todayTotal}문제 · 매일 자정에 새로 열립니다</p>
+		<!-- 첫 방문자용 안내: 발견형은 규칙을 알려주지 않는 장르라 짧게 짚어준다 -->
+		<ul class="l-how">
+			<li><b>규칙은 알려주지 않아요.</b> 예시 속에 숨은 규칙을 직접 찾아내는 게 핵심이에요.</li>
+			<li><b>막히면 힌트를</b> 하나씩 열 수 있어요 — 대신 점수가 조금씩 깎여요.</li>
+			<li><b>매일 자정</b> 세 종류가 새로 열리고, 모두가 같은 문제를 풀어요.</li>
+		</ul>
 	</section>
 {:else}
 	{#if mode === 'daily' && stats.dayStreak > 0 && stats.lastDay !== dayNum}
@@ -1627,6 +1633,42 @@
 		font-size: var(--fs-xs);
 		color: var(--muted);
 		font-weight: var(--fw-caption);
+	}
+	.l-how {
+		list-style: none;
+		max-width: 440px;
+		margin: 18px auto 0;
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
+		text-align: left;
+	}
+	.l-how li {
+		position: relative;
+		padding: 10px 14px 10px 34px;
+		background: var(--panel);
+		border: 1px solid var(--border);
+		border-radius: 12px;
+		font-size: var(--fs-xs);
+		font-weight: var(--fw-caption);
+		line-height: var(--lh-reading);
+		color: var(--text);
+		word-break: keep-all;
+	}
+	.l-how li::before {
+		content: '';
+		position: absolute;
+		left: 14px;
+		top: 50%;
+		width: 8px;
+		height: 8px;
+		border-radius: var(--seg-r);
+		background: var(--accent);
+		transform: translateY(-50%);
+	}
+	.l-how b {
+		color: var(--accent);
+		font-weight: var(--fw-emphasis);
 	}
 	.tracks {
 		display: grid;
