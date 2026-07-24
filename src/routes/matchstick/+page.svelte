@@ -334,7 +334,7 @@
 			subLine = `연속 ${stats.streak}판 · 통산 ${stats.solved}판`;
 			text = `딸깍! 성냥개비 — 연속 ${stats.streak}판 · 통산 ${stats.solved}판`;
 		}
-		text += `\n${location.origin}/matchstick`;
+		text += `\n${location.origin}/matchstick?ref=match\n#딸깍`;
 		const outcome = await shareCardResult(
 			{ title, scoreLabel, emojiRow, subLine, cta: '너도 도전해봐!' },
 			text

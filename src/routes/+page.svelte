@@ -150,13 +150,26 @@
 	/** 하루 전체 결과를 Wordle식 3줄 그리드로 공유한다 — 데일리 정체성의 핵심 바이럴 장치 */
 	async function shareToday() {
 		if (!browser) return;
+		// 상식 정답은 문제 난이도 색으로 인코딩 — 'NYT Connections'처럼 '어려운 문제까지 뚫었다'가
+		// 그리드 한 줄에 드러나 자랑 동기·미리보기 흡인력이 커진다.
+		const GRADE_EMOJI: Record<string, string> = {
+			초등: '🟩',
+			중등: '🟨',
+			고등: '🟦',
+			어른: '🟪'
+		};
+		const triviaGrades = dailyIndices(TRIVIA.length, dayNum, 5).map((i) => TRIVIA[i].grade);
 		const rowFor = (k: TrackKey): string => {
 			try {
 				const rec = JSON.parse(localStorage.getItem(`ddal.daily.${dayNum}.${k}`) || 'null');
 				if (!rec?.results) return '';
 				// 발견/상식은 이모지(✅💡🔓), 성냥개비는 win/fail 문자열 — 정규화한다
 				return (rec.results as string[])
-					.map((r) => (r === 'win' ? '✅' : r === 'fail' ? '🔓' : r))
+					.map((r, i) => {
+						const e = r === 'win' ? '✅' : r === 'fail' ? '🔓' : r;
+						if (k === 'trivia' && e === '✅') return GRADE_EMOJI[triviaGrades[i] ?? ''] ?? '✅';
+						return e;
+					})
 					.join('');
 			} catch {
 				return '';
@@ -170,14 +183,14 @@
 			.map((r) => ({ label: r.label, emoji: rowFor(r.key) }))
 			.filter((r) => r.emoji);
 		const solvedN = rows.reduce(
-			(n, r) => n + [...r.emoji].filter((e) => e === '✅' || e === '💡').length,
+			(n, r) => n + [...r.emoji].filter((e) => e !== '🔓').length,
 			0
 		);
 		const totalN = TRACKS.reduce((n, t) => n + t.size, 0);
 		const pn = puzzleNumber(dayNum);
 		let text = `딸깍 #${pn} · ${dateLabel}\n${rows.map((r) => `${r.label} ${r.emoji}`).join('\n')}\n${solvedN}/${totalN}`;
 		if (stats.dayStreak > 1) text += ` · 🔥 ${stats.dayStreak}일 연속`;
-		text += `\n${location.origin}`;
+		text += `\n${location.origin}/?ref=daily\n#딸깍`;
 		const outcome = await shareResult(
 			{
 				title: `오늘의 딸깍 #${pn}`,
@@ -197,6 +210,10 @@
 	let current = $derived(displayChoices(queue[pos]));
 	let shownHints = $derived(current && current.hints ? current.hints.slice(0, hintsUsed) : []);
 	let dateLabel = $derived(formatDate(dayNum));
+	// 오늘의 회차 번호(딸깍 #N) — Wordle식 '오늘 것' 수집 앵커. 첫 화면에도 노출한다.
+	let puzzleNo = $derived(puzzleNumber(dayNum));
+	// 공유 링크(?ref=...)로 들어온 초대 방문자 — 첫 화면에 사회적 증거 배너를 띄워 이탈을 줄인다.
+	let invited = $state(false);
 
 	function formatDate(day: number): string {
 		const ms = day * 86400000 - 9 * 3600 * 1000 + 43200000;
@@ -468,8 +485,9 @@
 		const label = mode === 'daily' ? `${trackInfo.name} · ${dateLabel}` : '랜덤 3문제';
 		const solvedN = results.filter((r) => r !== '🔓').length;
 		let text = `딸깍! ${label} ${solvedN}/${results.length} ${results.join('')}`;
+		text += `\n#딸깍`;
 		if (mode === 'daily' && stats.dayStreak > 1) text += `\n🔥 ${stats.dayStreak}일 연속`;
-		text += `\n${location.origin}`;
+		text += `\n${location.origin}/?ref=random`;
 		const outcome = await shareResult(
 			{
 				title: label,
@@ -502,6 +520,11 @@
 		load();
 		dayNum = kstDayNumber(Date.now());
 		refreshTrackState();
+		try {
+			invited = !!new URLSearchParams(location.search).get('ref');
+		} catch {
+			/* 무시 */
+		}
 		let visited = false;
 		try {
 			visited = !!localStorage.getItem('ddal.visited');
@@ -531,11 +554,20 @@
 	<meta property="og:url" content="https://ddalkkak-1c2.pages.dev/" />
 </svelte:head>
 
+{#if invited}
+	<div class="invite-banner">
+		<Icon name="share" size={15} />
+		<span>친구가 <b>오늘의 딸깍 #{puzzleNo}</b>에 초대했어요 — 같은 문제에 도전해봐요!</span>
+	</div>
+{/if}
+
 {#if phase === 'landing'}
 	<!-- 첫 방문자만 보는 화면. 재방문자는 곧바로 허브로 간다. -->
 	<section class="landing">
 		<h1 class="l-h1">규칙을 발견하는 순간, 딸깍.</h1>
-		<p class="l-sub">오늘 치 {todayTotal}문제 · 매일 자정에 새로 열립니다</p>
+		<p class="l-sub">
+			<b class="l-num">오늘의 딸깍 #{puzzleNo}</b> · 오늘 치 {todayTotal}문제, 매일 자정에 새로
+		</p>
 		<!-- 첫 방문자용 안내: 발견형은 규칙을 알려주지 않는 장르라 짧게 짚어준다 -->
 		<ul class="l-how">
 			<li><b>규칙은 알려주지 않아요.</b> 예시 속에 숨은 규칙을 직접 찾아내는 게 핵심이에요.</li>
@@ -554,7 +586,7 @@
 	<div class="banner">
 		<div class="b-left">
 			<span class="b-title"
-				>{phase === 'hub' ? '오늘의 딸깍' : mode === 'daily' ? trackInfo.name : '랜덤 연습'}</span
+				>{phase === 'hub' ? '오늘의 딸깍' : mode === 'daily' ? trackInfo.name : '랜덤 연습'}{#if phase === 'hub' || mode === 'daily'}<span class="b-num"> #{puzzleNo}</span>{/if}</span
 			>
 			<span class="b-date">{dateLabel}</span>
 		</div>
@@ -986,6 +1018,33 @@
 		font-size: var(--fs-lg);
 		font-weight: var(--fw-emphasis);
 		letter-spacing: var(--ls-normal);
+	}
+	.b-num {
+		color: var(--accent);
+		font-variant-numeric: tabular-nums;
+	}
+	.l-num {
+		color: var(--accent);
+		font-weight: var(--fw-emphasis);
+		font-variant-numeric: tabular-nums;
+	}
+	.invite-banner {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		padding: 11px 15px;
+		margin-bottom: 14px;
+		background: var(--accent-soft);
+		border: 1px solid #cfe6d8;
+		border-radius: 12px;
+		font-size: var(--fs-xs);
+		font-weight: var(--fw-caption);
+		color: #1f6b41;
+		word-break: keep-all;
+	}
+	.invite-banner b {
+		color: var(--accent);
+		font-weight: var(--fw-emphasis);
 	}
 	.b-date {
 		font-size: var(--fs-xs);
