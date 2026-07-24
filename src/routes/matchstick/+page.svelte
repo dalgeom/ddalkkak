@@ -5,6 +5,7 @@
 	import problems from '$lib/data/matchstick-problems.json';
 	import { parseEq, cloneBoard, isSolved, bit, type Board } from '$lib/matchstick';
 	import { kstDayNumber, dailyIndices, advanceStreakIfComplete } from '$lib/game';
+	import { shareResult as shareCardResult, outcomeMessage } from '$lib/shareCard';
 	import MatchstickBoard, { type PickLoc } from '$lib/components/MatchstickBoard.svelte';
 	import AdSlot from '$lib/components/AdSlot.svelte';
 	import Icon from '$lib/components/Icon.svelte';
@@ -304,25 +305,41 @@
 		toastTimer = setTimeout(() => (toastMsg = ''), 2200);
 	}
 
-	function shareResult() {
+	// 홈·연속모드와 동일하게 이미지 카드 + 4단 폴백 + 결과 토스트로 통일(성공/취소 무피드백 해소).
+	async function share() {
+		let title: string;
+		let scoreLabel: string;
+		let emojiRow: string;
+		let subLine: string;
 		let text: string;
 		if (mode.type === 'time') {
-			text = `딸깍! 성냥개비 타임어택 ${mode.seconds / 60}분 · ${runSolved}문제`;
-		} else if (mode.type === 'count') {
+			title = `성냥개비 타임어택 ${mode.seconds / 60}분`;
+			scoreLabel = `${runSolved}문제`;
+			emojiRow = '🔥'.repeat(Math.min(Math.max(runSolved, 1), 10));
+			subLine = `제한시간 안에 ${runSolved}문제 해결`;
+			text = `딸깍! ${title} · ${runSolved}문제`;
+		} else if (mode.type === 'count' || mode.type === 'daily') {
 			const wins = runResults.filter((r) => r === 'win').length;
-			text = `딸깍! 성냥개비 도전 ${mode.total}문제 중 ${wins}개 ${runResults
+			title = mode.type === 'daily' ? '오늘의 성냥개비' : `성냥개비 ${mode.total}문제 도전`;
+			scoreLabel = `${wins}문제`;
+			emojiRow = runResults.map((r) => (r === 'win' ? '🟢' : '⚪')).join('');
+			subLine = `${wins}/${runResults.length} 성공`;
+			text = `딸깍! ${title} ${wins}개 ${runResults
 				.map((r) => (r === 'win' ? '✅' : '🔓'))
 				.join('')}`;
 		} else {
+			title = '성냥개비';
+			scoreLabel = `연속 ${stats.streak}판`;
+			emojiRow = '🔥';
+			subLine = `연속 ${stats.streak}판 · 통산 ${stats.solved}판`;
 			text = `딸깍! 성냥개비 — 연속 ${stats.streak}판 · 통산 ${stats.solved}판`;
 		}
 		text += `\n${location.origin}/matchstick`;
-		if (navigator.share) navigator.share({ text }).catch(() => {});
-		else if (navigator.clipboard?.writeText)
-			navigator.clipboard.writeText(text).then(
-				() => toast('결과가 복사됐어요! 친구에게 도전장을 보내세요'),
-				() => toast('복사에 실패했어요')
-			);
+		const outcome = await shareCardResult(
+			{ title, scoreLabel, emojiRow, subLine, cta: '너도 도전해봐!' },
+			text
+		);
+		toast(outcomeMessage(outcome));
 	}
 
 	onMount(() => {
@@ -439,7 +456,7 @@
 			</div>
 		{:else if mode.type === 'free'}
 			<button class="btn wide" onclick={() => nextProblem()}>다음 문제 →</button>
-			<button class="btn ghost wide" onclick={shareResult}>기록 공유하기</button>
+			<button class="btn ghost wide" onclick={share}>기록 공유하기</button>
 			<button class="btn ghost wide" onclick={toMenu}>모드 선택으로</button>
 		{/if}
 	</div>
@@ -457,7 +474,7 @@
 		{#if bests[modeKey(mode)]}
 			<div class="best-line">이 모드 최고 기록: {bests[modeKey(mode)]}문제</div>
 		{/if}
-		<button class="btn wide" onclick={shareResult}>결과 공유 — 친구에게 도전장</button>
+		<button class="btn wide" onclick={share}>결과 공유 — 친구에게 도전장</button>
 		<button class="btn ghost wide" onclick={() => startMode(mode)}>다시 하기</button>
 		<button class="btn ghost wide" onclick={toMenu}>모드 선택으로</button>
 		<AdSlot label="모드 결과" />
