@@ -609,7 +609,12 @@
 	</div>
 
 	{#key pos}
-		<section class="card" class:bonus={current.bonus}>
+		<section
+			class="card"
+			class:bonus={current.bonus}
+			class:hit={judged && feedback?.ok}
+			class:miss={feedback && !feedback.ok}
+		>
 			{#if current.problem?.chip && !current.bonus}
 				<span class="cat-chip">{current.problem.chip}</span>
 			{:else if current.bonus}
@@ -618,6 +623,7 @@
 
 			<div class="q">
 				{#if current.eq && mCur}
+					<div class="qtext">성냥 <b>하나만</b> 옮겨 식을 참으로 만드세요.</div>
 					<div class="board-wrap">
 						<MatchstickBoard
 							board={mCur}
@@ -626,8 +632,8 @@
 							label={current.eq.displayed.replace('-', '−')}
 						/>
 					</div>
-					<p class="guide">
-						{mPicked ? '빈 자리를 짚어 내려놓으세요.' : '옮길 획을 짚어보세요.'}
+					<p class="guide" class:on={mPicked}>
+						{mPicked ? '이제 빈 자리를 눌러 놓으세요' : '옮길 획을 눌러 집으세요'}
 					</p>
 				{:else if current.problem}
 					{#each current.problem.blocks as b, i (i)}
@@ -1197,6 +1203,10 @@
 	.q {
 		margin-top: 14px;
 		flex: 1;
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		gap: 12px;
 	}
 	.qtext {
 		font-size: 18px;
@@ -1214,16 +1224,21 @@
 		margin-top: 2px;
 	}
 	.guide {
-		margin-top: 10px;
 		text-align: center;
-		font-size: 13px;
+		font-size: 14px;
+		font-weight: 700;
 		color: var(--muted);
+		margin: 0;
+	}
+	.guide.on {
+		color: var(--accent-2);
 	}
 
 	input[type='text'] {
 		width: 100%;
 		margin-top: 16px;
 		height: 50px;
+		flex: none;
 		border-radius: 12px;
 		border: 1px solid var(--border-strong);
 		padding: 0 14px;
@@ -1243,6 +1258,10 @@
 		flex-direction: column;
 		gap: 8px;
 		margin-top: 16px;
+		flex: none;
+	}
+	.choice {
+		flex: none;
 	}
 	.choice {
 		display: flex;
@@ -1301,6 +1320,7 @@
 		align-items: center;
 		gap: 8px;
 		margin-top: 14px;
+		flex: none;
 	}
 	.dots {
 		display: flex;
@@ -1335,6 +1355,7 @@
 	}
 	.hint-box {
 		margin-top: 10px;
+		flex: none;
 		background: var(--gold-bg);
 		border: 1px solid var(--gold);
 		border-radius: 12px;
@@ -1351,11 +1372,37 @@
 		}
 	}
 
+	.card.hit {
+		border-color: var(--accent);
+		animation: pop 420ms var(--ease-out);
+	}
+	.card.miss {
+		animation: nudge 420ms ease;
+	}
+	@keyframes pop {
+		40% {
+			transform: scale(1.012);
+		}
+	}
+	@keyframes nudge {
+		0%,
+		100% {
+			transform: translateX(0);
+		}
+		25% {
+			transform: translateX(-7px);
+		}
+		75% {
+			transform: translateX(7px);
+		}
+	}
 	.feedback {
 		display: flex;
 		align-items: center;
 		gap: 8px;
 		margin-top: 14px;
+		flex: none;
+		animation: fb-in 320ms var(--ease-out) both;
 		padding: 11px 14px;
 		border-radius: 12px;
 		border: 1px solid var(--danger);
@@ -1369,12 +1416,34 @@
 		background: var(--correct-bg);
 		color: var(--accent);
 	}
+	@keyframes fb-in {
+		from {
+			opacity: 0;
+			transform: translateY(6px);
+		}
+	}
 	.fmark {
 		font-weight: 800;
+		display: inline-flex;
+		animation: mark-pop 380ms var(--ease-out) both;
+	}
+	@keyframes mark-pop {
+		0% {
+			transform: scale(0.4);
+			opacity: 0;
+		}
+		60% {
+			transform: scale(1.25);
+			opacity: 1;
+		}
+		100% {
+			transform: scale(1);
+		}
 	}
 
 	.explain {
 		margin-top: 14px;
+		flex: none;
 		background: var(--panel-2);
 		border-radius: 12px;
 		padding: 13px 14px;
@@ -1390,6 +1459,7 @@
 	.submit {
 		width: 100%;
 		height: 52px;
+		flex: none;
 		border-radius: 14px;
 		background: var(--accent);
 		color: #fff;
@@ -1416,10 +1486,12 @@
 		display: flex;
 		gap: 8px;
 		margin-top: 16px;
+		flex: none;
 	}
 	.ghost {
-		flex: 1;
+		flex: 1 0 auto;
 		height: 52px;
+		min-height: 52px;
 		border-radius: 14px;
 		background: transparent;
 		border: 1px solid var(--border-strong);
@@ -1439,6 +1511,7 @@
 	.ghost.wide {
 		width: 100%;
 		margin-top: 16px;
+		flex: none;
 	}
 
 	/* ── 결과 ── */
