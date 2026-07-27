@@ -21,9 +21,17 @@
 	import Figure from '$lib/components/Figure.svelte';
 	import AdSlot from '$lib/components/AdSlot.svelte';
 	import Icon from '$lib/components/Icon.svelte';
+	import MatchstickBoard, { type PickLoc } from '$lib/components/MatchstickBoard.svelte';
+	import { parseEq, cloneBoard, isSolved, bit, type Board } from '$lib/matchstick';
+	import MATCH_PROBLEMS from '$lib/data/matchstick-problems.json';
 
-	type Filter = 'all' | 'puzzle' | 'trivia';
+	type Filter = 'all' | 'puzzle' | 'trivia' | 'match';
 	type Screen = 'menu' | 'play' | 'result';
+
+	/** 성냥개비 등식을 연속 모드의 Problem 형태로 감싼 것 */
+	type MatchItem = Problem & { match: { displayed: string; solution: string } };
+	const isMatch = (p: Problem | undefined): p is MatchItem =>
+		!!p && 'match' in p && !!(p as MatchItem).match;
 
 	let screen = $state<Screen>('menu');
 	let filter = $state<Filter>('all');
@@ -53,6 +61,15 @@
 	let inputEl = $state<HTMLInputElement | null>(null);
 	let feedback = $state<{ msg: string; ok: boolean } | null>(null);
 	let judge = $state<'correct' | 'wrong' | 'giveup' | null>(null);
+
+	/** 성냥개비 문제 전용 상태(획 조작은 텍스트 제출과 흐름이 달라 따로 둔다) */
+	let mOrig = $state<Board | null>(null);
+	let mCur = $state<Board | null>(null);
+	let mPicked = $state<PickLoc | null>(null);
+	/** 잘못 놓은 획 횟수. 힌트 해금·방황 보너스를 오염시키지 않도록 wrongAttempts와 분리한다. */
+	let mMisses = $state(0);
+	let mShaking = $state(false);
+	let mRevertTimer: ReturnType<typeof setTimeout> | undefined;
 
 	/** 입력창·선택지가 판정에 직접 반응하도록 하는 일시 상태 */
 	let inputState = $state<'idle' | 'wrong' | 'correct'>('idle');
@@ -94,10 +111,21 @@
 			(t) => (grade === 'all' || t.grade === grade) && (cat === 'all' || t.category === cat)
 		);
 	}
+	/** 성냥개비 등식 741개를 연속 모드가 다루는 Problem 형태로 감싼다(문제 데이터는 그대로 둔다) */
+	const MATCH_POOL: MatchItem[] = MATCH_PROBLEMS.map((m, i) => ({
+		id: `match-${i}`,
+		chip: '성냥개비',
+		blocks: [],
+		type: 'text',
+		answers: [],
+		explain: `성냥 하나만 옮겨 <b>${m.solution.replace('-', '−')}</b>을 만들면 참이 됩니다.`,
+		match: m
+	}));
 	function pool(f: Filter): Problem[] {
 		if (f === 'puzzle') return PROBLEMS;
 		if (f === 'trivia') return triviaPool();
-		return [...PROBLEMS, ...triviaPool()];
+		if (f === 'match') return MATCH_POOL;
+		return [...PROBLEMS, ...triviaPool(), ...MATCH_POOL];
 	}
 
 	function load() {
@@ -142,9 +170,21 @@
 		inputState = 'idle';
 		flashIndex = null;
 		flashKind = null;
+		clearTimeout(mRevertTimer);
+		mShaking = false;
+		mMisses = 0;
+		mPicked = null;
+		const c = queue[idx];
+		if (isMatch(c)) {
+			mOrig = parseEq(c.match.displayed);
+			mCur = cloneBoard(mOrig);
+		} else {
+			mOrig = null;
+			mCur = null;
+		}
 		if (browser) window.scrollTo({ top: 0, behavior: 'smooth' });
 		// 데스크톱에서만 새 문제의 입력창에 포커스(모바일은 키보드가 튀어 방해되므로 제외)
-		if (browser && window.matchMedia?.('(hover: hover)').matches) {
+		if (browser && !isMatch(c) && window.matchMedia?.('(hover: hover)').matches) {
 			tick().then(() => inputEl?.focus());
 		}
 	}
@@ -155,9 +195,10 @@
 		judge = win ? 'correct' : reason === 'giveup' ? 'giveup' : 'wrong';
 		recordSolve(win, hintsUsed);
 		if (win) {
-			const base =
-				(current.trivia ? 100 : Math.max(20, 100 - hintsUsed * 25)) +
-				wanderBonus(hintsUsed, wrongAttempts);
+			const base = isMatch(current)
+				? Math.max(40, 100 - mMisses * 10)
+				: (current.trivia ? 100 : Math.max(20, 100 - hintsUsed * 25)) +
+					wanderBonus(hintsUsed, wrongAttempts);
 			const gained = comboScore(base, combo);
 			score += gained;
 			combo += 1;
@@ -195,6 +236,60 @@
 		flash(ok ? 'correct' : 'wrong', i);
 		finish(ok);
 	}
+	/** 성냥 획 집기·놓기. 정답이 되면 자동 진행 없이 finish()만 불러 연속 모드의 수동 진행에 맞춘다. */
+	function handleStick(loc: PickLoc, lit: boolean) {
+		if (done || !mCur || !mOrig) return;
+
+		if (!mPicked) {
+			if (!lit) return;
+			mPicked = loc;
+			applyStick(loc, false);
+			return;
+		}
+		if (!lit && sameLoc(mPicked, loc)) {
+			applyStick(loc, true);
+			mPicked = null;
+			return;
+		}
+		if (lit) return;
+
+		applyStick(loc, true);
+		mPicked = null;
+
+		if (isSolved(mOrig, mCur)) {
+			finish(true);
+		} else {
+			mMisses += 1;
+			mShaking = true;
+			judge = 'wrong';
+			feedback = { msg: '아직 아니에요 — 되돌릴게요', ok: false };
+			clearTimeout(mRevertTimer);
+			mRevertTimer = setTimeout(() => {
+				mShaking = false;
+				if (mOrig) mCur = cloneBoard(mOrig);
+				mPicked = null;
+			}, 420);
+		}
+	}
+	function sameLoc(a: PickLoc, b: PickLoc): boolean {
+		return a.kind === b.kind && a.gi === b.gi && a.seg === b.seg;
+	}
+	function applyStick(loc: PickLoc, add: boolean) {
+		if (!mCur) return;
+		if (loc.kind === 'op') mCur.opPlus = add;
+		else if (add) mCur.glyphs[loc.gi!] |= bit(loc.seg!);
+		else mCur.glyphs[loc.gi!] &= ~bit(loc.seg!);
+	}
+	/** 성냥은 텍스트 해설 대신 정답 보드를 보여준다 */
+	function revealMatch() {
+		if (done || !isMatch(current)) return;
+		clearTimeout(mRevertTimer);
+		mShaking = false;
+		mCur = parseEq(current.match.solution);
+		mPicked = null;
+		finish(false, 'giveup');
+	}
+
 	function showHint() {
 		if (done || current.trivia || !current.hints || hintsUsed >= current.hints.length) return;
 		if (!hintUnlocked(hintsUsed, elapsedMs, wrongAttempts)) return;
@@ -223,7 +318,9 @@
 	}
 
 	async function share() {
-		const fname = { all: '전체 믹스', puzzle: '발견형', trivia: '상식퀴즈' }[filter];
+		const fname = { all: '전체 믹스', puzzle: '발견형', trivia: '상식퀴즈', match: '성냥개비' }[
+			filter
+		];
 		const gradeLabel = grade === 'all' ? '' : ` ${grade}`;
 		const catLabel = cat === 'all' ? '' : ` ${cat}`;
 		const title = `연속 모드 · ${fname}${gradeLabel}${catLabel} ${sessionSize}문제`;
@@ -245,14 +342,15 @@
 		{
 			key: 'all',
 			label: '전체 믹스',
-			sub: `발견형 ${PROBLEMS.length} + 상식 ${TRIVIA.length}문제`
+			sub: `발견형 ${PROBLEMS.length} + 상식 ${TRIVIA.length} + 성냥 ${MATCH_POOL.length}문제`
 		},
 		{ key: 'puzzle', label: '발견형 퍼즐', sub: `숨은 규칙 찾기 ${PROBLEMS.length}문제` },
 		{
 			key: 'trivia',
 			label: '상식 퀴즈',
 			sub: `${CATS.length}개 분야 · 4단계 난이도 ${TRIVIA.length}문제`
-		}
+		},
+		{ key: 'match', label: '성냥개비', sub: `하나만 옮겨 등식 만들기 ${MATCH_POOL.length}문제` }
 	];
 	const SIZES = [5, 10, 20];
 
@@ -261,7 +359,7 @@
 		// 허브의 분야·난이도 링크로 들어오면 메뉴를 미리 맞춰준다(문제 수는 사용자가 고른다)
 		const q = page.url.searchParams;
 		const f = q.get('filter');
-		if (f === 'all' || f === 'puzzle' || f === 'trivia') filter = f;
+		if (f === 'all' || f === 'puzzle' || f === 'trivia' || f === 'match') filter = f;
 		const g = q.get('grade');
 		if (g && GRADES.some((x) => x.key === g)) grade = g as Grade;
 		const c = q.get('cat');
@@ -303,7 +401,7 @@
 				{/each}
 			</div>
 
-			{#if filter !== 'puzzle'}
+			{#if filter === 'all' || filter === 'trivia'}
 				<div class="label">난이도</div>
 				<div class="pills">
 					<button class="pill" class:on={grade === 'all'} onclick={() => (grade = 'all')}
@@ -366,6 +464,17 @@
 				{/if}
 			</div>
 			<div class="q">
+				{#if isMatch(current) && mCur}
+					<div class="mq">성냥 <b>하나만</b> 옮겨 등식을 참으로 만드세요.</div>
+					<div class="mboard" class:shake={mShaking}>
+						<MatchstickBoard
+							board={mCur}
+							picked={mPicked}
+							onstick={handleStick}
+							label={current.match.displayed.replace('-', '−')}
+						/>
+					</div>
+				{/if}
 				{#each current.blocks as b, i (i)}
 					{#if b.kind === 'text'}
 						<div class="qtext">{@html b.html}</div>
@@ -386,7 +495,9 @@
 			</div>
 
 			<div class="answer-area">
-				{#if current.type === 'choice'}
+				{#if isMatch(current)}
+					<div class="mtip">획을 눌러 집고, 빈 자리를 눌러 놓으세요.</div>
+				{:else if current.type === 'choice'}
 					<div class="choices">
 						{#each current.choices! as c, i (i)}
 							<button
@@ -423,7 +534,18 @@
 
 			{#if !done}
 				<div class="controls">
-					{#if !current.trivia && current.hints}
+					{#if isMatch(current)}
+						<button
+							class="btn ghost"
+							disabled={!mPicked}
+							onclick={() => {
+								if (mPicked && mOrig) {
+									mCur = cloneBoard(mOrig);
+									mPicked = null;
+								}
+							}}>처음부터</button
+						>
+					{:else if !current.trivia && current.hints}
 						<button
 							class="btn ghost"
 							disabled={hintsUsed >= 3 || !hintUnlocked(hintsUsed, elapsedMs, wrongAttempts)}
@@ -436,7 +558,11 @@
 									: '조금만 더'}
 						</button>
 					{/if}
-					<button class="btn ghost" onclick={() => finish(false, 'giveup')}>모르겠어요</button>
+					<button
+						class="btn ghost"
+						onclick={() => (isMatch(current) ? revealMatch() : finish(false, 'giveup'))}
+						>모르겠어요</button
+					>
 				</div>
 			{/if}
 
@@ -727,6 +853,20 @@
 		font-size: 21px;
 		line-height: 1.7;
 		word-break: keep-all;
+	}
+	.mq {
+		font-size: 19px;
+		line-height: 1.6;
+		word-break: keep-all;
+		margin-bottom: 14px;
+	}
+	.mboard.shake {
+		animation: shake 0.4s ease;
+	}
+	.mtip {
+		font-size: 14px;
+		color: var(--muted);
+		text-align: center;
 	}
 	.qtext :global(b) {
 		color: var(--accent);
