@@ -561,8 +561,10 @@
 		<h2 class="sec-h">세 가지가 매일 섞여 나와요</h2>
 		<div class="kinds">
 			<div class="kind">
-				<div class="kind-vis seg">
-					<SevenSeg lines={['11 31', '55 66']} />
+				<div class="kind-vis rule">
+					<div class="rrow"><span>나무</span><em>→</em><b>2</b></div>
+					<div class="rrow"><span>가나다</span><em>→</em><b>1</b></div>
+					<div class="rrow"><span>고구마</span><em>→</em><b class="q">?</b></div>
 				</div>
 				<b>발견형 {KIND_COUNT.discover}</b>
 				<span>예시에 숨은 규칙을 스스로 찾습니다. 막히면 힌트가 3단계로 열려요.</span>
@@ -996,8 +998,34 @@
 		min-height: 78px;
 		overflow: hidden;
 	}
-	.kind-vis.seg {
-		background: var(--board-bg);
+	.kind-vis.rule {
+		flex-direction: column;
+		align-items: stretch;
+		gap: 5px;
+		padding: 14px 22px;
+	}
+	.rrow {
+		display: grid;
+		grid-template-columns: 1fr auto 1fr;
+		align-items: center;
+		gap: 10px;
+		font-size: 14px;
+		font-weight: 700;
+	}
+	.rrow span {
+		text-align: right;
+	}
+	.rrow em {
+		font-style: normal;
+		color: var(--muted-2);
+		font-weight: 400;
+	}
+	.rrow b {
+		color: var(--muted);
+	}
+	.rrow b.q {
+		color: var(--accent-2);
+		font-size: 16px;
 	}
 	.kind-vis.quiz {
 		display: grid;
