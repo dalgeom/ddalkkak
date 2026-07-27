@@ -410,6 +410,7 @@
 </svelte:head>
 
 {#if phase === 'home'}
+	<div class="home-panel">
 	<div class="hero">
 		<div class="date">{todayLabel}</div>
 		<div class="countdown">다음 문제까지 {countdown || '--:--:--'}</div>
@@ -440,6 +441,7 @@
 
 	<p class="composition">발견 3 · 상식 3 · 성냥 3 · 보너스 1</p>
 	<p class="total">누적 {data.totalProblems.toLocaleString()}문제 중 오늘의 10문제</p>
+	</div>
 {:else if phase === 'play' && current}
 	<div class="topbar">
 		<button class="exit" onclick={quit}>나가기</button>
@@ -618,6 +620,27 @@
 
 <style>
 	/* ── 홈 ── */
+	/* 모바일에서는 배경 위에 그대로 얹고(카드 없음), 데스크톱에서만 판을 깐다.
+	   넓은 화면에서 글자만 떠 있으면 화면이 버려진 것처럼 보인다. */
+	.home-panel {
+		display: contents;
+	}
+	@media (min-width: 768px) {
+		.home-panel {
+			display: block;
+			background: var(--panel);
+			border: 1px solid var(--border-strong);
+			border-radius: 22px;
+			padding: 46px 40px 38px;
+		}
+		.date {
+			font-size: 36px;
+		}
+		.cta {
+			min-height: 68px;
+			font-size: 19px;
+		}
+	}
 	.hero {
 		text-align: center;
 		margin-bottom: 22px;

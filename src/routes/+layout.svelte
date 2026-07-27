@@ -183,6 +183,26 @@
 
 	.page {
 		flex: 1;
+		display: flex;
+		flex-direction: column;
+	}
+	/* 데스크톱에서는 480px 열이 화면 위쪽에만 붙어 아래가 통째로 비어 보인다.
+	   콘텐츠를 세로 중앙에 세워 여백이 위아래로 나뉘게 한다(짧은 화면일수록 효과가 크다). */
+	@media (min-width: 768px) and (min-height: 700px) {
+		.page {
+			justify-content: center;
+			padding-bottom: 24px;
+		}
+	}
+	/* 넓은 화면에서 480px은 허전하다. 열을 조금 넓혀 카드가 화면을 감당하게 한다. */
+	@media (min-width: 768px) {
+		.wrap {
+			max-width: 560px;
+			padding: 28px 20px 0;
+		}
+		header {
+			margin-bottom: 34px;
+		}
 	}
 	.bottom-ad {
 		margin-top: 24px;
