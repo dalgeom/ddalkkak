@@ -186,12 +186,14 @@
 		display: flex;
 		flex-direction: column;
 	}
-	/* 데스크톱에서는 480px 열이 화면 위쪽에만 붙어 아래가 통째로 비어 보인다.
-	   콘텐츠를 세로 중앙에 세워 여백이 위아래로 나뉘게 한다(짧은 화면일수록 효과가 크다). */
-	@media (min-width: 768px) and (min-height: 700px) {
+	/* 콘텐츠를 화면 세로 중앙에 세운다. 위에 붙여두면 아래가 통째로 비어
+	   버려진 페이지처럼 보인다(모바일·데스크톱 공통).
+	   화면이 낮으면(가로모드 등) 중앙 정렬이 오히려 답답해서 높이 가드를 둔다.
+	   콘텐츠가 길어지면 flex가 알아서 늘어나므로 잘리지 않는다. */
+	@media (min-height: 620px) {
 		.page {
 			justify-content: center;
-			padding-bottom: 24px;
+			padding-bottom: 20px;
 		}
 	}
 	/* 넓은 화면에서 480px은 허전하다. 열을 조금 넓혀 카드가 화면을 감당하게 한다. */
