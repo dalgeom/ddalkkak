@@ -1,159 +1,124 @@
 <script lang="ts">
 	import { onMount, tick } from 'svelte';
-	import { page } from '$app/state';
 	import { browser } from '$app/environment';
-	import { PROBLEMS, GRADES, type Problem, type Grade } from '$lib/problems';
-	import { TRIVIA } from '$lib/trivia';
-	import {
-		buildSession,
-		comboScore,
-		isCorrectText,
-		hintUnlocked,
-		isCloseAnswer,
-		wanderBonus,
-		displayChoices,
-		recordSolve
-	} from '$lib/game';
-	import { shareResult, outcomeMessage } from '$lib/shareCard';
+	import { page } from '$app/state';
+	import type { Problem } from '$lib/problems';
+	import { isCorrectText, isCloseAnswer, hintUnlocked, displayChoices, recordSolve } from '$lib/game';
+	import { parseEq, cloneBoard, isSolved, bit, type Board } from '$lib/matchstick';
+	import MatchstickBoard, { type PickLoc } from '$lib/components/MatchstickBoard.svelte';
 	import SevenSeg from '$lib/components/SevenSeg.svelte';
 	import ColorBlocks from '$lib/components/ColorBlocks.svelte';
 	import Glyph from '$lib/components/Glyph.svelte';
 	import Figure from '$lib/components/Figure.svelte';
-	import AdSlot from '$lib/components/AdSlot.svelte';
-	import Icon from '$lib/components/Icon.svelte';
-	import MatchstickBoard, { type PickLoc } from '$lib/components/MatchstickBoard.svelte';
-	import { parseEq, cloneBoard, isSolved, bit, type Board } from '$lib/matchstick';
-	import MATCH_PROBLEMS from '$lib/data/matchstick-problems.json';
+
+	let { data }: { data: { counts: { discover: number; trivia: number; match: number } } } = $props();
 
 	type Filter = 'all' | 'puzzle' | 'trivia' | 'match';
-	type Screen = 'menu' | 'play' | 'result';
+	const FILTERS: { key: Filter; label: string }[] = [
+		{ key: 'all', label: '전체' },
+		{ key: 'puzzle', label: '발견형' },
+		{ key: 'trivia', label: '상식' },
+		{ key: 'match', label: '성냥개비' }
+	];
 
-	/** 성냥개비 등식을 연속 모드의 Problem 형태로 감싼 것 */
-	type MatchItem = Problem & { match: { displayed: string; solution: string } };
-	const isMatch = (p: Problem | undefined): p is MatchItem =>
-		!!p && 'match' in p && !!(p as MatchItem).match;
-
-	let screen = $state<Screen>('menu');
 	let filter = $state<Filter>('all');
-	let grade = $state<Grade | 'all'>('all');
-	let cat = $state<string>('all');
-	let showCats = $state(false);
-	let sessionSize = $state(10);
-
-	/** 상식 퀴즈에 존재하는 카테고리 목록 */
-	const CATS = [...new Set(TRIVIA.map((t) => t.category!))].sort();
-
-	let queue = $state<Problem[]>([]);
-	let idx = $state(0);
-	let score = $state(0);
 	let combo = $state(0);
-	let maxCombo = $state(0);
-	let correctCount = $state(0);
-	let results = $state<('o' | 'x')[]>([]);
+	let loading = $state(true);
 
+	/** 연습에 올라가는 한 문제. 성냥개비는 Problem이 아니라 등식 한 쌍이다. */
+	type Item = { problem?: Problem; eq?: { displayed: string; solution: string } };
+	let current = $state<Item | null>(null);
+	let shown = $derived(current?.problem ? displayChoices(current.problem) : undefined);
+
+	// 문제은행(로드 후 보관)
+	let bank = $state<{
+		puzzle: Problem[];
+		trivia: Problem[];
+		match: { displayed: string; solution: string }[];
+	} | null>(null);
+
+	// 이미 낸 문제를 다시 안 내기 위한 셔플백
+	let bag = $state<number[]>([]);
+
+	// 한 문제 상태
 	let hintsUsed = $state(0);
 	let wrongAttempts = $state(0);
 	let startedAt = $state(0);
 	let elapsedMs = $state(0);
-	let tickIv: ReturnType<typeof setInterval> | undefined;
-	let done = $state(false);
+	let judged = $state(false);
 	let answerValue = $state('');
 	let inputEl = $state<HTMLInputElement | null>(null);
 	let feedback = $state<{ msg: string; ok: boolean } | null>(null);
-	let judge = $state<'correct' | 'wrong' | 'giveup' | null>(null);
+	let picked = $state<number | null>(null);
 
-	/** 성냥개비 문제 전용 상태(획 조작은 텍스트 제출과 흐름이 달라 따로 둔다) */
+	// 성냥개비
 	let mOrig = $state<Board | null>(null);
 	let mCur = $state<Board | null>(null);
 	let mPicked = $state<PickLoc | null>(null);
-	/** 잘못 놓은 획 횟수. 힌트 해금·방황 보너스를 오염시키지 않도록 wrongAttempts와 분리한다. */
 	let mMisses = $state(0);
-	let mShaking = $state(false);
-	let mRevertTimer: ReturnType<typeof setTimeout> | undefined;
+	let mRevertTimer: ReturnType<typeof setTimeout>;
 
-	/** 입력창·선택지가 판정에 직접 반응하도록 하는 일시 상태 */
-	let inputState = $state<'idle' | 'wrong' | 'correct'>('idle');
-	let flashIndex = $state<number | null>(null);
-	let flashKind = $state<'wrong' | 'correct' | null>(null);
-	let flashTimer: ReturnType<typeof setTimeout> | undefined;
-
-	function flash(kind: 'wrong' | 'correct', idx?: number) {
-		clearTimeout(flashTimer);
-		if (idx !== undefined) {
-			flashIndex = idx;
-			flashKind = kind;
-		} else {
-			inputState = kind;
-		}
-		flashTimer = setTimeout(
-			() => {
-				flashIndex = null;
-				flashKind = null;
-				inputState = 'idle';
-			},
-			kind === 'wrong' ? 420 : 600
-		);
-	}
-	let toastMsg = $state('');
-
-	let best = $state<Record<string, number>>({});
-
-	let current = $derived(displayChoices(queue[idx]));
-	let shownHints = $derived(
-		current && !current.trivia && current.hints ? current.hints.slice(0, hintsUsed) : []
+	let shownHints = $derived(shown?.hints ? shown.hints.slice(0, hintsUsed) : []);
+	let poolSize = $derived(
+		filter === 'puzzle'
+			? data.counts.discover
+			: filter === 'trivia'
+				? data.counts.trivia
+				: filter === 'match'
+					? data.counts.match
+					: data.counts.discover + data.counts.trivia + data.counts.match
 	);
-	let bestKey = $derived(`${filter}-${grade}-${cat}-${sessionSize}`);
-	let availCount = $derived(pool(filter).length);
 
-	/** 상식 퀴즈에 난이도·카테고리 필터 적용 */
-	function triviaPool(): Problem[] {
-		return TRIVIA.filter(
-			(t) => (grade === 'all' || t.grade === grade) && (cat === 'all' || t.category === cat)
-		);
-	}
-	/** 성냥개비 등식 741개를 연속 모드가 다루는 Problem 형태로 감싼다(문제 데이터는 그대로 둔다) */
-	const MATCH_POOL: MatchItem[] = MATCH_PROBLEMS.map((m, i) => ({
-		id: `match-${i}`,
-		chip: '성냥개비',
-		blocks: [],
-		type: 'text',
-		answers: [],
-		explain: `성냥 하나만 옮겨 <b>${m.solution.replace('-', '−')}</b>을 만들면 참이 됩니다.`,
-		match: m
-	}));
-	function pool(f: Filter): Problem[] {
-		if (f === 'puzzle') return PROBLEMS;
-		if (f === 'trivia') return triviaPool();
-		if (f === 'match') return MATCH_POOL;
-		return [...PROBLEMS, ...triviaPool(), ...MATCH_POOL];
+	async function loadBank() {
+		const [p, t, m] = await Promise.all([
+			import('$lib/problems'),
+			import('$lib/trivia'),
+			import('$lib/data/matchstick-problems.json')
+		]);
+		bank = {
+			puzzle: p.PROBLEMS,
+			trivia: t.TRIVIA,
+			match: (m.default ?? m) as { displayed: string; solution: string }[]
+		};
 	}
 
-	function load() {
-		try {
-			best = JSON.parse(localStorage.getItem('ddal.play.best') || '{}');
-		} catch {
-			/* 무시 */
+	/** 현재 필터의 전체 후보 수 */
+	function poolLen(): number {
+		if (!bank) return 0;
+		if (filter === 'puzzle') return bank.puzzle.length;
+		if (filter === 'trivia') return bank.trivia.length;
+		if (filter === 'match') return bank.match.length;
+		return bank.puzzle.length + bank.trivia.length + bank.match.length;
+	}
+
+	/** 통합 인덱스 → 실제 문제 */
+	function itemAt(i: number): Item {
+		if (!bank) return {};
+		if (filter === 'puzzle') return { problem: bank.puzzle[i] };
+		if (filter === 'trivia') return { problem: bank.trivia[i] };
+		if (filter === 'match') return { eq: bank.match[i] };
+		const a = bank.puzzle.length;
+		const b = a + bank.trivia.length;
+		if (i < a) return { problem: bank.puzzle[i] };
+		if (i < b) return { problem: bank.trivia[i - a] };
+		return { eq: bank.match[i - b] };
+	}
+
+	function refillBag() {
+		const n = poolLen();
+		const idx = Array.from({ length: n }, (_, i) => i);
+		for (let i = n - 1; i > 0; i--) {
+			const j = Math.floor(Math.random() * (i + 1));
+			[idx[i], idx[j]] = [idx[j], idx[i]];
 		}
-	}
-	function saveBest() {
-		if (!browser) return;
-		try {
-			localStorage.setItem('ddal.play.best', JSON.stringify(best));
-		} catch {
-			/* 무시 */
-		}
+		bag = idx;
 	}
 
-	function start(size: number) {
-		sessionSize = size;
-		queue = buildSession(pool(filter), size);
-		idx = 0;
-		score = 0;
-		combo = 0;
-		maxCombo = 0;
-		correctCount = 0;
-		results = [];
-		screen = 'play';
+	function nextProblem() {
+		if (!bag.length) refillBag();
+		const i = bag[0];
+		bag = bag.slice(1);
+		current = itemAt(i);
 		resetProblem();
 	}
 
@@ -162,84 +127,90 @@
 		wrongAttempts = 0;
 		startedAt = Date.now();
 		elapsedMs = 0;
-		done = false;
+		judged = false;
 		answerValue = '';
 		feedback = null;
-		judge = null;
-		clearTimeout(flashTimer);
-		inputState = 'idle';
-		flashIndex = null;
-		flashKind = null;
+		picked = null;
 		clearTimeout(mRevertTimer);
-		mShaking = false;
 		mMisses = 0;
 		mPicked = null;
-		const c = queue[idx];
-		if (isMatch(c)) {
-			mOrig = parseEq(c.match.displayed);
+		if (current?.eq) {
+			mOrig = parseEq(current.eq.displayed);
 			mCur = cloneBoard(mOrig);
 		} else {
 			mOrig = null;
 			mCur = null;
 		}
-		if (browser) window.scrollTo({ top: 0, behavior: 'smooth' });
-		// 데스크톱에서만 새 문제의 입력창에 포커스(모바일은 키보드가 튀어 방해되므로 제외)
-		if (browser && !isMatch(c) && window.matchMedia?.('(hover: hover)').matches) {
+		if (browser && current?.problem && current.problem.type !== 'choice' && window.matchMedia?.('(hover: hover)').matches) {
 			tick().then(() => inputEl?.focus());
 		}
 	}
 
-	function finish(win: boolean, reason: 'answered' | 'giveup' = 'answered') {
-		if (done) return;
-		done = true;
-		judge = win ? 'correct' : reason === 'giveup' ? 'giveup' : 'wrong';
-		recordSolve(win, hintsUsed);
-		if (win) {
-			const base = isMatch(current)
-				? Math.max(40, 100 - mMisses * 10)
-				: (current.trivia ? 100 : Math.max(20, 100 - hintsUsed * 25)) +
-					wanderBonus(hintsUsed, wrongAttempts);
-			const gained = comboScore(base, combo);
-			score += gained;
-			combo += 1;
-			maxCombo = Math.max(maxCombo, combo);
-			correctCount += 1;
-			results = [...results, 'o'];
-			feedback = { msg: `정답 · +${gained}${combo > 1 ? ` (콤보 x${combo})` : ''}`, ok: true };
-		} else {
-			combo = 0;
-			results = [...results, 'x'];
-			feedback = {
-				msg: reason === 'giveup' ? '정답을 확인했어요' : '오답이에요',
-				ok: false
-			};
-		}
+	function pickFilter(f: Filter) {
+		if (filter === f) return;
+		filter = f;
+		combo = 0;
+		refillBag();
+		nextProblem();
+	}
+
+	/* ── 판정 ── */
+
+	function settle(ok: boolean, msg: string) {
+		if (judged) return;
+		judged = true;
+		feedback = { msg, ok };
+		combo = ok ? combo + 1 : 0;
+		recordSolve(ok, hintsUsed);
 	}
 
 	function submitText() {
-		if (done || !answerValue.trim()) return;
-		if (isCorrectText(current, answerValue)) {
-			flash('correct');
-			finish(true);
-		} else {
+		if (judged || !shown || !answerValue.trim()) return;
+		if (isCorrectText(shown, answerValue)) settle(true, '정답이에요');
+		else {
 			wrongAttempts += 1;
-			flash('wrong');
-			judge = 'wrong';
-			feedback = isCloseAnswer(current, answerValue)
+			feedback = isCloseAnswer(shown, answerValue)
 				? { msg: '거의 다 왔어요', ok: false }
 				: { msg: '아직이에요 — 다시 들여다볼까요?', ok: false };
 		}
 	}
-	function submitChoice(i: number) {
-		if (done) return;
-		const ok = i === current.answerIndex;
-		flash(ok ? 'correct' : 'wrong', i);
-		finish(ok);
-	}
-	/** 성냥 획 집기·놓기. 정답이 되면 자동 진행 없이 finish()만 불러 연속 모드의 수동 진행에 맞춘다. */
-	function handleStick(loc: PickLoc, lit: boolean) {
-		if (done || !mCur || !mOrig) return;
 
+	function submitChoice(i: number) {
+		if (judged || !shown) return;
+		picked = i;
+		if (i === shown.answerIndex) settle(true, '정답이에요');
+		else {
+			wrongAttempts += 1;
+			if (wrongAttempts >= 2) settle(false, '정답을 확인했어요');
+			else feedback = { msg: '아쉬워요 — 한 번 더 골라볼까요?', ok: false };
+		}
+	}
+
+	function showHint() {
+		if (judged || !shown?.hints || hintsUsed >= shown.hints.length) return;
+		if (!hintUnlocked(hintsUsed, elapsedMs, wrongAttempts)) return;
+		hintsUsed += 1;
+	}
+
+	function giveUp() {
+		if (judged) return;
+		if (current?.eq && mOrig) {
+			clearTimeout(mRevertTimer);
+			mCur = parseEq(current.eq.solution);
+			mPicked = null;
+		}
+		settle(false, '정답을 확인했어요');
+	}
+
+	function skip() {
+		nextProblem();
+		if (browser) window.scrollTo({ top: 0, behavior: 'smooth' });
+	}
+
+	/* ── 성냥개비 ── */
+
+	function handleStick(loc: PickLoc, lit: boolean) {
+		if (judged || !mCur || !mOrig) return;
 		if (!mPicked) {
 			if (!lit) return;
 			mPicked = loc;
@@ -252,236 +223,93 @@
 			return;
 		}
 		if (lit) return;
-
 		applyStick(loc, true);
 		mPicked = null;
-
-		if (isSolved(mOrig, mCur)) {
-			finish(true);
-		} else {
+		if (isSolved(mOrig, mCur)) settle(true, '정답이에요');
+		else {
 			mMisses += 1;
-			mShaking = true;
-			judge = 'wrong';
 			feedback = { msg: '아직 아니에요 — 되돌릴게요', ok: false };
 			clearTimeout(mRevertTimer);
 			mRevertTimer = setTimeout(() => {
-				mShaking = false;
 				if (mOrig) mCur = cloneBoard(mOrig);
 				mPicked = null;
 			}, 420);
 		}
 	}
-	function sameLoc(a: PickLoc, b: PickLoc): boolean {
-		return a.kind === b.kind && a.gi === b.gi && a.seg === b.seg;
-	}
+	const sameLoc = (a: PickLoc, b: PickLoc) => a.kind === b.kind && a.gi === b.gi && a.seg === b.seg;
 	function applyStick(loc: PickLoc, add: boolean) {
 		if (!mCur) return;
 		if (loc.kind === 'op') mCur.opPlus = add;
 		else if (add) mCur.glyphs[loc.gi!] |= bit(loc.seg!);
 		else mCur.glyphs[loc.gi!] &= ~bit(loc.seg!);
 	}
-	/** 성냥은 텍스트 해설 대신 정답 보드를 보여준다 */
-	function revealMatch() {
-		if (done || !isMatch(current)) return;
-		clearTimeout(mRevertTimer);
-		mShaking = false;
-		mCur = parseEq(current.match.solution);
+	function resetBoard() {
+		if (!mOrig) return;
+		mCur = cloneBoard(mOrig);
 		mPicked = null;
-		finish(false, 'giveup');
 	}
-
-	function showHint() {
-		if (done || current.trivia || !current.hints || hintsUsed >= current.hints.length) return;
-		if (!hintUnlocked(hintsUsed, elapsedMs, wrongAttempts)) return;
-		hintsUsed += 1;
-	}
-
-	function next() {
-		idx += 1;
-		if (idx < queue.length) resetProblem();
-		else endSession();
-	}
-
-	function endSession() {
-		if (score > (best[bestKey] ?? 0)) {
-			best[bestKey] = score;
-			saveBest();
-		}
-		screen = 'result';
-	}
-
-	let toastTimer: ReturnType<typeof setTimeout>;
-	function toast(msg: string) {
-		toastMsg = msg;
-		clearTimeout(toastTimer);
-		toastTimer = setTimeout(() => (toastMsg = ''), 2400);
-	}
-
-	async function share() {
-		const fname = { all: '전체 믹스', puzzle: '발견형', trivia: '상식퀴즈', match: '성냥개비' }[
-			filter
-		];
-		const gradeLabel = grade === 'all' ? '' : ` ${grade}`;
-		const catLabel = cat === 'all' ? '' : ` ${cat}`;
-		const title = `연속 모드 · ${fname}${gradeLabel}${catLabel} ${sessionSize}문제`;
-		const text = `딸깍! ${title} — ${correctCount}개 정답 · ${score}점\n너도 도전! ${location.origin}/play`;
-		const outcome = await shareResult(
-			{
-				title,
-				scoreLabel: `${score}점`,
-				emojiRow: results.map((r) => (r === 'o' ? '🟢' : '⚪')).join(''),
-				subLine: `${correctCount}/${queue.length} 정답 · 최고 콤보 ${maxCombo}`,
-				cta: '내 점수 넘어볼래?'
-			},
-			text
-		);
-		toast(outcomeMessage(outcome));
-	}
-
-	const FILTERS: { key: Filter; label: string; sub: string }[] = [
-		{
-			key: 'all',
-			label: '전체 믹스',
-			sub: `발견형 ${PROBLEMS.length} + 상식 ${TRIVIA.length} + 성냥 ${MATCH_POOL.length}문제`
-		},
-		{ key: 'puzzle', label: '발견형 퍼즐', sub: `숨은 규칙 찾기 ${PROBLEMS.length}문제` },
-		{
-			key: 'trivia',
-			label: '상식 퀴즈',
-			sub: `${CATS.length}개 분야 · 4단계 난이도 ${TRIVIA.length}문제`
-		},
-		{ key: 'match', label: '성냥개비', sub: `하나만 옮겨 등식 만들기 ${MATCH_POOL.length}문제` }
-	];
-	const SIZES = [5, 10, 20];
 
 	onMount(() => {
-		load();
-		// 허브의 분야·난이도 링크로 들어오면 메뉴를 미리 맞춰준다(문제 수는 사용자가 고른다)
-		const q = page.url.searchParams;
-		const f = q.get('filter');
+		const f = page.url.searchParams.get('filter');
 		if (f === 'all' || f === 'puzzle' || f === 'trivia' || f === 'match') filter = f;
-		const g = q.get('grade');
-		if (g && GRADES.some((x) => x.key === g)) grade = g as Grade;
-		const c = q.get('cat');
-		if (c && CATS.includes(c)) {
-			cat = c;
-			showCats = true;
-		}
-		tickIv = setInterval(() => {
-			if (screen === 'play' && !done && startedAt) elapsedMs = Date.now() - startedAt;
+		loadBank().then(() => {
+			loading = false;
+			refillBag();
+			nextProblem();
+		});
+		const iv = setInterval(() => {
+			if (!judged) elapsedMs = Date.now() - startedAt;
 		}, 1000);
-		return () => clearInterval(tickIv);
+		return () => clearInterval(iv);
 	});
 </script>
 
 <svelte:head>
-	<title>연속 모드 — 딸깍</title>
+	<title>무한 연습 — 딸깍</title>
 	<meta
 		name="description"
-		content="문제은행에서 랜덤으로 계속! 발견형 퍼즐과 상식 퀴즈를 5·10·20문제 연속으로 풀고 콤보 점수에 도전하세요."
+		content="발견형 퍼즐·상식 퀴즈·성냥개비를 원하는 만큼. 유형을 골라 계속 풀어보세요."
 	/>
-	<link rel="canonical" href="https://ddalkkak-1c2.pages.dev/play" />
-	<meta property="og:title" content="연속 모드 — 딸깍" />
-	<meta property="og:description" content="문제은행에서 랜덤으로 계속! 발견형 퍼즐과 상식 퀴즈를 5·10·20문제 연속으로 풀고 콤보 점수에 도전하세요." />
-	<meta property="og:url" content="https://ddalkkak-1c2.pages.dev/play" />
 </svelte:head>
 
-<div class="mroot">
-	{#if screen === 'menu'}
-		<div class="card menu">
-			<h2>연속 모드</h2>
-			<p class="desc">문제은행에서 랜덤 출제. <b>콤보</b>를 이어 최고 점수에 도전하세요.</p>
+<div class="topbar">
+	<h1>무한 연습</h1>
+	<span class="combo" class:on={combo > 0}>{combo} 연속 정답</span>
+</div>
 
-			<div class="label">무엇을 풀까요?</div>
-			<div class="filters">
-				{#each FILTERS as f (f.key)}
-					<button class="filter" class:on={filter === f.key} onclick={() => (filter = f.key)}>
-						<b>{f.label}</b><span>{f.sub}</span>
-					</button>
-				{/each}
-			</div>
+<div class="filters">
+	{#each FILTERS as f (f.key)}
+		<button class="filter" class:active={filter === f.key} onclick={() => pickFilter(f.key)}>
+			{f.label}
+		</button>
+	{/each}
+</div>
 
-			{#if filter === 'all' || filter === 'trivia'}
-				<div class="label">난이도</div>
-				<div class="pills">
-					<button class="pill" class:on={grade === 'all'} onclick={() => (grade = 'all')}
-						>전체</button
-					>
-					{#each GRADES as g (g.key)}
-						<button class="pill" class:on={grade === g.key} onclick={() => (grade = g.key)}
-							>{g.label}</button
-						>
-					{/each}
-				</div>
+{#if loading}
+	<div class="card skeleton">문제를 불러오는 중…</div>
+{:else if current}
+	<section class="card">
+		{#if shown?.chip}
+			<span class="cat-chip">{shown.chip}{shown.grade ? ` · ${shown.grade}` : ''}</span>
+		{:else if current.eq}
+			<span class="cat-chip">성냥개비</span>
+		{/if}
 
-				<div class="label">
-					분야
-					<button class="more" onclick={() => (showCats = !showCats)}>
-						{showCats ? '접기' : `${cat === 'all' ? '전체' : cat} · 바꾸기`}
-					</button>
-				</div>
-				{#if showCats}
-					<div class="pills wrap">
-						<button class="pill" class:on={cat === 'all'} onclick={() => (cat = 'all')}>전체</button>
-						{#each CATS as c (c)}
-							<button class="pill" class:on={cat === c} onclick={() => (cat = c)}>{c}</button>
-						{/each}
-					</div>
-				{/if}
-			{/if}
-
-			<div class="label">몇 문제? <span class="avail">선택된 문제 {availCount}개</span></div>
-			<div class="sizes">
-				{#each SIZES as s (s)}
-					<button class="size" disabled={availCount === 0} onclick={() => start(s)}>
-						{s}문제
-						{#if best[`${filter}-${grade}-${cat}-${s}`]}<span class="best"
-								>최고 {best[`${filter}-${grade}-${cat}-${s}`]}</span
-							>{/if}
-					</button>
-				{/each}
-			</div>
-			{#if availCount === 0}
-				<div class="warn">이 조합에 문제가 없어요. 난이도나 분야를 바꿔 보세요.</div>
-			{:else if availCount < 5}
-				<div class="warn">문제가 {availCount}개뿐이라 그만큼만 출제됩니다.</div>
-			{/if}
-
-			<AdSlot label="연속 모드" />
-		</div>
-	{:else if screen === 'play' && current}
-		<div class="topbar">
-			<div class="tb-item">문제 {idx + 1} / {queue.length}</div>
-			<div class="tb-item score">{score}점</div>
-			<div class="tb-item" class:hot={combo >= 2}>콤보 {combo}</div>
-		</div>
-		{#key current.id}
-		<div class="card slide">
-			<div class="chiprow">
-				<span class="chip" class:triv={current.trivia}>{current.chip}</span>
-				{#if current.grade}
-					<span class="gradechip">{GRADES.find((g) => g.key === current.grade)?.label}</span>
-				{/if}
-			</div>
-			<div class="q">
-				{#if isMatch(current) && mCur}
-					<div class="mq">성냥 <b>하나만</b> 옮겨 등식을 참으로 만드세요.</div>
-					<div class="mboard" class:shake={mShaking}>
-						<MatchstickBoard
-							board={mCur}
-							picked={mPicked}
-							onstick={handleStick}
-							label={current.match.displayed.replace('-', '−')}
-						/>
-					</div>
-				{/if}
-				{#each current.blocks as b, i (i)}
+		<div class="q">
+			{#if current.eq && mCur}
+				<MatchstickBoard
+					board={mCur}
+					picked={mPicked}
+					onstick={handleStick}
+					label={current.eq.displayed.replace('-', '−')}
+				/>
+				<p class="guide">{mPicked ? '빈 자리를 짚어 내려놓으세요.' : '옮길 획을 짚어보세요.'}</p>
+			{:else if shown}
+				{#each shown.blocks as b, i (i)}
 					{#if b.kind === 'text'}
 						<div class="qtext">{@html b.html}</div>
 					{:else if b.kind === 'pre'}
-						<pre
-							class="qblock"
-							style="--maxlen:{Math.max(...b.text.split('\n').map((l) => l.length), 1)}">{b.text}</pre>
+						<pre class="qpre">{b.text}</pre>
 					{:else if b.kind === 'lcd'}
 						<SevenSeg lines={b.lines} frags={b.frags} />
 					{:else if b.kind === 'colors'}
@@ -492,719 +320,401 @@
 						<Figure svg={b.svg} caption={b.caption} />
 					{/if}
 				{/each}
-			</div>
+			{/if}
+		</div>
 
-			<div class="answer-area">
-				{#if isMatch(current)}
-					<div class="mtip">획을 눌러 집고, 빈 자리를 눌러 놓으세요.</div>
-				{:else if current.type === 'choice'}
-					<div class="choices">
-						{#each current.choices! as c, i (i)}
-							<button
-								class="choice"
-								class:correct={done && i === current.answerIndex}
-								class:flash-wrong={flashIndex === i && flashKind === 'wrong'}
-								class:flash-correct={flashIndex === i && flashKind === 'correct'}
-								disabled={done}
-								onclick={() => submitChoice(i)}>{c}</button
-							>
-						{/each}
-					</div>
-				{:else}
-					<div class="input-row">
-						<input
-							bind:this={inputEl}
-							class:flash-wrong={inputState === 'wrong'}
-							class:flash-correct={inputState === 'correct'}
-							placeholder="정답을 입력하세요"
-							aria-label="정답 입력"
-							autocomplete="off"
-							bind:value={answerValue}
-							disabled={done}
-							onkeydown={(e) => e.key === 'Enter' && submitText()}
-						/>
-						<button class="btn" disabled={done} onclick={submitText}>제출</button>
-					</div>
+		{#if shown && !current.eq}
+			{#if shown.type === 'choice'}
+				<div class="choices">
+					{#each shown.choices ?? [] as c, i (i)}
+						<button
+							class="choice"
+							class:ok={judged && i === shown.answerIndex}
+							class:bad={picked === i && i !== shown.answerIndex}
+							disabled={judged}
+							onclick={() => submitChoice(i)}
+						>
+							<span class="badge">{['A', 'B', 'C', 'D', 'E'][i]}</span>
+							<span class="ctext">{c}</span>
+							{#if judged && i === shown.answerIndex}<span class="mark">✓</span>
+							{:else if picked === i && i !== shown.answerIndex}<span class="mark bad">✕</span>{/if}
+						</button>
+					{/each}
+				</div>
+			{:else}
+				<input
+					type="text"
+					bind:this={inputEl}
+					bind:value={answerValue}
+					placeholder="답을 입력하세요"
+					aria-label="정답 입력"
+					autocomplete="off"
+					disabled={judged}
+					onkeydown={(e) => e.key === 'Enter' && submitText()}
+				/>
+			{/if}
+		{/if}
+
+		{#if !judged && shown?.hints}
+			<div class="hint-row">
+				<div class="dots" aria-hidden="true">
+					{#each [0, 1, 2] as i (i)}
+						<span class="dot" class:on={i < hintsUsed}></span>
+					{/each}
+				</div>
+				<button
+					class="hint-btn"
+					disabled={hintsUsed >= 3 || !hintUnlocked(hintsUsed, elapsedMs, wrongAttempts)}
+					onclick={showHint}
+				>
+					{hintsUsed >= 3
+						? '힌트 다 봤어요'
+						: hintUnlocked(hintsUsed, elapsedMs, wrongAttempts)
+							? `힌트 보기 (${hintsUsed + 1}/3)`
+							: '조금만 더'}
+				</button>
+			</div>
+		{/if}
+
+		{#each shownHints as h, i (i)}
+			<div class="hint-box">{h}</div>
+		{/each}
+
+		{#if feedback}
+			<div class="feedback" class:ok={feedback.ok}>
+				<span class="fmark">{feedback.ok ? '✓' : '✕'}</span>
+				<span>{feedback.msg}</span>
+			</div>
+		{/if}
+
+		{#if judged}
+			<div class="explain">
+				<b>해설</b>
+				{#if current.eq}
+					성냥 하나만 옮겨 <b>{current.eq.solution.replace('-', '−')}</b>을 만들면 참이 됩니다.
+				{:else if shown}
+					{@html shown.explain}
 				{/if}
 			</div>
+			<button class="btn-primary wide" onclick={skip}>다음 문제</button>
+		{:else}
+			<div class="actions">
+				<button class="btn-outline" onclick={skip}>건너뛰기</button>
+				{#if current.eq}
+					<button class="btn-outline" onclick={giveUp}>모르겠어요</button>
+					<button class="btn-outline" disabled={!mPicked} onclick={resetBoard}>처음부터</button>
+				{:else if shown?.type === 'choice'}
+					<button class="btn-outline" onclick={giveUp}>모르겠어요</button>
+				{:else}
+					<button class="btn-primary" onclick={submitText}>확인</button>
+				{/if}
+			</div>
+		{/if}
+	</section>
 
-			{#each shownHints as h, i (i)}
-				<div class="hint"><b>힌트 {i + 1}</b>{h}</div>
-			{/each}
-
-			{#if !done}
-				<div class="controls">
-					{#if isMatch(current)}
-						<button
-							class="btn ghost"
-							disabled={!mPicked}
-							onclick={() => {
-								if (mPicked && mOrig) {
-									mCur = cloneBoard(mOrig);
-									mPicked = null;
-								}
-							}}>처음부터</button
-						>
-					{:else if !current.trivia && current.hints}
-						<button
-							class="btn ghost"
-							disabled={hintsUsed >= 3 || !hintUnlocked(hintsUsed, elapsedMs, wrongAttempts)}
-							onclick={showHint}
-						>
-							{hintsUsed >= 3
-								? '힌트 소진'
-								: hintUnlocked(hintsUsed, elapsedMs, wrongAttempts)
-									? `힌트 (${hintsUsed + 1}/3)`
-									: '조금만 더'}
-						</button>
-					{/if}
-					<button
-						class="btn ghost"
-						onclick={() => (isMatch(current) ? revealMatch() : finish(false, 'giveup'))}
-						>모르겠어요</button
-					>
-				</div>
-			{/if}
-
-			{#if feedback && judge}
-				{#key feedback.msg + judge}
-					<div class="feedback {judge}" role="alert" aria-live="assertive">
-						<Icon name={judge} size={20} />
-						<span>{feedback.msg}</span>
-					</div>
-				{/key}
-			{/if}
-
-			{#if done}
-				<div class="explain" class:win={feedback?.ok} class:giveup={!feedback?.ok}>
-					<div class="explain-head">
-						<Icon name={feedback?.ok ? 'correct' : 'giveup'} size={15} />
-						<span>{feedback?.ok ? '정답 풀이' : '정답 공개'}</span>
-					</div>
-					{@html current.explain}
-				</div>
-				<button class="btn wide" onclick={next}>
-					{idx + 1 < queue.length ? '다음 문제 →' : '결과 보기'}
-				</button>
-			{/if}
-		</div>
-		{/key}
-	{:else if screen === 'result'}
-		<div class="card result">
-			<h2>세션 완료!</h2>
-			<div class="emoji">{results.map((r) => (r === 'o' ? '🟢' : '⚪')).join(' ')}</div>
-			<div class="rscore">{score}<span class="unit">점</span></div>
-			<div class="rmeta">{correctCount}/{queue.length} 정답 · 최고 콤보 {maxCombo}</div>
-			{#if score >= (best[bestKey] ?? 0) && score > 0}
-				<div class="newbest"><Icon name="trophy" size={16} /> 신기록!</div>
-			{/if}
-			<button class="btn wide" onclick={share}>결과 공유 — 친구에게 도전장</button>
-			<button class="btn ghost wide" onclick={() => start(sessionSize)}>다시 하기</button>
-			<button class="btn ghost wide" onclick={() => (screen = 'menu')}>모드 선택으로</button>
-			<AdSlot label="결과" />
-		</div>
-	{/if}
-</div>
-
-{#if toastMsg}
-	<div class="toast" role="status" aria-live="polite">{toastMsg}</div>
+	<p class="poolnote">{FILTERS.find((f) => f.key === filter)?.label} {poolSize.toLocaleString()}문제 중에서 무작위로 나와요</p>
 {/if}
 
 <style>
-	.mroot {
-		max-width: 640px;
-		margin: 0 auto;
-	}
-	.card.slide {
-		animation: card-in var(--dur-move) var(--ease-out);
-	}
-	@keyframes card-in {
-		from {
-			opacity: 0;
-			transform: translateX(26px);
-		}
-		to {
-			opacity: 1;
-			transform: none;
-		}
-	}
-	.card {
-		background: var(--panel);
-		border: 1px solid var(--border);
-		border-radius: var(--radius);
-		padding: 30px 26px;
-		box-shadow: 0 4px 22px rgba(60, 50, 30, 0.07);
-	}
-	@media (max-width: 640px) {
-		.card {
-			padding: 22px 18px;
-		}
-	}
-	.menu h2 {
-		font-size: 26px;
-		margin-bottom: 4px;
-	}
-	.desc {
-		font-size: 15px;
-		color: var(--muted);
-		margin-bottom: 20px;
-	}
-	.desc :global(b) {
-		color: var(--accent);
-	}
-	.label {
-		font-size: 13px;
-		font-weight: 800;
-		color: var(--muted);
-		margin: 16px 0 10px;
+	.topbar {
 		display: flex;
 		align-items: center;
-		gap: 8px;
+		justify-content: space-between;
+		margin-bottom: 16px;
 	}
-	.avail {
-		font-weight: 600;
-		color: #b3a894;
+	.topbar h1 {
+		font-size: 18px;
+		font-weight: 800;
+		margin: 0;
 	}
-	.more {
-		margin-left: auto;
-		background: transparent;
-		border: 1px solid var(--border-strong);
-		border-radius: 999px;
-		padding: 4px 12px;
-		font-size: 11px;
-		font-weight: 700;
-		color: var(--muted);
-		cursor: pointer;
-		font-family: inherit;
-	}
-	.pills {
-		display: flex;
-		gap: 7px;
-		flex-wrap: wrap;
-	}
-	.pills.wrap {
-		max-height: 190px;
-		overflow-y: auto;
-	}
-	.pill {
+	.combo {
+		font-size: 12px;
+		font-weight: 800;
 		background: var(--panel-2);
-		border: 2px solid var(--border);
+		color: var(--muted-2);
+		padding: 5px 10px;
 		border-radius: 999px;
-		padding: 9px 15px;
-		font-size: 13.5px;
-		font-weight: 700;
-		color: var(--text);
-		cursor: pointer;
-		font-family: inherit;
-		transition:
-			border-color var(--dur-tap) var(--ease-out),
-			background var(--dur-tap) var(--ease-out),
-			color var(--dur-tap) var(--ease-out),
-			transform var(--dur-tap) var(--ease-out);
+		font-variant-numeric: tabular-nums;
 	}
-	.pill:hover:not(.on) {
-		border-color: var(--border-strong);
-		background: #fff;
-		transform: translateY(-1px);
-	}
-	.pill:active {
-		transform: translateY(1px) scale(0.98);
-	}
-	.pill.on {
-		border-color: var(--accent);
-		background: var(--accent-soft);
-		color: var(--accent);
-	}
-	.warn {
-		margin-top: 10px;
-		font-size: 12.5px;
-		color: var(--accent-2);
-		font-weight: 700;
-	}
-	.size:disabled {
-		opacity: 0.45;
-		cursor: default;
+	.combo.on {
+		background: var(--gold-bg);
+		color: var(--gold-text);
 	}
 	.filters {
 		display: flex;
-		flex-direction: column;
-		gap: 9px;
-	}
-	.filter {
-		display: flex;
-		flex-direction: column;
-		align-items: flex-start;
-		gap: 2px;
-		background: var(--panel-2);
-		border: 2px solid var(--border);
-		border-radius: 12px;
-		padding: 13px 16px;
-		cursor: pointer;
-		font-family: inherit;
-		text-align: left;
-		color: var(--text);
-		transition:
-			border-color var(--dur-tap) var(--ease-out),
-			background var(--dur-tap) var(--ease-out),
-			transform var(--dur-tap) var(--ease-out),
-			box-shadow 0.18s var(--ease-out);
-	}
-	.filter:hover:not(.on) {
-		border-color: var(--border-strong);
-		background: #fff;
-		transform: translateY(-2px);
-		box-shadow: 0 6px 16px rgba(44, 40, 34, 0.08);
-	}
-	.filter:active {
-		transform: translateY(0) scale(0.995);
-	}
-	.filter b {
-		font-size: 16px;
-	}
-	.filter span {
-		font-size: 12px;
-		color: var(--muted);
-	}
-	.filter.on {
-		border-color: var(--accent);
-		background: var(--accent-soft);
-	}
-	.sizes {
-		display: flex;
-		gap: 10px;
-	}
-	.size {
-		flex: 1;
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		gap: 3px;
-		background: var(--accent);
-		color: #fff;
-		border: none;
-		border-radius: 12px;
-		padding: 17px 8px;
-		font-size: 16px;
-		font-weight: 800;
-		cursor: pointer;
-		font-family: inherit;
-	}
-	.size:hover {
-		filter: brightness(1.06);
-	}
-	.size .best {
-		font-size: 10px;
-		font-weight: 600;
-		opacity: 0.9;
-	}
-	.topbar {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		margin-bottom: 10px;
-		gap: 8px;
-	}
-	.tb-item {
-		font-size: 14px;
-		font-weight: 800;
-		color: var(--muted);
-	}
-	.tb-item.score {
-		color: var(--accent);
-	}
-	.tb-item.hot {
-		color: var(--accent-2);
-	}
-	.chiprow {
-		display: flex;
-		align-items: center;
-		gap: 7px;
-		margin-bottom: 20px;
+		gap: 6px;
+		margin-bottom: 16px;
 		flex-wrap: wrap;
 	}
-	.chip {
-		display: inline-block;
-		background: var(--accent-soft);
-		color: var(--accent);
-		font-size: 12px;
-		font-weight: 800;
+	.filter {
+		padding: 7px 14px;
 		border-radius: 999px;
-		padding: 6px 15px;
-	}
-	.gradechip {
-		display: inline-block;
-		background: var(--panel-2);
+		font-size: 13px;
+		font-weight: 600;
 		border: 1px solid var(--border-strong);
-		color: var(--muted);
-		font-size: 11.5px;
-		font-weight: 800;
-		border-radius: 999px;
-		padding: 5px 12px;
+		background: transparent;
+		color: var(--text);
+		cursor: pointer;
+		font-family: inherit;
 	}
-	.chip.triv {
-		background: #f3ead4;
-		color: #a9791a;
+	.filter.active {
+		background: var(--accent);
+		color: #fff;
+		font-weight: 700;
+		border-color: var(--accent);
 	}
-	.q {
-		container-type: inline-size;
-		min-height: 60px;
+
+	.card {
+		border: 1px solid var(--border-strong);
+		background: var(--panel);
+		border-radius: 18px;
+		padding: 18px;
 	}
-	.qtext {
-		font-size: 21px;
-		line-height: 1.7;
-		word-break: keep-all;
-	}
-	.mq {
-		font-size: 19px;
-		line-height: 1.6;
-		word-break: keep-all;
-		margin-bottom: 14px;
-	}
-	.mboard.shake {
-		animation: shake 0.4s ease;
-	}
-	.mtip {
-		font-size: 14px;
-		color: var(--muted);
+	.card.skeleton {
 		text-align: center;
+		color: var(--muted-2);
+		font-size: 14px;
+		padding: 40px 18px;
 	}
-	.qtext :global(b) {
-		color: var(--accent);
-	}
-	.qblock {
-		font-family: Georgia, 'Nanum Myeongjo', 'Batang', serif;
-		font-size: 30px;
+	.cat-chip {
+		display: inline-block;
+		font-size: 12px;
 		font-weight: 700;
 		background: var(--panel-2);
-		border: 1px solid var(--border);
-		border-radius: 14px;
-		padding: clamp(16px, 4cqi, 26px) clamp(14px, 3.5cqi, 24px);
-		margin: 16px 0 22px;
-		line-height: 1.9;
+		color: var(--muted);
+		padding: 3px 9px;
+		border-radius: 999px;
+	}
+	.q {
+		margin-top: 14px;
+	}
+	.qtext {
+		font-size: 18px;
+		font-weight: 700;
+		line-height: 1.5;
+		word-break: keep-all;
+	}
+	.qpre {
+		font-size: 16px;
+		line-height: 1.6;
 		white-space: pre-wrap;
-		overflow-wrap: anywhere;
-		color: var(--text);
+		font-family: inherit;
 	}
-	@supports (container-type: inline-size) {
-		.qblock {
-			font-size: clamp(15px, calc(100cqi / var(--maxlen, 10) * 1.7), 30px);
-		}
+	.guide {
+		margin-top: 10px;
+		text-align: center;
+		font-size: 13px;
+		color: var(--muted);
 	}
-	.answer-area {
-		margin-top: 20px;
-	}
-	.input-row {
-		display: flex;
-		gap: 11px;
-	}
-	input {
-		flex: 1;
-		min-width: 0;
-		font-size: 19px;
-		padding: 16px 18px;
-		border: 2px solid var(--border-strong);
-		border-radius: 13px;
+
+	input[type='text'] {
+		width: 100%;
+		margin-top: 16px;
+		height: 50px;
+		border-radius: 12px;
+		border: 1px solid var(--border-strong);
+		padding: 0 14px;
+		font-size: 16px;
 		background: #fff;
 		color: var(--text);
 		font-family: inherit;
+	}
+	input[type='text']:focus {
 		outline: none;
+		border: 1.5px solid var(--accent);
 	}
-	input::placeholder {
-		color: #bcae9b;
-	}
-	input:focus {
-		border-color: var(--accent);
-		box-shadow: 0 0 0 3px rgba(47, 143, 91, 0.14);
-	}
-	input.flash-wrong {
-		border-color: var(--danger);
-		animation: shake 0.4s ease;
-	}
-	input.flash-correct {
-		border-color: var(--accent);
-		animation: judge-pop var(--dur-judge) var(--ease-pop);
-	}
-	.btn {
-		background: var(--accent);
-		color: #fff;
-		border: none;
-		border-radius: 13px;
-		font-size: 16px;
-		font-weight: 800;
-		padding: 16px 24px;
-		cursor: pointer;
-		font-family: inherit;
-		white-space: nowrap;
-		box-shadow: 0 1px 2px rgba(44, 40, 34, 0.16);
-		transition:
-			transform var(--dur-tap) var(--ease-out),
-			box-shadow 0.18s var(--ease-out),
-			filter 0.18s var(--ease-out);
-	}
-	.btn:hover:not(:disabled) {
-		filter: brightness(1.06);
-		transform: translateY(-1.5px);
-		box-shadow: 0 5px 14px rgba(47, 143, 91, 0.26);
-	}
-	.btn:active:not(:disabled) {
-		transform: translateY(1px) scale(0.985);
-		box-shadow: 0 1px 1px rgba(44, 40, 34, 0.2);
-	}
-	.btn.ghost {
-		box-shadow: none;
-	}
-	.btn.ghost:hover:not(:disabled) {
-		box-shadow: 0 4px 10px rgba(44, 40, 34, 0.08);
-	}
-	.btn.ghost {
-		background: transparent;
-		color: var(--muted);
-		border: 1px solid var(--border-strong);
-	}
-	.btn.wide {
-		width: 100%;
-		margin-top: 14px;
-	}
-	.btn:disabled {
-		opacity: 0.5;
-		cursor: default;
-	}
+
 	.choices {
 		display: flex;
 		flex-direction: column;
 		gap: 10px;
-	}
-	.choice {
-		background: var(--panel-2);
-		border: 2px solid var(--border);
-		border-radius: 12px;
-		padding: 16px 18px;
-		font-size: 17px;
-		font-weight: 700;
-		cursor: pointer;
-		text-align: left;
-		font-family: inherit;
-		color: var(--text);
-		transition:
-			border-color var(--dur-tap) var(--ease-out),
-			background var(--dur-tap) var(--ease-out),
-			transform var(--dur-tap) var(--ease-out);
-	}
-	.choice:hover:not(:disabled) {
-		border-color: var(--accent);
-		background: #fff;
-		transform: translateY(-1px);
-	}
-	.choice.flash-wrong {
-		border-color: var(--danger);
-		background: var(--danger-soft);
-		animation: shake 0.4s ease;
-	}
-	.choice.flash-correct {
-		border-color: var(--accent);
-		background: var(--accent-soft);
-		animation: judge-pop var(--dur-judge) var(--ease-pop);
-	}
-	.choice.correct {
-		border-color: var(--accent);
-		background: var(--accent-soft);
-	}
-	.choice:disabled {
-		opacity: 0.75;
-		cursor: default;
-	}
-	.controls {
-		display: flex;
-		gap: 11px;
 		margin-top: 16px;
 	}
-	.controls .btn {
-		flex: 1;
-		font-size: 14px;
-		padding: 13px 10px;
-	}
-	.hint {
-		background: #fbf3dd;
-		border-left: 3px solid var(--gold);
-		border-radius: 8px;
-		padding: 13px 16px;
-		font-size: 15px;
-		margin-top: 12px;
-		line-height: 1.6;
-		color: #6a5f48;
-	}
-	.hint b {
-		color: #a9791a;
-		margin-right: 8px;
-	}
-	/* 판정은 색만으로 알리지 않는다 — 아이콘 모양과 움직임을 함께 쓴다(색각 이상 대응) */
-	.feedback {
+	.choice {
 		display: flex;
 		align-items: center;
 		gap: 10px;
-		margin-top: 16px;
-		padding: 13px 16px;
-		border-radius: 13px;
-		font-size: 16px;
-		font-weight: 800;
-		border: 1.5px solid transparent;
-		word-break: keep-all;
-	}
-	.feedback.correct {
-		background: var(--accent-soft);
-		border-color: #cfe6d8;
-		color: #1f6b41;
-		animation: judge-pop var(--dur-judge) var(--ease-pop);
-	}
-	.feedback.wrong {
-		background: var(--danger-soft);
-		border-color: var(--danger-border);
-		color: #9c2f22;
-		animation: shake 0.4s ease;
-	}
-	.feedback.giveup {
-		background: var(--giveup-soft);
-		border-color: var(--giveup-border);
-		color: #8a5f1f;
-		animation: judge-fade var(--dur-move) var(--ease-out);
-	}
-	@keyframes judge-pop {
-		0% {
-			transform: scale(0.93);
-			opacity: 0;
-		}
-		55% {
-			transform: scale(1.035);
-			opacity: 1;
-		}
-		100% {
-			transform: scale(1);
-		}
-	}
-	@keyframes judge-fade {
-		from {
-			opacity: 0;
-			transform: translateY(5px);
-		}
-		to {
-			opacity: 1;
-			transform: none;
-		}
-	}
-	@keyframes shake {
-		0%,
-		100% {
-			transform: translateX(0);
-		}
-		18% {
-			transform: translateX(-7px);
-		}
-		38% {
-			transform: translateX(6px);
-		}
-		62% {
-			transform: translateX(-4px);
-		}
-		82% {
-			transform: translateX(2px);
-		}
-	}
-	.btn {
-		border-bottom: 3px solid #24714a;
-	}
-	.btn:active:not(:disabled) {
-		border-bottom-width: 1px;
-	}
-	.btn.ghost {
-		border-bottom: 3px solid var(--border-strong);
-	}
-	.btn.ghost:active:not(:disabled) {
-		border-bottom-width: 1px;
-	}
-	.explain {
+		padding: 12px 14px;
 		border-radius: 12px;
-		padding: 18px;
-		margin-top: 16px;
-		font-size: 15px;
-		line-height: 1.7;
-		word-break: keep-all;
-		animation: judge-fade var(--dur-move) var(--ease-out);
+		border: 1px solid var(--border-strong);
+		background: #fff;
+		text-align: left;
+		cursor: pointer;
+		font-family: inherit;
+		transition:
+			background var(--dur-move) ease,
+			border-color var(--dur-move) ease;
 	}
-	.explain-head {
-		display: flex;
-		align-items: center;
-		gap: 7px;
-		font-size: 12.5px;
+	.choice:disabled {
+		cursor: default;
+	}
+	.badge {
+		width: 24px;
+		height: 24px;
+		border-radius: 50%;
+		background: var(--panel-2);
+		color: var(--text);
+		font-size: 13px;
 		font-weight: 800;
-		letter-spacing: 0.3px;
-		margin-bottom: 10px;
-	}
-	.explain.win {
-		background: var(--accent-soft);
-		border: 1px solid #cfe6d8;
-		color: #2c4d3b;
-	}
-	.explain.win .explain-head {
-		color: #1f6b41;
-	}
-	.explain.giveup {
-		background: var(--giveup-soft);
-		border: 1px solid var(--giveup-border);
-		color: #6b4d1c;
-	}
-	.explain.giveup .explain-head {
-		color: var(--giveup);
-	}
-	.result {
-		text-align: center;
-		padding: 38px 24px;
-	}
-	.result h2 {
-		font-size: 24px;
-		margin-bottom: 12px;
-	}
-	.emoji {
-		font-size: 22px;
-		letter-spacing: 2px;
-		margin: 10px 0;
-		word-break: break-all;
-	}
-	.rscore {
-		font-size: 52px;
-		font-weight: 900;
-		color: var(--accent);
-		margin: 6px 0;
-	}
-	.rscore .unit {
-		font-size: 22px;
-		color: var(--muted);
-	}
-	.rmeta {
-		font-size: 14px;
-		color: var(--muted);
-		margin-bottom: 8px;
-	}
-	.newbest {
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		gap: 6px;
-		font-size: 17px;
-		font-weight: 900;
-		color: var(--accent-2);
-		margin-bottom: 10px;
+		flex: none;
 	}
-	.toast {
-		position: fixed;
-		bottom: 32px;
-		left: 50%;
-		transform: translateX(-50%);
-		background: var(--text);
-		color: #fdfbf6;
+	.ctext {
+		font-size: 15px;
+		font-weight: 600;
+		flex: 1;
+	}
+	.mark {
+		margin-left: auto;
+		font-weight: 800;
+		color: var(--accent);
+	}
+	.mark.bad {
+		color: var(--danger);
+	}
+	.choice.ok {
+		background: var(--correct-bg);
+		border-color: var(--accent);
+	}
+	.choice.bad {
+		background: var(--danger-bg);
+		border-color: var(--danger);
+	}
+
+	.hint-row {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		margin-top: 14px;
+	}
+	.dots {
+		display: flex;
+		gap: 4px;
+	}
+	.dot {
+		width: 8px;
+		height: 8px;
+		border-radius: 50%;
+		background: var(--border);
+		transition: background var(--dur-move) ease;
+	}
+	.dot.on {
+		background: var(--gold);
+	}
+	.hint-btn {
+		font-size: 13px;
+		font-weight: 700;
+		color: var(--gold-text);
+		background: var(--gold-bg);
+		border: 1px solid var(--gold);
 		border-radius: 999px;
-		padding: 12px 24px;
+		padding: 5px 12px;
+		cursor: pointer;
+		font-family: inherit;
+	}
+	.hint-btn:disabled {
+		color: var(--muted-2);
+		background: var(--panel-2);
+		border-color: var(--border);
+		cursor: default;
+	}
+	.hint-box {
+		margin-top: 10px;
+		background: var(--gold-bg);
+		border: 1px solid var(--gold);
+		border-radius: 12px;
+		padding: 12px 14px;
+		font-size: 13.5px;
+		color: var(--gold-text);
+		line-height: 1.6;
+	}
+
+	.feedback {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		margin-top: 14px;
+		padding: 11px 14px;
+		border-radius: 12px;
+		border: 1px solid var(--danger);
+		background: var(--danger-bg);
+		color: var(--danger);
 		font-size: 14px;
-		z-index: 30;
-		box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
+		font-weight: 700;
+	}
+	.feedback.ok {
+		border-color: var(--accent);
+		background: var(--correct-bg);
+		color: var(--accent);
+	}
+	.fmark {
+		font-weight: 800;
+	}
+	.explain {
+		margin-top: 14px;
+		background: var(--panel-2);
+		border-radius: 12px;
+		padding: 13px 14px;
+		font-size: 13.5px;
+		color: var(--muted);
+		line-height: 1.7;
+		word-break: keep-all;
+	}
+	.explain b {
+		color: var(--text);
+	}
+
+	.actions {
+		display: flex;
+		gap: 8px;
+		margin-top: 16px;
+	}
+	.btn-outline {
+		flex: 1;
+		height: 48px;
+		border-radius: 12px;
+		background: transparent;
+		color: var(--muted);
+		font-size: 14px;
+		font-weight: 700;
+		border: 1px solid var(--border-strong);
+		cursor: pointer;
+		font-family: inherit;
+	}
+	.btn-outline:disabled {
+		color: var(--muted-2);
+		cursor: default;
+	}
+	.btn-primary {
+		flex: 2;
+		height: 48px;
+		border-radius: 12px;
+		background: var(--accent);
+		color: #fff;
+		font-size: 15px;
+		font-weight: 800;
+		border: none;
+		cursor: pointer;
+		box-shadow: 0 6px 0 var(--accent-press);
+		font-family: inherit;
+		transition:
+			transform var(--dur-tap) var(--ease-out),
+			box-shadow var(--dur-tap) var(--ease-out);
+	}
+	.btn-primary:active {
+		transform: translateY(3px);
+		box-shadow: 0 3px 0 var(--accent-press);
+	}
+	.btn-primary.wide {
+		width: 100%;
+		margin-top: 16px;
+	}
+	.poolnote {
+		margin-top: 14px;
+		text-align: center;
+		font-size: 12px;
+		color: var(--muted-2);
 	}
 </style>

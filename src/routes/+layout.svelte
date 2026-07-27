@@ -1,59 +1,19 @@
 <script lang="ts">
-	import { page } from '$app/state';
 	import AdSlot from '$lib/components/AdSlot.svelte';
-	import Logo from '$lib/components/Logo.svelte';
 
 	let { children, data } = $props();
-	let path = $derived(page.url.pathname);
-
-	const TABS = [
-		{ href: '/', label: '오늘의 딸깍', sub: '매일 10문제' },
-		{ href: '/play', label: '무한 연습', sub: '골라서 계속' },
-		{ href: '/matchstick', label: '성냥개비', sub: '하나만 옮기기' }
-	];
-	const isActive = (href: string) => (href === '/' ? path === '/' : path.startsWith(href));
-
 	const year = new Date().getFullYear();
-
-	// 활성 탭 아래로 미끄러지는 세그먼트 막대. 측정이 필요하므로 마운트 후에만 보인다.
-	let navEl = $state<HTMLElement | null>(null);
-	let barX = $state(0);
-	let barW = $state(0);
-	let barReady = $state(false);
-
-	function measure() {
-		if (!navEl) return;
-		const el = navEl.querySelector<HTMLElement>('.tab.active');
-		if (!el) return;
-		barX = el.offsetLeft + 6;
-		barW = Math.max(20, el.offsetWidth - 12);
-		barReady = true;
-	}
-	$effect(() => {
-		// path가 바뀌면 다시 잰다
-		void path;
-		measure();
-	});
 </script>
-
-<svelte:window onresize={measure} />
-
 
 <div class="wrap">
 	<header>
-		<Logo />
-		<nav bind:this={navEl}>
-			{#each TABS as t (t.href)}
-				<a href={t.href} class="tab" class:active={isActive(t.href)}>
-					<b>{t.label}</b><span>{t.sub}</span>
-				</a>
-			{/each}
-			<span
-				class="segbar"
-				class:ready={barReady}
-				style="width:{barW}px; transform:translateX({barX}px)"
-				aria-hidden="true"
-			></span>
+		<a class="logo" href="/">
+			<span class="bulb" aria-hidden="true"></span>
+			<span class="name">딸깍</span>
+		</a>
+		<nav>
+			<a href="/play">연습</a>
+			<a href="/guide">가이드</a>
 		</nav>
 	</header>
 
@@ -64,97 +24,62 @@
 	<div class="bottom-ad"><AdSlot label="하단 배너" /></div>
 
 	<footer>
-		<div class="foot-top">
-			<div class="foot-brand">
-				<span class="fb-name">딸깍</span>
-				<span class="fb-tag">규칙을 발견하는 순간의 그 소리</span>
-				<span class="fb-desc">
-					발견형 퍼즐 · 상식 퀴즈 · 성냥개비를 매일 새로. 모두가 같은 문제를 풉니다.
-				</span>
-			</div>
-			<nav class="foot-col">
-				<span class="foot-h">즐기기</span>
-				{#each TABS as t (t.href)}
-					<a href={t.href}>{t.label}</a>
-				{/each}
-				<a href="/archive">지난 문제</a>
-			</nav>
-			<nav class="foot-col">
-				<span class="foot-h">안내</span>
-				<a href="/about">소개</a>
-				<a href="/guide">풀이 가이드</a>
-				<a href="/privacy">개인정보처리방침</a>
-				<a href="/terms">이용약관</a>
-			</nav>
-		</div>
-		<div class="foot-bottom">
-			<span>© {year} 딸깍</span>
-			<span class="seg-div" aria-hidden="true"></span>
-			<span>문제 {data.totalProblems.toLocaleString()}개</span>
-		</div>
+		<nav class="flinks">
+			<a href="/guide">가이드</a>
+			<span aria-hidden="true">·</span>
+			<a href="/play">연습</a>
+			<span aria-hidden="true">·</span>
+			<a href="/matchstick">성냥개비</a>
+			<span aria-hidden="true">·</span>
+			<a href="/about">소개</a>
+			<span aria-hidden="true">·</span>
+			<a href="/archive">지난 문제</a>
+			<span aria-hidden="true">·</span>
+			<a href="/terms">이용약관</a>
+			<span aria-hidden="true">·</span>
+			<a href="/privacy">개인정보</a>
+		</nav>
+		<p class="copy">© {year} 딸깍 · 문제 {data.totalProblems.toLocaleString()}개</p>
 	</footer>
 </div>
 
 <style>
 	:global(:root) {
+		/* ── 색 ── */
 		--bg: #efe7d8;
-		--bg-2: #e9dfcc;
 		--panel: #fdfbf6;
 		--panel-2: #f6f1e6;
 		--border: #e6dcc8;
 		--border-strong: #ddd0ba;
 		--text: #2c2822;
 		--muted: #6b6258;
+		--muted-2: #a89f8f;
 		--accent: #2f8f5b;
-		--accent-soft: #e5efe8;
+		--accent-press: #23703f;
 		--accent-2: #c0632e;
 		--gold: #f6d34e;
+		--gold-bg: #fdf3cf;
+		--gold-text: #8a6d16;
 		--danger: #c0392b;
-		/* 판정 3-state: 정답=accent(초록) / 오답=danger(빨강) / 포기=giveup(앰버).
-		   포기를 힌트(--gold 노랑)와 구분하려고 더 어둡고 채도 낮은 브라운-앰버로 잡았다. */
-		--danger-soft: #f9e4e1;
-		--danger-border: #f0c8c2;
-		--giveup: #a9762c;
-		--giveup-soft: #f5ecd8;
-		--giveup-border: #e8d6ad;
-		/* 모션 토큰 3단계 */
-		--dur-tap: 130ms;
-		--dur-move: 260ms;
-		--dur-judge: 480ms;
-		--ease-out: cubic-bezier(0.2, 0, 0, 1);
-		--ease-pop: cubic-bezier(0.34, 1.56, 0.64, 1);
-		/* 세그먼트 척추 — 7세그먼트 획(34×8, rx3)이 이 사이트의 유일한 조형 문법이다.
-		   카드(--radius:20px)·칩(999px)과 반경을 분리해 "이 반경은 세그먼트"라는 신호로 고정한다.
-		   적용 범위는 숫자 HUD·탭 인디케이터·구분선까지. 카드마다 뿌리지 않는다. */
+		--danger-bg: #f7e6e2;
+		--correct-bg: #e7f3ec;
+		/* 전광판·성냥개비 패널 */
+		--board-bg: #0a0d0a;
+		--led-on: #3aff62;
+		--led-off: rgba(58, 255, 98, 0.15);
+		--led-lift: #ff9f40;
+
+		/* ── 모션 ── */
+		--dur-tap: 120ms;
+		--dur-move: 150ms;
+		--ease-out: ease-out;
+
+		/* ── 형태 ── */
 		--seg-r: 3px;
-		--seg-on-hud: var(--accent-2);
 		--seg-off: rgba(44, 40, 34, 0.12);
-		--radius: 20px;
-		--maxw: 1120px;
-		/* 타이포그래피 축 — 이 7단 스케일 밖의 font-size는 쓰지 않는다.
-		   무게는 역할별로 5단만 쓴다: 460=보조 캡션 · 500=문제 지문(이 사이트에서 유일하게 "안 굵은" 문장) ·
-		   700=구조 라벨(탭·칩·선택지·고스트버튼) · 800=화면당 하나뿐인 강조(주 CTA·배너 타이틀·판정 메시지) ·
-		   900=숫자 전용(세그먼트·스코어·타이머)과 로고/랜딩 헤드라인의 정체성 표기, 문장에는 절대 쓰지 않는다.
-		   한글 자간: 본문 문장은 0(음절 블록이 라틴처럼 조여지지 않는다) — 자간을 만지는 건 소형 라벨(--ls-label,
-		   양수: 뭉친 볼드를 풀어준다)과 38px급 대형 헤드라인(--ls-tight, 음수) 두 자리뿐이다. */
-		--fs-2xs: 12px;
-		--fs-xs: 13px;
-		--fs-sm: 15px;
-		--fs-md: 17px;
-		--fs-lg: 21px;
-		--fs-xl: 28px;
-		--fs-2xl: 38px;
-		--fw-caption: 460;
-		--fw-body: 500;
-		--fw-label: 700;
-		--fw-emphasis: 800;
-		--fw-number: 900;
-		--ls-normal: 0em;
-		--ls-label: 0.02em;
-		--ls-tight: -0.02em;
-		--lh-tight: 1.25;
-		--lh-normal: 1.5;
-		--lh-reading: 1.7;
+		--radius: 18px;
+		/* 모바일 우선. 데스크톱도 같은 컴포넌트를 480px 열로 중앙에 세운다. */
+		--maxw: 480px;
 	}
 	@media (prefers-reduced-motion: reduce) {
 		:global(*) {
@@ -197,188 +122,97 @@
 		white-space: nowrap;
 		border: 0;
 	}
-	/* 콘텐츠가 짧아도 푸터는 화면 바닥에 붙는다 — 아래가 텅 비어 보이지 않게 */
+
 	.wrap {
 		max-width: var(--maxw);
 		margin: 0 auto;
-		padding: 20px 22px 0;
+		padding: 20px 20px 0;
 		min-height: 100dvh;
 		display: flex;
 		flex-direction: column;
-		overflow-x: hidden;
-	}
-	.page {
-		flex: 1 0 auto;
-	}
-	@media (max-width: 640px) {
-		.wrap {
-			padding: 16px 15px 36px;
-		}
 	}
 	header {
 		display: flex;
+		align-items: center;
 		justify-content: space-between;
-		align-items: center;
-		padding: 6px 2px 22px;
-		gap: 14px;
-		flex-wrap: wrap;
+		margin-bottom: 26px;
 	}
-	nav {
-		position: relative;
+	.logo {
 		display: flex;
-		gap: 8px;
-		padding-bottom: 10px;
-	}
-	.tab {
-		display: flex;
-		flex-direction: column;
 		align-items: center;
-		gap: 1px;
-		line-height: var(--lh-tight);
-		font-size: var(--fs-sm);
-		font-weight: var(--fw-label);
-		letter-spacing: var(--ls-label);
+		gap: 6px;
 		text-decoration: none;
-		color: var(--muted);
-		padding: 7px 15px;
-		border-radius: 14px;
-		border: 1px solid transparent;
-		transition:
-			color var(--dur-tap) var(--ease-out),
-			background var(--dur-tap) var(--ease-out),
-			border-color var(--dur-tap) var(--ease-out),
-			transform var(--dur-tap) var(--ease-out);
-	}
-	.tab:hover {
-		color: var(--text);
-		background: var(--panel-2);
-		transform: translateY(-1px);
-	}
-	.tab:active {
-		transform: translateY(1px) scale(0.98);
-	}
-	.tab span {
-		font-size: var(--fs-2xs);
-		font-weight: var(--fw-caption);
-		letter-spacing: var(--ls-normal);
-		opacity: 0.72;
-	}
-	/* 초록 알약 대신 세그먼트 막대가 활성 탭 아래로 미끄러진다 */
-	.tab.active {
 		color: var(--text);
 	}
-	.segbar {
+	/* 전구 느낌표 — '딸깍'의 정체성. 원이 전구, 아래 짧은 획이 소켓 겸 느낌표 점. */
+	.bulb {
+		width: 14px;
+		height: 14px;
+		border-radius: 50%;
+		background: var(--gold);
+		border: 2px solid var(--text);
+		position: relative;
+		flex: none;
+	}
+	.bulb::after {
+		content: '';
 		position: absolute;
-		left: 0;
-		bottom: -2px;
-		height: 8px;
-		border-radius: var(--seg-r);
-		background: var(--accent);
-		opacity: 0;
-		transition:
-			transform var(--dur-move) var(--ease-out),
-			width var(--dur-move) var(--ease-out),
-			opacity var(--dur-move) var(--ease-out);
+		bottom: -5px;
+		left: 3px;
+		width: 6px;
+		height: 3px;
+		background: var(--text);
 	}
-	.segbar.ready {
-		opacity: 1;
+	.name {
+		font-size: 19px;
+		font-weight: 800;
 	}
-	@media (max-width: 420px) {
-		.tab {
-			padding: 6px 11px;
-			font-size: var(--fs-xs);
-		}
+	header nav {
+		display: flex;
+		gap: 14px;
+		font-size: 13px;
+		font-weight: 600;
+	}
+	header nav a {
+		color: var(--muted);
+		text-decoration: none;
+	}
+	header nav a:hover {
+		color: var(--text);
+	}
+
+	.page {
+		flex: 1;
 	}
 	.bottom-ad {
-		flex: none;
-		max-width: 728px;
-		width: 100%;
-		margin: 0 auto;
-	}
-	footer {
-		flex: none;
-		margin-top: 34px;
-		border-top: 1px solid var(--border);
-		padding: 26px 0 30px;
-	}
-	.foot-top {
-		display: grid;
-		grid-template-columns: 2fr 1fr 1fr;
-		gap: 22px;
-	}
-	@media (max-width: 640px) {
-		.foot-top {
-			grid-template-columns: 1fr 1fr;
-		}
-		.foot-brand {
-			grid-column: 1 / -1;
-		}
-	}
-	.foot-brand {
-		display: flex;
-		flex-direction: column;
-		gap: 5px;
-		max-width: 34ch;
-	}
-	.fb-name {
-		font-size: var(--fs-md);
-		font-weight: var(--fw-number);
-		letter-spacing: -0.5px;
-		color: var(--text);
-	}
-	.fb-tag {
-		font-size: var(--fs-2xs);
-		font-weight: var(--fw-label);
-		color: var(--accent);
-	}
-	.fb-desc {
-		margin-top: 3px;
-		font-size: var(--fs-2xs);
-		font-weight: var(--fw-caption);
-		color: var(--muted);
-		line-height: var(--lh-reading);
-		word-break: keep-all;
-	}
-	.foot-col {
-		display: flex;
-		flex-direction: column;
-		align-items: flex-start;
-		gap: 7px;
-	}
-	.foot-h {
-		font-size: var(--fs-2xs);
-		font-weight: var(--fw-emphasis);
-		letter-spacing: var(--ls-label);
-		color: var(--text);
-		margin-bottom: 1px;
-	}
-	.foot-col a {
-		font-size: var(--fs-2xs);
-		font-weight: var(--fw-caption);
-		color: var(--muted);
-		text-decoration: none;
-		transition: color var(--dur-tap) var(--ease-out);
-	}
-	.foot-col a:hover {
-		color: var(--accent);
-	}
-	.foot-bottom {
-		display: flex;
-		align-items: center;
-		gap: 9px;
 		margin-top: 24px;
-		padding-top: 16px;
-		border-top: 1px solid var(--border);
-		font-size: var(--fs-2xs);
-		font-weight: var(--fw-caption);
-		color: var(--muted);
 	}
-	.seg-div {
-		display: inline-block;
-		width: 5px;
-		height: 13px;
-		border-radius: var(--seg-r);
-		background: var(--border-strong);
-		vertical-align: middle;
+
+	footer {
+		margin-top: 22px;
+		padding-bottom: 26px;
+		text-align: center;
+	}
+	.flinks {
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: center;
+		align-items: center;
+		gap: 6px;
+		font-size: 11.5px;
+		color: var(--muted-2);
+	}
+	.flinks a {
+		color: var(--muted-2);
+		text-decoration: none;
+	}
+	.flinks a:hover {
+		color: var(--muted);
+		text-decoration: underline;
+	}
+	.copy {
+		margin-top: 8px;
+		font-size: 11.5px;
+		color: var(--muted-2);
 	}
 </style>
