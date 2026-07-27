@@ -1,9 +1,12 @@
 <script lang="ts">
 	import AdSlot from '$lib/components/AdSlot.svelte';
+	import Splash from '$lib/components/Splash.svelte';
 
 	let { children, data } = $props();
 	const year = new Date().getFullYear();
 </script>
+
+<Splash />
 
 <div class="wrap">
 	<header>
