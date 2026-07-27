@@ -7,8 +7,8 @@
 	let path = $derived(page.url.pathname);
 
 	const TABS = [
-		{ href: '/', label: '오늘의 딸깍', sub: '매일 새 문제' },
-		{ href: '/play', label: '계속 풀기', sub: '무제한 랜덤' },
+		{ href: '/', label: '오늘의 딸깍', sub: '매일 10문제' },
+		{ href: '/play', label: '무한 연습', sub: '골라서 계속' },
 		{ href: '/matchstick', label: '성냥개비', sub: '하나만 옮기기' }
 	];
 	const isActive = (href: string) => (href === '/' ? path === '/' : path.startsWith(href));

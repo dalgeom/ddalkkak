@@ -6,5 +6,8 @@ import { MATCH_TOTAL } from '$lib/game';
 // 클라이언트 번들에 실리지 않아, 푸터 숫자 하나 때문에 모든 페이지가 ~96KB(gzip)를
 // 내려받던 문제가 사라진다.
 export function load() {
-	return { totalProblems: PROBLEMS.length + TRIVIA.length + MATCH_TOTAL };
+	return {
+		totalProblems: PROBLEMS.length + TRIVIA.length + MATCH_TOTAL,
+		counts: { discover: PROBLEMS.length, trivia: TRIVIA.length, match: MATCH_TOTAL }
+	};
 }

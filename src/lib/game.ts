@@ -178,6 +178,136 @@ export function dailyIndices(total: number, dayNum: number, size: number = ROUND
  *  matchstick.test.ts가 실제 데이터 길이와 일치하는지 검사한다. */
 export const MATCH_TOTAL = 741;
 
+/* ─────────────────────────── 오늘의 딸깍: 하루 10문제 ─────────────────────────── */
+
+/** 하루치 구성: 발견형 3 + 상식 3 + 성냥개비 3 + 보너스 1 = 10문제. */
+export const DAILY_COUNTS = { discover: 3, trivia: 3, match: 3 } as const;
+export const DAILY_SIZE = 10;
+
+export type DailyKind = 'discover' | 'trivia' | 'match';
+export type DailyPick = { kind: DailyKind; index: number; bonus?: boolean };
+
+/**
+ * 하루치 문제를 고른다. 전 방문자·같은 날이면 항상 같은 결과.
+ *
+ * keyOf를 주면 그 값이 겹치지 않게 고른다(발견형=분야 중복 금지, 상식=카테고리 중복 금지).
+ * 이때 단순히 순열을 걸으며 겹치는 걸 건너뛰면 날짜별 구간이 서로 겹쳐 같은 문제가 금방
+ * 재출제되므로, 키별 레인을 만들어 레인을 돌아가며 고르고 각 레인 안에서는 자기 순번대로
+ * 소진한다. 이렇게 하면 한 문제가 다시 나오기까지 (레인 크기 × 레인 수 ÷ count)일이 걸린다.
+ */
+export function pickDaily<T>(
+	items: T[],
+	count: number,
+	dayNum: number,
+	keyOf?: (item: T) => string,
+	seed = 20260101
+): number[] {
+	return pickAtCursor(items, Math.max(0, dayNum) * count, count, keyOf, seed);
+}
+
+/**
+ * 전역 커서(cursor)에서 count개를 집는다. 커서는 "지금까지 이 유형에서 몇 칸을 썼는가"로,
+ * 날짜마다 끊기지 않고 이어져야 같은 문제가 금방 다시 나오지 않는다.
+ */
+export function pickAtCursor<T>(
+	items: T[],
+	cursor: number,
+	count: number,
+	keyOf?: (item: T) => string,
+	seed = 20260101
+): number[] {
+	const n = items.length;
+	if (n <= 0 || count <= 0) return [];
+	const order = seededOrder(n, seed);
+	const base = Math.max(0, Math.floor(cursor));
+
+	// 키 없이 뽑을 때는 순열을 커서만큼 밀며 연속으로 집는다(한 바퀴 돌기 전엔 재출제 없음)
+	if (!keyOf) {
+		const out: number[] = [];
+		for (let i = 0; i < Math.min(count, n); i++) out.push(order[(base + i) % n]);
+		return out;
+	}
+
+	// 키별 레인 구성(순열 순서를 유지해 레인 내부도 섞여 있게)
+	const lanes = new Map<string, number[]>();
+	for (const idx of order) {
+		const k = keyOf(items[idx]);
+		const lane = lanes.get(k);
+		if (lane) lane.push(idx);
+		else lanes.set(k, [idx]);
+	}
+	const keys = [...lanes.keys()].sort();
+	const laneOrder = seededOrder(keys.length, seed ^ 0x5bf03635).map((i) => keys[i]);
+	const G = laneOrder.length;
+
+	// L = dayNum*count + i 는 날짜를 넘어 0,1,2,… 로 이어지는 전역 카운터다.
+	// 레인은 L % G, 그 레인 안에서의 순번은 floor(L / G) — 레인마다 고르게 소진된다.
+	const out: number[] = [];
+	const taken = new Set<number>();
+	const want = Math.min(count, n);
+	for (let i = 0; out.length < want && i < n + count; i++) {
+		const L = base + i;
+		const lane = lanes.get(laneOrder[L % G])!;
+		const idx = lane[Math.floor(L / G) % lane.length];
+		if (taken.has(idx)) continue;
+		taken.add(idx);
+		out.push(idx);
+	}
+	return out;
+}
+
+/**
+ * 그날의 10문제를 만든다. 전 방문자가 같은 날 같은 문제를 푼다.
+ * 발견형은 서로 다른 분야, 상식은 서로 다른 카테고리로 뽑는다.
+ * 보너스 1문제는 날짜에 따라 세 유형을 돌아가며 하나 더 뽑은 것이라 앞의 9문제와 겹치지 않는다.
+ */
+export function buildDailySet<D, T>(
+	discover: D[],
+	trivia: T[],
+	matchTotal: number,
+	dayNum: number,
+	fieldOf: (d: D) => string,
+	catOf: (t: T) => string
+): DailyPick[] {
+	const d = Math.max(0, dayNum);
+	// 보너스는 세 유형을 하루씩 돌아가며 붙는다(0→발견, 1→상식, 2→성냥).
+	const bonusKind: DailyKind = (['discover', 'trivia', 'match'] as const)[d % 3];
+
+	// 유형별 커서 = 지금까지 그 유형에서 쓴 칸 수 = 정규 3칸/일 + 그 유형이 보너스였던 날 1칸.
+	// 이렇게 이어 붙여야 순열을 한 칸도 건너뛰거나 겹치지 않고 소비해 재출제가 최대한 늦춰진다.
+	const cursorOf = (residue: number) => 3 * d + Math.max(0, Math.floor((d - residue + 2) / 3));
+	const cd = cursorOf(0);
+	const ct = cursorOf(1);
+	const cm = cursorOf(2);
+
+	const matchIdx = Array.from({ length: matchTotal }, (_, i) => i);
+	// 보너스인 유형만 4칸을 집고, 마지막 한 칸이 보너스 문제가 된다
+	const dAll = pickAtCursor(discover, cd, bonusKind === 'discover' ? 4 : 3, fieldOf);
+	const tAll = pickAtCursor(trivia, ct, bonusKind === 'trivia' ? 4 : 3, catOf, 20260202);
+	const mAll = pickAtCursor(matchIdx, cm, bonusKind === 'match' ? 4 : 3, undefined, 20260303);
+
+	const dIdx = dAll.slice(0, DAILY_COUNTS.discover);
+	const tIdx = tAll.slice(0, DAILY_COUNTS.trivia);
+	const mIdx = mAll.slice(0, DAILY_COUNTS.match);
+	const extra =
+		bonusKind === 'discover' ? dAll[3] : bonusKind === 'trivia' ? tAll[3] : mAll[3];
+	const bonus: DailyPick | null =
+		extra === undefined ? null : { kind: bonusKind, index: extra, bonus: true };
+
+	// 한 유형이 몰리면 지루하므로 유형을 번갈아 배치한다
+	const lanes: DailyPick[][] = [
+		dIdx.map((index) => ({ kind: 'discover' as const, index })),
+		tIdx.map((index) => ({ kind: 'trivia' as const, index })),
+		mIdx.map((index) => ({ kind: 'match' as const, index }))
+	];
+	const out: DailyPick[] = [];
+	for (let r = 0; r < Math.max(...lanes.map((l) => l.length)); r++) {
+		for (const lane of lanes) if (lane[r]) out.push(lane[r]);
+	}
+	if (bonus) out.push(bonus);
+	return out;
+}
+
 /** 아카이브에 노출하는 지난 날짜 수. 발견형 재순환 주기(104÷3≈35일)보다 짧게 둬 반복을 피한다. */
 export const ARCHIVE_DAYS = 30;
 
@@ -212,6 +342,70 @@ export const TRACKS: {
 export function emojiFor(win: boolean, hintsUsed: number): string {
 	if (!win) return '🔓';
 	return hintsUsed === 0 ? '✅' : '💡';
+}
+
+/* ───────────── 오늘의 딸깍 진행 상태(10문제 한 세션) ───────────── */
+
+/** 문제 하나의 결과. 기호는 이 세 가지 + 보너스뿐이다(예전엔 상태 표기가 6종이라 아무도 못 읽었다). */
+export type Mark = 'clean' | 'hinted' | 'miss';
+export const MARK_EMOJI: Record<Mark, string> = { clean: '🟩', hinted: '🟨', miss: '⬜' };
+
+export type DailyProgress = { pos: number; marks: Mark[]; done: boolean };
+
+export function dailyProgressKey(dayNum: number): string {
+	return `ddal.day.${dayNum}`;
+}
+
+export function readDailyProgress(dayNum: number): DailyProgress {
+	const empty: DailyProgress = { pos: 0, marks: [], done: false };
+	if (typeof localStorage === 'undefined') return empty;
+	try {
+		const raw = JSON.parse(localStorage.getItem(dailyProgressKey(dayNum)) || 'null');
+		if (!raw || typeof raw.pos !== 'number' || !Array.isArray(raw.marks)) return empty;
+		return { pos: raw.pos, marks: raw.marks, done: !!raw.done };
+	} catch {
+		return empty;
+	}
+}
+
+export function writeDailyProgress(dayNum: number, p: DailyProgress): void {
+	if (typeof localStorage === 'undefined') return;
+	try {
+		localStorage.setItem(dailyProgressKey(dayNum), JSON.stringify(p));
+	} catch {
+		/* 저장 실패는 무시 — 진행은 메모리로 이어진다 */
+	}
+}
+
+/**
+ * 오늘 10문제를 끝냈을 때 연속 일수를 갱신한다.
+ * 하루에 한 번만 반영되며, 어제도 완주했으면 이어지고 아니면 1일부터 다시 센다.
+ */
+export function completeDailySession(dayNum: number): DailyStats | null {
+	if (typeof localStorage === 'undefined') return null;
+	let stats: DailyStats;
+	try {
+		stats = JSON.parse(localStorage.getItem('ddal.stats') || 'null') || {
+			score: 0,
+			dayStreak: 0,
+			maxStreak: 0,
+			played: 0,
+			lastDay: -1
+		};
+	} catch {
+		stats = { score: 0, dayStreak: 0, maxStreak: 0, played: 0, lastDay: -1 };
+	}
+	if (stats.lastDay === dayNum) return stats; // 오늘 이미 반영됨
+	stats.dayStreak = stats.lastDay === dayNum - 1 ? (stats.dayStreak || 0) + 1 : 1;
+	stats.maxStreak = Math.max(stats.maxStreak || 0, stats.dayStreak);
+	stats.played = (stats.played || 0) + 1;
+	stats.lastDay = dayNum;
+	try {
+		localStorage.setItem('ddal.stats', JSON.stringify(stats));
+	} catch {
+		/* 무시 */
+	}
+	return stats;
 }
 
 type DailyStats = {

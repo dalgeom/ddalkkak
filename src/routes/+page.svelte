@@ -1,94 +1,187 @@
 <script lang="ts">
 	import { onMount, tick } from 'svelte';
 	import { browser, dev } from '$app/environment';
-	import { PROBLEMS, GRADES, DISCOVER_FIELDS, fieldOfChip, type Problem } from '$lib/problems';
-	import { TRIVIA } from '$lib/trivia';
+	import type { Problem } from '$lib/problems';
 	import {
-		TRACKS,
-		MATCH_TOTAL,
-		type TrackKey,
-		buildRound,
-		isCorrectText,
-		scoreFor,
-		emojiFor,
 		kstDayNumber,
 		puzzleNumber,
-		dailyIndices,
-		hintUnlocked,
+		buildDailySet,
+		DAILY_SIZE,
+		MATCH_TOTAL,
+		isCorrectText,
 		isCloseAnswer,
-		wanderBonus,
+		hintUnlocked,
 		displayChoices,
-		advanceStreakIfComplete,
 		recordSolve,
-		readSolveStats,
-		type SolveStats
+		readDailyProgress,
+		writeDailyProgress,
+		completeDailySession,
+		MARK_EMOJI,
+		type Mark,
+		type DailyKind
 	} from '$lib/game';
 	import { shareResult, outcomeMessage } from '$lib/shareCard';
+	import { parseEq, cloneBoard, isSolved, bit, type Board } from '$lib/matchstick';
+	import MatchstickBoard, { type PickLoc } from '$lib/components/MatchstickBoard.svelte';
 	import SevenSeg from '$lib/components/SevenSeg.svelte';
-	import MatchstickBoard from '$lib/components/MatchstickBoard.svelte';
-	import { parseEq } from '$lib/matchstick';
 	import ColorBlocks from '$lib/components/ColorBlocks.svelte';
 	import Glyph from '$lib/components/Glyph.svelte';
 	import Figure from '$lib/components/Figure.svelte';
 	import AdSlot from '$lib/components/AdSlot.svelte';
 	import Icon from '$lib/components/Icon.svelte';
-	import SegNumber from '$lib/components/SegNumber.svelte';
-	import StatsModal from '$lib/components/StatsModal.svelte';
 
-	// SSR 시점 load에서 계산한 오늘 날짜(FOUC·크롤러 stale 방지). 클라이언트에서 재확인.
-	let { data }: { data: { dayNum: number } } = $props();
+	let {
+		data
+	}: {
+		data: { dayNum: number; totalProblems: number; counts: { discover: number; trivia: number; match: number } };
+	} = $props();
 
-	let solved = $state<string[]>([]);
-	let stats = $state({ score: 0, dayStreak: 0, maxStreak: 0, played: 0, lastDay: -1 });
-	let calendar = $state<boolean[]>([]);
-
-	let mode = $state<'daily' | 'random'>('daily');
-	// SSR 초기 HTML은 이 seed 값으로 그린다(FOUC 방지). 클라이언트에선 onMount가 재계산하므로 초기값 캡처가 의도된 동작.
+	// SSR 시점 날짜(FOUC·크롤러 stale 방지). 클라이언트에서 자정을 넘겼는지 다시 확인한다.
 	// svelte-ignore state_referenced_locally
 	let dayNum = $state(data.dayNum ?? 0);
-	let queue = $state<Problem[]>([]);
-	let pos = $state(0);
-	let results = $state<string[]>([]);
-	let phase = $state<'landing' | 'hub' | 'play' | 'done'>('hub');
-	let track = $state<TrackKey>('discover');
-	/** 트랙별 완료 여부 (오늘 기준) */
-	let trackDone = $state<Record<string, boolean>>({});
-	/** 트랙별 진행 위치 */
-	let trackPos = $state<Record<string, number>>({});
 
+	type Phase = 'home' | 'play' | 'done';
+	let phase = $state<Phase>('home');
+	let loading = $state(false);
+
+	/** 세션에 실제로 올라가는 한 문제. 성냥개비는 Problem이 아니라 등식 한 쌍이다. */
+	type Item = {
+		kind: DailyKind;
+		bonus: boolean;
+		problem?: Problem;
+		eq?: { displayed: string; solution: string };
+	};
+	let queue = $state<Item[]>([]);
+	let pos = $state(0);
+	let marks = $state<Mark[]>([]);
+	let streakDays = $state(0);
+	let playedCount = $state(0);
+
+	// 한 문제를 푸는 동안의 상태
 	let hintsUsed = $state(0);
 	let wrongAttempts = $state(0);
 	let startedAt = $state(0);
 	let elapsedMs = $state(0);
-	let done = $state(false);
+	let judged = $state(false);
 	let answerValue = $state('');
 	let inputEl = $state<HTMLInputElement | null>(null);
-
-	// 통계 모달(내 기록) — 열 때 최신 풀이 통계를 읽는다.
-	let showStats = $state(false);
-	let solveStats = $state<SolveStats>({ hintDist: [0, 0, 0, 0], solved: 0, gaveUp: 0 });
-	function openStats() {
-		solveStats = readSolveStats();
-		showStats = true;
-	}
 	let feedback = $state<{ msg: string; ok: boolean } | null>(null);
-	let toastMsg = $state('');
-	let countdown = $state('');
-
-	/** 입력창·선택지가 판정에 직접 반응하도록 하는 일시 상태 (색 + 팝/셰이크) */
+	let judge = $state<'correct' | 'wrong' | 'giveup' | null>(null);
 	let inputState = $state<'idle' | 'wrong' | 'correct'>('idle');
 	let flashIndex = $state<number | null>(null);
 	let flashKind = $state<'wrong' | 'correct' | null>(null);
-	let flashTimer: ReturnType<typeof setTimeout> | undefined;
+	let flashTimer: ReturnType<typeof setTimeout>;
+
+	// 성냥개비 전용
+	let mOrig = $state<Board | null>(null);
+	let mCur = $state<Board | null>(null);
+	let mPicked = $state<PickLoc | null>(null);
+	let mMisses = $state(0);
+	let mShaking = $state(false);
+	let mRevertTimer: ReturnType<typeof setTimeout>;
+
+	let countdown = $state('');
+	let toastMsg = $state('');
+	let toastTimer: ReturnType<typeof setTimeout>;
+
+	let current = $derived(queue[pos] ? { ...queue[pos], problem: queue[pos].problem ? displayChoices(queue[pos].problem!) : undefined } : undefined);
+	let shownHints = $derived(current?.problem?.hints ? current.problem.hints.slice(0, hintsUsed) : []);
+	let correctCount = $derived(marks.filter((m) => m !== 'miss').length);
+	let cleanCount = $derived(marks.filter((m) => m === 'clean').length);
+	let puzzleNo = $derived(puzzleNumber(dayNum));
+
+	const KIND_LABEL: Record<DailyKind, string> = {
+		discover: '발견형',
+		trivia: '상식',
+		match: '성냥개비'
+	};
+
+	/* ───────── 진행 저장·복원 ───────── */
+
+	function persist(done = false) {
+		writeDailyProgress(dayNum, { pos, marks, done });
+	}
+
+	/** 문제은행은 첫 화면에 필요 없다. 시작을 누른 순간에만 내려받아 홈을 가볍게 유지한다. */
+	async function loadBank() {
+		const [p, t, m] = await Promise.all([
+			import('$lib/problems'),
+			import('$lib/trivia'),
+			import('$lib/data/matchstick-problems.json')
+		]);
+		const eqs = (m.default ?? m) as { displayed: string; solution: string }[];
+		const picks = buildDailySet(
+			p.PROBLEMS,
+			t.TRIVIA,
+			MATCH_TOTAL,
+			dayNum,
+			(x) => p.fieldOfChip(x.chip),
+			(x) => x.category ?? '기타'
+		);
+		queue = picks.map((pick) => ({
+			kind: pick.kind,
+			bonus: !!pick.bonus,
+			problem:
+				pick.kind === 'discover'
+					? p.PROBLEMS[pick.index]
+					: pick.kind === 'trivia'
+						? t.TRIVIA[pick.index]
+						: undefined,
+			eq: pick.kind === 'match' ? eqs[pick.index] : undefined
+		}));
+	}
+
+	async function startOrResume() {
+		if (loading) return;
+		loading = true;
+		try {
+			if (!queue.length) await loadBank();
+			const saved = readDailyProgress(dayNum);
+			pos = Math.min(saved.pos, queue.length - 1);
+			marks = saved.marks.slice(0, queue.length);
+			phase = saved.done ? 'done' : 'play';
+			if (phase === 'play') resetProblem();
+		} finally {
+			loading = false;
+		}
+	}
+
+	function resetProblem() {
+		hintsUsed = 0;
+		wrongAttempts = 0;
+		startedAt = Date.now();
+		elapsedMs = 0;
+		judged = false;
+		answerValue = '';
+		feedback = null;
+		judge = null;
+		inputState = 'idle';
+		flashIndex = null;
+		flashKind = null;
+		clearTimeout(mRevertTimer);
+		mShaking = false;
+		mMisses = 0;
+		mPicked = null;
+		const it = queue[pos];
+		if (it?.eq) {
+			mOrig = parseEq(it.eq.displayed);
+			mCur = cloneBoard(mOrig);
+		} else {
+			mOrig = null;
+			mCur = null;
+		}
+		if (browser) window.scrollTo({ top: 0, behavior: 'smooth' });
+		if (browser && it && !it.eq && it.problem?.type !== 'choice' && window.matchMedia?.('(hover: hover)').matches) {
+			tick().then(() => inputEl?.focus());
+		}
+	}
 
 	function flash(kind: 'wrong' | 'correct', idx?: number) {
 		clearTimeout(flashTimer);
 		if (idx !== undefined) {
 			flashIndex = idx;
 			flashKind = kind;
-		} else {
-			inputState = kind;
-		}
+		} else inputState = kind;
 		flashTimer = setTimeout(
 			() => {
 				flashIndex = null;
@@ -99,789 +192,405 @@
 		);
 	}
 
-	/** 판정 3-state: 정답 / 오답(재시도 가능) / 포기(정답 공개) */
-	let judge = $derived<'correct' | 'wrong' | 'giveup' | null>(
-		!feedback ? null : feedback.ok ? 'correct' : done ? 'giveup' : 'wrong'
+	/* ───────── 판정 ───────── */
+
+	function settle(mark: Mark, msg: string, ok: boolean) {
+		if (judged) return;
+		judged = true;
+		judge = ok ? 'correct' : mark === 'miss' ? 'giveup' : 'wrong';
+		marks = [...marks.slice(0, pos), mark, ...marks.slice(pos + 1)];
+		feedback = { msg, ok };
+		recordSolve(ok, hintsUsed);
+		persist();
+	}
+
+	function submitText() {
+		if (judged || !current?.problem || !answerValue.trim()) return;
+		if (isCorrectText(current.problem, answerValue)) {
+			flash('correct');
+			settle(hintsUsed === 0 && wrongAttempts === 0 ? 'clean' : 'hinted', '정답이에요', true);
+		} else {
+			wrongAttempts += 1;
+			flash('wrong');
+			judge = 'wrong';
+			feedback = isCloseAnswer(current.problem, answerValue)
+				? { msg: '거의 다 왔어요', ok: false }
+				: { msg: '아직이에요 — 다시 들여다볼까요?', ok: false };
+		}
+	}
+
+	function submitChoice(i: number) {
+		if (judged || !current?.problem) return;
+		const ok = i === current.problem.answerIndex;
+		flash(ok ? 'correct' : 'wrong', i);
+		if (ok) settle(wrongAttempts === 0 ? 'clean' : 'hinted', '정답이에요', true);
+		else {
+			wrongAttempts += 1;
+			// 상식은 한 번 더 고를 기회를 주고, 두 번째도 틀리면 정답을 공개한다
+			if (wrongAttempts >= 2) settle('miss', '정답을 확인했어요', false);
+			else {
+				judge = 'wrong';
+				feedback = { msg: '아쉬워요 — 한 번 더 골라볼까요?', ok: false };
+			}
+		}
+	}
+
+	function showHint() {
+		if (judged || !current?.problem?.hints || hintsUsed >= current.problem.hints.length) return;
+		if (!hintUnlocked(hintsUsed, elapsedMs, wrongAttempts)) return;
+		hintsUsed += 1;
+	}
+
+	function giveUp() {
+		if (judged) return;
+		if (current?.eq && mOrig) {
+			clearTimeout(mRevertTimer);
+			mShaking = false;
+			mCur = parseEq(current.eq.solution);
+			mPicked = null;
+		}
+		settle('miss', '정답을 확인했어요', false);
+	}
+
+	/* ───────── 성냥개비 조작 ───────── */
+
+	function handleStick(loc: PickLoc, lit: boolean) {
+		if (judged || !mCur || !mOrig) return;
+		if (!mPicked) {
+			if (!lit) return;
+			mPicked = loc;
+			applyStick(loc, false);
+			return;
+		}
+		if (!lit && sameLoc(mPicked, loc)) {
+			applyStick(loc, true);
+			mPicked = null;
+			return;
+		}
+		if (lit) return;
+		applyStick(loc, true);
+		mPicked = null;
+		if (isSolved(mOrig, mCur)) {
+			settle(mMisses === 0 ? 'clean' : 'hinted', '정답이에요', true);
+		} else {
+			mMisses += 1;
+			mShaking = true;
+			judge = 'wrong';
+			feedback = { msg: '아직 아니에요 — 되돌릴게요', ok: false };
+			clearTimeout(mRevertTimer);
+			mRevertTimer = setTimeout(() => {
+				mShaking = false;
+				if (mOrig) mCur = cloneBoard(mOrig);
+				mPicked = null;
+			}, 420);
+		}
+	}
+	const sameLoc = (a: PickLoc, b: PickLoc) => a.kind === b.kind && a.gi === b.gi && a.seg === b.seg;
+	function applyStick(loc: PickLoc, add: boolean) {
+		if (!mCur) return;
+		if (loc.kind === 'op') mCur.opPlus = add;
+		else if (add) mCur.glyphs[loc.gi!] |= bit(loc.seg!);
+		else mCur.glyphs[loc.gi!] &= ~bit(loc.seg!);
+	}
+	function resetBoard() {
+		if (!mOrig) return;
+		mCur = cloneBoard(mOrig);
+		mPicked = null;
+	}
+
+	/* ───────── 진행 ───────── */
+
+	function next() {
+		if (pos + 1 < queue.length) {
+			pos += 1;
+			persist();
+			resetProblem();
+		} else {
+			phase = 'done';
+			persist(true);
+			const st = completeDailySession(dayNum);
+			if (st) {
+				streakDays = st.dayStreak;
+				playedCount = st.played;
+			}
+			if (browser) window.scrollTo({ top: 0, behavior: 'smooth' });
+		}
+	}
+
+	function quit() {
+		persist();
+		phase = 'home';
+		if (browser) window.scrollTo({ top: 0, behavior: 'smooth' });
+	}
+
+	/* ───────── 결과·공유 ───────── */
+
+	// 보너스를 한 번에 맞혔을 때만 ⭐ — 공유 카드에서 자랑거리로 읽히게 한다.
+	// (무조건 ⭐로 덮으면 마지막 문제를 맞혔는지 틀렸는지가 사라진다)
+	let emojiRow = $derived(
+		marks.map((m, i) => (queue[i]?.bonus && m === 'clean' ? '⭐' : MARK_EMOJI[m])).join('')
 	);
 
-	const TRACK_META = TRACKS;
-	let trackInfo = $derived(TRACKS.find((t) => t.key === track)!);
-	/** 인라인으로 푸는 트랙만 데일리 완료 판정에 넣는다(성냥개비는 별도 라우트) */
-	const INLINE_TRACKS: TrackKey[] = ['discover', 'trivia', 'match'];
-	let allInlineDone = $derived(INLINE_TRACKS.every((k) => trackDone[k]));
-
-	/** 카드에 실제 문제를 미리 보여준다 — 이름만 보고는 뭘 하는 모드인지 알 수 없다는 지적 대응 */
-	const PEEK: Record<TrackKey, string> = {
-		discover: '11 · 31 · 55 · 66 · ?\n숫자가 아닙니다',
-		trivia: '세계에서 국토 면적이\n가장 넓은 나라는?',
-		match: '0 + 0 = 8\n한 개만 옮기세요'
-	};
-	const todayTotal = TRACKS.reduce((n, t) => n + t.size, 0);
-	/** 성냥개비 카드 미리보기용 정적 보드 — 그 모드의 고유 부품을 그대로 쓴다 */
-	const PREVIEW_BOARD = parseEq('0 + 0 = 8');
-	/** 상식 카드 미리보기용 보기 — 그 모드의 고유 형태(객관식)를 그대로 쓴다 */
-	const PREVIEW_CHOICES = ['러시아', '캐나다', '중국'];
-
-	/** 18개 분야가 "18개 분야"라는 글자 하나로만 존재했다. 실제 분포를 보여준다. */
-	const CAT_COUNTS = (() => {
-		const m = new Map<string, number>();
-		for (const t of TRIVIA) m.set(t.category!, (m.get(t.category!) ?? 0) + 1);
-		return [...m.entries()].sort((a, b) => b[1] - a[1]);
-	})();
-	/** 발견형은 chip이 35종이라 그대로 보여주면 시끄럽다. 6개 상위 분야로 묶어 보여준다. */
-	const FIELD_COUNTS = (() => {
-		const m = new Map<string, number>();
-		for (const p of PROBLEMS) {
-			const f = fieldOfChip(p.chip);
-			m.set(f, (m.get(f) ?? 0) + 1);
-		}
-		return DISCOVER_FIELDS.map((f) => [f, m.get(f) ?? 0] as [string, number]).filter(
-			([, c]) => c > 0
-		);
-	})();
-	const GRADE_COUNTS = GRADES.map((g) => ({
-		key: g.key,
-		count: TRIVIA.filter((t) => t.grade === g.key).length
-	}));
-	let showCats = $state(false);
-
-	let doneCount = $derived(TRACKS.filter((t) => trackDone[t.key]).length);
-
-	/** 하루 전체 결과를 Wordle식 3줄 그리드로 공유한다 — 데일리 정체성의 핵심 바이럴 장치 */
-	async function shareToday() {
-		if (!browser) return;
-		// 상식 정답은 문제 난이도 색으로 인코딩 — 'NYT Connections'처럼 '어려운 문제까지 뚫었다'가
-		// 그리드 한 줄에 드러나 자랑 동기·미리보기 흡인력이 커진다.
-		const GRADE_EMOJI: Record<string, string> = {
-			초등: '🟩',
-			중등: '🟨',
-			고등: '🟦',
-			어른: '🟪'
-		};
-		const triviaGrades = dailyIndices(TRIVIA.length, dayNum, 5).map((i) => TRIVIA[i].grade);
-		const rowFor = (k: TrackKey): string => {
-			try {
-				const rec = JSON.parse(localStorage.getItem(`ddal.daily.${dayNum}.${k}`) || 'null');
-				if (!rec?.results) return '';
-				// 발견/상식은 이모지(✅💡🔓), 성냥개비는 win/fail 문자열 — 정규화한다
-				return (rec.results as string[])
-					.map((r, i) => {
-						const e = r === 'win' ? '✅' : r === 'fail' ? '🔓' : r;
-						if (k === 'trivia' && e === '✅') return GRADE_EMOJI[triviaGrades[i] ?? ''] ?? '✅';
-						return e;
-					})
-					.join('');
-			} catch {
-				return '';
-			}
-		};
-		const rows = [
-			{ key: 'discover' as TrackKey, label: '발견' },
-			{ key: 'trivia' as TrackKey, label: '상식' },
-			{ key: 'match' as TrackKey, label: '성냥' }
-		]
-			.map((r) => ({ label: r.label, emoji: rowFor(r.key) }))
-			.filter((r) => r.emoji);
-		const solvedN = rows.reduce(
-			(n, r) => n + [...r.emoji].filter((e) => e !== '🔓').length,
-			0
-		);
-		const totalN = TRACKS.reduce((n, t) => n + t.size, 0);
-		const pn = puzzleNumber(dayNum);
-		let text = `딸깍 #${pn} · ${dateLabel}\n${rows.map((r) => `${r.label} ${r.emoji}`).join('\n')}\n${solvedN}/${totalN}`;
-		if (stats.dayStreak > 1) text += ` · 🔥 ${stats.dayStreak}일 연속`;
-		text += `\n${location.origin}/?ref=daily\n#딸깍`;
+	async function share() {
+		const title = `딸깍 #${puzzleNo}`;
+		const text = `딸깍 #${puzzleNo} — 오늘의 10문제 ${correctCount}/${DAILY_SIZE}\n${emojiRow}\n${location.origin}/?ref=daily #딸깍`;
 		const outcome = await shareResult(
 			{
-				title: `오늘의 딸깍 #${pn}`,
-				scoreLabel: `${solvedN} / ${totalN}`,
-				gridRows: rows,
-				subLine: stats.dayStreak > 1 ? `🔥 ${stats.dayStreak}일 연속` : undefined,
-				cta: '너도 오늘의 딸깍 풀어볼래?'
+				title,
+				scoreLabel: `${correctCount} / ${DAILY_SIZE}`,
+				emojiRow,
+				subLine: streakDays >= 2 ? `${streakDays}일째 딸깍 중` : '매일 밤 12시에 새 10문제',
+				cta: '너도 오늘 문제 풀어볼래?'
 			},
 			text
 		);
 		toast(outcomeMessage(outcome));
 	}
-	let nextTrack = $derived(
-		TRACKS.find((t) => t.key !== 'match' && t.key !== track && !trackDone[t.key]) ?? null
-	);
-
-	let current = $derived(displayChoices(queue[pos]));
-	let shownHints = $derived(current && current.hints ? current.hints.slice(0, hintsUsed) : []);
-	let dateLabel = $derived(formatDate(dayNum));
-	// 오늘의 회차 번호(딸깍 #N) — Wordle식 '오늘 것' 수집 앵커. 첫 화면에도 노출한다.
-	let puzzleNo = $derived(puzzleNumber(dayNum));
-	// 공유 링크(?ref=...)로 들어온 초대 방문자 — 첫 화면에 사회적 증거 배너를 띄워 이탈을 줄인다.
-	let invited = $state(false);
-
-	function formatDate(day: number): string {
-		const ms = day * 86400000 - 9 * 3600 * 1000 + 43200000;
-		const d = new Date(ms);
-		return `${d.getUTCFullYear()}. ${d.getUTCMonth() + 1}. ${d.getUTCDate()}`;
-	}
-
-	function load() {
-		try {
-			solved = JSON.parse(localStorage.getItem('ddal.solved') || '[]');
-			const s = JSON.parse(localStorage.getItem('ddal.stats') || '{}');
-			stats = {
-				score: s.score ?? 0,
-				dayStreak: s.dayStreak ?? 0,
-				maxStreak: s.maxStreak ?? 0,
-				played: s.played ?? 0,
-				lastDay: s.lastDay ?? -1
-			};
-		} catch {
-			/* 무시 */
-		}
-	}
-
-	/** 최근 14일 각 날짜의 데일리 완료 여부 (localStorage 스캔) */
-	function buildCalendar() {
-		const out: boolean[] = [];
-		for (let d = dayNum - 13; d <= dayNum; d++) {
-			let doneDay = false;
-			try {
-				doneDay = INLINE_TRACKS.every((k) => {
-					const rec = JSON.parse(localStorage.getItem(`ddal.daily.${d}.${k}`) || 'null');
-					return !!rec && rec.phase === 'done';
-				});
-			} catch {
-				/* 무시 */
-			}
-			out.push(doneDay);
-		}
-		calendar = out;
-	}
-	function persist() {
-		if (!browser) return;
-		try {
-			localStorage.setItem('ddal.solved', JSON.stringify(solved));
-			localStorage.setItem('ddal.stats', JSON.stringify(stats));
-		} catch {
-			/* 무시 */
-		}
-	}
-	function dailyKey(k: TrackKey = track) {
-		return `ddal.daily.${dayNum}.${k}`;
-	}
-	function saveDaily() {
-		if (!browser || mode !== 'daily') return;
-		try {
-			localStorage.setItem(dailyKey(), JSON.stringify({ pos, results, phase }));
-		} catch {
-			/* 무시 */
-		}
-		refreshTrackState();
-	}
-	/** 오늘 각 트랙이 어디까지 갔는지 다시 읽는다 */
-	function refreshTrackState() {
-		if (!browser) return;
-		const d: Record<string, boolean> = {};
-		const p: Record<string, number> = {};
-		for (const t of TRACKS) {
-			try {
-				const rec = JSON.parse(localStorage.getItem(dailyKey(t.key)) || 'null');
-				d[t.key] = !!rec && rec.phase === 'done';
-				p[t.key] = rec?.pos ?? 0;
-			} catch {
-				d[t.key] = false;
-				p[t.key] = 0;
-			}
-		}
-		trackDone = d;
-		trackPos = p;
-		syncStreak();
-	}
-
-	/** 오늘 3트랙 완료 시 연속 기록 갱신. 어느 트랙을 마지막에 끝내든(홈·성냥개비) 동작. */
-	function syncStreak() {
-		const s = advanceStreakIfComplete(dayNum);
-		if (s) stats = { ...s };
-	}
-
-	function startTrack(k: TrackKey) {
-		mode = 'daily';
-		track = k;
-		// 한 번이라도 시작했으면 다음부터 랜딩을 건너뛴다
-		try {
-			localStorage.setItem('ddal.visited', '1');
-		} catch {
-			/* 무시 */
-		}
-		const meta = TRACKS.find((t) => t.key === k)!;
-		queue =
-			k === 'trivia'
-				? dailyIndices(TRIVIA.length, dayNum, meta.size).map((i) => TRIVIA[i])
-				: dailyIndices(PROBLEMS.length, dayNum, meta.size).map((i) => PROBLEMS[i]);
-		let saved: { pos: number; results: string[]; phase: 'play' | 'done' } | null = null;
-		try {
-			saved = JSON.parse(localStorage.getItem(dailyKey(k)) || 'null');
-		} catch {
-			/* 무시 */
-		}
-		if (saved) {
-			// 손상된 pos(NaN 등)면 current=undefined가 되어 화면이 통째로 멈춘다 — 정수 가드.
-			pos =
-				Number.isInteger(saved.pos) && saved.pos >= 0 ? Math.min(saved.pos, queue.length) : 0;
-			results = Array.isArray(saved.results) ? saved.results : [];
-			phase = saved.phase || 'play';
-		} else {
-			pos = 0;
-			results = [];
-			phase = 'play';
-		}
-		resetProblem();
-		if (pos >= queue.length) phase = 'done';
-		buildCalendar();
-	}
-
-	/** 방금 끝낸 트랙에만 완료 축하 모션을 준다 — 허브 로드 시 모든 완료 카드가 튀는 잡음을 피한다 */
-	let pulseKey = $state<TrackKey | null>(null);
-	let celebrateAll = $state(false);
-	let pulseTimer: ReturnType<typeof setTimeout> | undefined;
-
-	function goHub() {
-		const justFinished = phase === 'done' && mode === 'daily';
-		const finishedTrack = track;
-		phase = 'hub';
-		refreshTrackState();
-		buildCalendar();
-		if (justFinished && trackDone[finishedTrack]) {
-			clearTimeout(pulseTimer);
-			pulseKey = finishedTrack;
-			// 3트랙 완주 축하는 하루 한 번만 — trackDone은 플레이 중 실시간 갱신돼
-			// '방금 완성됐는지'를 못 가리므로 localStorage 플래그로 판정한다
-			const celKey = `ddal.celebrated.${dayNum}`;
-			let already = true;
-			try {
-				already = !!localStorage.getItem(celKey);
-			} catch {
-				/* 무시 */
-			}
-			if (allInlineDone && !already) {
-				celebrateAll = true;
-				try {
-					localStorage.setItem(celKey, '1');
-				} catch {
-					/* 무시 */
-				}
-			}
-			pulseTimer = setTimeout(() => {
-				pulseKey = null;
-				celebrateAll = false;
-			}, 900);
-		}
-		if (browser) window.scrollTo({ top: 0, behavior: 'smooth' });
-	}
-
-	function startRandom() {
-		mode = 'random';
-		const r = buildRound(PROBLEMS, solved, 3);
-		if (r.poolReset) {
-			solved = [];
-			persist();
-		}
-		queue = r.round;
-		pos = 0;
-		results = [];
-		phase = 'play';
-		resetProblem();
-	}
-
-	function resetProblem() {
-		hintsUsed = 0;
-		wrongAttempts = 0;
-		startedAt = Date.now();
-		elapsedMs = 0;
-		done = false;
-		answerValue = '';
-		feedback = null;
-		clearTimeout(flashTimer);
-		inputState = 'idle';
-		flashIndex = null;
-		flashKind = null;
-		if (browser) window.scrollTo({ top: 0, behavior: 'smooth' });
-		// 데스크톱에서만 새 문제의 입력창에 포커스(모바일은 키보드가 튀어 방해되므로 제외)
-		if (browser && window.matchMedia?.('(hover: hover)').matches) {
-			tick().then(() => inputEl?.focus());
-		}
-	}
-
-	function finish(win: boolean) {
-		if (done) return;
-		done = true;
-		results = [...results, emojiFor(win, hintsUsed)];
-		const bonus = win ? wanderBonus(hintsUsed, wrongAttempts) : 0;
-		const gained = scoreFor(win, hintsUsed) + bonus;
-		stats.score += gained;
-		if (mode === 'random' && current) solved = [...solved, current.id];
-		feedback = win
-			? {
-					msg: bonus ? `정답 · +${gained} — 힌트 없이 끝까지 물고 늘어졌네요` : `정답 · +${gained}`,
-					ok: true
-				}
-			: { msg: '정답을 확인했어요', ok: false };
-		recordSolve(win, hintsUsed);
-		persist();
-		saveDaily();
-	}
-
-	function submitText() {
-		if (done || !answerValue.trim()) return;
-		if (isCorrectText(current, answerValue)) {
-			flash('correct');
-			finish(true);
-		} else {
-			wrongAttempts += 1;
-			flash('wrong');
-			feedback = isCloseAnswer(current, answerValue)
-				? { msg: '거의 다 왔어요', ok: false }
-				: { msg: '아직이에요 — 다시 들여다볼까요?', ok: false };
-		}
-	}
-	function submitChoice(i: number) {
-		if (done) return;
-		if (i === current.answerIndex) {
-			flash('correct', i);
-			finish(true);
-		} else {
-			wrongAttempts += 1;
-			flash('wrong', i);
-			feedback = { msg: '아직이에요 — 다시 들여다볼까요?', ok: false };
-		}
-	}
-	function showHint() {
-		if (done || !current.hints || hintsUsed >= current.hints.length) return;
-		if (!hintUnlocked(hintsUsed, elapsedMs, wrongAttempts)) return;
-		hintsUsed += 1;
-	}
-
-	function next() {
-		pos += 1;
-		if (pos < queue.length) {
-			resetProblem();
-			saveDaily();
-		} else {
-			phase = 'done';
-			if (mode === 'daily') {
-				trackDone = { ...trackDone, [track]: true };
-			}
-			// 스트릭 갱신은 saveDaily()가 이 트랙의 done 레코드를 쓴 뒤 refreshTrackState→syncStreak에서.
-			saveDaily();
-			buildCalendar();
-		}
-	}
-
-	let toastTimer: ReturnType<typeof setTimeout>;
 	function toast(msg: string) {
 		toastMsg = msg;
 		clearTimeout(toastTimer);
 		toastTimer = setTimeout(() => (toastMsg = ''), 2400);
 	}
 
-	async function share() {
-		const label = mode === 'daily' ? `${trackInfo.name} · ${dateLabel}` : '랜덤 3문제';
-		const solvedN = results.filter((r) => r !== '🔓').length;
-		let text = `딸깍! ${label} ${solvedN}/${results.length} ${results.join('')}`;
-		text += `\n#딸깍`;
-		if (mode === 'daily' && stats.dayStreak > 1) text += `\n🔥 ${stats.dayStreak}일 연속`;
-		text += `\n${location.origin}/?ref=random`;
-		const outcome = await shareResult(
-			{
-				title: label,
-				scoreLabel: `${solvedN} / ${results.length}`,
-				emojiRow: results.join(' '),
-				subLine:
-					mode === 'daily' && stats.dayStreak > 1 ? `🔥 ${stats.dayStreak}일 연속` : undefined,
-				cta: '너도 오늘의 딸깍 풀어볼래?'
-			},
-			text
-		);
-		toast(outcomeMessage(outcome));
-	}
+	/* ───────── 초기화 ───────── */
 
-	function tickElapsed() {
-		if (!done && startedAt) elapsedMs = Date.now() - startedAt;
-	}
-
-	function tickCountdown() {
-		const nextMidnight = (dayNum + 1) * 86400000 - 9 * 3600 * 1000;
-		let ms = nextMidnight - Date.now();
-		if (ms < 0) ms = 0;
-		const h = Math.floor(ms / 3600000);
-		const m = Math.floor((ms % 3600000) / 60000);
-		const s = Math.floor((ms % 60000) / 1000);
-		countdown = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
-	}
+	let savedProgress = $state({ pos: 0, marks: [] as Mark[], done: false });
 
 	onMount(() => {
-		load();
 		dayNum = kstDayNumber(Date.now());
-		refreshTrackState();
+		savedProgress = readDailyProgress(dayNum);
+		marks = savedProgress.marks;
+		pos = savedProgress.pos;
+		if (savedProgress.done) phase = 'done';
 		try {
-			invited = !!new URLSearchParams(location.search).get('ref');
+			const st = JSON.parse(localStorage.getItem('ddal.stats') || 'null');
+			if (st) {
+				streakDays = st.lastDay === dayNum || st.lastDay === dayNum - 1 ? st.dayStreak || 0 : 0;
+				playedCount = st.played || 0;
+			}
 		} catch {
 			/* 무시 */
 		}
-		let visited = false;
-		try {
-			visited = !!localStorage.getItem('ddal.visited');
-		} catch {
-			/* 무시 */
-		}
-		phase = visited ? 'hub' : 'landing';
-		buildCalendar();
-		tickCountdown();
-		const iv = setInterval(() => {
-			tickCountdown();
-			tickElapsed();
+
+		const tick1 = setInterval(() => {
+			if (phase === 'play' && !judged) elapsedMs = Date.now() - startedAt;
+			// 탭을 열어둔 채 자정을 넘기면 홈에서만 새 날짜로 넘어간다.
+			// 세션 중에는 날짜를 고정해 풀던 10문제가 중간에 바뀌지 않게 한다.
+			if (phase !== 'play') {
+				const today = kstDayNumber(Date.now());
+				if (today !== dayNum) {
+					dayNum = today;
+					savedProgress = readDailyProgress(today);
+					marks = savedProgress.marks;
+					pos = savedProgress.pos;
+					queue = [];
+					phase = savedProgress.done ? 'done' : 'home';
+				}
+			}
+			const now = new Date();
+			const kst = new Date(now.getTime() + (now.getTimezoneOffset() + 540) * 60000);
+			const end = new Date(kst);
+			end.setHours(24, 0, 0, 0);
+			const left = Math.max(0, end.getTime() - kst.getTime());
+			const h = String(Math.floor(left / 3600000)).padStart(2, '0');
+			const m = String(Math.floor((left % 3600000) / 60000)).padStart(2, '0');
+			const s = String(Math.floor((left % 60000) / 1000)).padStart(2, '0');
+			countdown = `${h}:${m}:${s}`;
 		}, 1000);
-		return () => clearInterval(iv);
+		return () => clearInterval(tick1);
 	});
+
+	let resumable = $derived(savedProgress.pos > 0 && !savedProgress.done);
 </script>
 
 <svelte:head>
-	<title>딸깍 — 매일 새로 열리는 두뇌 퍼즐</title>
+	<title>딸깍 — 매일 새로 열리는 두뇌 퍼즐 10문제</title>
 	<meta
 		name="description"
-		content="규칙을 발견하는 순간의 그 소리. 발견형 퍼즐·상식 퀴즈·성냥개비를 매일 새로, 모두가 같은 문제로."
+		content="하루 10문제. 발견형 퍼즐 3 · 상식 퀴즈 3 · 성냥개비 3 · 보너스 1. 가입 없이 바로, 오늘은 모두 같은 문제를 풉니다."
 	/>
 	<link rel="canonical" href="https://ddalkkak-1c2.pages.dev/" />
-	<meta property="og:title" content="딸깍 — 매일 새로 열리는 두뇌 퍼즐" />
-	<meta property="og:description" content="규칙을 발견하는 순간의 그 소리. 발견형 퍼즐·상식 퀴즈·성냥개비를 매일 새로, 모두가 같은 문제로." />
+	<meta property="og:title" content="딸깍 — 매일 새로 열리는 두뇌 퍼즐 10문제" />
+	<meta
+		property="og:description"
+		content="하루 10문제. 발견형 퍼즐 3 · 상식 퀴즈 3 · 성냥개비 3 · 보너스 1. 가입 없이 바로."
+	/>
 	<meta property="og:url" content="https://ddalkkak-1c2.pages.dev/" />
 </svelte:head>
 
-{#if invited}
-	<div class="invite-banner">
-		<Icon name="share" size={15} />
-		<span>친구가 <b>오늘의 딸깍 #{puzzleNo}</b>에 초대했어요 — 같은 문제에 도전해봐요!</span>
-	</div>
-{/if}
+<div class="root">
+	{#if phase === 'home'}
+		<!-- 첫 화면: 누를 수 있는 것은 시작 버튼 하나뿐 -->
+		<section class="hero">
+			<h1>오늘의 10문제</h1>
+			<p class="sub">매일 밤 12시에 새로 열려요 · 막히면 힌트가 열려요</p>
 
-{#if phase === 'landing'}
-	<!-- 첫 방문자만 보는 화면. 재방문자는 곧바로 허브로 간다. -->
-	<section class="landing">
-		<h1 class="l-h1">규칙을 발견하는 순간, 딸깍.</h1>
-		<p class="l-sub">
-			<b class="l-num">오늘의 딸깍 #{puzzleNo}</b> · 오늘 치 {todayTotal}문제, 매일 자정에 새로
+			<div class="dots" aria-hidden="true">
+				{#each Array(DAILY_SIZE) as _, i (i)}
+					<span
+						class="dot"
+						class:filled={i < savedProgress.marks.length}
+						class:gap={i === 3 || i === 6 || i === 9}
+					></span>
+				{/each}
+			</div>
+			<p class="compo">발견형 3 · 상식 3 · 성냥개비 3 · 보너스 1</p>
+
+			<button class="cta" onclick={startOrResume} disabled={loading}>
+				{#if loading}
+					불러오는 중…
+				{:else if resumable}
+					이어서 풀기 · {savedProgress.pos}/{DAILY_SIZE}
+				{:else}
+					시작하기
+				{/if}
+			</button>
+			<p class="note">가입 없이 바로 · 오늘은 모두 같은 문제를 풀어요</p>
+			{#if streakDays >= 2}
+				<div class="streak">{streakDays}일째 딸깍 중</div>
+			{/if}
+		</section>
+
+		{#if playedCount < 3}
+			<!-- 어떤 문제가 나오는지 보여만 준다(누를 수 없음) -->
+			<section class="kinds">
+				<div class="kind">
+					<b>발견형</b>
+					<span>예시에 숨은 규칙을 직접 찾아요. 답이 아니라 규칙을 찾는 게임이에요.</span>
+				</div>
+				<div class="kind">
+					<b>상식 퀴즈</b>
+					<span>18개 분야에서 나와요. 고르거나, 짧게 답을 적어요.</span>
+				</div>
+				<div class="kind">
+					<b>성냥개비</b>
+					<span>성냥 하나만 옮겨 식을 맞게 만들어요.</span>
+				</div>
+			</section>
+		{/if}
+
+		<a class="practice-line" href="/play">
+			<span>더 풀고 싶다면 · 무한 연습</span>
+			<em>발견형 · 상식 · 성냥개비 중 골라 계속</em>
+		</a>
+
+		<p class="trust">
+			모두 합쳐 <b>{data.totalProblems.toLocaleString()}</b>문제 · 매일 자정 새로 열림 · 가입 없음
 		</p>
-		<!-- 첫 방문자용 안내: 발견형은 규칙을 알려주지 않는 장르라 짧게 짚어준다 -->
-		<ul class="l-how">
-			<li><b>규칙은 알려주지 않아요.</b> 예시 속에 숨은 규칙을 직접 찾아내는 게 핵심이에요.</li>
-			<li><b>막히면 힌트를</b> 하나씩 열 수 있어요 — 대신 점수가 조금씩 깎여요.</li>
-			<li><b>매일 자정</b> 세 종류가 새로 열리고, 모두가 같은 문제를 풀어요.</li>
-		</ul>
-	</section>
-{:else}
-	{#if mode === 'daily' && stats.dayStreak > 0 && stats.lastDay !== dayNum}
-		<div class="streak-warn">
-			<Icon name="streak" size={16} />
-			<span><b>{stats.dayStreak}일 연속</b> 기록이 오늘 끊겨요! 남은 시간 <b>{countdown}</b></span>
+	{:else if phase === 'play' && current}
+		<!-- 세션: 상단은 진행 점과 나가기뿐 -->
+		<div class="bar">
+			<div class="dots small" aria-label="{pos + 1}번째 문제 / 총 {DAILY_SIZE}문제">
+				{#each Array(queue.length) as _, i (i)}
+					<span
+						class="dot {marks[i] ?? ''}"
+						class:now={i === pos}
+						class:gap={i === 3 || i === 6 || i === 9}
+					></span>
+				{/each}
+			</div>
+			<span class="count">{pos + 1} / {queue.length}</span>
+			<button class="x" onclick={quit} aria-label="나가기">✕</button>
 		</div>
-	{/if}
 
-	<div class="banner">
-		<div class="b-left">
-			<span class="b-title"
-				>{phase === 'hub' ? '오늘의 딸깍' : mode === 'daily' ? trackInfo.name : '랜덤 연습'}{#if phase === 'hub' || mode === 'daily'}<span class="b-num"> #{puzzleNo}</span>{/if}</span
-			>
-			<span class="b-date">{dateLabel}</span>
-		</div>
-		{#if phase !== 'hub'}
-			<button class="b-back" onclick={goHub}>← 오늘의 딸깍</button>
-		{/if}
-	</div>
-{/if}
-
-{#if celebrateAll}
-	<div class="celebrate">
-		<Icon name="correct" size={17} />
-		<span>오늘의 딸깍 완주! 내일 또 만나요</span>
-	</div>
-{/if}
-
-{#if phase === 'landing' || phase === 'hub'}
-	<section class="tracks">
-		{#each TRACK_META as t (t.key)}
-			{#if t.key === 'match'}
-				<a
-					class="track"
-					class:cleared={trackDone[t.key]}
-					class:pulse={pulseKey === t.key}
-					href="/matchstick?daily=1"
-				>
-					<span class="t-top">
-						<Icon name={trackDone[t.key] ? 'correct' : t.icon} size={17} />{t.name}
+		{#key pos}
+			<section class="card">
+				<div class="chiprow">
+					<span class="chip" class:bonus={current.bonus}>
+						{current.bonus ? '보너스' : KIND_LABEL[current.kind]}
 					</span>
-					<span class="t-desc">{t.desc}</span>
-					<span class="t-board">
-						<MatchstickBoard board={PREVIEW_BOARD} picked={null} onstick={() => {}} interactive={false} />
-					</span>
-					<span class="t-cap">한 개만 옮기세요</span>
-					<span class="t-foot">
-						<span class="t-dots">
-							{#each Array(t.size) as _, i (i)}
-								<span class="t-dot" class:on={trackDone[t.key] || i < (trackPos[t.key] ?? 0)}
-								></span>
-							{/each}
-						</span>
-						<span class="t-go">{trackDone[t.key] ? '다시 보기 →' : '풀어보기 →'}</span>
-					</span>
-				</a>
-			{:else}
-				<button
-					class="track"
-					class:feature={t.key === 'discover'}
-					class:cleared={trackDone[t.key]}
-					class:pulse={pulseKey === t.key}
-					onclick={() => startTrack(t.key)}
-				>
-					<span class="t-top">
-						<Icon name={trackDone[t.key] ? 'correct' : t.icon} size={17} />{t.name}
-					</span>
-					<span class="t-desc">{t.desc}</span>
-					{#if t.key === 'discover'}
-						<!-- 시그니처 트랙만 실제 전광판으로 보여준다. 사이트에서 가장 특징적인
-						     부품인데 지금까지 문제 화면 안에만 있었다. -->
-						<span class="t-lcd"><SevenSeg lines={['11 31 55 66 ?']} /></span>
-						<span class="t-cap">숫자가 아닙니다</span>
-					{:else}
-						<span class="t-quiz">
-							<span class="tq-q">세계에서 국토 면적이 가장 넓은 나라는?</span>
-							<span class="tq-opts">
-								{#each PREVIEW_CHOICES as c (c)}
-									<span class="tq-opt">{c}</span>
-								{/each}
-							</span>
-						</span>
+					{#if current.problem?.chip && !current.bonus}
+						<span class="subchip">{current.problem.chip}</span>
 					{/if}
-					<span class="t-foot">
-						<span class="t-dots">
-							{#each Array(t.size) as _, i (i)}
-								<span class="t-dot" class:on={trackDone[t.key] || i < (trackPos[t.key] ?? 0)}
-								></span>
-							{/each}
-						</span>
-						<span class="t-go">{trackDone[t.key] ? '다시 보기 →' : '풀어보기 →'}</span>
-					</span>
-				</button>
-			{/if}
-		{/each}
-	</section>
-{/if}
-
-{#if phase === 'landing' || phase === 'hub'}
-	<!-- 문제 은행 규모. 숫자를 크게 박는 대신 이미 아이덴티티인 세그먼트 부품으로 센다. -->
-	<section class="bank">
-		<div class="bank-item"><b>{PROBLEMS.length}</b><span>발견형</span></div>
-		<div class="bank-item"><b>{TRIVIA.length}</b><span>상식 · 18개 분야</span></div>
-		<div class="bank-item"><b>{MATCH_TOTAL}</b><span>성냥개비</span></div>
-		<div class="bank-total">
-			<span>모두 합쳐</span>
-			<SegNumber value={PROBLEMS.length + TRIVIA.length + MATCH_TOTAL} size={34} />
-			<span>문제</span>
-		</div>
-	</section>
-
-	<!-- 발견형 분야 밀도 (chip 35종을 6개 분야로) -->
-	<section class="fields">
-		<div class="fields-head">
-			<span class="fields-title">발견형 {PROBLEMS.length}문제 · {FIELD_COUNTS.length}개 분야</span>
-			<a class="fields-more" href="/play?filter=puzzle">연속으로 풀기 →</a>
-		</div>
-		<div class="field-bar" aria-hidden="true">
-			{#each FIELD_COUNTS as [name, count] (name)}
-				<span class="field-seg" style="flex-grow:{count}" title="{name} · {count}문제"></span>
-			{/each}
-		</div>
-		<div class="field-pills compact">
-			{#each FIELD_COUNTS as [name, count] (name)}
-				<span class="field-pill static">{name}<span>{count}</span></span>
-			{/each}
-		</div>
-	</section>
-
-	<!-- 기본은 조용한 밀도 바 하나. 파고들 사람만 칩을 펼친다. -->
-	<section class="fields">
-		<div class="fields-head">
-			<span class="fields-title">상식 {TRIVIA.length}문제 · {CAT_COUNTS.length}개 분야 · 4단계</span>
-			<a class="fields-more" href="/play?filter=trivia">연속으로 풀기 →</a>
-		</div>
-		<div class="field-bar" aria-hidden="true">
-			{#each CAT_COUNTS as [name, count] (name)}
-				<span class="field-seg" style="flex-grow:{count}" title="{name} · {count}문제"></span>
-			{/each}
-		</div>
-		<button class="fields-toggle" onclick={() => (showCats = !showCats)}>
-			{showCats ? '접기' : '분야별로 보기'}
-		</button>
-		{#if showCats}
-			<div class="field-pills">
-				{#each CAT_COUNTS as [name, count] (name)}
-					<a class="field-pill" href="/play?filter=trivia&cat={encodeURIComponent(name)}"
-						>{name}<span>{count}</span></a
-					>
-				{/each}
-			</div>
-		{/if}
-		<div class="grade-bar">
-			{#each GRADE_COUNTS as g (g.key)}
-				<a class="grade-seg" style="flex-grow:{g.count}" href="/play?filter=trivia&grade={g.key}">
-					<span class="grade-seg-label">{g.key}</span>
-					<span class="grade-seg-n">{g.count}</span>
-				</a>
-			{/each}
-		</div>
-	</section>
-{/if}
-
-{#if phase === 'hub'}
-	<section class="hub-grid">
-		<div class="panel">
-			<div class="panel-head">
-				<div class="panel-title">기록</div>
-				<button class="stats-open" onclick={openStats}>내 기록 자세히 →</button>
-			</div>
-			<div class="today-row">
-				<span class="today-label">오늘</span>
-				<span class="today-dots">
-					{#each TRACK_META as t (t.key)}
-						<span class="today-dot" class:on={trackDone[t.key]} title={t.name}></span>
-					{/each}
-				</span>
-				<span class="today-count">{doneCount} / {TRACK_META.length} 트랙</span>
-			</div>
-			{#if stats.played === 0}
-				<div class="empty-note">아직 기록이 없어요 — 오늘 첫 문제부터 시작해보세요</div>
-			{:else}
-				<div class="stat-strip">
-					<div class="stat"><b>{stats.played}</b><span>플레이</span></div>
-					<div class="stat"><b>{stats.dayStreak}</b><span>연속</span></div>
-					<div class="stat"><b>{stats.maxStreak}</b><span>최고</span></div>
-					<div class="stat"><b>{stats.score.toLocaleString()}</b><span>총점</span></div>
 				</div>
-			{/if}
-			{#if doneCount > 0}
-				<button class="share-today" class:ready={allInlineDone} onclick={shareToday}>
-					<Icon name="share" size={15} />
-					{allInlineDone ? '오늘 결과 공유하기' : '지금까지 결과 공유'}
-				</button>
-			{/if}
-		</div>
-		<div class="panel">
-			<div class="panel-title">최근 14일</div>
-			<div class="cal">
-				{#each calendar as d, i (i)}
-					<span class="cell" class:done={d} class:today={i === calendar.length - 1}></span>
-				{/each}
-			</div>
-		</div>
-		<div class="panel center">
-			<div class="cd-title">다음 퍼즐까지</div>
-			<div class="cd-big">{countdown}</div>
-		</div>
-	</section>
 
-	<!-- 오늘 치를 다 풀기 전에는 조용한 줄, 다 푼 뒤에만 다음 행동으로 올라온다 -->
-	<div class="hub-links">
-		<a class="next-bar" class:ready={allInlineDone} href="/play">
-			<span class="nb-main">
-				<Icon name="arrow" size={15} />
-				{allInlineDone ? '오늘 치 완료 — 계속 풀기로' : '계속 풀기'}
-			</span>
-			<span class="nb-sub">{PROBLEMS.length + TRIVIA.length}문제 무제한 랜덤 · 콤보 점수</span>
-		</a>
-		<a class="next-bar archive-link" href="/archive">
-			<span class="nb-main"><Icon name="search" size={15} /> 지난 문제</span>
-			<span class="nb-sub">놓친 날의 오늘의 딸깍 다시 풀기</span>
-		</a>
-	</div>
-{/if}
-
-{#if phase === 'play' || phase === 'done'}
-<div class="layout" class:result={phase === 'done'}>
-	<div class="main">
-		{#if phase === 'play' && current}
-			{#key current.id}
-			<div class="card slide">
-				<div class="chip">{current.chip}</div>
 				<div class="q">
-					{#each current.blocks as b, i (i)}
-						{#if b.kind === 'text'}
-							<div class="qtext">{@html b.html}</div>
-						{:else if b.kind === 'pre'}
-							<pre
-								class="qblock"
-								style="--maxlen:{Math.max(...b.text.split('\n').map((l) => l.length), 1)}">{b.text}</pre>
-
-						{:else if b.kind === 'lcd'}
-							<SevenSeg lines={b.lines} frags={b.frags} />
-						{:else if b.kind === 'colors'}
-							<ColorBlocks rows={b.rows} />
-						{:else if b.kind === 'glyph'}
-							<Glyph lines={b.lines} axis={b.axis} />
-						{:else if b.kind === 'figure'}
-							<Figure svg={b.svg} caption={b.caption} />
-						{/if}
-					{/each}
-				</div>
-
-				<div class="answer-area">
-					{#if current.type === 'choice'}
-						<div class="choices">
-							{#each current.choices! as c, i (i)}
-								<button
-									class="choice"
-									class:flash-wrong={flashIndex === i && flashKind === 'wrong'}
-									class:flash-correct={flashIndex === i && flashKind === 'correct'}
-									disabled={done}
-									onclick={() => submitChoice(i)}>{c}</button
-								>
-							{/each}
-						</div>
-					{:else}
-						<div class="input-row">
-							<input
-								bind:this={inputEl}
-								class:flash-wrong={inputState === 'wrong'}
-								class:flash-correct={inputState === 'correct'}
-								placeholder="정답을 입력하세요"
-								aria-label="정답 입력"
-								autocomplete="off"
-								bind:value={answerValue}
-								disabled={done}
-								onkeydown={(e) => e.key === 'Enter' && submitText()}
+					{#if current.eq && mCur}
+						<p class="mq">성냥 <b>하나만</b> 옮겨 식을 참으로 만드세요.</p>
+						<div class="mboard-wrap" class:shake={mShaking}>
+							<MatchstickBoard
+								board={mCur}
+								picked={mPicked}
+								onstick={handleStick}
+								label={current.eq.displayed.replace('-', '−')}
 							/>
-							<button class="btn" disabled={done} onclick={submitText}>제출</button>
 						</div>
+						<p class="mtip">획을 눌러 집고, 빈 자리를 눌러 놓으세요.</p>
+					{:else if current.problem}
+						{#each current.problem.blocks as b, i (i)}
+							{#if b.kind === 'text'}
+								<div class="qtext">{@html b.html}</div>
+							{:else if b.kind === 'pre'}
+								<pre class="qblock">{b.text}</pre>
+							{:else if b.kind === 'lcd'}
+								<SevenSeg lines={b.lines} frags={b.frags} />
+							{:else if b.kind === 'colors'}
+								<ColorBlocks rows={b.rows} />
+							{:else if b.kind === 'glyph'}
+								<Glyph lines={b.lines} axis={b.axis} />
+							{:else if b.kind === 'figure'}
+								<Figure svg={b.svg} caption={b.caption} />
+							{/if}
+						{/each}
 					{/if}
 				</div>
+
+				{#if current.problem && !current.eq}
+					<div class="answer">
+						{#if current.problem.type === 'choice'}
+							<div class="choices">
+								{#each current.problem.choices ?? [] as c, i (i)}
+									<button
+										class="choice"
+										class:correct={judged && i === current.problem.answerIndex}
+										class:flash-wrong={flashIndex === i && flashKind === 'wrong'}
+										class:flash-correct={flashIndex === i && flashKind === 'correct'}
+										disabled={judged}
+										onclick={() => submitChoice(i)}>{c}</button
+									>
+								{/each}
+							</div>
+						{:else}
+							<div class="input-row">
+								<input
+									bind:this={inputEl}
+									class:flash-wrong={inputState === 'wrong'}
+									class:flash-correct={inputState === 'correct'}
+									placeholder="정답을 입력하세요"
+									aria-label="정답 입력"
+									autocomplete="off"
+									bind:value={answerValue}
+									disabled={judged}
+									onkeydown={(e) => e.key === 'Enter' && submitText()}
+								/>
+								<button class="btn" disabled={judged} onclick={submitText}>제출</button>
+							</div>
+						{/if}
+					</div>
+				{/if}
 
 				{#each shownHints as h, i (i)}
 					<div class="hint"><b>힌트 {i + 1}</b>{h}</div>
 				{/each}
 
-				{#if !done}
+				{#if !judged}
 					<div class="controls">
-						<!-- 상식 퀴즈는 힌트가 없다. 없는 문제에 힌트 버튼을 띄우면 눌러도 아무 일이 없다. -->
-						{#if current.hints?.length}
+						{#if current.eq}
+							<button class="btn ghost" disabled={!mPicked} onclick={resetBoard}>처음부터</button>
+						{:else if current.problem?.hints}
 							<button
 								class="btn ghost"
-								disabled={hintsUsed >= current.hints.length ||
-									!hintUnlocked(hintsUsed, elapsedMs, wrongAttempts)}
+								disabled={hintsUsed >= 3 || !hintUnlocked(hintsUsed, elapsedMs, wrongAttempts)}
 								onclick={showHint}
 							>
-								{hintsUsed >= current.hints.length
+								{hintsUsed >= 3
 									? '힌트 소진'
 									: hintUnlocked(hintsUsed, elapsedMs, wrongAttempts)
-										? `힌트 (${hintsUsed + 1}/${current.hints.length})`
-										: '조금만 더 만져보세요'}
+										? `힌트 (${hintsUsed + 1}/3)`
+										: '조금만 더'}
 							</button>
 						{/if}
-						<button class="btn ghost" onclick={() => finish(false)}>정답 보기</button>
+						<button class="btn ghost" onclick={giveUp}>모르겠어요</button>
 					</div>
 				{/if}
 
@@ -894,436 +603,359 @@
 					{/key}
 				{/if}
 
-				{#if done}
-					<div class="explain" class:win={feedback?.ok} class:giveup={!feedback?.ok}>
+				{#if judged}
+					<div class="explain" class:win={feedback?.ok}>
 						<div class="explain-head">
 							<Icon name={feedback?.ok ? 'correct' : 'giveup'} size={15} />
 							<span>{feedback?.ok ? '정답 풀이' : '정답 공개'}</span>
 						</div>
-						{@html current.explain}
+						{#if current.eq}
+							성냥 하나만 옮겨 <b>{current.eq.solution.replace('-', '−')}</b>을 만들면 참이 됩니다.
+						{:else if current.problem}
+							{@html current.problem.explain}
+						{/if}
 					</div>
 					<button class="btn wide" onclick={next}>
 						{pos + 1 < queue.length ? '다음 문제 →' : '결과 보기'}
 					</button>
 				{/if}
-			</div>
-			{/key}
-		{:else if phase === 'done'}
-			<div class="card result">
-				<h2>{mode === 'daily' ? `${trackInfo.name} 완료!` : '랜덤 3문제 완료!'}</h2>
-				<div class="emoji">{results.join(' ')}</div>
-				<div class="rscore">{results.filter((r) => r !== '🔓').length} / {results.length}</div>
-				<button class="btn wide" onclick={share}>결과 공유하기</button>
-				{#if mode === 'daily'}
-					{#if nextTrack}
-						<button class="btn ghost wide" onclick={() => startTrack(nextTrack.key)}>
-							{nextTrack.name} 이어서 풀기 →
-						</button>
-					{:else if !trackDone['match']}
-						<a class="btn ghost wide" href="/matchstick?daily=1">오늘의 성냥개비 풀기 →</a>
-					{:else}
-						<!-- 오늘 3트랙 완주 → 더 풀 거리로 유도(세션 PV·광고 노출↑, 내부링크 SEO) -->
-						<a class="btn ghost wide" href="/play">연속 모드로 더 풀기 →</a>
-						<a class="btn ghost wide" href="/archive">지난 문제 다시 풀기 →</a>
-					{/if}
-					<button class="btn ghost wide" onclick={goHub}>오늘의 딸깍으로</button>
-				{:else}
-					<button class="btn ghost wide" onclick={startRandom}>또 풀기</button>
-					<a class="btn ghost wide" href="/archive">지난 문제 풀기 →</a>
-					<button class="btn ghost wide" onclick={goHub}>오늘의 딸깍으로</button>
-				{/if}
-			</div>
-		{/if}
-	</div>
+			</section>
+		{/key}
+	{:else if phase === 'done'}
+		<section class="card result">
+			<h2>오늘의 딸깍 #{puzzleNo} 완료</h2>
+			<div class="big">{correctCount} <span>/ {DAILY_SIZE}</span></div>
+			<p class="verdict">
+				{correctCount === DAILY_SIZE
+					? '전부 맞혔어요'
+					: correctCount >= 7
+						? '오늘도 딸깍'
+						: '내일 다시 만나요'}
+			</p>
 
-	<aside class="side">
-		{#if phase === 'play'}
-			<div class="panel">
-				<div class="panel-title">오늘의 진행</div>
-				<div class="dots">
-					{#each queue as _, i (i)}
-						<span class="dot" class:filled={i < results.length} class:cur={i === pos}></span>
-					{/each}
-				</div>
-				<div class="panel-sub">{queue.length}문제 중 {Math.min(pos + 1, queue.length)}번째</div>
-			</div>
-			<div class="panel center">
-				{#if stats.dayStreak > 0}
-					<div class="streak-num">
-						<Icon name="streak" size={18} /><b>{stats.dayStreak}</b><small>일 연속</small>
-					</div>
-				{:else}
-					<div class="streak-none">오늘 풀면 연속 기록이 시작돼요</div>
-				{/if}
-				{#if mode === 'daily'}<div class="cd-sub">다음 퍼즐까지 {countdown}</div>{/if}
-			</div>
-			{#if mode === 'daily'}
-				<!-- 푸는 동안에도 오늘까지의 연속이 보여야 다음 날 다시 올 이유가 된다 -->
-				<div class="panel">
-					<div class="panel-title">최근 14일</div>
-					<div class="cal">
-						{#each calendar as d, i (i)}
-							<span class="cell" class:done={d} class:today={i === calendar.length - 1}></span>
-						{/each}
-					</div>
-				</div>
+			<div class="emoji">{emojiRow}</div>
+			<p class="legend">
+				{MARK_EMOJI.clean} 바로 맞힘 · {MARK_EMOJI.hinted} 힌트·재시도 · {MARK_EMOJI.miss} 못 맞힘 · ⭐ 보너스를 한 번에
+			</p>
+			{#if cleanCount > 0}
+				<p class="legend">한 번에 맞힌 문제 {cleanCount}개</p>
 			{/if}
-			{#if dev}<div class="panel"><AdSlot label="사이드" /></div>{/if}
-		{:else}
-			<div class="panel">
-				<div class="panel-title">기록</div>
-				<div class="stat-strip">
-					<div class="stat"><b>{stats.played}</b><span>플레이</span></div>
-					<div class="stat"><b>{stats.dayStreak}</b><span>연속</span></div>
-					<div class="stat"><b>{stats.maxStreak}</b><span>최고</span></div>
-				</div>
-			</div>
-			<div class="panel">
-				<div class="panel-title">최근 14일</div>
-				<div class="cal">
-					{#each calendar as d, i (i)}
-						<span class="cell" class:done={d} class:today={i === calendar.length - 1}></span>
-					{/each}
-				</div>
-			</div>
-			{#if mode === 'daily'}
-				<div class="panel center">
-					<div class="cd-title">다음 퍼즐까지</div>
-					<div class="cd-big">{countdown}</div>
-				</div>
+			{#if streakDays >= 2}
+				<div class="streak">{streakDays}일째 딸깍 중</div>
 			{/if}
-			{#if dev}<div class="panel"><AdSlot label="사이드" /></div>{/if}
-		{/if}
-	</aside>
+
+			<button class="cta" onclick={share}>결과 공유하기</button>
+			<p class="note">내일 10문제까지 {countdown}</p>
+		</section>
+
+		<section class="more">
+			<h3>아직 더 풀고 싶다면</h3>
+			<div class="more-grid">
+				<a class="more-btn" href="/play?filter=puzzle">발견형 {data.counts.discover}</a>
+				<a class="more-btn" href="/play?filter=trivia">상식 {data.counts.trivia}</a>
+				<a class="more-btn" href="/play?filter=match">성냥개비 {data.counts.match}</a>
+				<a class="more-btn" href="/play?filter=all">전부 섞기 {data.totalProblems.toLocaleString()}</a>
+			</div>
+		</section>
+
+		{#if dev}<AdSlot label="결과" />{/if}
+	{/if}
+
+	{#if toastMsg}
+		<div class="toast" role="status">{toastMsg}</div>
+	{/if}
 </div>
-{/if}
-
-{#if toastMsg}
-	<div class="toast" role="status" aria-live="polite">{toastMsg}</div>
-{/if}
-
-{#if showStats}
-	<StatsModal {stats} {solveStats} onclose={() => (showStats = false)} />
-{/if}
 
 <style>
-	.banner {
-		display: flex;
-		align-items: baseline;
-		gap: 10px;
-		margin-bottom: 16px;
-		padding: 0 2px;
+	.root {
+		max-width: 620px;
+		margin: 0 auto;
+		padding: 0 4px;
 	}
-	.b-title {
-		font-size: var(--fs-lg);
-		font-weight: var(--fw-emphasis);
-		letter-spacing: var(--ls-normal);
+
+	/* ── 첫 화면 ── */
+	.hero {
+		background: var(--panel);
+		border: 1px solid var(--border);
+		border-radius: var(--radius, 20px);
+		padding: 40px 24px 32px;
+		text-align: center;
+		margin-top: 8px;
 	}
-	.b-num {
-		color: var(--accent);
-		font-variant-numeric: tabular-nums;
+	h1 {
+		font-size: 34px;
+		font-weight: 900;
+		margin: 0 0 8px;
+		letter-spacing: -0.5px;
 	}
-	.l-num {
-		color: var(--accent);
-		font-weight: var(--fw-emphasis);
-		font-variant-numeric: tabular-nums;
-	}
-	.invite-banner {
-		display: flex;
-		align-items: center;
-		gap: 8px;
-		padding: 11px 15px;
-		margin-bottom: 14px;
-		background: var(--accent-soft);
-		border: 1px solid #cfe6d8;
-		border-radius: 12px;
-		font-size: var(--fs-xs);
-		font-weight: var(--fw-caption);
-		color: #1f6b41;
-		word-break: keep-all;
-	}
-	.invite-banner b {
-		color: var(--accent);
-		font-weight: var(--fw-emphasis);
-	}
-	.b-date {
-		font-size: var(--fs-xs);
-		font-weight: var(--fw-caption);
+	.sub {
 		color: var(--muted);
-		font-variant-numeric: tabular-nums;
+		font-size: 15px;
+		margin: 0 0 26px;
 	}
-
-	.streak-warn {
+	.dots {
 		display: flex;
-		align-items: center;
-		gap: 8px;
-		background: #fdf1e3;
-		border: 1px solid #f0d9b8;
-		color: #9a5a20;
-		border-radius: 12px;
-		padding: 11px 16px;
-		font-size: var(--fs-xs);
-		font-weight: var(--fw-label);
-		margin-bottom: 12px;
+		justify-content: center;
+		gap: 7px;
+		margin-bottom: 10px;
 	}
-	.streak-warn b {
-		color: var(--accent-2);
+	.dot {
+		width: 11px;
+		height: 11px;
+		border-radius: 999px;
+		background: var(--border-strong);
+		flex: none;
 	}
-
-	.play-promo {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		gap: 12px;
-		background: linear-gradient(100deg, #2f8f5b, #38a06a);
+	.dot.gap {
+		margin-left: 12px;
+	}
+	.dot.filled {
+		background: var(--accent);
+	}
+	.compo {
+		font-size: 13px;
+		color: var(--muted);
+		margin: 0 0 24px;
+	}
+	.cta {
+		width: 100%;
+		padding: 18px;
+		font-size: 19px;
+		font-weight: 800;
 		color: #fff;
-		border-radius: 16px;
-		padding: 16px 20px;
-		margin-bottom: 16px;
-		text-decoration: none;
-		box-shadow: 0 4px 18px rgba(47, 143, 91, 0.28);
-		transition:
-			transform 0.12s,
-			filter 0.15s;
+		background: var(--accent);
+		border: none;
+		border-radius: 14px;
+		cursor: pointer;
+		transition: transform var(--dur-tap) var(--ease-out);
 	}
-	.play-promo:hover {
-		filter: brightness(1.05);
+	.cta:hover {
 		transform: translateY(-1px);
 	}
-	.pp-left {
+	.cta:disabled {
+		opacity: 0.6;
+		cursor: default;
+	}
+	.note {
+		font-size: 13px;
+		color: var(--muted);
+		margin: 12px 0 0;
+	}
+	.streak {
+		display: inline-block;
+		margin-top: 14px;
+		padding: 6px 14px;
+		border-radius: 999px;
+		background: var(--accent-soft);
+		color: var(--accent);
+		font-size: 13px;
+		font-weight: 800;
+	}
+
+	/* ── 어떤 문제가 나오나(누를 수 없음) ── */
+	.kinds {
+		margin-top: 14px;
+		display: grid;
+		gap: 8px;
+	}
+	.kind {
+		background: var(--panel-2);
+		border: 1px solid var(--border);
+		border-radius: 12px;
+		padding: 13px 16px;
 		display: flex;
 		flex-direction: column;
 		gap: 3px;
 	}
-	.pp-title {
-		display: flex;
-		align-items: center;
-		gap: 7px;
-		font-size: var(--fs-md);
-		font-weight: var(--fw-emphasis);
+	.kind b {
+		font-size: 15px;
 	}
-	.pp-sub {
-		font-size: var(--fs-2xs);
-		font-weight: var(--fw-caption);
-		opacity: 0.92;
-	}
-	.pp-go {
-		font-size: var(--fs-sm);
-		font-weight: var(--fw-emphasis);
-		letter-spacing: var(--ls-label);
-		white-space: nowrap;
-	}
-	@media (max-width: 520px) {
-		.pp-sub {
-			display: none;
-		}
+	.kind span {
+		font-size: 13px;
+		color: var(--muted);
+		word-break: keep-all;
 	}
 
-	.layout {
-		display: grid;
-		grid-template-columns: minmax(0, 1.75fr) minmax(0, 1fr);
-		gap: 22px;
-		align-items: start;
+	.practice-line {
+		margin-top: 14px;
+		display: flex;
+		flex-direction: column;
+		gap: 2px;
+		padding: 14px 16px;
+		border: 1px solid var(--border);
+		border-radius: 12px;
+		text-decoration: none;
+		color: inherit;
+		background: var(--panel);
 	}
-	.main {
-		min-width: 0;
+	.practice-line span {
+		font-size: 15px;
+		font-weight: 700;
 	}
-	.layout.result {
-		grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+	.practice-line em {
+		font-style: normal;
+		font-size: 13px;
+		color: var(--muted);
 	}
-	@media (max-width: 780px) {
-		.layout,
-		.layout.result {
-			grid-template-columns: 1fr;
-			justify-content: stretch;
-		}
+	.trust {
+		text-align: center;
+		font-size: 13px;
+		color: var(--muted);
+		margin: 20px 0 8px;
+	}
+	.trust b {
+		font-size: 15px;
+		color: var(--text);
+	}
+
+	/* ── 세션 ── */
+	.bar {
+		display: flex;
+		align-items: center;
+		gap: 10px;
+		padding: 12px 4px;
+	}
+	.dots.small {
+		gap: 5px;
+		justify-content: flex-start;
+		flex: 1;
+	}
+	.dots.small .dot {
+		width: 9px;
+		height: 9px;
+	}
+	.dots.small .dot.gap {
+		margin-left: 9px;
+	}
+	.dot.clean {
+		background: var(--accent);
+	}
+	.dot.hinted {
+		background: var(--gold);
+	}
+	.dot.miss {
+		background: transparent;
+		border: 2px solid var(--border-strong);
+	}
+	.dot.now {
+		outline: 2px solid var(--accent);
+		outline-offset: 2px;
+	}
+	.count {
+		font-size: 13px;
+		color: var(--muted);
+		font-variant-numeric: tabular-nums;
+	}
+	.x {
+		background: none;
+		border: none;
+		font-size: 17px;
+		color: var(--muted);
+		cursor: pointer;
+		padding: 4px 8px;
 	}
 
 	.card {
 		background: var(--panel);
 		border: 1px solid var(--border);
-		border-radius: var(--radius);
-		padding: 34px 32px;
-		box-shadow: 0 4px 22px rgba(60, 50, 30, 0.07);
+		border-radius: var(--radius, 20px);
+		padding: 22px 20px;
+		animation: in var(--dur-move) var(--ease-out);
 	}
-	.card.slide {
-		animation: card-in var(--dur-move) var(--ease-out);
-	}
-	@keyframes card-in {
+	@keyframes in {
 		from {
 			opacity: 0;
-			transform: translateX(26px);
-		}
-		to {
-			opacity: 1;
-			transform: none;
+			transform: translateY(6px);
 		}
 	}
-	@media (max-width: 640px) {
-		.card {
-			padding: 24px 20px;
-		}
+	.chiprow {
+		display: flex;
+		gap: 6px;
+		margin-bottom: 14px;
+		flex-wrap: wrap;
 	}
 	.chip {
-		display: inline-block;
 		background: var(--accent-soft);
 		color: var(--accent);
-		font-size: var(--fs-2xs);
-		font-weight: var(--fw-label);
-		letter-spacing: var(--ls-label);
+		font-size: 12px;
+		font-weight: 800;
+		padding: 5px 12px;
 		border-radius: 999px;
-		padding: 6px 15px;
-		margin-bottom: 22px;
+	}
+	.chip.bonus {
+		background: var(--gold);
+		color: #4a3c10;
+	}
+	.subchip {
+		background: var(--panel-2);
+		color: var(--muted);
+		font-size: 12px;
+		padding: 5px 10px;
+		border-radius: 999px;
 	}
 	.q {
-		container-type: inline-size;
-		/* 문제마다 높이가 달라 카드가 튀는 걸 막되, 한 줄 문제에서 크게 비지 않을 만큼만 */
-		min-height: 44px;
+		min-height: 52px;
 	}
 	.qtext {
-		font-size: var(--fs-lg);
-		font-weight: var(--fw-body);
-		letter-spacing: var(--ls-normal);
-		line-height: var(--lh-reading);
+		font-size: 20px;
+		line-height: 1.7;
 		word-break: keep-all;
 	}
-	.qtext :global(b) {
-		color: var(--accent);
-	}
 	.qblock {
-		font-family: Georgia, 'Nanum Myeongjo', 'Batang', serif;
-		font-size: 30px;
-		font-weight: 700;
-		background: var(--panel-2);
-		border: 1px solid var(--border);
-		border-radius: 14px;
-		padding: clamp(16px, 4cqi, 26px) clamp(14px, 3.5cqi, 24px);
-		margin: 16px 0 22px;
-		line-height: 1.9;
-		letter-spacing: 0.5px;
+		font-size: 17px;
+		line-height: 1.6;
 		white-space: pre-wrap;
-		overflow-wrap: anywhere;
-		color: var(--text);
+		margin: 0;
 	}
-	@supports (container-type: inline-size) {
-		.qblock {
-			font-size: clamp(15px, calc(100cqi / var(--maxlen, 10) * 1.7), 30px);
-		}
+	.mq {
+		font-size: 18px;
+		margin: 0 0 12px;
+		word-break: keep-all;
 	}
-	.answer-area {
-		margin-top: 22px;
-	}
-	.input-row {
-		display: flex;
-		gap: 11px;
-	}
-	input {
-		flex: 1;
-		min-width: 0;
-		font-size: var(--fs-lg);
-		font-weight: var(--fw-body);
-		padding: 16px 18px;
-		border: 2px solid var(--border-strong);
-		border-radius: 13px;
-		background: #fff;
-		color: var(--text);
-		font-family: inherit;
-		outline: none;
-		transition: border-color 0.15s;
-	}
-	input::placeholder {
-		color: #bcae9b;
-	}
-	input:focus {
-		border-color: var(--accent);
-		box-shadow: 0 0 0 3px rgba(47, 143, 91, 0.14);
-	}
-	input.flash-wrong {
-		border-color: var(--danger);
+	.mboard-wrap.shake {
 		animation: shake 0.4s ease;
 	}
-	input.flash-correct {
-		border-color: var(--accent);
-		animation: judge-pop var(--dur-judge) var(--ease-pop);
+	@keyframes shake {
+		0%,
+		100% {
+			transform: translateX(0);
+		}
+		25% {
+			transform: translateX(-6px);
+		}
+		75% {
+			transform: translateX(6px);
+		}
 	}
-	.btn {
-		background: var(--accent);
-		color: #fff;
-		border: none;
-		border-radius: 13px;
-		font-size: var(--fs-md);
-		font-weight: var(--fw-emphasis);
-		letter-spacing: var(--ls-label);
-		padding: 16px 24px;
-		cursor: pointer;
-		font-family: inherit;
-		white-space: nowrap;
-		transition:
-			transform var(--dur-tap) var(--ease-out),
-			box-shadow 0.18s var(--ease-out),
-			filter 0.18s var(--ease-out);
-		box-shadow: 0 1px 2px rgba(44, 40, 34, 0.16);
-	}
-	.btn:hover:not(:disabled) {
-		filter: brightness(1.06);
-		transform: translateY(-1.5px);
-		box-shadow: 0 5px 14px rgba(47, 143, 91, 0.26);
-	}
-	.btn:active:not(:disabled) {
-		transform: translateY(1px) scale(0.985);
-		box-shadow: 0 1px 1px rgba(44, 40, 34, 0.2);
-	}
-	.btn.ghost {
-		box-shadow: none;
-	}
-	.btn.ghost:hover:not(:disabled) {
-		box-shadow: 0 4px 10px rgba(44, 40, 34, 0.08);
-	}
-	.btn.ghost {
-		background: transparent;
+	.mtip {
+		font-size: 13px;
 		color: var(--muted);
-		border: 1px solid var(--border-strong);
-	}
-	.btn.ghost:hover:not(:disabled) {
-		color: var(--text);
-		border-color: var(--muted);
-		filter: none;
-	}
-	.btn.wide {
-		width: 100%;
-		margin-top: 14px;
-	}
-	/* funnel 링크를 버튼처럼 — <a>는 실제 내부링크라 크롤러도 따라간다(PV·SEO) */
-	a.btn {
-		display: block;
-		box-sizing: border-box;
 		text-align: center;
-		text-decoration: none;
+		margin: 10px 0 0;
 	}
-	.btn:disabled {
-		opacity: 0.5;
-		cursor: default;
+	.answer {
+		margin-top: 18px;
 	}
 	.choices {
-		display: flex;
-		flex-direction: column;
-		gap: 10px;
+		display: grid;
+		gap: 8px;
 	}
 	.choice {
-		background: var(--panel-2);
-		border: 2px solid var(--border);
-		border-radius: 12px;
-		padding: 16px 18px;
-		font-size: var(--fs-md);
-		font-weight: var(--fw-label);
-		cursor: pointer;
+		padding: 15px;
+		font-size: 16px;
 		text-align: left;
-		font-family: inherit;
-		color: var(--text);
-		transition:
-			border-color var(--dur-tap) var(--ease-out),
-			background var(--dur-tap) var(--ease-out),
-			transform var(--dur-tap) var(--ease-out);
+		background: var(--panel-2);
+		border: 1.5px solid var(--border);
+		border-radius: 12px;
+		cursor: pointer;
+	}
+	.choice:disabled {
+		cursor: default;
+	}
+	.choice.correct {
+		border-color: var(--accent);
+		background: var(--accent-soft);
+		font-weight: 800;
 	}
 	.choice.flash-wrong {
 		border-color: var(--danger);
@@ -1333,999 +965,210 @@
 	.choice.flash-correct {
 		border-color: var(--accent);
 		background: var(--accent-soft);
-		animation: judge-pop var(--dur-judge) var(--ease-pop);
 	}
-	.choice:hover:not(:disabled) {
-		border-color: var(--accent);
+	.input-row {
+		display: flex;
+		gap: 8px;
+	}
+	.input-row input {
+		flex: 1;
+		min-width: 0;
+		padding: 14px;
+		font-size: 16px;
+		border: 1.5px solid var(--border-strong);
+		border-radius: 12px;
 		background: #fff;
-		transform: translateY(-1px);
 	}
-	.choice:disabled {
-		opacity: 0.55;
+	.input-row input.flash-wrong {
+		border-color: var(--danger);
+		animation: shake 0.4s ease;
+	}
+	.input-row input.flash-correct {
+		border-color: var(--accent);
+	}
+	.btn {
+		padding: 14px 20px;
+		font-size: 15px;
+		font-weight: 700;
+		border-radius: 12px;
+		border: none;
+		background: var(--accent);
+		color: #fff;
+		cursor: pointer;
+	}
+	.btn.ghost {
+		background: transparent;
+		color: var(--muted);
+		border: 1.5px solid var(--border);
+	}
+	.btn.ghost:disabled {
+		opacity: 0.5;
 		cursor: default;
+	}
+	.btn.wide {
+		width: 100%;
+		margin-top: 14px;
+		padding: 16px;
+		font-size: 16px;
 	}
 	.controls {
 		display: flex;
-		gap: 11px;
+		gap: 8px;
 		margin-top: 16px;
-	}
-	.controls .btn {
-		flex: 1;
-		font-size: var(--fs-sm);
-		padding: 13px 10px;
 	}
 	.hint {
 		background: #fbf3dd;
 		border-left: 3px solid var(--gold);
 		border-radius: 8px;
-		padding: 13px 16px;
-		font-size: var(--fs-sm);
-		font-weight: var(--fw-caption);
+		padding: 12px 15px;
+		font-size: 15px;
 		margin-top: 12px;
-		line-height: var(--lh-reading);
+		line-height: 1.6;
 		color: #6a5f48;
-		animation: slidein 0.25s ease;
 	}
 	.hint b {
-		font-weight: var(--fw-label);
-		color: #a9791a;
-		margin-right: 8px;
+		display: block;
+		font-size: 12px;
+		margin-bottom: 3px;
 	}
-	@keyframes slidein {
-		from {
-			opacity: 0;
-			transform: translateY(-4px);
-		}
-		to {
-			opacity: 1;
-		}
-	}
-	/* 판정은 색만으로 알리지 않는다 — 아이콘 모양과 움직임을 함께 쓴다(색각 이상 대응) */
 	.feedback {
 		display: flex;
 		align-items: center;
-		gap: 10px;
-		margin-top: 16px;
-		padding: 13px 16px;
-		border-radius: 13px;
-		font-size: var(--fs-md);
-		font-weight: var(--fw-emphasis);
-		border: 1.5px solid transparent;
-		word-break: keep-all;
+		gap: 8px;
+		margin-top: 14px;
+		padding: 12px 15px;
+		border-radius: 12px;
+		font-weight: 700;
+		font-size: 15px;
 	}
 	.feedback.correct {
 		background: var(--accent-soft);
-		border-color: #cfe6d8;
-		color: #1f6b41;
-		animation: judge-pop var(--dur-judge) var(--ease-pop);
+		color: var(--accent);
 	}
 	.feedback.wrong {
 		background: var(--danger-soft);
-		border-color: var(--danger-border);
 		color: #9c2f22;
 		animation: shake 0.4s ease;
 	}
 	.feedback.giveup {
 		background: var(--giveup-soft);
-		border-color: var(--giveup-border);
-		color: #8a5f1f;
-		animation: judge-fade var(--dur-move) var(--ease-out);
-	}
-	@keyframes judge-pop {
-		0% {
-			transform: scale(0.93);
-			opacity: 0;
-		}
-		55% {
-			transform: scale(1.035);
-			opacity: 1;
-		}
-		100% {
-			transform: scale(1);
-		}
-	}
-	@keyframes judge-fade {
-		from {
-			opacity: 0;
-			transform: translateY(5px);
-		}
-		to {
-			opacity: 1;
-			transform: none;
-		}
-	}
-	@keyframes shake {
-		0%,
-		100% {
-			transform: translateX(0);
-		}
-		18% {
-			transform: translateX(-7px);
-		}
-		38% {
-			transform: translateX(6px);
-		}
-		62% {
-			transform: translateX(-4px);
-		}
-		82% {
-			transform: translateX(2px);
-		}
-	}
-	.btn {
-		border-bottom: 3px solid #24714a;
-	}
-	.btn:active:not(:disabled) {
-		border-bottom-width: 1px;
-	}
-	.btn.ghost {
-		border-bottom: 3px solid var(--border-strong);
-	}
-	.btn.ghost:active:not(:disabled) {
-		border-bottom-width: 1px;
+		color: var(--giveup);
 	}
 	.explain {
+		margin-top: 14px;
+		padding: 15px 17px;
 		border-radius: 12px;
-		padding: 18px;
-		margin-top: 16px;
-		font-size: var(--fs-sm);
-		font-weight: var(--fw-caption);
-		line-height: var(--lh-reading);
+		background: var(--panel-2);
+		border: 1px solid var(--border);
+		font-size: 15px;
+		line-height: 1.75;
 		word-break: keep-all;
-		animation: judge-fade var(--dur-move) var(--ease-out);
+	}
+	.explain.win {
+		background: var(--accent-soft);
+		border-color: #cfe3d6;
 	}
 	.explain-head {
 		display: flex;
 		align-items: center;
-		gap: 7px;
-		font-size: var(--fs-2xs);
-		font-weight: var(--fw-label);
-		letter-spacing: var(--ls-label);
-		margin-bottom: 10px;
-	}
-	.explain.win {
-		background: var(--accent-soft);
-		border: 1px solid #cfe6d8;
-		color: #2c4d3b;
-	}
-	.explain.win .explain-head {
-		color: #1f6b41;
-	}
-	.explain.win :global(b) {
-		color: var(--accent);
-	}
-	.explain.giveup {
-		background: var(--giveup-soft);
-		border: 1px solid var(--giveup-border);
-		color: #6b4d1c;
-	}
-	.explain.giveup .explain-head {
-		color: var(--giveup);
-	}
-	.explain.giveup :global(b) {
-		color: #8a5f1f;
+		gap: 5px;
+		font-size: 12px;
+		font-weight: 800;
+		color: var(--muted);
+		margin-bottom: 7px;
 	}
 
+	/* ── 결과 ── */
 	.result {
 		text-align: center;
-		padding: 40px 26px;
+		margin-top: 8px;
 	}
 	.result h2 {
-		font-size: var(--fs-xl);
-		font-weight: var(--fw-emphasis);
-		letter-spacing: var(--ls-tight);
-		margin-bottom: 14px;
-	}
-	.emoji {
-		font-size: 34px;
-		letter-spacing: 6px;
-		margin: 12px 0;
-	}
-	.rscore {
-		font-size: var(--fs-2xl);
-		font-weight: var(--fw-number);
-		font-variant-numeric: tabular-nums;
-		color: var(--accent);
-		margin: 8px 0;
-	}
-	.stat-strip {
-		display: grid;
-		grid-template-columns: repeat(3, 1fr);
-		gap: 8px;
-	}
-	.stat {
-		text-align: center;
-	}
-	.stat b {
-		font-size: var(--fs-lg);
-		font-weight: var(--fw-number);
-		font-variant-numeric: tabular-nums;
-	}
-	.stat span {
-		font-size: var(--fs-2xs);
-		font-weight: var(--fw-caption);
+		font-size: 19px;
+		margin: 0 0 14px;
 		color: var(--muted);
+		font-weight: 700;
 	}
-	.cal {
-		display: grid;
-		grid-template-columns: repeat(7, 1fr);
-		gap: 6px;
-	}
-	.cell {
-		aspect-ratio: 1;
-		border-radius: 7px;
-		background: var(--panel-2);
-		border: 1px solid var(--border);
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		font-size: 13px;
-	}
-	/* 완료 표시는 이모지 대신 세그먼트 획 하나 — 사이트 조형 문법과 같은 부품 */
-	.cell.done::after {
-		content: '';
-		width: 55%;
-		height: 5px;
-		border-radius: var(--seg-r);
-		background: var(--accent);
-	}
-	.cell.done {
-		background: var(--accent-soft);
-		border-color: #cfe6d8;
-	}
-	.cell.today {
-		border-color: var(--accent);
-		border-width: 2px;
-	}
-	.cd-title {
-		font-size: var(--fs-2xs);
-		font-weight: var(--fw-caption);
-		color: var(--muted);
-		margin-bottom: 4px;
-	}
-	.cd-big {
-		font-size: var(--fs-xl);
-		font-weight: var(--fw-number);
-		color: var(--accent-2);
-		font-variant-numeric: tabular-nums;
-	}
-
-	.side {
-		display: flex;
-		flex-direction: column;
-		gap: 16px;
-		min-width: 0;
-		position: sticky;
-		top: 16px;
-	}
-	@media (max-width: 780px) {
-		.side {
-			position: static;
-		}
-	}
-	.panel {
-		background: var(--panel);
-		border: 1px solid var(--border);
-		border-radius: 16px;
-		padding: 20px 18px;
-		box-shadow: 0 3px 14px rgba(60, 50, 30, 0.05);
-	}
-	.panel.center {
-		text-align: center;
-	}
-	.panel-title {
-		font-size: var(--fs-xs);
-		font-weight: var(--fw-label);
-		letter-spacing: var(--ls-label);
-		margin-bottom: 13px;
-	}
-	.panel-head {
-		display: flex;
-		align-items: baseline;
-		justify-content: space-between;
-		gap: 8px;
-	}
-	.panel-head .panel-title {
-		margin-bottom: 13px;
-	}
-	.stats-open {
-		background: none;
-		border: none;
-		padding: 0;
-		font-family: inherit;
-		font-size: var(--fs-2xs);
-		font-weight: var(--fw-label);
-		color: var(--accent);
-		cursor: pointer;
-	}
-	.stats-open:hover {
-		text-decoration: underline;
-	}
-	.dots {
-		display: flex;
-		gap: 9px;
-	}
-	.dot {
-		width: 13px;
-		height: 13px;
-		border-radius: 50%;
-		background: var(--border-strong);
-	}
-	.dot.filled {
-		background: var(--accent);
-	}
-	.dot.cur {
-		background: var(--accent-2);
-		transform: scale(1.15);
-	}
-	.panel-sub {
-		font-size: var(--fs-2xs);
-		font-weight: var(--fw-caption);
-		color: var(--muted);
-		margin-top: 10px;
-	}
-	/* 한 자리 스트릭은 세그먼트로 그리면 획이 2~3개뿐이라 숫자로 안 읽힌다 */
-	.streak-num b {
-		font-size: 34px;
-		font-weight: var(--fw-number);
-		color: var(--accent-2);
-		font-variant-numeric: tabular-nums;
+	.big {
+		font-size: 54px;
+		font-weight: 900;
 		line-height: 1;
 	}
-	.streak-num {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		gap: 7px;
-		font-size: var(--fs-xl);
-		font-weight: var(--fw-number);
-		color: var(--accent-2);
-		font-variant-numeric: tabular-nums;
-	}
-	.streak-none {
-		font-size: var(--fs-xs);
-		font-weight: var(--fw-caption);
+	.big span {
+		font-size: 24px;
 		color: var(--muted);
+	}
+	.verdict {
+		font-size: 17px;
+		font-weight: 800;
+		margin: 10px 0 20px;
+	}
+	.emoji {
+		font-size: 25px;
+		letter-spacing: 3px;
+		word-break: break-all;
+	}
+	.legend {
+		font-size: 12px;
+		color: var(--muted);
+		margin: 8px 0 0;
 		word-break: keep-all;
 	}
-	.streak-num small {
-		font-size: var(--fs-xs);
-		font-weight: var(--fw-label);
-		color: var(--muted);
+	.result .cta {
+		margin-top: 22px;
 	}
-	.cd-sub {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		gap: 6px;
-		font-size: var(--fs-2xs);
-		font-weight: var(--fw-caption);
-		color: var(--muted);
-		margin-top: 6px;
-		font-variant-numeric: tabular-nums;
+
+	.more {
+		margin-top: 16px;
+		background: var(--panel);
+		border: 1px solid var(--border);
+		border-radius: var(--radius, 20px);
+		padding: 20px;
+	}
+	.more h3 {
+		font-size: 16px;
+		margin: 0 0 12px;
+		text-align: center;
+	}
+	.more-grid {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 8px;
+	}
+	.more-btn {
+		padding: 15px 10px;
+		text-align: center;
+		background: var(--panel-2);
+		border: 1.5px solid var(--border);
+		border-radius: 12px;
+		text-decoration: none;
+		color: inherit;
+		font-weight: 700;
+		font-size: 14px;
 	}
 
 	.toast {
 		position: fixed;
-		bottom: 32px;
 		left: 50%;
+		bottom: 26px;
 		transform: translateX(-50%);
-		background: var(--text);
-		color: #fdfbf6;
+		background: #2c2822;
+		color: #fff;
+		padding: 12px 18px;
 		border-radius: 999px;
-		padding: 12px 24px;
-		font-size: var(--fs-sm);
-		font-weight: var(--fw-label);
-		z-index: 30;
-		box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
-	}
-	/* ---- 랜딩 / 트랙 허브 ---- */
-	.landing {
-		text-align: center;
-		padding: 26px 0 6px;
-	}
-	.l-h1 {
-		font-size: clamp(var(--fs-xl), 5vw, var(--fs-2xl));
-		font-weight: var(--fw-number);
-		letter-spacing: var(--ls-tight);
-		line-height: var(--lh-tight);
-		word-break: keep-all;
-	}
-	.l-sub {
-		margin-top: 10px;
-		font-size: var(--fs-xs);
-		color: var(--muted);
-		font-weight: var(--fw-caption);
-	}
-	.l-how {
-		list-style: none;
-		max-width: 440px;
-		margin: 18px auto 0;
-		display: flex;
-		flex-direction: column;
-		gap: 8px;
-		text-align: left;
-	}
-	.l-how li {
-		position: relative;
-		padding: 10px 14px 10px 34px;
-		background: var(--panel);
-		border: 1px solid var(--border);
-		border-radius: 12px;
-		font-size: var(--fs-xs);
-		font-weight: var(--fw-caption);
-		line-height: var(--lh-reading);
-		color: var(--text);
-		word-break: keep-all;
-	}
-	.l-how li::before {
-		content: '';
-		position: absolute;
-		left: 14px;
-		top: 50%;
-		width: 8px;
-		height: 8px;
-		border-radius: var(--seg-r);
-		background: var(--accent);
-		transform: translateY(-50%);
-	}
-	.l-how b {
-		color: var(--accent);
-		font-weight: var(--fw-emphasis);
-	}
-	.tracks {
-		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
-		gap: 14px;
-		margin: 18px 0 0;
-	}
-	.track {
-		display: flex;
-		flex-direction: column;
-		align-items: stretch;
-		gap: 9px;
-		min-width: 0;
-		text-align: left;
-		text-decoration: none;
-		color: var(--text);
-		background: var(--panel);
-		border: 1px solid var(--border);
-		border-radius: var(--radius);
-		padding: 18px;
-		cursor: pointer;
-		font-family: inherit;
-		transition:
-			transform 0.16s var(--ease-out),
-			box-shadow 0.2s var(--ease-out),
-			border-color var(--dur-tap) var(--ease-out);
-	}
-	.track:hover {
-		transform: translateY(-3px);
-		border-color: var(--accent);
-		box-shadow: 0 10px 24px rgba(44, 40, 34, 0.11);
-	}
-	.track:active {
-		transform: translateY(0) scale(0.995);
-	}
-	/* 방금 완료한 트랙만 한 번 튄다 (transform/opacity, reduce-motion 전역 룰이 무력화) */
-	.track.pulse {
-		animation: track-pop 0.6s var(--ease-pop);
-	}
-	@keyframes track-pop {
-		0% { transform: scale(1); }
-		40% { transform: scale(1.035); }
-		100% { transform: scale(1); }
-	}
-	.celebrate {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		gap: 8px;
-		margin-top: 14px;
-		padding: 12px;
-		border-radius: 14px;
-		background: var(--accent-soft);
-		border: 1px solid #cfe6d8;
-		color: #1f6b41;
-		font-size: var(--fs-sm);
-		font-weight: var(--fw-emphasis);
-		animation: celebrate-in 0.5s var(--ease-pop);
-	}
-	@keyframes celebrate-in {
-		0% { opacity: 0; transform: translateY(-8px) scale(0.96); }
-		100% { opacity: 1; transform: none; }
-	}
-	.track.cleared {
-		border-color: #cfe6d8;
-		background: linear-gradient(180deg, var(--accent-soft), var(--panel) 46%);
-	}
-	.t-top {
-		display: flex;
-		align-items: center;
-		gap: 8px;
-		font-size: var(--fs-md);
-		font-weight: var(--fw-label);
-	}
-	.t-desc {
-		font-size: var(--fs-2xs);
-		font-weight: var(--fw-caption);
-		color: var(--muted);
-		line-height: var(--lh-normal);
-		word-break: keep-all;
-	}
-	.t-peek {
-		background: var(--panel-2);
-		border: 1px dashed var(--border-strong);
-		border-radius: 10px;
-		padding: 11px;
-		font-size: var(--fs-2xs);
-		font-weight: var(--fw-caption);
-		line-height: var(--lh-reading);
-		white-space: pre-wrap;
-		color: #6f6555;
-		font-variant-numeric: tabular-nums;
-	}
-	.t-foot {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		font-size: var(--fs-2xs);
-		font-weight: var(--fw-label);
-		letter-spacing: var(--ls-label);
-		color: var(--accent);
-	}
-	.t-dots {
-		display: flex;
-		gap: 4px;
-	}
-	.t-dot {
-		width: 7px;
-		height: 7px;
-		border-radius: 50%;
-		background: var(--border-strong);
-	}
-	.t-dot.on {
-		background: var(--accent);
-	}
-	.t-go {
-		opacity: 0.85;
-	}
-	.b-back {
-		background: none;
-		border: none;
-		font-family: inherit;
-		font-size: var(--fs-xs);
-		font-weight: var(--fw-label);
-		letter-spacing: var(--ls-label);
-		color: var(--muted);
-		cursor: pointer;
-		padding: 6px 10px;
-		border-radius: 999px;
-		transition:
-			color var(--dur-tap) var(--ease-out),
-			background var(--dur-tap) var(--ease-out);
-	}
-	.b-back:hover {
-		color: var(--text);
-		background: var(--panel-2);
-	}
-	/* ---- 문제 은행 스트립 ---- */
-	.bank {
-		display: flex;
-		align-items: center;
-		flex-wrap: wrap;
-		gap: 10px 26px;
-		margin-top: 14px;
-		padding: 14px 20px;
-		background: var(--panel-2);
-		border: 1px solid var(--border);
-		border-radius: 14px;
-	}
-	.bank-item b {
-		font-size: var(--fs-sm);
-		font-weight: var(--fw-number);
-		color: var(--text);
-		font-variant-numeric: tabular-nums;
-	}
-	.bank-item,
-	.bank-total {
-		display: flex;
-		align-items: center;
-		gap: 8px;
-		font-size: var(--fs-2xs);
-		font-weight: var(--fw-label);
-		color: var(--muted);
-	}
-	.bank-total {
-		margin-left: auto;
-		color: var(--text);
-		font-weight: var(--fw-emphasis);
-	}
-	@media (max-width: 700px) {
-		.bank-total {
-			margin-left: 0;
-			width: 100%;
-			padding-top: 10px;
-			border-top: 1px solid var(--border);
-		}
+		font-size: 14px;
+		z-index: 60;
 	}
 
-	/* ---- 허브 하단 3열 ---- */
-	.hub-grid {
-		display: grid;
-		grid-template-columns: 1.1fr 1.3fr 0.9fr;
-		gap: 14px;
-		margin-top: 14px;
-		align-items: stretch;
-	}
-	@media (max-width: 860px) {
-		.hub-grid {
-			grid-template-columns: 1fr 1fr;
+	@media (max-width: 420px) {
+		h1 {
+			font-size: 29px;
 		}
-		.hub-grid > :last-child {
-			grid-column: 1 / -1;
+		.hero {
+			padding: 32px 18px 26px;
 		}
-	}
-	@media (max-width: 560px) {
-		.hub-grid {
-			grid-template-columns: 1fr;
+		.card {
+			padding: 18px 15px;
 		}
-	}
-	.empty-note {
-		font-size: var(--fs-2xs);
-		font-weight: var(--fw-caption);
-		color: var(--muted);
-		line-height: var(--lh-reading);
-		word-break: keep-all;
-	}
-
-	/* ---- 계속 풀기: 평소엔 조용한 줄, 오늘 치 완료 시에만 승격 ---- */
-	.hub-links {
-		display: grid;
-		grid-template-columns: 1.4fr 1fr;
-		gap: 12px;
-		margin-top: 14px;
-	}
-	@media (max-width: 560px) {
-		.hub-links {
-			grid-template-columns: 1fr;
-		}
-	}
-	.next-bar {
-		display: flex;
-		align-items: center;
-		gap: 12px;
-		flex-wrap: wrap;
-		padding: 13px 18px;
-		border: 1px solid var(--border);
-		border-radius: 14px;
-		background: var(--panel);
-		text-decoration: none;
-		color: var(--muted);
-		transition:
-			border-color var(--dur-tap) var(--ease-out),
-			background var(--dur-tap) var(--ease-out),
-			transform var(--dur-tap) var(--ease-out);
-	}
-	.next-bar:hover {
-		border-color: var(--accent);
-		transform: translateY(-1px);
-	}
-	.nb-main {
-		display: flex;
-		align-items: center;
-		gap: 7px;
-		font-size: var(--fs-xs);
-		font-weight: var(--fw-emphasis);
-		color: var(--text);
-	}
-	.nb-sub {
-		font-size: var(--fs-2xs);
-		font-weight: var(--fw-caption);
-	}
-	.next-bar.ready {
-		background: var(--accent-soft);
-		border-color: #cfe6d8;
-	}
-	.next-bar.ready .nb-main {
-		color: #1f6b41;
-	}
-
-	/* ---- 트랙 벤토: 발견형이 시그니처다 ---- */
-	.tracks {
-		grid-template-columns: 1.35fr 1fr 1fr;
-	}
-	.track.feature {
-		gap: 12px;
-		padding: 22px;
-	}
-	.track.feature .t-top {
-		font-size: var(--fs-lg);
-	}
-	@media (max-width: 860px) {
-		.tracks {
-			grid-template-columns: 1fr 1fr;
-		}
-		.track.feature {
-			grid-column: 1 / -1;
-		}
-	}
-	@media (max-width: 560px) {
-		.tracks {
-			grid-template-columns: 1fr;
-		}
-	}
-	/* 시그니처 카드: 전광판 미리보기 */
-	.t-lcd {
-		display: block;
-		background: var(--panel-2);
-		border: 1px solid var(--border);
-		border-radius: 12px;
-		padding: 14px 12px;
-		min-width: 0;
-		overflow: hidden;
-	}
-	/* 글리프가 4개뿐이라 원래 크기면 시그니처 카드의 전광판보다 커져 위계가 뒤집힌다.
-	   보드는 고정 픽셀 SVG라 max-width로 줄이면 잘리므로 높이 기준으로 비례 축소한다. */
-	.t-board {
-		display: block;
-		background: var(--panel-2);
-		border: 1px solid var(--border);
-		border-radius: 12px;
-		padding: 12px;
-		pointer-events: none;
-	}
-	.t-board :global(svg) {
-		height: 66px;
-		width: auto;
-	}
-	.t-quiz {
-		display: flex;
-		flex-direction: column;
-		gap: 9px;
-		background: var(--panel-2);
-		border: 1px dashed var(--border-strong);
-		border-radius: 10px;
-		padding: 12px;
-	}
-	.tq-q {
-		font-size: var(--fs-2xs);
-		font-weight: var(--fw-label);
-		color: #6f6555;
-		line-height: var(--lh-normal);
-		word-break: keep-all;
-	}
-	.tq-opts {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 5px;
-	}
-	.tq-opt {
-		font-size: 11px;
-		font-weight: var(--fw-caption);
-		color: var(--muted);
-		background: var(--panel);
-		border: 1px solid var(--border);
-		border-radius: 999px;
-		padding: 3px 9px;
-	}
-	.t-cap {
-		font-size: var(--fs-2xs);
-		font-weight: var(--fw-caption);
-		color: var(--muted);
-		text-align: center;
-	}
-
-	/* 기록 패널: 오늘 진행 */
-	.share-today {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		gap: 7px;
-		width: 100%;
-		margin-top: 12px;
-		padding: 10px;
-		border-radius: 12px;
-		border: 1.5px solid var(--border-strong);
-		border-bottom-width: 3px;
-		background: var(--panel-2);
-		color: var(--muted);
-		font-family: inherit;
-		font-size: var(--fs-2xs);
-		font-weight: var(--fw-emphasis);
-		cursor: pointer;
-		transition:
-			color var(--dur-tap) var(--ease-out),
-			border-color var(--dur-tap) var(--ease-out),
-			background var(--dur-tap) var(--ease-out);
-	}
-	.share-today:hover {
-		color: var(--text);
-		border-color: var(--accent);
-	}
-	.share-today:active {
-		border-bottom-width: 1px;
-	}
-	.share-today.ready {
-		background: var(--accent-soft);
-		border-color: #cfe6d8;
-		color: #1f6b41;
-	}
-	.today-row {
-		display: flex;
-		align-items: center;
-		gap: 9px;
-		padding-bottom: 12px;
-		margin-bottom: 12px;
-		border-bottom: 1px solid var(--border);
-	}
-	.today-label {
-		font-size: var(--fs-2xs);
-		font-weight: var(--fw-emphasis);
-		color: var(--text);
-	}
-	.today-dots {
-		display: flex;
-		gap: 5px;
-	}
-	.today-dot {
-		width: 16px;
-		height: 6px;
-		border-radius: var(--seg-r);
-		background: var(--border-strong);
-	}
-	.today-dot.on {
-		background: var(--accent);
-	}
-	.today-count {
-		margin-left: auto;
-		font-size: var(--fs-2xs);
-		font-weight: var(--fw-caption);
-		color: var(--muted);
-		font-variant-numeric: tabular-nums;
-	}
-	/* 통계 4개가 한 줄에서 접혀 3+1로 어긋났다. 2×2로 고정해 리듬을 맞춘다. */
-	.hub-grid .stat-strip {
-		display: grid;
-		grid-template-columns: 1fr 1fr;
-		gap: 14px 10px;
-	}
-	/* ---- 분야·난이도 밀도 ---- */
-	.fields {
-		margin-top: 12px;
-		padding: 15px 20px;
-		background: var(--panel-2);
-		border: 1px solid var(--border);
-		border-radius: 14px;
-	}
-	.fields-head {
-		display: flex;
-		align-items: baseline;
-		justify-content: space-between;
-		flex-wrap: wrap;
-		gap: 4px 10px;
-		min-width: 0;
-		margin-bottom: 10px;
-	}
-	.fields-title {
-		font-size: var(--fs-2xs);
-		font-weight: var(--fw-label);
-		color: var(--muted);
-	}
-	.fields-more {
-		font-size: var(--fs-2xs);
-		font-weight: var(--fw-label);
-		color: var(--accent);
-		text-decoration: none;
-		white-space: nowrap;
-	}
-	.field-bar {
-		display: flex;
-		gap: 2px;
-		height: 10px;
-	}
-	.field-seg {
-		flex-shrink: 0;
-		flex-basis: 0;
-		border-radius: var(--seg-r);
-		background: var(--border-strong);
-	}
-	.fields-toggle {
-		margin-top: 9px;
-		background: none;
-		border: none;
-		font-family: inherit;
-		font-size: var(--fs-2xs);
-		font-weight: var(--fw-label);
-		color: var(--muted);
-		cursor: pointer;
-		padding: 3px 0;
-		transition: color var(--dur-tap) var(--ease-out);
-	}
-	.fields-toggle:hover {
-		color: var(--text);
-	}
-	.field-pills {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 6px;
-		margin-top: 8px;
-	}
-	.field-pill {
-		display: flex;
-		align-items: center;
-		gap: 5px;
-		padding: 7px 13px;
-		border-radius: 999px;
-		background: var(--panel);
-		border: 1px solid var(--border);
-		font-size: var(--fs-2xs);
-		font-weight: var(--fw-label);
-		color: var(--text);
-		text-decoration: none;
-		transition:
-			border-color var(--dur-tap) var(--ease-out),
-			color var(--dur-tap) var(--ease-out),
-			transform var(--dur-tap) var(--ease-out);
-	}
-	.field-pills.compact {
-		margin-top: 10px;
-	}
-	.field-pill.static {
-		cursor: default;
-	}
-	.field-pill.static:hover {
-		border-color: var(--border);
-		color: var(--text);
-		transform: none;
-	}
-	.field-pill:hover {
-		border-color: var(--accent);
-		color: var(--accent);
-		transform: translateY(-1px);
-	}
-	.field-pill span {
-		color: var(--muted);
-		font-variant-numeric: tabular-nums;
-	}
-	.grade-bar {
-		display: grid;
-		grid-template-columns: repeat(4, 1fr);
-		gap: 4px;
-		margin-top: 10px;
-	}
-	@media (max-width: 520px) {
-		.grade-bar {
-			grid-template-columns: repeat(2, 1fr);
-		}
-	}
-	.grade-seg {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		gap: 6px;
-		padding: 8px 4px;
-		border-radius: 10px;
-		background: var(--panel);
-		border: 1px solid var(--border);
-		text-decoration: none;
-		color: var(--text);
-		transition:
-			border-color var(--dur-tap) var(--ease-out),
-			transform var(--dur-tap) var(--ease-out);
-	}
-	.grade-seg:hover {
-		border-color: var(--accent);
-		transform: translateY(-1px);
-	}
-	.grade-seg-label {
-		font-size: var(--fs-2xs);
-		font-weight: var(--fw-label);
-	}
-	.grade-seg-n {
-		font-size: var(--fs-2xs);
-		font-weight: var(--fw-number);
-		color: var(--muted);
-		font-variant-numeric: tabular-nums;
 	}
 </style>
