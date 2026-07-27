@@ -10,6 +10,7 @@
 	import ColorBlocks from '$lib/components/ColorBlocks.svelte';
 	import Glyph from '$lib/components/Glyph.svelte';
 	import Figure from '$lib/components/Figure.svelte';
+	import ExampleList from '$lib/components/ExampleList.svelte';
 
 	let { data }: { data: { counts: { discover: number; trivia: number; match: number } } } = $props();
 
@@ -314,7 +315,7 @@
 					{#if b.kind === 'text'}
 						<div class="qtext">{@html b.html}</div>
 					{:else if b.kind === 'pre'}
-						<pre class="qpre">{b.text}</pre>
+						<ExampleList text={b.text} />
 					{:else if b.kind === 'lcd'}
 						<SevenSeg lines={b.lines} frags={b.frags} />
 					{:else if b.kind === 'colors'}
@@ -499,12 +500,6 @@
 		line-height: 1.5;
 		word-break: keep-all;
 	}
-	.qpre {
-		font-size: 16px;
-		line-height: 1.6;
-		white-space: pre-wrap;
-		font-family: inherit;
-	}
 	.guide {
 		margin-top: 10px;
 		text-align: center;
@@ -539,6 +534,8 @@
 		display: flex;
 		align-items: center;
 		gap: 10px;
+		color: var(--text);
+		-webkit-text-fill-color: currentColor;
 		padding: 12px 14px;
 		border-radius: 12px;
 		border: 1px solid var(--border-strong);
@@ -570,6 +567,7 @@
 		font-size: 15px;
 		font-weight: 600;
 		flex: 1;
+		color: var(--text);
 	}
 	.mark {
 		margin-left: auto;
