@@ -52,63 +52,101 @@
 	function segLit(gi: number, seg: SegKey): boolean {
 		return (board.glyphs[gi] & bit(seg)) !== 0;
 	}
+
+	/**
+	 * 보드 전체를 하나의 viewBox로 묶어 폭에 맞춰 통째로 축소한다.
+	 * 자리마다 고정폭 svg를 나열하면 두 자리 답(글리프 5개)에서 좁은 화면을 넘쳐
+	 * 획이 잘려 누를 수 없게 되므로, 전광판(SevenSeg)과 같은 fit-to-width 방식을 쓴다.
+	 */
+	const GW = 54; // 글리프 폭(세그먼트 좌표계 0~54)
+	const GH = 95; // 글리프 높이
+	const GAP = 14; // 기호와 숫자 사이 간격
+	const DIGIT_GAP = 22; // 두 자리 답에서 숫자끼리 붙어 보이지 않도록 더 벌린다
+	const OPW = 42; // 연산자 칸
+	const EQW = 36; // 등호 칸
+
+	/** 각 글리프의 x 위치와 전체 폭을 한 번에 계산 */
+	let layout = $derived.by(() => {
+		const xs: number[] = [];
+		let x = 0;
+		for (let gi = 0; gi < board.glyphs.length; gi++) {
+			if (gi === 1) x += OPW + GAP;
+			if (gi === 2) x += EQW + GAP;
+			// 답이 두 자리일 때 셋째·넷째 글리프 사이(gi===3)만 넓게
+			if (gi === 3) x += DIGIT_GAP - GAP;
+			xs.push(x);
+			x += GW + GAP;
+		}
+		return { xs, width: x - GAP, opX: xs[0] + GW + GAP, eqX: xs[1] + GW + GAP };
+	});
 </script>
 
 <div class="mboard">
 	{#if label}<span class="sr-only">{label}</span>{/if}
-	{#each board.glyphs as mask, gi (gi)}
-		{#if gi === 1}
-			<!-- 연산자 -->
-			<svg class="op" width="44" height="95" viewBox="-2 -2 48 99">
-				<rect x="4" y="43.5" width="34" height="8" rx="3" class="fixed" />
-				<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
-				<rect
-					x="17"
-					y="30"
-					width="8"
-					height="35"
-					rx="3"
-					class="stick {board.opPlus ? 'lit' : 'ghost'} {isPicked({ kind: 'op' })
-						? 'picked'
-						: ''}"
-					class:ro={!interactive}
-					role={interactive ? 'button' : undefined}
-					tabindex={interactive ? 0 : undefined}
-					aria-label={interactive ? '연산자 세로 성냥' : undefined}
-					data-loc="op-v"
-					onclick={interactive ? () => onstick({ kind: 'op' }, board.opPlus) : undefined}
-					onkeydown={interactive ? (e) => onKey(e, { kind: 'op' }, board.opPlus) : undefined}
-				/>
-			</svg>
-		{/if}
-		{#if gi === 2}
-			<span class="eq">=</span>
-		{/if}
-		<svg width="60" height="105" viewBox="-3 -3 60 101">
-			{#each SEG_KEYS as seg (seg)}
-				{@const r = SEG_RECT[seg]}
-				{@const lit = segLit(gi, seg)}
-				<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
-				<rect
-					x={r[0]}
-					y={r[1]}
-					width={r[2]}
-					height={r[3]}
-					rx="3"
-					class="stick {lit ? 'lit' : 'ghost'} {isPicked({ kind: 'glyph', gi, seg })
-						? 'picked'
-						: ''}"
-					class:ro={!interactive}
-					role={interactive ? 'button' : undefined}
-					tabindex={interactive ? 0 : undefined}
-					aria-label={interactive ? `${gi + 1}번째 자리 성냥` : undefined}
-					data-loc="g{gi}-{seg}"
-					onclick={interactive ? () => onstick({ kind: 'glyph', gi, seg }, lit) : undefined}
-					onkeydown={interactive ? (e) => onKey(e, { kind: 'glyph', gi, seg }, lit) : undefined}
-				/>
-			{/each}
-		</svg>
-	{/each}
+	<svg
+		class="fit"
+		viewBox="-4 -4 {layout.width + 8} {GH + 8}"
+		width={layout.width + 8}
+		height={GH + 8}
+		role="presentation"
+	>
+		{#each board.glyphs as mask, gi (gi)}
+			{#if gi === 1}
+				<!-- 연산자: 가로획은 고정, 세로획만 옮길 수 있다 -->
+				<g transform="translate({layout.opX} 0)">
+					<rect x="4" y="43.5" width="34" height="8" rx="3" class="fixed" />
+					<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
+					<rect
+						x="17"
+						y="30"
+						width="8"
+						height="35"
+						rx="3"
+						class="stick {board.opPlus ? 'lit' : 'ghost'} {isPicked({ kind: 'op' })
+							? 'picked'
+							: ''}"
+						class:ro={!interactive}
+						role={interactive ? 'button' : undefined}
+						tabindex={interactive ? 0 : undefined}
+						aria-label={interactive ? '연산자 세로 성냥' : undefined}
+						data-loc="op-v"
+						onclick={interactive ? () => onstick({ kind: 'op' }, board.opPlus) : undefined}
+						onkeydown={interactive ? (e) => onKey(e, { kind: 'op' }, board.opPlus) : undefined}
+					/>
+				</g>
+			{/if}
+			{#if gi === 2}
+				<g transform="translate({layout.eqX} 0)" class="eq">
+					<rect x="1" y="37" width="30" height="7" rx="3" />
+					<rect x="1" y="51" width="30" height="7" rx="3" />
+				</g>
+			{/if}
+			<g transform="translate({layout.xs[gi]} 0)">
+				{#each SEG_KEYS as seg (seg)}
+					{@const r = SEG_RECT[seg]}
+					{@const lit = segLit(gi, seg)}
+					<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
+					<rect
+						x={r[0]}
+						y={r[1]}
+						width={r[2]}
+						height={r[3]}
+						rx="3"
+						class="stick {lit ? 'lit' : 'ghost'} {isPicked({ kind: 'glyph', gi, seg })
+							? 'picked'
+							: ''}"
+						class:ro={!interactive}
+						role={interactive ? 'button' : undefined}
+						tabindex={interactive ? 0 : undefined}
+						aria-label={interactive ? `${gi + 1}번째 자리 성냥` : undefined}
+						data-loc="g{gi}-{seg}"
+						onclick={interactive ? () => onstick({ kind: 'glyph', gi, seg }, lit) : undefined}
+						onkeydown={interactive ? (e) => onKey(e, { kind: 'glyph', gi, seg }, lit) : undefined}
+					/>
+				{/each}
+			</g>
+		{/each}
+	</svg>
 </div>
 
 <style>
@@ -119,11 +157,12 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		gap: 8px;
-		overflow-x: auto;
 	}
-	svg {
-		flex: none;
+	/* 자리 수가 늘어도(두 자리 답) 폭에 맞춰 통째로 줄어든다 — 잘림·가로스크롤 없음 */
+	.fit {
+		width: 100%;
+		max-width: 340px;
+		height: auto;
 	}
 	.stick {
 		cursor: pointer;
@@ -147,14 +186,7 @@
 	.fixed {
 		fill: #ffd24a;
 	}
-	.op {
-		margin: 0 2px;
-	}
-	.eq {
-		color: #ffd24a;
-		font-size: 34px;
-		font-weight: 900;
-		margin: 0 4px;
-		flex: none;
+	.eq rect {
+		fill: #ffd24a;
 	}
 </style>
