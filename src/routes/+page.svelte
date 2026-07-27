@@ -408,17 +408,15 @@
 		<div class="countdown">다음 문제까지 {countdown || '--:--:--'}</div>
 	</div>
 
-	{#if resumable}
-		<div class="ticks" aria-label="{savedProgress.pos}문제까지 풀었어요">
-			{#each Array(DAILY_SIZE) as _, i (i)}
-				<span
-					class="tick"
-					class:done={i < savedProgress.marks.length}
-					class:current={i === savedProgress.pos}
-				></span>
-			{/each}
-		</div>
-	{/if}
+	<div class="ticks home-ticks" aria-label="오늘 {DAILY_SIZE}문제 중 {savedProgress.marks.length}문제 완료">
+		{#each Array(DAILY_SIZE) as _, i (i)}
+			<span
+				class="tick"
+				class:done={i < savedProgress.marks.length}
+				class:current={resumable && i === savedProgress.pos}
+			></span>
+		{/each}
+	</div>
 
 	<button class="cta" onclick={startOrResume} disabled={loading}>
 		{#if loading}
@@ -613,19 +611,30 @@
 	/* ── 홈 ── */
 	/* 모바일에서는 배경 위에 그대로 얹고(카드 없음), 데스크톱에서만 판을 깐다.
 	   넓은 화면에서 글자만 떠 있으면 화면이 버려진 것처럼 보인다. */
+	/* 배경 위에 글자만 떠 있으면 화면이 비어 보인다. 모바일에서도 판을 깔되
+	   여백을 넉넉히 줘 '카드가 화면을 감당하는' 비율을 만든다. */
 	.home-panel {
-		display: contents;
+		background: var(--panel);
+		border: 1px solid var(--border-strong);
+		border-radius: 22px;
+		padding: 36px 24px 32px;
+		box-shadow: 0 1px 0 rgba(255, 255, 255, 0.7) inset;
+		/* 문제 카드와 같은 바닥 높이 — 홈에서 세션으로 넘어갈 때 화면 무게가 튀지 않는다 */
+		min-height: 380px;
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+	}
+	.home-ticks {
+		margin-bottom: 20px;
 	}
 	@media (min-width: 768px) {
 		.home-panel {
-			display: block;
-			background: var(--panel);
-			border: 1px solid var(--border-strong);
-			border-radius: 22px;
-			padding: 46px 40px 38px;
+			padding: 52px 44px 46px;
+			min-height: 440px;
 		}
 		.date {
-			font-size: 36px;
+			font-size: 38px;
 		}
 		.cta {
 			min-height: 68px;
@@ -637,9 +646,10 @@
 		margin-bottom: 22px;
 	}
 	.date {
-		font-size: 30px;
+		font-size: 33px;
 		font-weight: 800;
-		letter-spacing: -0.3px;
+		letter-spacing: -0.4px;
+		line-height: 1.25;
 	}
 	.countdown {
 		display: inline-block;
@@ -756,13 +766,24 @@
 		border: 1px solid var(--border-strong);
 		background: var(--panel);
 		border-radius: 18px;
-		padding: 18px;
+		padding: 20px;
+		/* 문제 길이에 따라 카드가 조각처럼 작아지거나 화면이 출렁이지 않도록 바닥을 깐다 */
+		min-height: 380px;
+		display: flex;
+		flex-direction: column;
+	}
+	@media (min-width: 768px) {
+		.card {
+			min-height: 440px;
+			padding: 26px;
+		}
 	}
 	.card.bonus {
 		border: 2px dashed var(--gold);
 	}
 	.cat-chip {
-		display: inline-block;
+		/* 카드가 flex column이라 그냥 두면 칩이 가로로 늘어난다 */
+		align-self: flex-start;
 		font-size: 12px;
 		font-weight: 700;
 		background: var(--panel-2);
@@ -776,6 +797,7 @@
 	}
 	.q {
 		margin-top: 14px;
+		flex: 1;
 	}
 	.qtext {
 		font-size: 18px;
