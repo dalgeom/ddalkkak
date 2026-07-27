@@ -26,8 +26,18 @@
 	import ColorBlocks from '$lib/components/ColorBlocks.svelte';
 	import Glyph from '$lib/components/Glyph.svelte';
 	import Figure from '$lib/components/Figure.svelte';
+	import AdSlot from '$lib/components/AdSlot.svelte';
 
-	let { data }: { data: { dayNum: number } } = $props();
+	type Sample = {
+		chip: string;
+		blocks: Problem['blocks'];
+		type: 'text' | 'choice';
+		answers: string[];
+		choices: string[];
+		answerIndex: number;
+		explain: string;
+	};
+	let { data }: { data: { dayNum: number; sample: Sample | null } } = $props();
 
 	// SSR 시점 날짜(FOUC·크롤러 stale 방지). 클라이언트에서 자정을 넘겼는지 다시 확인한다.
 	// svelte-ignore state_referenced_locally
@@ -80,6 +90,11 @@
 	let puzzleNo = $derived(puzzleNumber(dayNum));
 
 	const KIND_LABEL: Record<DailyKind, string> = { discover: '발견', trivia: '상식', match: '성냥' };
+	// 랜딩 소개용 — 문제은행을 랜딩에서 받지 않으려고 개수는 상수로 둔다(레이아웃 서버 로드와 같은 값)
+	const KIND_COUNT = { discover: 164, trivia: 433, match: MATCH_TOTAL };
+	const TOTAL_PROBLEMS = KIND_COUNT.discover + KIND_COUNT.trivia + KIND_COUNT.match;
+	// 성냥개비 소개 카드에 띄우는 읽기전용 보드
+	const demoBoard = parseEq('8 - 0 = 8');
 
 	/** 상단 유형 칩: "발견 · 2/3" — 같은 유형 안에서 몇 번째인지 */
 	let typeChip = $derived.by(() => {
@@ -113,6 +128,33 @@
 		const w = ['일', '월', '화', '수', '목', '금', '토'][d.getUTCDay()];
 		return `${d.getUTCMonth() + 1}월 ${d.getUTCDate()}일 ${w}요일`;
 	});
+
+	/* ───────── 오늘의 맛보기(랜딩) ───────── */
+	// 오늘의 10문제와 겹치지 않는 문제를 서버가 하나 골라 내려준다. 세션과 별개라 점수도 없다.
+	let sampleValue = $state('');
+	let samplePicked = $state<number | null>(null);
+	let sampleDone = $state(false);
+	let sampleOk = $state(false);
+
+	function sampleSubmitText() {
+		if (sampleDone || !data.sample || !sampleValue.trim()) return;
+		const norm = (v: string) => v.replace(/\s+/g, '').toLowerCase();
+		sampleOk = data.sample.answers.some((a) => norm(a) === norm(sampleValue));
+		if (sampleOk) sampleDone = true;
+		else sampleShake = true;
+		setTimeout(() => (sampleShake = false), 420);
+	}
+	function sampleSubmitChoice(i: number) {
+		if (sampleDone || !data.sample) return;
+		samplePicked = i;
+		sampleOk = i === data.sample.answerIndex;
+		sampleDone = true;
+	}
+	function sampleReveal() {
+		sampleOk = false;
+		sampleDone = true;
+	}
+	let sampleShake = $state(false);
 
 	/* ───────── 진행 저장·복원 ───────── */
 
@@ -402,35 +444,152 @@
 </svelte:head>
 
 {#if phase === 'home'}
-	<div class="home-panel">
-	<div class="hero">
+	<!-- ① 히어로 -->
+	<section class="hero-card reveal">
+		<div class="mark" aria-hidden="true">
+			<span class="mark-bulb"></span>
+		</div>
+		<h1 class="slogan">매일 두뇌를 깨우는<br /><b>10분의 딸깍</b></h1>
+		<p class="tagline">규칙을 발견하는 순간, 머릿속에서 딸깍 소리가 납니다.</p>
+
 		<div class="date">{todayLabel}</div>
 		<div class="countdown">다음 문제까지 {countdown || '--:--:--'}</div>
-	</div>
 
-	<div class="ticks home-ticks" aria-label="오늘 {DAILY_SIZE}문제 중 {savedProgress.marks.length}문제 완료">
-		{#each Array(DAILY_SIZE) as _, i (i)}
-			<span
-				class="tick"
-				class:done={i < savedProgress.marks.length}
-				class:current={resumable && i === savedProgress.pos}
-			></span>
-		{/each}
-	</div>
+		<div class="ticks home-ticks" aria-label="오늘 {DAILY_SIZE}문제 중 {savedProgress.marks.length}문제 완료">
+			{#each Array(DAILY_SIZE) as _, i (i)}
+				<span
+					class="tick"
+					class:done={i < savedProgress.marks.length}
+					class:current={resumable && i === savedProgress.pos}
+				></span>
+			{/each}
+		</div>
 
-	<button class="cta" onclick={startOrResume} disabled={loading}>
-		{#if loading}
-			불러오는 중…
-		{:else if resumable}
-			<span class="cta-main">이어서 풀기</span>
-			<span class="cta-sub">{savedProgress.pos} / {DAILY_SIZE}문제 진행 중</span>
-		{:else}
-			오늘의 10문제 시작하기
-		{/if}
-	</button>
+		<button class="cta" onclick={startOrResume} disabled={loading}>
+			{#if loading}
+				불러오는 중…
+			{:else if resumable}
+				<span class="cta-main">이어서 풀기</span>
+				<span class="cta-sub">{savedProgress.pos} / {DAILY_SIZE}문제 진행 중</span>
+			{:else}
+				오늘의 10문제 시작하기
+			{/if}
+		</button>
 
-	<p class="composition">발견 3 · 상식 3 · 성냥 3 · 보너스 1</p>
-	</div>
+		<p class="composition">발견 3 · 상식 3 · 성냥 3 · 보너스 1</p>
+	</section>
+
+	<!-- ② 오늘의 맛보기 — 시작 전에 한 문제 그냥 풀어볼 수 있다(오늘의 10문제와 겹치지 않음) -->
+	{#if data.sample}
+		<section class="sec reveal d1">
+			<h2 class="sec-h">오늘의 맛보기<span>10문제와 별개예요</span></h2>
+			<div class="card sample" class:shake={sampleShake}>
+				<span class="cat-chip">{data.sample.chip}</span>
+				<div class="q">
+					{#each data.sample.blocks as b, i (i)}
+						{#if b.kind === 'text'}
+							<div class="qtext">{@html b.html}</div>
+						{:else if b.kind === 'pre'}
+							<pre class="qpre">{b.text}</pre>
+						{:else if b.kind === 'lcd'}
+							<SevenSeg lines={b.lines} frags={b.frags} />
+						{:else if b.kind === 'colors'}
+							<ColorBlocks rows={b.rows} />
+						{:else if b.kind === 'glyph'}
+							<Glyph lines={b.lines} axis={b.axis} />
+						{:else if b.kind === 'figure'}
+							<Figure svg={b.svg} caption={b.caption} />
+						{/if}
+					{/each}
+				</div>
+
+				{#if data.sample.type === 'choice'}
+					<div class="choices">
+						{#each data.sample.choices as c, i (i)}
+							<button
+								class="choice"
+								class:ok={sampleDone && i === data.sample.answerIndex}
+								class:bad={samplePicked === i && i !== data.sample.answerIndex}
+								disabled={sampleDone}
+								onclick={() => sampleSubmitChoice(i)}
+							>
+								<span class="badge">{['A', 'B', 'C', 'D', 'E'][i]}</span>
+								<span class="ctext">{c}</span>
+							</button>
+						{/each}
+					</div>
+				{:else}
+					<input
+						type="text"
+						bind:value={sampleValue}
+						placeholder="답을 입력해보세요"
+						aria-label="맛보기 정답 입력"
+						autocomplete="off"
+						disabled={sampleDone}
+						onkeydown={(e) => e.key === 'Enter' && sampleSubmitText()}
+					/>
+				{/if}
+
+				{#if sampleDone}
+					<div class="feedback" class:ok={sampleOk}>
+						<span class="fmark">{sampleOk ? '✓' : '✕'}</span>
+						<span>{sampleOk ? '딸깍! 맞혔어요' : '정답을 확인했어요'}</span>
+					</div>
+					<div class="explain"><b>해설</b> {@html data.sample.explain}</div>
+				{:else if data.sample.type !== 'choice'}
+					<div class="dual">
+						<button class="ghost" onclick={sampleReveal}>정답 보기</button>
+						<button class="submit inline" onclick={sampleSubmitText}>확인</button>
+					</div>
+				{:else}
+					<button class="ghost wide" onclick={sampleReveal}>정답 보기</button>
+				{/if}
+			</div>
+		</section>
+	{/if}
+
+	<div class="adwrap reveal d2"><AdSlot label="랜딩 중단" /></div>
+
+	<!-- ③ 어떤 문제가 나오나 — 설명이 아니라 실제 생김새로 -->
+	<section class="sec reveal d2">
+		<h2 class="sec-h">세 가지가 매일 섞여 나와요</h2>
+		<div class="kinds">
+			<div class="kind">
+				<div class="kind-vis seg">
+					<SevenSeg lines={['11 31', '55 66']} />
+				</div>
+				<b>발견형 {KIND_COUNT.discover}</b>
+				<span>예시에 숨은 규칙을 스스로 찾습니다. 막히면 힌트가 3단계로 열려요.</span>
+			</div>
+			<div class="kind">
+				<div class="kind-vis quiz">
+					<span class="mini-badge">A</span><span class="mini-line"></span>
+					<span class="mini-badge on">B</span><span class="mini-line on"></span>
+					<span class="mini-badge">C</span><span class="mini-line"></span>
+				</div>
+				<b>상식 퀴즈 {KIND_COUNT.trivia}</b>
+				<span>18개 분야, 초등부터 어른까지. 해설이 함께 나옵니다.</span>
+			</div>
+			<div class="kind">
+				<div class="kind-vis">
+					<MatchstickBoard board={demoBoard} picked={null} onstick={() => {}} interactive={false} label="8 − 0 = 8" />
+				</div>
+				<b>성냥개비 {KIND_COUNT.match}</b>
+				<span>성냥 하나만 옮겨 식을 참으로. 획을 눌러 집고 빈 자리에 놓습니다.</span>
+			</div>
+		</div>
+	</section>
+
+	<div class="adwrap reveal d3"><AdSlot label="랜딩 하단" /></div>
+
+	<!-- ④ 더 풀고 싶은 사람 -->
+	<section class="sec reveal d3">
+		<a class="practice" href="/play">
+			<b>오늘 걸 다 풀었다면 · 무한 연습</b>
+			<span>발견형 · 상식 · 성냥개비 중 골라 원하는 만큼</span>
+		</a>
+		<p class="total">지금까지 쌓인 문제 <b>{TOTAL_PROBLEMS.toLocaleString()}</b>개</p>
+	</section>
 {:else if phase === 'play' && current}
 	<div class="topbar">
 		<button class="exit" onclick={quit}>나가기</button>
@@ -608,52 +767,106 @@
 {/if}
 
 <style>
-	/* ── 홈 ── */
-	/* 모바일에서는 배경 위에 그대로 얹고(카드 없음), 데스크톱에서만 판을 깐다.
-	   넓은 화면에서 글자만 떠 있으면 화면이 버려진 것처럼 보인다. */
-	/* 배경 위에 글자만 떠 있으면 화면이 비어 보인다. 모바일에서도 판을 깔되
-	   여백을 넉넉히 줘 '카드가 화면을 감당하는' 비율을 만든다. */
-	.home-panel {
+	/* ── 랜딩 ── */
+	/* 스크롤 없이 위에서부터 순서대로 떠오른다. 과하지 않게 8px·150ms. */
+	.reveal {
+		animation: rise 420ms var(--ease-out) both;
+	}
+	.reveal.d1 {
+		animation-delay: 90ms;
+	}
+	.reveal.d2 {
+		animation-delay: 160ms;
+	}
+	.reveal.d3 {
+		animation-delay: 230ms;
+	}
+	@keyframes rise {
+		from {
+			opacity: 0;
+			transform: translateY(10px);
+		}
+	}
+
+	.hero-card {
 		background: var(--panel);
 		border: 1px solid var(--border-strong);
 		border-radius: 22px;
-		padding: 36px 24px 32px;
-		box-shadow: 0 1px 0 rgba(255, 255, 255, 0.7) inset;
-		/* 문제 카드와 같은 바닥 높이 — 홈에서 세션으로 넘어갈 때 화면 무게가 튀지 않는다 */
-		min-height: 380px;
-		display: flex;
-		flex-direction: column;
-		justify-content: center;
-	}
-	.home-ticks {
-		margin-bottom: 20px;
-	}
-	@media (min-width: 768px) {
-		.home-panel {
-			padding: 52px 44px 46px;
-			min-height: 440px;
-		}
-		.date {
-			font-size: 38px;
-		}
-		.cta {
-			min-height: 68px;
-			font-size: 19px;
-		}
-	}
-	.hero {
+		padding: 32px 24px 30px;
 		text-align: center;
-		margin-bottom: 22px;
+	}
+	/* 전구가 켜지며 시작한다 — 로고의 '딸깍'을 화면에서 한 번 재생 */
+	.mark {
+		display: flex;
+		justify-content: center;
+		margin-bottom: 16px;
+	}
+	.mark-bulb {
+		width: 30px;
+		height: 30px;
+		border-radius: 50%;
+		background: var(--gold);
+		border: 3px solid var(--text);
+		position: relative;
+		animation: bulb-on 900ms var(--ease-out) both;
+	}
+	.mark-bulb::after {
+		content: '';
+		position: absolute;
+		bottom: -9px;
+		left: 8px;
+		width: 11px;
+		height: 5px;
+		border-radius: 1px;
+		background: var(--text);
+	}
+	@keyframes bulb-on {
+		0% {
+			background: var(--panel-2);
+			box-shadow: none;
+			transform: scale(0.9);
+		}
+		55% {
+			background: var(--panel-2);
+			box-shadow: none;
+			transform: scale(0.9);
+		}
+		70% {
+			background: var(--gold);
+			box-shadow: 0 0 0 8px rgba(246, 211, 78, 0.45);
+			transform: scale(1.06);
+		}
+		100% {
+			background: var(--gold);
+			box-shadow: 0 0 0 0 rgba(246, 211, 78, 0);
+			transform: scale(1);
+		}
+	}
+	.slogan {
+		font-size: 27px;
+		font-weight: 800;
+		line-height: 1.35;
+		letter-spacing: -0.4px;
+		margin: 0;
+		word-break: keep-all;
+	}
+	.slogan b {
+		color: var(--accent);
+	}
+	.tagline {
+		margin: 10px 0 22px;
+		font-size: 13.5px;
+		color: var(--muted);
+		word-break: keep-all;
 	}
 	.date {
-		font-size: 33px;
+		font-size: 20px;
 		font-weight: 800;
-		letter-spacing: -0.4px;
-		line-height: 1.25;
+		letter-spacing: -0.2px;
 	}
 	.countdown {
 		display: inline-block;
-		margin-top: 10px;
+		margin-top: 8px;
 		padding: 6px 14px;
 		border-radius: 999px;
 		background: var(--panel-2);
@@ -661,6 +874,9 @@
 		font-size: 13px;
 		font-weight: 700;
 		font-variant-numeric: tabular-nums;
+	}
+	.home-ticks {
+		margin: 18px 0;
 	}
 	.cta {
 		display: block;
@@ -674,12 +890,11 @@
 		border: none;
 		box-shadow: 0 6px 0 var(--accent-press);
 		cursor: pointer;
+		font-family: inherit;
+		padding: 12px;
 		transition:
 			transform var(--dur-tap) var(--ease-out),
 			box-shadow var(--dur-tap) var(--ease-out);
-		text-align: center;
-		text-decoration: none;
-		padding: 12px;
 	}
 	.cta:active {
 		transform: translateY(3px);
@@ -705,6 +920,168 @@
 		opacity: 0.85;
 		margin-top: 2px;
 	}
+
+	/* ── 섹션 공통 ── */
+	.sec {
+		margin-top: 26px;
+	}
+	.sec-h {
+		display: flex;
+		align-items: baseline;
+		gap: 8px;
+		font-size: 15px;
+		font-weight: 800;
+		margin: 0 0 10px 2px;
+	}
+	.sec-h span {
+		font-size: 12px;
+		font-weight: 600;
+		color: var(--muted-2);
+	}
+	.adwrap {
+		margin-top: 26px;
+	}
+
+	.card.sample {
+		min-height: 0;
+	}
+	.card.sample.shake {
+		animation: shake 0.4s ease;
+	}
+	@keyframes shake {
+		0%,
+		100% {
+			transform: translateX(0);
+		}
+		25% {
+			transform: translateX(-6px);
+		}
+		75% {
+			transform: translateX(6px);
+		}
+	}
+
+	/* ── 유형 소개 ── */
+	.kinds {
+		display: flex;
+		flex-direction: column;
+		gap: 10px;
+	}
+	.kind {
+		background: var(--panel);
+		border: 1px solid var(--border-strong);
+		border-radius: 16px;
+		padding: 16px;
+	}
+	.kind-vis {
+		background: var(--panel-2);
+		border-radius: 12px;
+		padding: 12px;
+		margin-bottom: 12px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		min-height: 78px;
+		overflow: hidden;
+	}
+	.kind-vis.seg {
+		background: var(--board-bg);
+	}
+	.kind-vis.quiz {
+		display: grid;
+		grid-template-columns: auto 1fr;
+		gap: 7px 9px;
+		align-content: center;
+		padding: 14px 18px;
+	}
+	.mini-badge {
+		width: 20px;
+		height: 20px;
+		border-radius: 50%;
+		background: var(--panel);
+		border: 1px solid var(--border-strong);
+		font-size: 11px;
+		font-weight: 800;
+		color: var(--muted);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+	.mini-badge.on {
+		background: var(--accent);
+		border-color: var(--accent);
+		color: #fff;
+	}
+	.mini-line {
+		height: 8px;
+		border-radius: 4px;
+		background: var(--border);
+		align-self: center;
+	}
+	.mini-line.on {
+		background: #bcdcc9;
+	}
+	.kind b {
+		display: block;
+		font-size: 15px;
+		margin-bottom: 4px;
+	}
+	.kind span {
+		font-size: 13px;
+		color: var(--muted);
+		line-height: 1.55;
+		word-break: keep-all;
+	}
+
+	/* ── 연습 유도 ── */
+	.practice {
+		display: block;
+		background: var(--panel);
+		border: 1px solid var(--border-strong);
+		border-radius: 16px;
+		padding: 16px 18px;
+		text-decoration: none;
+		color: inherit;
+	}
+	.practice b {
+		display: block;
+		font-size: 15px;
+		margin-bottom: 3px;
+	}
+	.practice span {
+		font-size: 13px;
+		color: var(--muted);
+	}
+	.total {
+		text-align: center;
+		margin-top: 14px;
+		font-size: 12.5px;
+		color: var(--muted-2);
+	}
+	.total b {
+		color: var(--muted);
+		font-size: 14px;
+	}
+
+	@media (min-width: 768px) {
+		.hero-card {
+			padding: 44px 40px 38px;
+		}
+		.slogan {
+			font-size: 32px;
+		}
+		.date {
+			font-size: 22px;
+		}
+		.cta {
+			min-height: 68px;
+			font-size: 19px;
+		}
+		.kinds {
+			gap: 12px;
+		}
+	}
+
 	.composition {
 		text-align: center;
 		margin-top: 16px;

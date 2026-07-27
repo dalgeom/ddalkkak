@@ -344,6 +344,28 @@ export function emojiFor(win: boolean, hintsUsed: number): string {
 	return hintsUsed === 0 ? '✅' : '💡';
 }
 
+/**
+ * 랜딩에 띄울 '오늘의 맛보기' 한 문제를 고른다.
+ * 오늘의 10문제와 겹치면 세션 전에 답을 알아버리므로 exclude에 든 인덱스는 건너뛴다.
+ * 날짜마다 한 칸씩 전진해 매일 다른 문제가 걸린다.
+ */
+export function dailySample(
+	total: number,
+	dayNum: number,
+	exclude: number[] = [],
+	seed = 20260505
+): number {
+	if (total <= 0) return -1;
+	const order = seededOrder(total, seed);
+	const skip = new Set(exclude);
+	const start = Math.max(0, dayNum);
+	for (let k = 0; k < total; k++) {
+		const idx = order[(start + k) % total];
+		if (!skip.has(idx)) return idx;
+	}
+	return order[start % total];
+}
+
 /* ───────────── 오늘의 딸깍 진행 상태(10문제 한 세션) ───────────── */
 
 /** 문제 하나의 결과. 기호는 이 세 가지 + 보너스뿐이다(예전엔 상태 표기가 6종이라 아무도 못 읽었다). */
