@@ -4,7 +4,6 @@
 	import { page } from '$app/state';
 	import problems from '$lib/data/matchstick-problems.json';
 	import { parseEq, cloneBoard, isSolved, bit, type Board } from '$lib/matchstick';
-	import { kstDayNumber, dailyIndices, advanceStreakIfComplete } from '$lib/game';
 	import { shareResult as shareCardResult, outcomeMessage } from '$lib/shareCard';
 	import MatchstickBoard, { type PickLoc } from '$lib/components/MatchstickBoard.svelte';
 	import AdSlot from '$lib/components/AdSlot.svelte';
@@ -13,8 +12,7 @@
 	type Mode =
 		| { type: 'free' }
 		| { type: 'time'; seconds: number }
-		| { type: 'count'; total: number }
-		| { type: 'daily'; total: number };
+		| { type: 'count'; total: number };
 
 	let screen = $state<'menu' | 'play' | 'result'>('menu');
 	let mode = $state<Mode>({ type: 'free' });
@@ -33,13 +31,6 @@
 	let shaking = $state(false);
 	let toastMsg = $state('');
 
-	/** 오늘의 성냥개비 — 날짜 시드로 뽑은 3문제. 전 방문자가 같은 문제를 푼다. */
-	const DAILY_SIZE = 3;
-	let dayNum = $state(0);
-	let dailyQueue = $state<number[]>([]);
-	let dailyPos = $state(0);
-	let dailyCleared = $state(false);
-
 	// 모드 런 상태
 	let runSolved = $state(0);
 	let runResults = $state<('win' | 'fail')[]>([]);
@@ -53,31 +44,13 @@
 	function modeKey(m: Mode): string {
 		if (m.type === 'time') return `time-${m.seconds}`;
 		if (m.type === 'count') return `count-${m.total}`;
-		if (m.type === 'daily') return 'daily';
 		return 'free';
 	}
 	function modeLabel(m: Mode): string {
 		if (m.type === 'time') return `타임어택 ${m.seconds / 60}분`;
 		if (m.type === 'count') return `${m.total}문제 도전`;
-		if (m.type === 'daily') return '오늘의 성냥개비';
 		return '무한 연습';
 	}
-	function dailyKey() {
-		return `ddal.daily.${dayNum}.match`;
-	}
-	/** 홈 허브가 읽는 것과 같은 형식으로 진행 상황을 남긴다 */
-	function saveDailyProgress(phase: 'play' | 'done') {
-		if (!browser) return;
-		try {
-			localStorage.setItem(
-				dailyKey(),
-				JSON.stringify({ pos: dailyPos, results: runResults, phase })
-			);
-		} catch {
-			/* 무시 */
-		}
-	}
-
 	function load() {
 		try {
 			done = JSON.parse(localStorage.getItem('ddal.match.done') || '[]');
@@ -105,27 +78,6 @@
 		runSolved = 0;
 		runResults = [];
 		screen = 'play';
-		if (m.type === 'daily') {
-			dailyQueue = dailyIndices(problems.length, dayNum, DAILY_SIZE);
-			dailyPos = 0;
-			try {
-				const rec = JSON.parse(localStorage.getItem(dailyKey()) || 'null');
-				if (rec && rec.phase === 'done') {
-					// 이미 끝냈으면 결과 화면으로
-					runResults = rec.results || [];
-					runSolved = runResults.filter((r: string) => r === 'win').length;
-					screen = 'result';
-					return;
-				}
-				if (rec) {
-					dailyPos = Math.min(rec.pos ?? 0, DAILY_SIZE);
-					runResults = rec.results || [];
-					runSolved = runResults.filter((r: string) => r === 'win').length;
-				}
-			} catch {
-				/* 무시 */
-			}
-		}
 		if (m.type === 'time') {
 			timeLeft = m.seconds;
 			timerId = setInterval(() => {
@@ -139,14 +91,9 @@
 	function endRun() {
 		clearInterval(timerId);
 		timerId = undefined;
-		if (mode.type === 'daily') {
-			saveDailyProgress('done');
-			// 성냥개비를 마지막에 끝냈을 때도 오늘 3트랙 완료면 연속 기록이 갱신되도록.
-			advanceStreakIfComplete(dayNum);
-		}
 		const key = modeKey(mode);
 		const score =
-			mode.type === 'count' || mode.type === 'daily'
+			mode.type === 'count'
 				? runResults.filter((r) => r === 'win').length
 				: runSolved;
 		if (score > (bests[key] ?? 0)) bests[key] = score;
@@ -163,18 +110,6 @@
 	function nextProblem(first = false) {
 		const forced = Number(page.url.searchParams.get('p'));
 		let idx: number;
-		if (mode.type === 'daily') {
-			idx = dailyQueue[Math.min(dailyPos, dailyQueue.length - 1)] ?? 0;
-			pIdx = idx;
-			orig = parseEq(problems[idx].displayed);
-			cur = cloneBoard(orig);
-			picked = null;
-			attempts = 0;
-			solvedThis = 'no';
-			feedback = '';
-			saveDailyProgress('play');
-			return;
-		}
 		if (first && mode.type === 'free' && page.url.searchParams.has('p') && !Number.isNaN(forced)) {
 			idx = Math.max(0, Math.min(problems.length - 1, forced));
 		} else {
@@ -233,14 +168,12 @@
 				feedback = `딸깍! +${gained}점 (시도 ${attempts + 1}회)`;
 			} else {
 				runSolved++;
-				if (mode.type === 'count' || mode.type === 'daily') runResults = [...runResults, 'win'];
-				if (mode.type === 'daily') dailyPos += 1;
+				if (mode.type === 'count') runResults = [...runResults, 'win'];
 				feedback = '딸깍!';
 				setTimeout(() => {
 					if (screen !== 'play') return;
 					if (
-						(mode.type === 'count' || mode.type === 'daily') &&
-						runResults.length >= mode.total
+						mode.type === 'count' && runResults.length >= mode.total
 					)
 						endRun();
 					else nextProblem();
@@ -287,9 +220,8 @@
 		markDone();
 		persist();
 		feedback = `정답: ${problems[pIdx].solution.replace('-', '−')}`;
-		if (mode.type === 'count' || mode.type === 'daily') {
+		if (mode.type === 'count') {
 			runResults = [...runResults, 'fail'];
-			if (mode.type === 'daily') dailyPos += 1;
 			setTimeout(() => {
 				if (screen !== 'play') return;
 				if (runResults.length >= (mode as { total: number }).total) endRun();
@@ -318,9 +250,9 @@
 			emojiRow = '🔥'.repeat(Math.min(Math.max(runSolved, 1), 10));
 			subLine = `제한시간 안에 ${runSolved}문제 해결`;
 			text = `딸깍! ${title} · ${runSolved}문제`;
-		} else if (mode.type === 'count' || mode.type === 'daily') {
+		} else if (mode.type === 'count') {
 			const wins = runResults.filter((r) => r === 'win').length;
-			title = mode.type === 'daily' ? '오늘의 성냥개비' : `성냥개비 ${mode.total}문제 도전`;
+			title = `성냥개비 ${mode.total}문제 도전`;
 			scoreLabel = `${wins}문제`;
 			emojiRow = runResults.map((r) => (r === 'win' ? '🟢' : '⚪')).join('');
 			subLine = `${wins}/${runResults.length} 성공`;
@@ -344,15 +276,7 @@
 
 	onMount(() => {
 		load();
-		dayNum = kstDayNumber(Date.now());
-		try {
-			const rec = JSON.parse(localStorage.getItem(dailyKey()) || 'null');
-			dailyCleared = !!rec && rec.phase === 'done';
-		} catch {
-			/* 무시 */
-		}
-		if (page.url.searchParams.get('daily') === '1') startMode({ type: 'daily', total: DAILY_SIZE });
-		else if (page.url.searchParams.has('p')) startMode({ type: 'free' });
+		if (page.url.searchParams.has('p')) startMode({ type: 'free' });
 	});
 	onDestroy(() => clearInterval(timerId));
 </script>
@@ -377,12 +301,10 @@
 
 		<div class="mode-sec daily-sec">
 			<div class="mode-title">
-				<Icon name="match" size={16} /> 오늘의 성냥개비
-				<span class="hintTxt">모두가 같은 3문제 · 자정에 새로</span>
+				<Icon name="match" size={16} /> 오늘 치는 여기가 아니에요
+				<span class="hintTxt">성냥개비 3문제는 '오늘의 10문제'에 들어 있어요</span>
 			</div>
-			<button class="btn wide" onclick={() => startMode({ type: 'daily', total: DAILY_SIZE })}>
-				{dailyCleared ? '다시 보기' : '오늘 치 풀기'}
-			</button>
+			<a class="btn wide" href="/">오늘의 10문제 풀러 가기</a>
 		</div>
 
 		<div class="mode-sec">

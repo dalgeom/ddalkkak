@@ -1,5 +1,8 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import {
+	pickDaily,
+	buildDailySet,
+	DAILY_SIZE,
 	normalize,
 	isCorrectText,
 	buildRound,
@@ -315,5 +318,69 @@ describe('recordSolve / readSolveStats (통계)', () => {
 	it('힌트 3개 초과는 3으로 clamp된다', () => {
 		recordSolve(true, 9);
 		expect(readSolveStats().hintDist[3]).toBe(1);
+	});
+});
+
+describe('오늘의 딸깍 — 하루 10문제 세트', () => {
+	// 발견형 대역: 6분야에 고르게 분포
+	const FIELDS = ['수·연산', '언어·문자', '달력·시간', '규칙·분류', '도형·전광판', '관찰·추리'];
+	const discover = Array.from({ length: 164 }, (_, i) => ({ id: 'd' + i, field: FIELDS[i % 6] }));
+	const CATS = Array.from({ length: 18 }, (_, i) => 'cat' + i);
+	const trivia = Array.from({ length: 433 }, (_, i) => ({ id: 't' + i, category: CATS[i % 18] }));
+	const build = (day: number) => buildDailySet(discover, trivia, 741, day, (d) => d.field, (t) => t.category);
+
+	it('하루 10문제, 유형별 발견3·상식3·성냥3 + 보너스1', () => {
+		for (const day of [20649, 20650, 20651, 20700, 21000]) {
+			const set = build(day);
+			expect(set.length).toBe(DAILY_SIZE);
+			const bonus = set.filter((p) => p.bonus);
+			expect(bonus.length).toBe(1);
+			const base = set.filter((p) => !p.bonus);
+			const cnt = (k: string) => base.filter((p) => p.kind === k).length;
+			expect(cnt('discover')).toBe(3);
+			expect(cnt('trivia')).toBe(3);
+			expect(cnt('match')).toBe(3);
+		}
+	});
+
+	it('발견형 3문제는 서로 다른 분야, 상식 3문제는 서로 다른 카테고리', () => {
+		for (let day = 20649; day < 20649 + 60; day++) {
+			const set = build(day);
+			const df = set.filter((p) => p.kind === 'discover').map((p) => discover[p.index].field);
+			expect(new Set(df).size).toBe(df.length);
+			const tc = set.filter((p) => p.kind === 'trivia').map((p) => trivia[p.index].category);
+			expect(new Set(tc).size).toBe(tc.length);
+		}
+	});
+
+	it('같은 날은 항상 같은 문제(전 방문자 동일), 다음 날은 달라진다', () => {
+		expect(build(20649)).toEqual(build(20649));
+		const a = JSON.stringify(build(20649));
+		const b = JSON.stringify(build(20650));
+		expect(a).not.toBe(b);
+	});
+
+	it('한 세트 안에 같은 문제가 두 번 나오지 않는다', () => {
+		for (let day = 20649; day < 20649 + 40; day++) {
+			const keys = build(day).map((p) => p.kind + ':' + p.index);
+			expect(new Set(keys).size).toBe(keys.length);
+		}
+	});
+
+	it('보너스 유형은 날짜에 따라 세 유형을 돌아간다', () => {
+		const kinds = [20649, 20650, 20651].map((d) => build(d).find((p) => p.bonus)!.kind);
+		expect(new Set(kinds).size).toBe(3);
+	});
+
+	it('pickDaily: 키 종류가 모자라면 중복을 허용해서라도 개수를 채운다', () => {
+		const items = [{ k: 'a' }, { k: 'a' }, { k: 'b' }];
+		const got = pickDaily(items, 3, 5, (x) => x.k);
+		expect(got.length).toBe(3);
+		expect(new Set(got).size).toBe(3);
+	});
+
+	it('pickDaily: 빈 배열·0개 요청에도 안전', () => {
+		expect(pickDaily([], 3, 1)).toEqual([]);
+		expect(pickDaily([1, 2, 3], 0, 1)).toEqual([]);
 	});
 });
