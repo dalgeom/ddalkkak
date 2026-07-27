@@ -27,15 +27,7 @@
 	import Glyph from '$lib/components/Glyph.svelte';
 	import Figure from '$lib/components/Figure.svelte';
 
-	let {
-		data
-	}: {
-		data: {
-			dayNum: number;
-			totalProblems: number;
-			counts: { discover: number; trivia: number; match: number };
-		};
-	} = $props();
+	let { data }: { data: { dayNum: number } } = $props();
 
 	// SSR 시점 날짜(FOUC·크롤러 stale 방지). 클라이언트에서 자정을 넘겼는지 다시 확인한다.
 	// svelte-ignore state_referenced_locally
@@ -440,7 +432,6 @@
 	</button>
 
 	<p class="composition">발견 3 · 상식 3 · 성냥 3 · 보너스 1</p>
-	<p class="total">누적 {data.totalProblems.toLocaleString()}문제 중 오늘의 10문제</p>
 	</div>
 {:else if phase === 'play' && current}
 	<div class="topbar">
@@ -710,12 +701,6 @@
 		font-size: 13px;
 		color: var(--muted);
 		font-weight: 600;
-	}
-	.total {
-		text-align: center;
-		margin-top: 6px;
-		font-size: 12px;
-		color: var(--muted-2);
 	}
 
 	/* ── 진행 틱 ── */
