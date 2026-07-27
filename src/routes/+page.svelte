@@ -90,6 +90,13 @@
 	let cleanCount = $derived(marks.filter((m) => m === 'clean').length);
 	let puzzleNo = $derived(puzzleNumber(dayNum));
 
+	/** epoch day → "7월 27일 월요일" (KST 정오 기준으로 안전하게 변환) */
+	let todayLabel = $derived.by(() => {
+		const d = new Date(dayNum * 86400000 - 9 * 3600 * 1000 + 43200000);
+		const w = ['일', '월', '화', '수', '목', '금', '토'][d.getUTCDay()];
+		return `${d.getUTCMonth() + 1}월 ${d.getUTCDate()}일 ${w}요일`;
+	});
+
 	const KIND_LABEL: Record<DailyKind, string> = {
 		discover: '발견형',
 		trivia: '상식',
@@ -420,10 +427,15 @@
 
 <div class="root">
 	{#if phase === 'home'}
-		<!-- 첫 화면: 누를 수 있는 것은 시작 버튼 하나뿐 -->
 		<section class="hero">
+			<p class="today">{todayLabel}</p>
 			<h1>오늘의 10문제</h1>
-			<p class="sub">매일 밤 12시에 새로 열려요 · 막히면 힌트가 열려요</p>
+			<div class="compo">
+				<span>발견형 <b>3</b></span>
+				<span>상식 <b>3</b></span>
+				<span>성냥개비 <b>3</b></span>
+				<span class="b">보너스 <b>1</b></span>
+			</div>
 
 			<div class="dots" aria-hidden="true">
 				{#each Array(DAILY_SIZE) as _, i (i)}
@@ -434,7 +446,6 @@
 					></span>
 				{/each}
 			</div>
-			<p class="compo">발견형 3 · 상식 3 · 성냥개비 3 · 보너스 1</p>
 
 			<button class="cta" onclick={startOrResume} disabled={loading}>
 				{#if loading}
@@ -445,38 +456,20 @@
 					시작하기
 				{/if}
 			</button>
-			<p class="note">가입 없이 바로 · 오늘은 모두 같은 문제를 풀어요</p>
+
+			<div class="next">
+				<span>다음 문제까지</span>
+				<time>{countdown || '--:--:--'}</time>
+			</div>
 			{#if streakDays >= 2}
 				<div class="streak">{streakDays}일째 딸깍 중</div>
 			{/if}
 		</section>
 
-		{#if playedCount < 3}
-			<!-- 어떤 문제가 나오는지 보여만 준다(누를 수 없음) -->
-			<section class="kinds">
-				<div class="kind">
-					<b>발견형</b>
-					<span>예시에 숨은 규칙을 직접 찾아요. 답이 아니라 규칙을 찾는 게임이에요.</span>
-				</div>
-				<div class="kind">
-					<b>상식 퀴즈</b>
-					<span>18개 분야에서 나와요. 고르거나, 짧게 답을 적어요.</span>
-				</div>
-				<div class="kind">
-					<b>성냥개비</b>
-					<span>성냥 하나만 옮겨 식을 맞게 만들어요.</span>
-				</div>
-			</section>
-		{/if}
-
 		<a class="practice-line" href="/play">
 			<span>더 풀고 싶다면 · 무한 연습</span>
 			<em>발견형 · 상식 · 성냥개비 중 골라 계속</em>
 		</a>
-
-		<p class="trust">
-			모두 합쳐 <b>{data.totalProblems.toLocaleString()}</b>문제 · 매일 자정 새로 열림 · 가입 없음
-		</p>
 	{:else if phase === 'play' && current}
 		<!-- 세션: 상단은 진행 점과 나가기뿐 -->
 		<div class="bar">
@@ -682,22 +675,24 @@
 		text-align: center;
 		margin-top: 8px;
 	}
+	.today {
+		font-size: 14px;
+		font-weight: 700;
+		color: var(--accent-2);
+		letter-spacing: 0.2px;
+		margin: 0 0 10px;
+	}
 	h1 {
 		font-size: 34px;
 		font-weight: 900;
-		margin: 0 0 8px;
+		margin: 0 0 10px;
 		letter-spacing: -0.5px;
-	}
-	.sub {
-		color: var(--muted);
-		font-size: 15px;
-		margin: 0 0 26px;
 	}
 	.dots {
 		display: flex;
 		justify-content: center;
 		gap: 7px;
-		margin-bottom: 10px;
+		margin: 0 0 26px;
 	}
 	.dot {
 		width: 11px;
@@ -713,9 +708,31 @@
 		background: var(--accent);
 	}
 	.compo {
-		font-size: 13px;
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: center;
+		gap: 6px;
+		margin: 0 0 22px;
+	}
+	.compo span {
+		font-size: 12.5px;
 		color: var(--muted);
-		margin: 0 0 24px;
+		background: var(--panel-2);
+		border: 1px solid var(--border);
+		border-radius: 999px;
+		padding: 5px 11px;
+	}
+	.compo span b {
+		color: var(--text);
+		font-weight: 800;
+	}
+	.compo span.b {
+		background: #fdf4d8;
+		border-color: #efe0b0;
+		color: #7a6420;
+	}
+	.compo span.b b {
+		color: #6b5616;
 	}
 	.cta {
 		width: 100%;
@@ -736,10 +753,25 @@
 		opacity: 0.6;
 		cursor: default;
 	}
-	.note {
+	.next {
+		display: flex;
+		align-items: baseline;
+		justify-content: center;
+		gap: 10px;
+		margin-top: 20px;
+		padding-top: 17px;
+		border-top: 1px solid var(--border);
+	}
+	.next span {
 		font-size: 13px;
 		color: var(--muted);
-		margin: 12px 0 0;
+	}
+	.next time {
+		font-size: 21px;
+		font-weight: 800;
+		color: var(--accent-2);
+		font-variant-numeric: tabular-nums;
+		letter-spacing: 0.5px;
 	}
 	.streak {
 		display: inline-block;
@@ -752,29 +784,6 @@
 		font-weight: 800;
 	}
 
-	/* ── 어떤 문제가 나오나(누를 수 없음) ── */
-	.kinds {
-		margin-top: 14px;
-		display: grid;
-		gap: 8px;
-	}
-	.kind {
-		background: var(--panel-2);
-		border: 1px solid var(--border);
-		border-radius: 12px;
-		padding: 13px 16px;
-		display: flex;
-		flex-direction: column;
-		gap: 3px;
-	}
-	.kind b {
-		font-size: 15px;
-	}
-	.kind span {
-		font-size: 13px;
-		color: var(--muted);
-		word-break: keep-all;
-	}
 
 	.practice-line {
 		margin-top: 14px;
@@ -796,16 +805,6 @@
 		font-style: normal;
 		font-size: 13px;
 		color: var(--muted);
-	}
-	.trust {
-		text-align: center;
-		font-size: 13px;
-		color: var(--muted);
-		margin: 20px 0 8px;
-	}
-	.trust b {
-		font-size: 15px;
-		color: var(--text);
 	}
 
 	/* ── 세션 ── */
