@@ -2,23 +2,14 @@
 	import { onMount } from 'svelte';
 
 	/**
-	 * 첫 진입 스플래시. 실제 로딩을 기다리는 게 아니라 브랜드를 한 번 보여주는 연출이다.
-	 * 한 세션에 한 번만 뜬다 — 페이지를 옮길 때마다 나오면 방해가 된다.
+	 * 진입 스플래시. 실제 로딩을 기다리는 게 아니라 브랜드를 보여주는 연출이다.
+	 * 페이지를 새로 열 때(전체 로드)마다 뜬다 — 앱 안에서 화면을 옮기는 건 재로드가
+	 * 아니라 이 컴포넌트가 그대로 살아 있으므로 다시 뜨지 않는다.
+	 * (세션당 1회로 막았더니 한 번 본 뒤로는 새로고침해도 영영 안 보여서 없앤 것과 같았다)
 	 */
 	let show = $state(true);
 
 	onMount(() => {
-		let already = false;
-		try {
-			already = sessionStorage.getItem('ddal.splash') === '1';
-			sessionStorage.setItem('ddal.splash', '1');
-		} catch {
-			/* 프라이빗 모드 등에서 막히면 그냥 한 번 보여준다 */
-		}
-		if (already) {
-			show = false;
-			return;
-		}
 		const t = setTimeout(() => (show = false), 1200);
 		return () => clearTimeout(t);
 	});
