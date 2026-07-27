@@ -122,6 +122,12 @@
 		return Object.values(base).filter((r) => r.total > 0);
 	});
 
+	/** 다음 힌트가 열리기까지 남은 초. 잠긴 이유를 숫자로 보여줘야 죽은 버튼으로 안 읽힌다. */
+	let hintWaitSec = $derived.by(() => {
+		const need = hintsUsed <= 1 ? 25000 : 60000;
+		return Math.max(1, Math.ceil((need - elapsedMs) / 1000));
+	});
+
 	/** epoch day → "7월 27일 월요일" (KST 정오 기준으로 안전하게 변환) */
 	let todayLabel = $derived.by(() => {
 		const d = new Date(dayNum * 86400000 - 9 * 3600 * 1000 + 43200000);
@@ -592,7 +598,7 @@
 	</section>
 {:else if phase === 'play' && current}
 	<div class="topbar">
-		<button class="exit" onclick={quit}>나가기</button>
+		<button class="exit" onclick={quit}><span class="ar" aria-hidden="true">←</span>나가기</button>
 		<span class="type-chip" class:bonus={current.bonus}>{typeChip}</span>
 	</div>
 
@@ -692,7 +698,7 @@
 							? '힌트 다 봤어요'
 							: hintUnlocked(hintsUsed, elapsedMs, wrongAttempts)
 								? `힌트 보기 (${hintsUsed + 1}/3)`
-								: '조금만 더'}
+								: `${hintWaitSec}초 뒤 힌트`}
 					</button>
 				</div>
 			{/if}
@@ -1118,14 +1124,30 @@
 		justify-content: space-between;
 		margin-bottom: 14px;
 	}
+	/* 텍스트만 두면 버튼으로 안 읽히고 누를 자리도 좁다 — 테두리 있는 알약으로 */
 	.exit {
+		display: inline-flex;
+		align-items: center;
+		gap: 5px;
+		min-height: 34px;
+		padding: 0 13px;
 		font-size: 13px;
 		font-weight: 700;
+		font-family: inherit;
 		color: var(--muted);
-		background: none;
-		border: none;
+		background: var(--panel);
+		border: 1px solid var(--border-strong);
+		border-radius: 999px;
 		cursor: pointer;
-		padding: 4px 0;
+		transition: background var(--dur-move) ease;
+	}
+	.exit:hover {
+		background: var(--panel-2);
+		color: var(--text);
+	}
+	.exit .ar {
+		font-size: 14px;
+		line-height: 1;
 	}
 	.type-chip {
 		font-size: 12px;

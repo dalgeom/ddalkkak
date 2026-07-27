@@ -59,6 +59,11 @@
 	let mRevertTimer: ReturnType<typeof setTimeout>;
 
 	let shownHints = $derived(shown?.hints ? shown.hints.slice(0, hintsUsed) : []);
+	/** 다음 힌트까지 남은 초 — 잠긴 이유를 숫자로 보여준다 */
+	let hintWaitSec = $derived.by(() => {
+		const need = hintsUsed <= 1 ? 25000 : 60000;
+		return Math.max(1, Math.ceil((need - elapsedMs) / 1000));
+	});
 	let poolSize = $derived(
 		filter === 'puzzle'
 			? data.counts.discover
@@ -371,7 +376,7 @@
 						? '힌트 다 봤어요'
 						: hintUnlocked(hintsUsed, elapsedMs, wrongAttempts)
 							? `힌트 보기 (${hintsUsed + 1}/3)`
-							: '조금만 더'}
+							: `${hintWaitSec}초 뒤 힌트`}
 				</button>
 			</div>
 		{/if}
