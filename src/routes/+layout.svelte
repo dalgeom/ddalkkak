@@ -101,10 +101,21 @@
 		font-family:
 			'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, 'Segoe UI',
 			'Malgun Gothic', sans-serif;
-		background: var(--bg);
 		color: var(--text);
 		min-height: 100vh;
 		-webkit-font-smoothing: antialiased;
+		/* 평면 단색이면 콘텐츠가 적을 때 '만들다 만 화면'으로 보인다.
+		   위에서 든 빛 + 아래 그림자 + 미세한 종이 결로 바탕에 깊이를 준다(이미지 없이 CSS만). */
+		background-color: var(--bg);
+		background-image:
+			radial-gradient(ellipse 90% 55% at 50% -8%, rgba(255, 253, 247, 0.85), transparent 72%),
+			radial-gradient(ellipse 70% 45% at 50% 108%, rgba(206, 190, 162, 0.4), transparent 72%),
+			radial-gradient(rgba(44, 40, 34, 0.035) 1px, transparent 1px);
+		background-size:
+			auto,
+			auto,
+			22px 22px;
+		background-attachment: fixed, fixed, fixed;
 	}
 	:global(::selection) {
 		background: #cfe6d8;
