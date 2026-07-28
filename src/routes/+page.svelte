@@ -28,6 +28,7 @@
 	import Figure from '$lib/components/Figure.svelte';
 	import ExampleList from '$lib/components/ExampleList.svelte';
 	import AdSlot from '$lib/components/AdSlot.svelte';
+	import Bulb from '$lib/components/Bulb.svelte';
 
 	type Sample = {
 		chip: string;
@@ -453,9 +454,7 @@
 {#if phase === 'home'}
 	<!-- ① 히어로 -->
 	<section class="hero-card reveal">
-		<div class="mark" aria-hidden="true">
-			<span class="mark-bulb"></span>
-		</div>
+		<div class="mark"><Bulb size={38} /></div>
 		<h1 class="slogan">매일 두뇌를 깨우는<br /><b>10분의 딸깍</b></h1>
 		<p class="tagline">규칙을 발견하는 순간, 머릿속에서 딸깍 소리가 납니다.</p>
 
@@ -833,65 +832,6 @@
 		display: flex;
 		justify-content: center;
 		margin-bottom: 16px;
-	}
-	.mark-bulb {
-		width: 30px;
-		height: 30px;
-		border-radius: 50%;
-		background: var(--gold);
-		border: 3px solid var(--text);
-		position: relative;
-		/* '딸-깍' 두 번, 그리고 쉼 — 이 리듬이 사이트 이름 그 자체다 */
-		animation: bulb-click 3.4s steps(1, end) infinite;
-	}
-	.mark-bulb::after {
-		content: '';
-		position: absolute;
-		bottom: -9px;
-		left: 8px;
-		width: 11px;
-		height: 5px;
-		border-radius: 1px;
-		background: var(--text);
-	}
-	@keyframes bulb-click {
-		/* 딸 */
-		0% {
-			background: var(--panel-2);
-			box-shadow: none;
-		}
-		4% {
-			background: var(--gold);
-			box-shadow: 0 0 0 7px rgba(246, 211, 78, 0.4);
-		}
-		11% {
-			background: var(--gold);
-			box-shadow: 0 0 0 0 rgba(246, 211, 78, 0);
-		}
-		15% {
-			background: var(--panel-2);
-			box-shadow: none;
-		}
-		/* 깍 */
-		19% {
-			background: var(--gold);
-			box-shadow: 0 0 0 7px rgba(246, 211, 78, 0.4);
-		}
-		26% {
-			background: var(--gold);
-			box-shadow: 0 0 0 0 rgba(246, 211, 78, 0);
-		}
-		/* 켜진 채로 쉰다 */
-		100% {
-			background: var(--gold);
-			box-shadow: 0 0 0 0 rgba(246, 211, 78, 0);
-		}
-	}
-	@media (prefers-reduced-motion: reduce) {
-		.mark-bulb {
-			animation: none;
-			background: var(--gold);
-		}
 	}
 	.slogan {
 		font-size: 27px;
