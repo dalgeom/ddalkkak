@@ -439,7 +439,7 @@
 		background: var(--panel-2);
 		color: var(--muted-2);
 		padding: 5px 10px;
-		border-radius: 999px;
+		border-radius: 8px;
 		font-variant-numeric: tabular-nums;
 	}
 	.combo.on {
@@ -454,7 +454,7 @@
 	}
 	.filter {
 		padding: 7px 14px;
-		border-radius: 999px;
+		border-radius: 10px;
 		font-size: 13px;
 		font-weight: 600;
 		border: 1px solid var(--border-strong);
@@ -489,7 +489,7 @@
 		background: var(--panel-2);
 		color: var(--muted);
 		padding: 3px 9px;
-		border-radius: 999px;
+		border-radius: 7px;
 	}
 	.q {
 		margin-top: 14px;
@@ -612,7 +612,7 @@
 		color: var(--gold-text);
 		background: var(--gold-bg);
 		border: 1px solid var(--gold);
-		border-radius: 999px;
+		border-radius: 10px;
 		padding: 5px 12px;
 		cursor: pointer;
 		font-family: inherit;
