@@ -2,70 +2,57 @@
 	/**
 	 * 심전도 신호가 전구를 관통하며 '딸깍' 켜지는 연출.
 	 *
-	 * 핵심은 파형이 '살아 있어야' 한다는 것 — 평평한 선에 스파이크 하나만 박아 두고
-	 * 통째로 밀면, 고정된 그림이 미끄러질 뿐 신호처럼 보이지 않는다.
-	 * 그래서 파형을 계산해서 만든다: 잔물결(세 개의 사인파)이 항상 위아래로 요동치고,
-	 * 그 위에 심박(QRS)이 주기적으로 크게 튄다. 선이 흐르면 모든 지점이 계속 흔들린다.
-	 *
-	 * 이음매가 보이지 않도록 모든 성분의 주기를 W의 정수배로 맞췄다.
-	 * 한 주기(W)만큼 밀면 파형이 자기 자신과 정확히 겹친다.
+	 * 실제 심전도 모니터처럼: 베이스라인은 평평하고, 박동(P-QRS-T)은 직선으로 꺾인
+	 * 날카로운 스파이크다. 사인파로 그리면 둥글둥글해져서 심전도로 안 보인다.
+	 * 박동은 한 주기에 4개(높이를 조금씩 다르게), 초당 하나꼴로 전구를 관통한다.
 	 */
 	let { size = 44 }: { size?: number } = $props();
 
 	const W = 260; // 한 주기 폭
 	const H = 66;
-	const CX = 130; // 전구 중심 = 화면 중앙
+	const CX = 130; // 전구 중심
 	const CY = 26;
 
-	/** 심박 한 번(QRS): 살짝 내렸다 크게 솟고 깊게 떨어졌다 돌아온다 */
-	function beat(u: number): number {
-		// u: 0~1 구간에서만 값이 있다
-		if (u < 0 || u > 1) return 0;
-		if (u < 0.18) return -3 * Math.sin((Math.PI * u) / 0.18); // P파(작은 봉우리)
-		if (u < 0.3) return 0;
-		if (u < 0.38) return 5 * Math.sin((Math.PI * (u - 0.3)) / 0.08); // Q(살짝 아래)
-		if (u < 0.5) return -20 * Math.sin((Math.PI * (u - 0.38)) / 0.12); // R(크게 위)
-		if (u < 0.6) return 11 * Math.sin((Math.PI * (u - 0.5)) / 0.1); // S(깊게 아래)
-		if (u < 0.72) return 0;
-		if (u < 1) return -6.5 * Math.sin((Math.PI * (u - 0.72)) / 0.28); // T파(완만한 봉우리)
-		return 0;
-	}
+	/** 박동 하나 — 각진 폴리라인(작은 P → 급한 QRS 스파이크 → 완만한 T) */
+	const BEAT_PTS: [number, number][] = [
+		[0, 0],
+		[5, 0],
+		[8, -5],
+		[11, 0],
+		[18, 0],
+		[20, 3],
+		[24, -24],
+		[28, 16],
+		[31, 0],
+		[40, 0],
+		[45, -8],
+		[50, 0],
+		[56, 0]
+	];
+	/** 한 주기 안 박동 위치(균등 간격)와 높이 배율 — 모니터처럼 조금씩 다르게 */
+	const BEATS = [0.05, 0.3, 0.55, 0.8];
+	const SCALES = [1, 0.7, 0.92, 0.78];
 
-	/** 한 주기 안 두 번의 심박 위치(0~1) — 이 지점이 전구를 지날 때 딸깍 */
-	const BEATS = [0.28, 0.78];
-	const BEAT_W = 0.16; // 심박 하나가 차지하는 폭(주기 대비)
-
-	function yAt(x: number): number {
-		const t = x / W;
-		// 잔물결 — 정수 배음이라 W마다 정확히 반복된다
-		let y =
-			2.3 * Math.sin(2 * Math.PI * 3 * t) +
-			1.5 * Math.sin(2 * Math.PI * 7 * t + 1.1) +
-			1.0 * Math.sin(2 * Math.PI * 11 * t + 2.3);
-		// 심박
-		for (const b of BEATS) {
-			const u = (((t - b) % 1) + 1) % 1;
-			if (u < BEAT_W) y += beat(u / BEAT_W);
-		}
-		return CY + y;
-	}
-
-	/** -W ~ 2W(세 주기)를 그려 두면 한 주기 미는 동안 화면이 비지 않는다 */
-	const STEP = 3;
+	/** 세 주기(-W~2W)를 이어 그린다. 한 주기 밀면 자기 자신과 겹쳐 이음매가 없다. */
 	let d = $derived.by(() => {
-		const pts: string[] = [];
-		for (let x = -W; x <= 2 * W; x += STEP) {
-			pts.push(`${x} ${yAt(x).toFixed(1)}`);
+		const pts: string[] = [`-${W} ${CY}`];
+		for (let k = -1; k <= 2; k++) {
+			BEATS.forEach((b, i) => {
+				const x0 = (k + b) * W;
+				for (const [dx, dy] of BEAT_PTS) {
+					pts.push(`${(x0 + dx).toFixed(1)} ${(CY + dy * SCALES[i]).toFixed(1)}`);
+				}
+			});
 		}
+		pts.push(`${2 * W} ${CY}`);
 		return 'M' + pts.join(' L');
 	});
 
 	/**
-	 * 심박이 전구를 지나는 시점 = 사이클의 몇 %인가.
-	 *   center = beat + BEAT_W*0.44 (R파가 솟는 지점)
-	 *   t = ((CX/W - center) mod 1) * 100
-	 * BEATS=[0.28, 0.78], BEAT_W=0.16, CX/W=0.5 → 약 15% 와 65%.
-	 * CSS 키프레임의 %는 변수로 넣을 수 없어 아래 flash/burst에 그 값을 직접 적었다.
+	 * 번쩍이는 시점: R파(박동 시작 +24px)가 전구(CX)에 오는 순간.
+	 *   t = ((CX - (beat*W + 24)) / W) mod 1
+	 * BEATS = [0.05, 0.3, 0.55, 0.8] → 약 10.8% · 35.8% · 60.8% · 85.8%.
+	 * CSS 키프레임 %에는 변수를 못 넣어 flash/burst에 그 값을 직접 적었다.
 	 * BEATS를 바꾸면 키프레임도 같이 고쳐야 한다.
 	 */
 </script>
@@ -118,9 +105,11 @@
 	.line {
 		fill: none;
 		stroke: var(--accent-2);
-		stroke-width: 2.6;
+		stroke-width: 2.4;
 		stroke-linecap: round;
 		stroke-linejoin: round;
+		/* 모니터의 네온 발광 — 안쪽 짧은 번짐 + 바깥 넓은 번짐 */
+		filter: drop-shadow(0 0 2px rgba(192, 99, 46, 0.9)) drop-shadow(0 0 6px rgba(192, 99, 46, 0.45));
 	}
 	/* 정확히 한 주기만큼 밀어 이음매 없이 흐른다 */
 	.wave {
@@ -149,25 +138,43 @@
 		opacity: 0;
 		animation: flash 4s ease-out infinite;
 	}
-	/* 심박이 두 번 지나가므로 번쩍임도 두 번(15% · 65%) */
+	/* 박동 4개가 초당 하나꼴로 관통 — 번쩍임도 4번(10.8 · 35.8 · 60.8 · 85.8%) */
 	@keyframes flash {
 		0%,
-		13.6% {
+		9.4% {
 			opacity: 0;
 		}
-		15% {
+		10.8% {
 			opacity: 0.85;
 		}
-		19% {
+		14.5% {
 			opacity: 0;
 		}
-		63.6% {
+		34.4% {
 			opacity: 0;
 		}
-		65% {
+		35.8% {
 			opacity: 0.85;
 		}
-		69% {
+		39.5% {
+			opacity: 0;
+		}
+		59.4% {
+			opacity: 0;
+		}
+		60.8% {
+			opacity: 0.85;
+		}
+		64.5% {
+			opacity: 0;
+		}
+		84.4% {
+			opacity: 0;
+		}
+		85.8% {
+			opacity: 0.85;
+		}
+		89.5% {
 			opacity: 0;
 		}
 		100% {
@@ -182,30 +189,54 @@
 	}
 	@keyframes burst {
 		0%,
-		13.5% {
+		9.3% {
 			opacity: 0;
 			transform: scale(0.85);
 		}
-		16% {
-			opacity: 0.45;
-			transform: scale(1.5);
+		11.5% {
+			opacity: 0.4;
+			transform: scale(1.45);
 		}
-		24% {
+		17% {
 			opacity: 0;
-			transform: scale(1.85);
+			transform: scale(1.75);
 		}
-		63.5% {
+		34.3% {
 			opacity: 0;
 			transform: scale(0.85);
 		}
-		66% {
-			opacity: 0.45;
-			transform: scale(1.5);
+		36.5% {
+			opacity: 0.4;
+			transform: scale(1.45);
 		}
-		74%,
+		42% {
+			opacity: 0;
+			transform: scale(1.75);
+		}
+		59.3% {
+			opacity: 0;
+			transform: scale(0.85);
+		}
+		61.5% {
+			opacity: 0.4;
+			transform: scale(1.45);
+		}
+		67% {
+			opacity: 0;
+			transform: scale(1.75);
+		}
+		84.3% {
+			opacity: 0;
+			transform: scale(0.85);
+		}
+		86.5% {
+			opacity: 0.4;
+			transform: scale(1.45);
+		}
+		92%,
 		100% {
 			opacity: 0;
-			transform: scale(1.85);
+			transform: scale(1.75);
 		}
 	}
 
