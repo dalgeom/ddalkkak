@@ -438,7 +438,7 @@
 		letter-spacing: 0.4px;
 		color: var(--accent);
 		background: var(--correct-bg);
-		border-radius: 999px;
+		border-radius: 7px;
 		padding: 4px 11px;
 	}
 	.mcover h1 {

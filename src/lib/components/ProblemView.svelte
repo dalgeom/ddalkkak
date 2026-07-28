@@ -80,7 +80,7 @@
 		font-weight: var(--fw-emphasis);
 		color: var(--accent);
 		background: var(--accent-soft);
-		border-radius: 999px;
+		border-radius: 7px;
 		padding: 4px 11px;
 	}
 	.pv-q {

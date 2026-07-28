@@ -132,7 +132,7 @@
 		letter-spacing: 0.4px;
 		color: var(--accent);
 		background: var(--correct-bg);
-		border-radius: 999px;
+		border-radius: 7px;
 		padding: 4px 11px;
 	}
 	h1 {
@@ -227,7 +227,7 @@
 		font-weight: 700;
 		color: var(--muted);
 		background: var(--panel-2);
-		border-radius: 999px;
+		border-radius: 7px;
 		padding: 3px 9px;
 	}
 	.cd {

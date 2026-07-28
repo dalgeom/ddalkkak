@@ -919,7 +919,7 @@
 		display: inline-block;
 		margin-top: 8px;
 		padding: 6px 14px;
-		border-radius: 999px;
+		border-radius: 9px;
 		background: var(--panel-2);
 		color: var(--accent-2);
 		font-size: 13px;
@@ -1299,7 +1299,7 @@
 		color: var(--muted);
 		background: var(--panel);
 		border: 1px solid var(--border-strong);
-		border-radius: 999px;
+		border-radius: 10px;
 		cursor: pointer;
 		transition: background var(--dur-move) ease;
 	}
@@ -1317,7 +1317,7 @@
 		background: var(--panel-2);
 		color: var(--text);
 		padding: 4px 10px;
-		border-radius: 999px;
+		border-radius: 7px;
 	}
 	.type-chip.bonus {
 		background: var(--gold-bg);
@@ -1350,7 +1350,7 @@
 		background: var(--panel-2);
 		color: var(--muted);
 		padding: 3px 9px;
-		border-radius: 999px;
+		border-radius: 7px;
 	}
 	.cat-chip.gold {
 		background: var(--gold-bg);
@@ -1495,7 +1495,7 @@
 		color: var(--gold-text);
 		background: var(--gold-bg);
 		border: 1px solid var(--gold);
-		border-radius: 999px;
+		border-radius: 10px;
 		padding: 5px 12px;
 		cursor: pointer;
 		font-family: inherit;
