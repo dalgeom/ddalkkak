@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import Bulb from '$lib/components/Bulb.svelte';
 
 	/**
 	 * 진입 스플래시. 실제 로딩을 기다리는 게 아니라 브랜드를 보여주는 연출이다.
@@ -18,7 +19,7 @@
 {#if show}
 	<div class="splash" role="status" aria-label="딸깍 불러오는 중">
 		<div class="inner">
-			<span class="bulb" aria-hidden="true"></span>
+			<Bulb size={40} />
 			<span class="name">딸깍</span>
 			<div class="bar" aria-hidden="true"><span></span></div>
 		</div>
@@ -57,43 +58,6 @@
 		gap: 10px;
 	}
 	/* 전구가 켜지면서 '딸깍' — 로고를 한 번 재생한다 */
-	.bulb {
-		width: 34px;
-		height: 34px;
-		border-radius: 50%;
-		background: var(--panel-2);
-		border: 3px solid var(--text);
-		position: relative;
-		animation: bulb 900ms var(--ease-out) both;
-	}
-	.bulb::after {
-		content: '';
-		position: absolute;
-		bottom: -10px;
-		left: 9px;
-		width: 12px;
-		height: 5px;
-		border-radius: 1px;
-		background: var(--text);
-	}
-	@keyframes bulb {
-		0%,
-		34% {
-			background: var(--panel-2);
-			box-shadow: none;
-			transform: scale(0.92);
-		}
-		48% {
-			background: var(--gold);
-			box-shadow: 0 0 0 10px rgba(246, 211, 78, 0.5);
-			transform: scale(1.08);
-		}
-		100% {
-			background: var(--gold);
-			box-shadow: 0 0 0 0 rgba(246, 211, 78, 0);
-			transform: scale(1);
-		}
-	}
 	.name {
 		margin-top: 6px;
 		font-size: 20px;
