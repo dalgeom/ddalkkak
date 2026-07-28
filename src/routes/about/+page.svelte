@@ -301,20 +301,15 @@
 	}
 	.mail {
 		display: inline-block;
-		margin-bottom: 16px;
-		padding: 11px 18px;
-		border-radius: 999px;
-		background: var(--panel-2);
-		border: 1px solid var(--border-strong);
-		font-size: 15px;
+		margin-bottom: 18px;
+		font-size: 16px;
 		font-weight: 800;
-		color: var(--text);
+		color: var(--accent);
 		text-decoration: none;
 		word-break: break-all;
 	}
 	.mail:hover {
-		border-color: var(--accent);
-		color: var(--accent);
+		text-decoration: underline;
 	}
 	.cta {
 		display: block;
