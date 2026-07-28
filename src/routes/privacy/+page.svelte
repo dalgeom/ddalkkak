@@ -215,19 +215,14 @@
 	}
 	.mail {
 		display: inline-block;
-		padding: 11px 18px;
-		border-radius: 999px;
-		background: var(--panel-2);
-		border: 1px solid var(--border-strong);
-		font-size: 15px;
+		font-size: 16px;
 		font-weight: 800;
-		color: var(--text);
+		color: var(--accent);
 		text-decoration: none;
 		word-break: break-all;
 	}
 	.mail:hover {
-		border-color: var(--accent);
-		color: var(--accent);
+		text-decoration: underline;
 	}
 	@media (min-width: 768px) {
 		.cover {
