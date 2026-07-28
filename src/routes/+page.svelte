@@ -476,10 +476,10 @@
 			{#if loading}
 				불러오는 중…
 			{:else if resumable}
-				<span class="cta-main">이어서 풀기</span>
+				<span class="cta-main">이어서 풀기 <span class="arr" aria-hidden="true">→</span></span>
 				<span class="cta-sub">{savedProgress.pos} / {DAILY_SIZE}문제 진행 중</span>
 			{:else}
-				오늘의 10문제 시작하기
+				오늘의 10문제 시작하기 <span class="arr" aria-hidden="true">→</span>
 			{/if}
 		</button>
 
@@ -591,13 +591,31 @@
 
 	<div class="adwrap reveal d3"><AdSlot label="랜딩 하단" /></div>
 
-	<!-- ④ 더 풀고 싶은 사람 -->
+	<!-- ④ 10문제로 부족한 사람 — 유형별로 바로 들어가게 -->
 	<section class="sec reveal d3">
-		<a class="practice" href="/play">
-			<b>오늘 걸 다 풀었다면 · 무한 연습</b>
-			<span>발견형 · 상식 · 성냥개비 중 골라 원하는 만큼</span>
-		</a>
-		<p class="total">지금까지 쌓인 문제 <b>{TOTAL_PROBLEMS.toLocaleString()}</b>개</p>
+		<div class="more">
+			<p class="more-h">10문제로는 감질나죠</p>
+			<p class="more-s">
+				<b>{TOTAL_PROBLEMS.toLocaleString()}</b>문제가 기다리고 있어요. 원하는 만큼 계속.
+			</p>
+			<div class="more-grid">
+				<a class="mbtn" href="/play?filter=puzzle">
+					<span class="mb-t">발견형</span>
+					<span class="mb-n">{KIND_COUNT.discover}</span>
+				</a>
+				<a class="mbtn" href="/play?filter=trivia">
+					<span class="mb-t">상식</span>
+					<span class="mb-n">{KIND_COUNT.trivia}</span>
+				</a>
+				<a class="mbtn" href="/play?filter=match">
+					<span class="mb-t">성냥개비</span>
+					<span class="mb-n">{KIND_COUNT.match}</span>
+				</a>
+			</div>
+			<a class="mall" href="/play?filter=all">
+				전부 섞어서 풀기 <span class="arr" aria-hidden="true">→</span>
+			</a>
+		</div>
 	</section>
 {:else if phase === 'play' && current}
 	<div class="topbar">
@@ -823,7 +841,8 @@
 		background: var(--gold);
 		border: 3px solid var(--text);
 		position: relative;
-		animation: bulb-on 900ms var(--ease-out) both;
+		/* '딸-깍' 두 번, 그리고 쉼 — 이 리듬이 사이트 이름 그 자체다 */
+		animation: bulb-click 3.4s steps(1, end) infinite;
 	}
 	.mark-bulb::after {
 		content: '';
@@ -835,26 +854,43 @@
 		border-radius: 1px;
 		background: var(--text);
 	}
-	@keyframes bulb-on {
+	@keyframes bulb-click {
+		/* 딸 */
 		0% {
 			background: var(--panel-2);
 			box-shadow: none;
-			transform: scale(0.9);
 		}
-		55% {
+		4% {
+			background: var(--gold);
+			box-shadow: 0 0 0 7px rgba(246, 211, 78, 0.4);
+		}
+		11% {
+			background: var(--gold);
+			box-shadow: 0 0 0 0 rgba(246, 211, 78, 0);
+		}
+		15% {
 			background: var(--panel-2);
 			box-shadow: none;
-			transform: scale(0.9);
 		}
-		70% {
+		/* 깍 */
+		19% {
 			background: var(--gold);
-			box-shadow: 0 0 0 8px rgba(246, 211, 78, 0.45);
-			transform: scale(1.06);
+			box-shadow: 0 0 0 7px rgba(246, 211, 78, 0.4);
 		}
+		26% {
+			background: var(--gold);
+			box-shadow: 0 0 0 0 rgba(246, 211, 78, 0);
+		}
+		/* 켜진 채로 쉰다 */
 		100% {
 			background: var(--gold);
 			box-shadow: 0 0 0 0 rgba(246, 211, 78, 0);
-			transform: scale(1);
+		}
+	}
+	@media (prefers-reduced-motion: reduce) {
+		.mark-bulb {
+			animation: none;
+			background: var(--gold);
 		}
 	}
 	.slogan {
@@ -927,6 +963,32 @@
 	.cta-main {
 		display: block;
 		font-size: 18px;
+	}
+	/* 화살표가 앞으로 밀렸다 돌아온다 — 누르라는 신호 */
+	.arr {
+		display: inline-block;
+		animation: arr-nudge 1.6s var(--ease-out) infinite;
+	}
+	@keyframes arr-nudge {
+		0%,
+		55%,
+		100% {
+			transform: translateX(0);
+		}
+		70% {
+			transform: translateX(5px);
+		}
+		85% {
+			transform: translateX(1px);
+		}
+	}
+	.cta:hover .arr {
+		animation-duration: 900ms;
+	}
+	@media (prefers-reduced-motion: reduce) {
+		.arr {
+			animation: none;
+		}
 	}
 	.cta-sub {
 		display: block;
@@ -1092,34 +1154,81 @@
 		word-break: keep-all;
 	}
 
-	/* ── 연습 유도 ── */
-	.practice {
-		display: block;
+	/* ── 10문제로 부족한 사람 ── */
+	.more {
 		background: var(--panel);
 		border: 1px solid var(--border-strong);
-		border-radius: 16px;
-		padding: 16px 18px;
-		text-decoration: none;
-		color: inherit;
+		border-radius: 18px;
+		padding: 20px 18px;
+		text-align: center;
 	}
-	.practice b {
-		display: block;
-		font-size: 15px;
-		margin-bottom: 3px;
+	.more-h {
+		font-size: 17px;
+		font-weight: 800;
+		margin: 0;
 	}
-	.practice span {
+	.more-s {
+		margin: 6px 0 16px;
 		font-size: 13px;
 		color: var(--muted);
 	}
-	.total {
-		text-align: center;
-		margin-top: 14px;
-		font-size: 12.5px;
-		color: var(--muted-2);
+	.more-s b {
+		color: var(--accent);
+		font-size: 15px;
+		font-variant-numeric: tabular-nums;
 	}
-	.total b {
-		color: var(--muted);
-		font-size: 14px;
+	.more-grid {
+		display: grid;
+		grid-template-columns: repeat(3, 1fr);
+		gap: 8px;
+	}
+	.mbtn {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 3px;
+		padding: 13px 6px;
+		border-radius: 14px;
+		background: var(--panel-2);
+		border: 1px solid var(--border);
+		text-decoration: none;
+		color: inherit;
+		transition:
+			transform var(--dur-tap) var(--ease-out),
+			border-color var(--dur-move) ease;
+	}
+	.mbtn:hover {
+		transform: translateY(-2px);
+		border-color: var(--accent);
+	}
+	.mb-t {
+		font-size: 13px;
+		font-weight: 700;
+	}
+	.mb-n {
+		font-size: 17px;
+		font-weight: 800;
+		color: var(--accent);
+		font-variant-numeric: tabular-nums;
+	}
+	.mall {
+		display: block;
+		margin-top: 10px;
+		padding: 14px;
+		border-radius: 14px;
+		background: var(--accent);
+		color: #fff;
+		font-size: 15px;
+		font-weight: 800;
+		text-decoration: none;
+		box-shadow: 0 4px 0 var(--accent-press);
+		transition:
+			transform var(--dur-tap) var(--ease-out),
+			box-shadow var(--dur-tap) var(--ease-out);
+	}
+	.mall:active {
+		transform: translateY(2px);
+		box-shadow: 0 2px 0 var(--accent-press);
 	}
 
 	@media (min-width: 768px) {
