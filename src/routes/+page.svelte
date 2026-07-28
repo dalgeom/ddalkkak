@@ -565,7 +565,7 @@
 				<div class="kind-vis rule">
 					<div class="rrow"><span>나무</span><em>→</em><b>2</b></div>
 					<div class="rrow"><span>가나다</span><em>→</em><b>1</b></div>
-					<div class="rrow"><span>고구마</span><em>→</em><b class="q">?</b></div>
+					<div class="rrow"><span>고구마</span><em>→</em><b class="qm">?</b></div>
 				</div>
 				<b>발견형 {KIND_COUNT.discover}</b>
 				<span>예시에 숨은 규칙을 스스로 찾습니다. 막히면 힌트가 3단계로 열려요.</span>
@@ -1005,28 +1005,44 @@
 		gap: 5px;
 		padding: 14px 22px;
 	}
+	/* 그리드로 두면 행마다 트랙 높이가 달라져(마지막 행 35px) 물음표 줄만 내려앉는다.
+	   flex + 고정폭·고정높이로 세 줄을 같은 자리에 못박는다. */
 	.rrow {
-		display: grid;
-		grid-template-columns: 1fr auto 1fr;
+		display: flex;
 		align-items: center;
+		justify-content: center;
 		gap: 10px;
+		height: 21px;
+		line-height: 21px;
 		font-size: 14px;
 		font-weight: 700;
 	}
 	.rrow span {
+		width: 66px;
 		text-align: right;
+		font-size: 14px;
+		line-height: 21px;
+		color: var(--text);
 	}
 	.rrow em {
+		width: 14px;
+		text-align: center;
 		font-style: normal;
+		font-size: 14px;
+		line-height: 21px;
 		color: var(--muted-2);
 		font-weight: 400;
 	}
 	.rrow b {
+		width: 40px;
+		text-align: left;
+		font-size: 14px;
+		line-height: 21px;
 		color: var(--muted);
 	}
-	.rrow b.q {
+	.rrow b.qm {
 		color: var(--accent-2);
-		font-size: 16px;
+		font-weight: 800;
 	}
 	.kind-vis.quiz {
 		display: grid;
@@ -1062,12 +1078,14 @@
 	.mini-line.on {
 		background: #bcdcc9;
 	}
-	.kind b {
+	/* 카드 제목·설명만 겨냥한다. 자손 선택자로 두면 예시 표(.rrow) 안의 b·span까지
+	   먹어 글자 크기와 여백이 뒤틀린다. */
+	.kind > b {
 		display: block;
 		font-size: 15px;
 		margin-bottom: 4px;
 	}
-	.kind span {
+	.kind > span {
 		font-size: 13px;
 		color: var(--muted);
 		line-height: 1.55;
