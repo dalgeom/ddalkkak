@@ -20,6 +20,7 @@
 		type DailyKind
 	} from '$lib/game';
 	import { shareResult, outcomeMessage } from '$lib/shareCard';
+	import { logoClicks } from '$lib/nav';
 	import { parseEq, cloneBoard, isSolved, bit, type Board } from '$lib/matchstick';
 	import MatchstickBoard, { type PickLoc } from '$lib/components/MatchstickBoard.svelte';
 	import SevenSeg from '$lib/components/SevenSeg.svelte';
@@ -76,6 +77,7 @@
 	let mCur = $state<Board | null>(null);
 	let mPicked = $state<PickLoc | null>(null);
 	let mMisses = $state(0);
+	let mAnimFrom = $state<Board | null>(null); // 정답 공개 시 원래 배치 → 성냥이 날아가는 연출
 	let mRevertTimer: ReturnType<typeof setTimeout>;
 
 	let countdown = $state('');
@@ -93,7 +95,7 @@
 
 	const KIND_LABEL: Record<DailyKind, string> = { discover: '발견', trivia: '상식', match: '성냥' };
 	// 랜딩 소개용 — 문제은행을 랜딩에서 받지 않으려고 개수는 상수로 둔다(레이아웃 서버 로드와 같은 값)
-	const KIND_COUNT = { discover: 164, trivia: 433, match: MATCH_TOTAL };
+	const KIND_COUNT = { discover: 163, trivia: 433, match: MATCH_TOTAL };
 	const TOTAL_PROBLEMS = KIND_COUNT.discover + KIND_COUNT.trivia + KIND_COUNT.match;
 	// 성냥개비 소개 카드에 띄우는 읽기전용 보드
 	const demoBoard = parseEq('8 - 0 = 8');
@@ -108,7 +110,9 @@
 		return `${KIND_LABEL[c.kind]} · ${nth}/${same.length}`;
 	});
 
-	/** 결과 화면 행: 유형 3개 + 보너스. 보너스를 유형에 합치면 "발견형 4"처럼 보여 10문제 구성이 어긋난다. */
+	/** 결과 화면 행: 유형 3개 + 보너스. 보너스를 유형에 합치면 "발견형 4"처럼 보여 10문제 구성이 어긋난다.
+	 * 다 푼 뒤 새로고침하면 queue가 비어 있는데, 배치 순서는 늘 발견-상식-성냥 반복 + 마지막 보너스로
+	 * 고정이므로 marks만으로도 유형별 집계를 복원할 수 있다. */
 	let resultRows = $derived.by(() => {
 		const base: Record<string, { label: string; ok: number; total: number }> = {
 			discover: { label: '발견형', ok: 0, total: 0 },
@@ -116,11 +120,14 @@
 			match: { label: '성냥개비', ok: 0, total: 0 },
 			bonus: { label: '보너스', ok: 0, total: 0 }
 		};
-		queue.forEach((q, i) => {
-			const row = base[q.bonus ? 'bonus' : q.kind];
+		const kindAt = (i: number): string =>
+			queue[i] ? (queue[i].bonus ? 'bonus' : queue[i].kind) : i >= 9 ? 'bonus' : (['discover', 'trivia', 'match'] as const)[i % 3];
+		const n = Math.max(queue.length, marks.length);
+		for (let i = 0; i < n; i++) {
+			const row = base[kindAt(i)];
 			row.total += 1;
 			if (marks[i] && marks[i] !== 'miss') row.ok += 1;
-		});
+		}
 		return Object.values(base).filter((r) => r.total > 0);
 	});
 
@@ -226,6 +233,7 @@
 		clearTimeout(mRevertTimer);
 		mMisses = 0;
 		mPicked = null;
+		mAnimFrom = null;
 		const it = queue[pos];
 		if (it?.eq) {
 			mOrig = parseEq(it.eq.displayed);
@@ -292,6 +300,9 @@
 		if (judged) return;
 		if (current?.eq && mOrig) {
 			clearTimeout(mRevertTimer);
+			// 정답으로 확 바뀌면 원래 문제가 뭐였는지 알 수 없다 —
+			// 원래 배치에서 성냥이 날아가 정답 자리에 안착하는 연출로 보여준다
+			mAnimFrom = cloneBoard(mOrig);
 			mCur = parseEq(current.eq.solution);
 			mPicked = null;
 		}
@@ -319,7 +330,7 @@
 		if (isSolved(mOrig, mCur)) settle(mMisses === 0 ? 'clean' : 'hinted', '정답이에요', true);
 		else {
 			mMisses += 1;
-			feedback = { msg: '아직 아니에요 — 되돌릴게요', ok: false };
+			feedback = { msg: '식이 맞지 않아요 — 성냥을 원래 자리로 되돌렸어요', ok: false };
 			clearTimeout(mRevertTimer);
 			mRevertTimer = setTimeout(() => {
 				if (mOrig) mCur = cloneBoard(mOrig);
@@ -402,6 +413,51 @@
 	let savedProgress = $state({ pos: 0, marks: [] as Mark[], done: false });
 	let resumable = $derived(savedProgress.pos > 0 && !savedProgress.done);
 
+	/* 헤더 로고 클릭 → 랜딩 화면으로(진행은 저장). 이미 /에 있으면 링크가 죽은 버튼이라 신호로 받는다. */
+	let logoSeen = -1;
+	$effect(() => {
+		const n = $logoClicks;
+		if (logoSeen === -1) {
+			logoSeen = n; // 마운트 시점 값과 동기화 — 다른 페이지에서 눌린 횟수에 반응하지 않게
+			return;
+		}
+		if (n === logoSeen) return;
+		logoSeen = n;
+		if (phase === 'play') quit();
+		else if (phase === 'done') {
+			phase = 'home';
+			savedProgress = readDailyProgress(dayNum);
+			if (browser) window.scrollTo({ top: 0 });
+		}
+	});
+
+	/* ── 결과 화면 기록: 연속·누적은 completeDailySession이 쌓는 ddal.stats에서, 어제 점수는 어제 진행에서 ── */
+	let doneStats = $state({ streak: 0, played: 0, yesterday: -1 });
+	$effect(() => {
+		if (phase !== 'done' || !browser) return;
+		let s: { dayStreak?: number; played?: number } | null = null;
+		try {
+			s = JSON.parse(localStorage.getItem('ddal.stats') || 'null');
+		} catch {
+			s = null;
+		}
+		const y = readDailyProgress(dayNum - 1);
+		doneStats = {
+			streak: s?.dayStreak || 1,
+			played: s?.played || 1,
+			yesterday: y.done ? y.marks.filter((m) => m !== 'miss').length : -1
+		};
+	});
+
+	/** 가장 약했던 유형 — 결과 화면에서 그 유형 연습으로 이어준다(전부 맞았으면 null) */
+	const FILTER_OF: Record<string, string> = { 발견형: 'puzzle', 상식: 'trivia', 성냥개비: 'match' };
+	let weakest = $derived.by(() => {
+		const rows = resultRows.filter((r) => FILTER_OF[r.label]);
+		let w: (typeof rows)[0] | null = null;
+		for (const r of rows) if (!w || r.ok / r.total < w.ok / w.total) w = r;
+		return w && w.ok < w.total ? w : null;
+	});
+
 	onMount(() => {
 		dayNum = kstDayNumber(Date.now());
 		savedProgress = readDailyProgress(dayNum);
@@ -474,6 +530,8 @@
 		<button class="cta" onclick={startOrResume} disabled={loading}>
 			{#if loading}
 				불러오는 중…
+			{:else if savedProgress.done}
+				오늘의 결과 보기 <span class="arr" aria-hidden="true">→</span>
 			{:else if resumable}
 				<span class="cta-main">이어서 풀기 <span class="arr" aria-hidden="true">→</span></span>
 				<span class="cta-sub">{savedProgress.pos} / {DAILY_SIZE}문제 진행 중</span>
@@ -541,6 +599,9 @@
 						<span class="fmark">{sampleOk ? '✓' : '✕'}</span>
 						<span>{sampleOk ? '딸깍! 맞혔어요' : '정답을 확인했어요'}</span>
 					</div>
+					{#if !sampleOk && data.sample.type !== 'choice'}
+						<div class="answer-line">정답은 <b>{data.sample.answers[0]}</b></div>
+					{/if}
 					<div class="explain"><b>해설</b> {@html data.sample.explain}</div>
 				{:else if data.sample.type !== 'choice'}
 					<div class="dual">
@@ -649,6 +710,7 @@
 							board={mCur}
 							picked={mPicked}
 							onstick={handleStick}
+							animateFrom={mAnimFrom}
 							label={current.eq.displayed.replace('-', '−')}
 						/>
 					</div>
@@ -741,6 +803,9 @@
 			{/if}
 
 			{#if judged}
+				{#if current.problem && current.problem.type !== 'choice' && feedback && !feedback.ok}
+					<div class="answer-line">정답은 <b>{current.problem.answers?.[0]}</b></div>
+				{/if}
 				<div class="explain">
 					<b>해설</b>
 					{#if current.eq}
@@ -784,13 +849,81 @@
 		{/each}
 	</div>
 
-	<p class="share-label">결과 공유</p>
-	<div class="share-btns">
-		<button class="btn-primary" onclick={copyLink}>링크 복사</button>
-		<button class="btn-outline" onclick={shareNative}>공유하기</button>
+	<!-- 기록: 결과만 덜렁 있으면 다 푼 사람이 볼 게 없다 — 연속·누적·어제 대비를 보여준다 -->
+	<div class="stats">
+		<div class="stat">
+			<b>{doneStats.streak}일</b>
+			<span>연속 딸깍</span>
+		</div>
+		<div class="stat">
+			<b>{doneStats.played}일</b>
+			<span>누적 참여</span>
+		</div>
+		<div class="stat">
+			{#if doneStats.yesterday >= 0}
+				<b class:up={correctCount > doneStats.yesterday} class:down={correctCount < doneStats.yesterday}>
+					{doneStats.yesterday} → {correctCount}
+				</b>
+				<span>어제 → 오늘</span>
+			{:else}
+				<b>첫 기록</b>
+				<span>내일부터 비교돼요</span>
+			{/if}
+		</div>
 	</div>
 
-	<a class="cta link" href="/play">무한 연습하러 가기</a>
+	<p class="share-label">결과 공유</p>
+	<div class="share-btns">
+		<button class="sh-btn primary" onclick={shareNative}>
+			<svg
+				viewBox="0 0 24 24"
+				fill="none"
+				stroke="currentColor"
+				stroke-width="2"
+				stroke-linecap="round"
+				stroke-linejoin="round"
+				aria-hidden="true"
+			>
+				<path d="M12 15V4" />
+				<path d="M8 7l4-4 4 4" />
+				<path d="M5 12v7a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-7" />
+			</svg>
+			공유하기
+		</button>
+		<button class="sh-btn" onclick={copyLink}>
+			<svg
+				viewBox="0 0 24 24"
+				fill="none"
+				stroke="currentColor"
+				stroke-width="2"
+				stroke-linecap="round"
+				stroke-linejoin="round"
+				aria-hidden="true"
+			>
+				<path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+				<path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+			</svg>
+			링크 복사
+		</button>
+	</div>
+
+	<!-- 다음 행동: 가장 약했던 유형의 연습으로 이어준다 -->
+	<div class="nudge">
+		{#if weakest}
+			<p class="nudge-t">
+				오늘 <b>{weakest.label} {weakest.ok}/{weakest.total}</b> — 연습으로 감을 잡아볼까요?
+			</p>
+			<a class="nudge-btn" href="/play?filter={FILTER_OF[weakest.label]}">
+				{weakest.label} 연습하러 가기 <span class="arr" aria-hidden="true">→</span>
+			</a>
+		{:else}
+			<p class="nudge-t">오늘 감이 좋은데요? 이 기세로 계속 풀어봐요.</p>
+			<a class="nudge-btn" href="/play?filter=all">
+				무한 연습하러 가기 <span class="arr" aria-hidden="true">→</span>
+			</a>
+		{/if}
+	</div>
+
 	<p class="next-day">내일 10문제까지 {countdown || '--:--:--'}</p>
 {/if}
 
@@ -1534,6 +1667,24 @@
 		}
 	}
 
+	/* 모르겠어요·오답 뒤 정답 공개 — 해설에 답이 없을 수 있어 정답을 따로 명시한다 */
+	.answer-line {
+		margin-top: 10px;
+		flex: none;
+		background: var(--correct-bg);
+		border: 1px solid var(--accent);
+		border-radius: 12px;
+		padding: 11px 14px;
+		font-size: 14px;
+		font-weight: 700;
+		color: var(--text);
+		animation: fb-in 320ms var(--ease-out) both;
+	}
+	.answer-line b {
+		color: var(--accent);
+		font-weight: 800;
+	}
+
 	.explain {
 		margin-top: 14px;
 		flex: none;
@@ -1659,6 +1810,41 @@
 	.frac.bad {
 		color: var(--danger);
 	}
+	/* 기록 3칸 — 연속·누적·어제 대비 */
+	.stats {
+		display: grid;
+		grid-template-columns: repeat(3, 1fr);
+		gap: 8px;
+		margin-top: 8px;
+	}
+	.stat {
+		background: var(--panel);
+		border: 1px solid var(--border-strong);
+		border-radius: 12px;
+		padding: 13px 6px 11px;
+		text-align: center;
+	}
+	.stat b {
+		display: block;
+		font-size: 17px;
+		font-weight: 800;
+		font-variant-numeric: tabular-nums;
+		letter-spacing: -0.2px;
+	}
+	.stat b.up {
+		color: var(--accent);
+	}
+	.stat b.down {
+		color: var(--accent-2);
+	}
+	.stat span {
+		display: block;
+		margin-top: 3px;
+		font-size: 11.5px;
+		color: var(--muted-2);
+		font-weight: 600;
+	}
+
 	.share-label {
 		font-size: 13px;
 		font-weight: 700;
@@ -1669,33 +1855,88 @@
 		display: flex;
 		gap: 8px;
 	}
-	.btn-primary,
-	.btn-outline {
+	.sh-btn {
 		flex: 1;
-		height: 48px;
-		border-radius: 12px;
-		font-size: 14px;
-		cursor: pointer;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 7px;
+		height: 52px;
+		border-radius: 14px;
+		font-size: 14.5px;
+		font-weight: 700;
 		font-family: inherit;
+		cursor: pointer;
+		background: var(--panel);
+		border: 1px solid var(--border-strong);
+		color: var(--text);
+		transition:
+			background var(--dur-move) ease,
+			transform var(--dur-tap) var(--ease-out),
+			box-shadow var(--dur-tap) var(--ease-out);
 	}
-	.btn-primary {
+	.sh-btn:hover {
+		background: var(--panel-2);
+	}
+	.sh-btn svg {
+		width: 18px;
+		height: 18px;
+		flex: none;
+	}
+	.sh-btn.primary {
 		background: var(--accent);
+		border: none;
 		color: #fff;
 		font-weight: 800;
-		border: none;
-		box-shadow: 0 6px 0 var(--accent-press);
+		box-shadow: 0 5px 0 var(--accent-press);
 	}
-	.btn-outline {
-		background: transparent;
-		color: var(--text);
-		font-weight: 700;
-		border: 1px solid var(--border-strong);
+	.sh-btn.primary:hover {
+		background: var(--accent);
+		filter: brightness(1.04);
 	}
-	.cta.link {
+	.sh-btn.primary:active {
+		transform: translateY(3px);
+		box-shadow: 0 2px 0 var(--accent-press);
+	}
+
+	/* 약점 유형 연습 유도 */
+	.nudge {
 		margin-top: 18px;
-		min-height: 56px;
-		font-size: 16px;
-		line-height: 32px;
+		background: var(--panel);
+		border: 1px solid var(--border-strong);
+		border-radius: 16px;
+		padding: 16px;
+		text-align: center;
+	}
+	.nudge-t {
+		font-size: 13.5px;
+		color: var(--muted);
+		margin: 0 0 12px;
+		word-break: keep-all;
+	}
+	.nudge-t b {
+		color: var(--text);
+	}
+	.nudge-btn {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 6px;
+		min-height: 54px;
+		border-radius: 14px;
+		background: var(--accent);
+		color: #fff;
+		font-size: 15.5px;
+		font-weight: 800;
+		text-decoration: none;
+		box-shadow: 0 5px 0 var(--accent-press);
+		transition:
+			transform var(--dur-tap) var(--ease-out),
+			box-shadow var(--dur-tap) var(--ease-out);
+	}
+	.nudge-btn:active {
+		transform: translateY(3px);
+		box-shadow: 0 2px 0 var(--accent-press);
 	}
 	.next-day {
 		text-align: center;

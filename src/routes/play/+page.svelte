@@ -57,6 +57,7 @@
 	let mCur = $state<Board | null>(null);
 	let mPicked = $state<PickLoc | null>(null);
 	let mMisses = $state(0);
+	let mAnimFrom = $state<Board | null>(null); // 정답 공개 시 원래 배치 → 성냥이 날아가는 연출
 	let mRevertTimer: ReturnType<typeof setTimeout>;
 
 	let shownHints = $derived(shown?.hints ? shown.hints.slice(0, hintsUsed) : []);
@@ -140,6 +141,7 @@
 		clearTimeout(mRevertTimer);
 		mMisses = 0;
 		mPicked = null;
+		mAnimFrom = null;
 		if (current?.eq) {
 			mOrig = parseEq(current.eq.displayed);
 			mCur = cloneBoard(mOrig);
@@ -202,6 +204,8 @@
 		if (judged) return;
 		if (current?.eq && mOrig) {
 			clearTimeout(mRevertTimer);
+			// 원래 배치에서 성냥이 날아가 정답 자리에 안착하는 연출로 보여준다
+			mAnimFrom = cloneBoard(mOrig);
 			mCur = parseEq(current.eq.solution);
 			mPicked = null;
 		}
@@ -234,7 +238,7 @@
 		if (isSolved(mOrig, mCur)) settle(true, '정답이에요');
 		else {
 			mMisses += 1;
-			feedback = { msg: '아직 아니에요 — 되돌릴게요', ok: false };
+			feedback = { msg: '식이 맞지 않아요 — 성냥을 원래 자리로 되돌렸어요', ok: false };
 			clearTimeout(mRevertTimer);
 			mRevertTimer = setTimeout(() => {
 				if (mOrig) mCur = cloneBoard(mOrig);
@@ -307,6 +311,7 @@
 					board={mCur}
 					picked={mPicked}
 					onstick={handleStick}
+					animateFrom={mAnimFrom}
 					label={current.eq.displayed.replace('-', '−')}
 				/>
 				<p class="guide">{mPicked ? '빈 자리를 짚어 내려놓으세요.' : '옮길 획을 짚어보세요.'}</p>
@@ -394,6 +399,9 @@
 		{/if}
 
 		{#if judged}
+			{#if shown && !current.eq && shown.type !== 'choice' && feedback && !feedback.ok}
+				<div class="answer-line">정답은 <b>{shown.answers?.[0]}</b></div>
+			{/if}
 			<div class="explain">
 				<b>해설</b>
 				{#if current.eq}
@@ -655,6 +663,22 @@
 	.fmark {
 		font-weight: 800;
 	}
+	/* 모르겠어요·오답 뒤 정답 공개 — 해설에 답이 없을 수 있어 정답을 따로 명시한다 */
+	.answer-line {
+		margin-top: 10px;
+		background: var(--correct-bg);
+		border: 1px solid var(--accent);
+		border-radius: 12px;
+		padding: 11px 14px;
+		font-size: 14px;
+		font-weight: 700;
+		color: var(--text);
+	}
+	.answer-line b {
+		color: var(--accent);
+		font-weight: 800;
+	}
+
 	.explain {
 		margin-top: 14px;
 		background: var(--panel-2);

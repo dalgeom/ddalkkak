@@ -1,6 +1,7 @@
 <script lang="ts">
 	import AdSlot from '$lib/components/AdSlot.svelte';
 	import Splash from '$lib/components/Splash.svelte';
+	import { logoClicks } from '$lib/nav';
 
 	let { children, data } = $props();
 	const year = new Date().getFullYear();
@@ -10,7 +11,7 @@
 
 <div class="wrap">
 	<header>
-		<a class="logo" href="/">
+		<a class="logo" href="/" onclick={() => logoClicks.update((n) => n + 1)}>
 			<span class="bulb" aria-hidden="true"></span>
 			<span class="name">딸깍</span>
 		</a>

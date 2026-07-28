@@ -12,7 +12,8 @@
 		picked,
 		onstick,
 		label,
-		interactive = true
+		interactive = true,
+		animateFrom = null
 	}: {
 		board: Board;
 		picked: PickLoc | null;
@@ -21,6 +22,12 @@
 		label?: string;
 		/** false면 읽기전용(허브 미리보기·아카이브) — role/tabindex/키보드 핸들러를 렌더하지 않아 죽은 탭 정지점을 없앤다. */
 		interactive?: boolean;
+		/**
+		 * 정답 공개 연출: 이 배치(원래 문제)에서 현재 board(정답)로 바뀔 때,
+		 * 옮겨진 성냥이 집혔다가 새 자리로 날아가 안착하는 애니메이션을 재생한다.
+		 * 정답 화면만 남으면 그 전 상태가 뭐였는지 알 수 없어서 넣은 연출이다.
+		 */
+		animateFrom?: Board | null;
 	} = $props();
 
 	/** Enter·Space로 세그먼트 활성화(WAI-ARIA button 패턴) */
@@ -79,6 +86,74 @@
 		}
 		return { xs, width: x - GAP, opX: xs[0] + GW + GAP, eqX: xs[1] + GW + GAP };
 	});
+
+	/* ── 정답 공개 애니메이션 ── */
+
+	type Geo = { x: number; y: number; w: number; h: number };
+
+	function locGeo(kind: 'op' | 'glyph', gi?: number, seg?: SegKey): Geo {
+		if (kind === 'op') return { x: layout.opX + 17, y: 30, w: 8, h: 35 };
+		const r = SEG_RECT[seg!];
+		return { x: layout.xs[gi!] + r[0], y: r[1], w: r[2], h: r[3] };
+	}
+
+	let animPhase = $state<'idle' | 'lift' | 'fly' | 'land'>('idle');
+	/** 떠 있는 성냥들의 현재 지오메트리 — lift 때 출발 자리, fly 때 도착 자리(CSS transition이 사이를 메움) */
+	let flyGeos = $state<Geo[]>([]);
+	let animKeys = $state<Set<string>>(new Set());
+	let lastAnim: Board | null = null;
+	let animT1: ReturnType<typeof setTimeout>;
+	let animT2: ReturnType<typeof setTimeout>;
+
+	$effect(() => {
+		if (animateFrom === lastAnim) return;
+		lastAnim = animateFrom;
+		clearTimeout(animT1);
+		clearTimeout(animT2);
+		if (!animateFrom) {
+			animPhase = 'idle';
+			return;
+		}
+		// 원래 배치와 정답 배치의 차이 = 옮겨진 성냥(빠진 자리 → 새로 켜진 자리)
+		const removed: { key: string; geo: Geo }[] = [];
+		const added: { key: string; geo: Geo }[] = [];
+		for (let gi = 0; gi < board.glyphs.length; gi++) {
+			for (const seg of SEG_KEYS) {
+				const was = (animateFrom.glyphs[gi] & bit(seg)) !== 0;
+				const now = (board.glyphs[gi] & bit(seg)) !== 0;
+				if (was === now) continue;
+				(was ? removed : added).push({ key: `g${gi}-${seg}`, geo: locGeo('glyph', gi, seg) });
+			}
+		}
+		if (animateFrom.opPlus !== board.opPlus) {
+			(animateFrom.opPlus ? removed : added).push({ key: 'op', geo: locGeo('op') });
+		}
+		const pairs = removed.map((r, i) => ({ from: r, to: added[i] ?? r }));
+		if (!pairs.length) {
+			animPhase = 'idle';
+			return;
+		}
+		animKeys = new Set(pairs.flatMap((p) => [p.from.key, p.to.key]));
+		flyGeos = pairs.map((p) => p.from.geo);
+		animPhase = 'lift'; // 출발 자리에서 집힌 색으로 잠깐 떠 있고
+		animT1 = setTimeout(() => {
+			animPhase = 'fly'; // 도착 자리로 스르륵
+			flyGeos = pairs.map((p) => p.to.geo);
+		}, 500);
+		animT2 = setTimeout(() => {
+			animPhase = 'land'; // 안착 — 이후는 정답 보드 그대로
+		}, 500 + 900);
+		return () => {
+			clearTimeout(animT1);
+			clearTimeout(animT2);
+		};
+	});
+
+	/** 애니메이션 중에는 옮겨지는 성냥의 출발·도착 자리를 비워 두고 떠 있는 성냥이 대신 보인다 */
+	function shownLit(key: string, lit: boolean): boolean {
+		if ((animPhase === 'lift' || animPhase === 'fly') && animKeys.has(key)) return false;
+		return lit;
+	}
 </script>
 
 <div class="mboard">
@@ -102,7 +177,7 @@
 						width="8"
 						height="35"
 						rx="3"
-						class="stick {board.opPlus ? 'lit' : 'ghost'} {isPicked({ kind: 'op' })
+						class="stick {shownLit('op', board.opPlus) ? 'lit' : 'ghost'} {isPicked({ kind: 'op' })
 							? 'picked'
 							: ''}"
 						class:ro={!interactive}
@@ -132,7 +207,11 @@
 						width={r[2]}
 						height={r[3]}
 						rx="3"
-						class="stick {lit ? 'lit' : 'ghost'} {isPicked({ kind: 'glyph', gi, seg })
+						class="stick {shownLit(`g${gi}-${seg}`, lit) ? 'lit' : 'ghost'} {isPicked({
+							kind: 'glyph',
+							gi,
+							seg
+						})
 							? 'picked'
 							: ''}"
 						class:ro={!interactive}
@@ -146,6 +225,17 @@
 				{/each}
 			</g>
 		{/each}
+
+		<!-- 정답 공개: 옮겨지는 성냥이 집힌 색으로 떠서 새 자리로 날아간다 -->
+		{#if animPhase === 'lift' || animPhase === 'fly'}
+			{#each flyGeos as g, i (i)}
+				<rect
+					class="stick flying"
+					rx="3"
+					style="x:{g.x}px; y:{g.y}px; width:{g.w}px; height:{g.h}px"
+				/>
+			{/each}
+		{/if}
 	</svg>
 </div>
 
@@ -182,6 +272,18 @@
 	.stick.picked {
 		fill: #ffb020;
 		filter: drop-shadow(0 0 8px rgba(255, 176, 32, 0.9));
+	}
+	/* 날아가는 성냥 — 집힌 성냥과 같은 주황. 지오메트리를 style로 줘야 x·y·width·height에
+	   CSS transition이 걸린다(속성으로 주면 브라우저에 따라 전환이 안 붙는다). */
+	.stick.flying {
+		fill: #ffb020;
+		filter: drop-shadow(0 0 8px rgba(255, 176, 32, 0.9));
+		pointer-events: none;
+		transition:
+			x 900ms cubic-bezier(0.25, 0.8, 0.3, 1),
+			y 900ms cubic-bezier(0.25, 0.8, 0.3, 1),
+			width 900ms cubic-bezier(0.25, 0.8, 0.3, 1),
+			height 900ms cubic-bezier(0.25, 0.8, 0.3, 1);
 	}
 	.fixed {
 		fill: #ffd24a;
