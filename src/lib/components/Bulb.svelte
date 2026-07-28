@@ -190,11 +190,12 @@
 			draw 4.5s linear infinite,
 			trail 4.5s linear infinite;
 	}
-	/* 유리 안은 얇은 진초록 필라멘트 — 금색 유리 위 대비 */
+	/* 유리 안(입)은 검은 라인 — 노란 바탕 + 검은 눈·입의 클래식 스마일리.
+	   초록으로 두면 공포영화 이모티콘처럼 보인다. */
 	.trace.fil {
-		stroke: var(--accent-press);
-		stroke-width: 1.4;
-		filter: drop-shadow(0 0 1.2px rgba(47, 143, 91, 0.7));
+		stroke: var(--text);
+		stroke-width: 1.6;
+		filter: none;
 	}
 	@keyframes draw {
 		0% {
@@ -219,11 +220,10 @@
 		}
 	}
 
-	/* ── 눈: 딸깍 순간 팝(키프레임은 위에서 생성해 주입) ── */
+	/* ── 눈: 딸깍 순간 팝(키프레임은 위에서 생성해 주입) — 입과 같은 검정 ── */
 	.eye {
-		fill: var(--accent-press);
+		fill: var(--text);
 		opacity: 0;
-		filter: drop-shadow(0 0 1.5px rgba(47, 143, 91, 0.7));
 		animation: bulb-eyes-pop 4.5s linear infinite;
 	}
 
