@@ -307,12 +307,6 @@
 			</div>
 		</header>
 
-		<a class="today" href="/">
-			<span class="t-t">오늘 치는 여기가 아니에요</span>
-			<span class="t-d">성냥개비 3문제는 '오늘의 10문제'에 들어 있어요</span>
-			<span class="t-go">오늘의 10문제 풀러 가기 <span class="arr" aria-hidden="true">→</span></span>
-		</a>
-
 		<section class="msec">
 			<h2 class="mh">무한 연습</h2>
 			<p class="mp">시간·개수 제한 없이 계속 풉니다.</p>
@@ -483,34 +477,6 @@
 		color: var(--muted-2);
 	}
 
-	.today {
-		display: block;
-		background: var(--gold-bg);
-		border: 1px solid var(--gold);
-		border-radius: 16px;
-		padding: 15px 16px;
-		text-decoration: none;
-		color: var(--gold-text);
-	}
-	.t-t {
-		display: block;
-		font-size: 14px;
-		font-weight: 800;
-	}
-	.t-d {
-		display: block;
-		margin-top: 3px;
-		font-size: 12.5px;
-		opacity: 0.9;
-		word-break: keep-all;
-	}
-	.t-go {
-		display: block;
-		margin-top: 9px;
-		font-size: 13px;
-		font-weight: 800;
-		text-decoration: underline;
-	}
 
 	.msec {
 		background: var(--panel);
