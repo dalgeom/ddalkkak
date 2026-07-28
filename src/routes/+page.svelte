@@ -594,9 +594,9 @@
 	<!-- ④ 10문제로 부족한 사람 — 유형별로 바로 들어가게 -->
 	<section class="sec reveal d3">
 		<div class="more">
-			<p class="more-h">10문제로는 감질나죠</p>
+			<p class="more-h">더 풀고 싶다면?</p>
 			<p class="more-s">
-				<b>{TOTAL_PROBLEMS.toLocaleString()}</b>문제가 기다리고 있어요. 원하는 만큼 계속.
+				딸깍이 준비한 <b>{TOTAL_PROBLEMS.toLocaleString()}</b>문제! 유형별로 계속 풀어봐요
 			</p>
 			<div class="more-grid">
 				<a class="mbtn" href="/play?filter=puzzle">
