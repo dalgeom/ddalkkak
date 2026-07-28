@@ -1,19 +1,25 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
+
 	/**
-	 * 심전도 신호가 전구를 관통하며 '딸깍' 켜지는 연출.
+	 * 심전도 모니터 연출 — 레퍼런스 영상 그대로:
+	 * 선이 통째로 흘러가는 게 아니라, 빛나는 끝점이 왼쪽에서 오른쪽으로
+	 * 파형을 '그려 나간다'. 그려진 자국은 남고, 그리는 지점이 가장 밝다.
+	 * 끝점이 전구를 통과하는 순간 딸깍 켜진다. 끝까지 그리면 잔상이 스르르
+	 * 사라지고 처음부터 다시 그린다.
 	 *
-	 * 실제 심전도 모니터처럼: 베이스라인은 평평하고, 박동(P-QRS-T)은 직선으로 꺾인
-	 * 날카로운 스파이크다. 사인파로 그리면 둥글둥글해져서 심전도로 안 보인다.
-	 * 박동은 한 주기에 4개(높이를 조금씩 다르게), 초당 하나꼴로 전구를 관통한다.
+	 * 구현: pathLength=100 + stroke-dashoffset 100→0 으로 선을 그리고,
+	 * 같은 경로를 offset-path로 따라가는 광점(팁)을 얹는다. 둘 다 호 길이
+	 * 기준이라 정확히 붙어 다닌다.
 	 */
 	let { size = 44 }: { size?: number } = $props();
 
-	const W = 260; // 한 주기 폭
+	const W = 260;
 	const H = 66;
 	const CX = 130; // 전구 중심
 	const CY = 26;
 
-	/** 박동 하나 — 각진 폴리라인(작은 P → 급한 QRS 스파이크 → 완만한 T) */
+	/** 박동 하나 — 각진 폴리라인(작은 P → 급한 QRS → 완만한 T) */
 	const BEAT_PTS: [number, number][] = [
 		[0, 0],
 		[5, 0],
@@ -29,62 +35,70 @@
 		[50, 0],
 		[56, 0]
 	];
-	/** 한 주기 안 박동 위치(균등 간격)와 높이 배율 — 모니터처럼 조금씩 다르게 */
-	const BEATS = [0.05, 0.3, 0.55, 0.8];
-	const SCALES = [1, 0.7, 0.92, 0.78];
+	/** 화면 폭 안에 박동 3개 — 레퍼런스와 같은 밀도. 높이는 조금씩 다르게. */
+	const BEATS = [0.1, 0.42, 0.74];
+	const SCALES = [0.85, 1, 0.8];
 
-	/** 세 주기(-W~2W)를 이어 그린다. 한 주기 밀면 자기 자신과 겹쳐 이음매가 없다. */
-	let d = $derived.by(() => {
-		const pts: string[] = [`-${W} ${CY}`];
-		for (let k = -1; k <= 2; k++) {
-			BEATS.forEach((b, i) => {
-				const x0 = (k + b) * W;
-				for (const [dx, dy] of BEAT_PTS) {
-					pts.push(`${(x0 + dx).toFixed(1)} ${(CY + dy * SCALES[i]).toFixed(1)}`);
-				}
-			});
+	/** 파형 점 목록(한 화면 분량) */
+	const pts: [number, number][] = [[0, CY]];
+	for (let i = 0; i < BEATS.length; i++) {
+		const x0 = BEATS[i] * W;
+		for (const [dx, dy] of BEAT_PTS) pts.push([x0 + dx, CY + dy * SCALES[i]]);
+	}
+	pts.push([W, CY]);
+
+	const d = 'M' + pts.map(([x, y]) => `${x.toFixed(1)} ${y.toFixed(1)}`).join(' L');
+
+	/** 끝점이 전구(CX)에 닿는 순간 = 전체 호 길이 대비 몇 %인가 (그리기 속도는 호 길이 기준) */
+	let fracAtBulb = 0.5;
+	{
+		let total = 0;
+		const cum: number[] = [0];
+		for (let i = 1; i < pts.length; i++) {
+			total += Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]);
+			cum.push(total);
 		}
-		pts.push(`${2 * W} ${CY}`);
-		return 'M' + pts.join(' L');
-	});
+		for (let i = 1; i < pts.length; i++) {
+			if (pts[i][0] >= CX) {
+				const x1 = pts[i - 1][0];
+				const seg = cum[i] - cum[i - 1];
+				const r = pts[i][0] === x1 ? 0 : (CX - x1) / (pts[i][0] - x1);
+				fracAtBulb = (cum[i - 1] + seg * Math.max(0, Math.min(1, r))) / total;
+				break;
+			}
+		}
+	}
 
-	/**
-	 * 번쩍이는 시점: R파(박동 시작 +24px)가 전구(CX)에 오는 순간.
-	 *   t = ((CX - (beat*W + 24)) / W) mod 1
-	 * BEATS = [0.05, 0.3, 0.55, 0.8] → 약 10.8% · 35.8% · 60.8% · 85.8%.
-	 * CSS 키프레임 %에는 변수를 못 넣어 flash/burst에 그 값을 직접 적었다.
-	 * BEATS를 바꾸면 키프레임도 같이 고쳐야 한다.
-	 */
+	/** 한 사이클 4.5초. 0~86% 그리기, 86~94% 잔상 소멸, 나머지 빈 화면(모니터 리셋). */
+	const T = 4500;
+	const DRAW = 0.86;
+	const flashDelay = Math.round(fracAtBulb * DRAW * T);
+
+	/** offset-path 미지원 브라우저에서는 팁이 (0,0)에 박혀 보이므로 숨긴다 */
+	let tipOk = $state(false);
+	onMount(() => {
+		try {
+			tipOk = CSS.supports('offset-path', "path('M0 0 L1 1')");
+		} catch {
+			tipOk = false;
+		}
+	});
 </script>
 
-<span
-	class="wrap"
-	style="--w:{Math.round(size * (W / 32))}px"
-	aria-hidden="true"
->
+<span class="wrap" style="--w:{Math.round(size * (W / 32))}px" aria-hidden="true">
 	<svg viewBox="0 0 {W} {H}" width="100%" height="100%">
-		<defs>
-			<linearGradient id="bulbFade" x1="0" x2="1" y1="0" y2="0">
-				<stop offset="0" stop-color="white" stop-opacity="0" />
-				<stop offset="0.14" stop-color="white" stop-opacity="1" />
-				<stop offset="0.86" stop-color="white" stop-opacity="1" />
-				<stop offset="1" stop-color="white" stop-opacity="0" />
-			</linearGradient>
-			<mask id="bulbMask">
-				<rect x="0" y="0" width={W} height={H} fill="url(#bulbFade)" />
-			</mask>
-		</defs>
+		<!-- 그려지는 파형(자국) -->
+		<path class="trace" pathLength="100" {d} />
 
-		<g mask="url(#bulbMask)">
-			<g class="wave">
-				<path class="line" {d} />
-			</g>
-		</g>
+		<!-- 그리는 끝점 — 가장 밝은 광점 -->
+		{#if tipOk}
+			<circle class="tip" r="3.4" style="offset-path: path('{d}')" />
+		{/if}
 
-		<circle class="halo" cx={CX} cy={CY} r="17" />
+		<circle class="halo" cx={CX} cy={CY} r="17" style="animation-delay: {flashDelay}ms" />
 		<!-- 로고 그대로: 원 + 소켓 -->
 		<circle class="glass" cx={CX} cy={CY} r="16" />
-		<circle class="flash" cx={CX} cy={CY} r="14" />
+		<circle class="flash" cx={CX} cy={CY} r="14" style="animation-delay: {flashDelay}ms" />
 		<rect class="socket" x={CX - 7} y={CY + 17} width="14" height="6" rx="1.5" />
 	</svg>
 </span>
@@ -102,29 +116,73 @@
 		overflow: visible;
 	}
 
-	.line {
+	/* ── 파형 자국 ── */
+	.trace {
 		fill: none;
 		stroke: var(--accent-2);
 		stroke-width: 2.4;
 		stroke-linecap: round;
 		stroke-linejoin: round;
-		/* 모니터의 네온 발광 — 안쪽 짧은 번짐 + 바깥 넓은 번짐 */
-		filter: drop-shadow(0 0 2px rgba(192, 99, 46, 0.9)) drop-shadow(0 0 6px rgba(192, 99, 46, 0.45));
+		stroke-dasharray: 100;
+		filter: drop-shadow(0 0 2px rgba(192, 99, 46, 0.9)) drop-shadow(0 0 6px rgba(246, 211, 78, 0.5));
+		animation:
+			draw 4.5s linear infinite,
+			trail 4.5s linear infinite;
 	}
-	/* 정확히 한 주기만큼 밀어 이음매 없이 흐른다 */
-	.wave {
-		animation: flow 4s linear infinite;
-	}
-	@keyframes flow {
-		from {
-			transform: translateX(0);
+	@keyframes draw {
+		0% {
+			stroke-dashoffset: 100;
 		}
-		to {
-			transform: translateX(260px);
+		86% {
+			stroke-dashoffset: 0;
+		}
+		100% {
+			stroke-dashoffset: 0;
+		}
+	}
+	/* 다 그린 뒤 잔상이 스르르 사라지고, 빈 화면에서 다시 시작 */
+	@keyframes trail {
+		0%,
+		86% {
+			opacity: 1;
+		}
+		94%,
+		100% {
+			opacity: 0;
 		}
 	}
 
-	/* 전구는 늘 금색(로고 유지). 심박이 관통할 때만 번쩍인다 */
+	/* ── 그리는 끝점(광점) ── */
+	.tip {
+		fill: #ffe9a0;
+		filter: drop-shadow(0 0 3px rgba(246, 211, 78, 1)) drop-shadow(0 0 8px rgba(246, 211, 78, 0.8));
+		animation:
+			tip-move 4.5s linear infinite,
+			tip-vis 4.5s linear infinite;
+	}
+	@keyframes tip-move {
+		0% {
+			offset-distance: 0%;
+		}
+		86% {
+			offset-distance: 100%;
+		}
+		100% {
+			offset-distance: 100%;
+		}
+	}
+	@keyframes tip-vis {
+		0%,
+		85% {
+			opacity: 1;
+		}
+		87%,
+		100% {
+			opacity: 0;
+		}
+	}
+
+	/* ── 전구: 로고 그대로 늘 금색, 끝점이 통과할 때만 번쩍 ── */
 	.glass {
 		fill: var(--gold);
 		stroke: var(--text);
@@ -133,48 +191,20 @@
 	.socket {
 		fill: var(--text);
 	}
+	/* 번쩍임 시점은 호 길이로 계산해 인라인 animation-delay로 넣는다(키프레임 %는 변수 불가) */
 	.flash {
 		fill: #fff8dc;
 		opacity: 0;
-		animation: flash 4s ease-out infinite;
+		animation: blink 4.5s ease-out infinite;
 	}
-	/* 박동 4개가 초당 하나꼴로 관통 — 번쩍임도 4번(10.8 · 35.8 · 60.8 · 85.8%) */
-	@keyframes flash {
-		0%,
-		9.4% {
+	@keyframes blink {
+		0% {
 			opacity: 0;
 		}
-		10.8% {
+		1% {
 			opacity: 0.85;
 		}
-		14.5% {
-			opacity: 0;
-		}
-		34.4% {
-			opacity: 0;
-		}
-		35.8% {
-			opacity: 0.85;
-		}
-		39.5% {
-			opacity: 0;
-		}
-		59.4% {
-			opacity: 0;
-		}
-		60.8% {
-			opacity: 0.85;
-		}
-		64.5% {
-			opacity: 0;
-		}
-		84.4% {
-			opacity: 0;
-		}
-		85.8% {
-			opacity: 0.85;
-		}
-		89.5% {
+		6% {
 			opacity: 0;
 		}
 		100% {
@@ -185,67 +215,39 @@
 		fill: var(--gold);
 		transform-origin: 130px 26px;
 		opacity: 0;
-		animation: burst 4s ease-out infinite;
+		animation: pulse-halo 4.5s ease-out infinite;
 	}
-	@keyframes burst {
-		0%,
-		9.3% {
+	@keyframes pulse-halo {
+		0% {
 			opacity: 0;
 			transform: scale(0.85);
 		}
-		11.5% {
-			opacity: 0.4;
-			transform: scale(1.45);
+		2% {
+			opacity: 0.45;
+			transform: scale(1.5);
 		}
-		17% {
+		8% {
 			opacity: 0;
-			transform: scale(1.75);
+			transform: scale(1.8);
 		}
-		34.3% {
-			opacity: 0;
-			transform: scale(0.85);
-		}
-		36.5% {
-			opacity: 0.4;
-			transform: scale(1.45);
-		}
-		42% {
-			opacity: 0;
-			transform: scale(1.75);
-		}
-		59.3% {
-			opacity: 0;
-			transform: scale(0.85);
-		}
-		61.5% {
-			opacity: 0.4;
-			transform: scale(1.45);
-		}
-		67% {
-			opacity: 0;
-			transform: scale(1.75);
-		}
-		84.3% {
-			opacity: 0;
-			transform: scale(0.85);
-		}
-		86.5% {
-			opacity: 0.4;
-			transform: scale(1.45);
-		}
-		92%,
 		100% {
 			opacity: 0;
-			transform: scale(1.75);
+			transform: scale(1.8);
 		}
 	}
 
 	@media (prefers-reduced-motion: reduce) {
-		.wave,
+		.trace,
+		.tip,
 		.flash,
 		.halo {
 			animation: none;
 		}
+		.trace {
+			stroke-dashoffset: 0;
+			opacity: 1;
+		}
+		.tip,
 		.flash,
 		.halo {
 			opacity: 0;
