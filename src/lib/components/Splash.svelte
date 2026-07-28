@@ -19,7 +19,7 @@
 {#if show}
 	<div class="splash" role="status" aria-label="딸깍 불러오는 중">
 		<div class="inner">
-			<Bulb size={40} />
+			<Bulb size={48} />
 			<span class="name">딸깍</span>
 			<div class="bar" aria-hidden="true"><span></span></div>
 		</div>

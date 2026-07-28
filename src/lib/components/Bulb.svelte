@@ -1,114 +1,116 @@
 <script lang="ts">
 	/**
-	 * '딸깍' 순간을 재생하는 전구.
+	 * 심전도 펄스가 전구를 관통하며 '딸깍' 켜지는 연출.
 	 *
-	 * 만화에서 아이디어가 번뜩일 때처럼 — 전기 스파크가 쉭 하고 지나가고,
-	 * 그게 전구에 닿는 순간 번쩍이며 광선이 튄다. 그리고 딸 / 깍 두 번.
-	 * 한 사이클 3.6초, 모든 요소가 같은 duration을 공유해 타이밍이 어긋나지 않는다.
+	 * 병원 모니터처럼 가로선이 흐르다가, V자·역V자로 튀는 펄스가 왼쪽에서 날아와
+	 * 전구를 관통하는 순간 불이 켜지고, 펄스는 그대로 오른쪽으로 빠져나간다.
 	 *
-	 * 타임라인
-	 *   0~14%  꺼짐
-	 *  14~24%  스파크가 전구를 가로질러 달린다 (쉭)
-	 *  24~28%  번쩍 — 유리가 켜지고 후광이 퍼지며 광선이 튄다 (딸)
-	 *  28~34%  광선 사라지고 후광 수축
-	 *  34~37%  깜빡 꺼짐
-	 *  37~41%  작게 한 번 더 (깍)
-	 *  41~100% 켜진 채로 유지
+	 * 전구 모양은 로고 그대로다 — 원 + 아래 소켓. 필라멘트 같은 건 넣지 않는다.
 	 */
-	let { size = 34 }: { size?: number } = $props();
+	let { size = 40 }: { size?: number } = $props();
+
+	// size = 화면에 보이는 전구 지름. viewBox상 지름이 32이므로 전체 폭은 그 비율로 잡는다.
+	const W = 260;
+	const H = 66;
+	const CX = 130;
+	const CY = 26;
 </script>
 
-<span class="bulb" style="--s:{size}px" aria-hidden="true">
-	<svg viewBox="0 0 64 64" width={size} height={size * 1.18}>
-		<!-- 번뜩이는 순간 튀는 광선 -->
-		<g class="rays">
-			<line x1="32" y1="3" x2="32" y2="10" />
-			<line x1="12" y1="11" x2="17" y2="16" />
-			<line x1="52" y1="11" x2="47" y2="16" />
-			<line x1="4" y1="30" x2="11" y2="30" />
-			<line x1="60" y1="30" x2="53" y2="30" />
-			<line x1="12" y1="49" x2="17" y2="44" />
-			<line x1="52" y1="49" x2="47" y2="44" />
+<span class="wrap" style="--w:{Math.round(size * (260 / 32))}px" aria-hidden="true">
+	<svg viewBox="0 0 {W} {H}" width="100%" height="100%">
+		<defs>
+			<!-- 양 끝에서 서서히 사라져 화면 밖으로 이어지는 느낌 -->
+			<linearGradient id="fade" x1="0" x2="1" y1="0" y2="0">
+				<stop offset="0" stop-color="white" stop-opacity="0" />
+				<stop offset="0.16" stop-color="white" stop-opacity="1" />
+				<stop offset="0.84" stop-color="white" stop-opacity="1" />
+				<stop offset="1" stop-color="white" stop-opacity="0" />
+			</linearGradient>
+			<mask id="fadeMask">
+				<rect x="0" y="0" width={W} height={H} fill="url(#fade)" />
+			</mask>
+		</defs>
+
+		<!-- 흐르는 심전도 선: 평평하다가 전구 자리에서 V·역V로 튄다 -->
+		<g mask="url(#fadeMask)">
+			<g class="wave">
+				<path
+					class="line"
+					d="M-260 {CY} H{CX - 30} L{CX - 18} {CY} L{CX - 9} {CY - 17} L{CX} {CY + 19} L{CX + 9} {CY - 8} L{CX + 18} {CY} H{W + 260}"
+				/>
+			</g>
 		</g>
 
-		<!-- 후광 -->
-		<circle class="halo" cx="32" cy="30" r="16" />
+		<!-- 후광: 관통하는 순간만 -->
+		<circle class="halo" cx={CX} cy={CY} r="17" />
 
-		<!-- 유리구 -->
-		<circle class="glass" cx="32" cy="30" r="15" />
-
-		<!-- 필라멘트 — 켜질 때 같이 살아난다 -->
-		<path class="fil" d="M26 33 L29 26 L32 33 L35 26 L38 33" />
-
-		<!-- 소켓(느낌표의 점) -->
-		<rect class="socket" x="26" y="49" width="12" height="6" rx="1.5" />
-
-		<!-- 가로지르는 전기 스파크 -->
-		<path class="spark" d="M2 47 L22 33 L16 28 L40 12 L62 6" />
+		<!-- 로고 그대로: 원 + 소켓 (필라멘트 없음) -->
+		<circle class="glass" cx={CX} cy={CY} r="16" />
+		<circle class="flash" cx={CX} cy={CY} r="14" />
+		<rect class="socket" x={CX - 7} y={CY + 17} width="14" height="6" rx="1.5" />
 	</svg>
 </span>
 
 <style>
-	.bulb {
-		display: inline-flex;
+	.wrap {
+		display: block;
+		width: var(--w);
+		max-width: 100%;
+		margin: 0 auto;
 		line-height: 0;
 	}
 	svg {
+		display: block;
 		overflow: visible;
 	}
 
-	/* ── 유리구 ── */
-	.glass {
-		fill: var(--panel-2);
-		stroke: var(--text);
-		stroke-width: 3.4;
-		animation: glass 3.6s steps(1, end) infinite;
+	/* ── 흐르는 펄스 ── */
+	.line {
+		fill: none;
+		stroke: var(--accent-2);
+		stroke-width: 3;
+		stroke-linecap: round;
+		stroke-linejoin: round;
 	}
-	@keyframes glass {
-		0%,
-		23.9% {
-			fill: var(--panel-2);
+	.wave {
+		animation: run 3.2s linear infinite;
+	}
+	/* 펄스가 화면 왼쪽 밖에서 들어와 오른쪽 밖으로 빠져나간다.
+	   translate 0일 때 스파이크가 정확히 전구 위에 온다. */
+	@keyframes run {
+		from {
+			transform: translateX(-260px);
 		}
-		24%,
-		33.9% {
-			fill: var(--gold);
-		}
-		34%,
-		36.9% {
-			fill: var(--panel-2);
-		}
-		37%,
-		100% {
-			fill: var(--gold);
+		to {
+			transform: translateX(260px);
 		}
 	}
 
-	/* ── 필라멘트 ── */
-	.fil {
-		fill: none;
+	/* ── 전구: 로고 그대로 늘 금색. 관통 순간에만 흰빛이 터진다 ── */
+	.glass {
+		fill: var(--gold);
 		stroke: var(--text);
-		stroke-width: 2;
-		stroke-linecap: round;
-		stroke-linejoin: round;
-		opacity: 0.25;
-		animation: fil 3.6s steps(1, end) infinite;
+		stroke-width: 4;
 	}
-	@keyframes fil {
+	/* 순백으로 채우면 로고의 금색이 날아간다 — 따뜻한 흰빛으로 짧게만 */
+	.flash {
+		fill: #fff8dc;
+		opacity: 0;
+		animation: flash 3.2s ease-out infinite;
+	}
+	@keyframes flash {
 		0%,
-		23.9% {
-			opacity: 0.22;
+		48.8% {
+			opacity: 0;
 		}
-		24%,
-		33.9% {
+		50% {
 			opacity: 0.85;
 		}
-		34%,
-		36.9% {
-			opacity: 0.22;
+		54.5% {
+			opacity: 0;
 		}
-		37%,
 		100% {
-			opacity: 0.7;
+			opacity: 0;
 		}
 	}
 
@@ -116,126 +118,38 @@
 		fill: var(--text);
 	}
 
-	/* ── 후광: 번쩍이는 순간 확 퍼졌다 수축 ── */
+	/* ── 관통 순간의 빛 번짐 ── */
 	.halo {
 		fill: var(--gold);
-		transform-origin: 32px 30px;
+		transform-origin: 130px 26px;
 		opacity: 0;
-		animation: halo 3.6s ease-out infinite;
+		animation: burst 3.2s ease-out infinite;
 	}
-	@keyframes halo {
+	@keyframes burst {
 		0%,
-		23% {
+		49% {
 			opacity: 0;
-			transform: scale(0.7);
+			transform: scale(0.8);
 		}
-		25% {
-			opacity: 0.55;
-			transform: scale(1.75);
+		51% {
+			opacity: 0.5;
+			transform: scale(1.55);
 		}
-		32% {
-			opacity: 0;
-			transform: scale(2.1);
-		}
-		37% {
-			opacity: 0.3;
-			transform: scale(1.35);
-		}
-		42%,
+		60%,
 		100% {
 			opacity: 0;
-			transform: scale(1.6);
+			transform: scale(1.9);
 		}
 	}
 
-	/* ── 광선: 번쩍이는 순간에만 튄다 ── */
-	.rays line {
-		stroke: var(--gold);
-		stroke-width: 3;
-		stroke-linecap: round;
-	}
-	.rays {
-		transform-origin: 32px 30px;
-		opacity: 0;
-		animation: rays 3.6s ease-out infinite;
-	}
-	@keyframes rays {
-		0%,
-		23% {
-			opacity: 0;
-			transform: scale(0.55);
-		}
-		25.5% {
-			opacity: 1;
-			transform: scale(1);
-		}
-		31% {
-			opacity: 0;
-			transform: scale(1.2);
-		}
-		100% {
-			opacity: 0;
-			transform: scale(1.2);
-		}
-	}
-
-	/* ── 스파크: 짧은 조각이 경로를 타고 달려와 전구에 꽂힌다 ── */
-	.spark {
-		fill: none;
-		stroke: var(--accent-2);
-		stroke-width: 3;
-		stroke-linecap: round;
-		stroke-linejoin: round;
-		/* 짧은 dash 하나만 남기고 offset을 밀어 경로를 타고 달리게 한다.
-		   경로 길이가 약 84이므로 offset을 14(시작 직전) → -84(끝 통과)로 움직여야
-		   대시가 실제로 화면을 가로지른다. */
-		stroke-dasharray: 16 300;
-		stroke-dashoffset: 16;
-		opacity: 0;
-		animation: spark 3.6s linear infinite;
-	}
-	@keyframes spark {
-		0%,
-		13.9% {
-			stroke-dashoffset: 16;
-			opacity: 0;
-		}
-		14% {
-			stroke-dashoffset: 16;
-			opacity: 1;
-		}
-		23% {
-			stroke-dashoffset: -70;
-			opacity: 1;
-		}
-		24.5% {
-			stroke-dashoffset: -90;
-			opacity: 0;
-		}
-		100% {
-			stroke-dashoffset: -90;
-			opacity: 0;
-		}
-	}
-
-	/* 모션을 줄이려는 사용자에겐 켜진 상태로 고정 */
 	@media (prefers-reduced-motion: reduce) {
-		.glass,
-		.fil,
-		.halo,
-		.rays,
-		.spark {
+		.wave,
+		.flash,
+		.halo {
 			animation: none;
 		}
-		.glass {
-			fill: var(--gold);
-		}
-		.fil {
-			opacity: 0.7;
-		}
-		.halo,
-		.rays,
-		.spark {
+		.flash,
+		.halo {
 			opacity: 0;
 		}
 	}

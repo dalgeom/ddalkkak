@@ -454,7 +454,7 @@
 {#if phase === 'home'}
 	<!-- ① 히어로 -->
 	<section class="hero-card reveal">
-		<div class="mark"><Bulb size={38} /></div>
+		<div class="mark"><Bulb size={44} /></div>
 		<h1 class="slogan">매일 두뇌를 깨우는<br /><b>10분의 딸깍</b></h1>
 		<p class="tagline">규칙을 발견하는 순간, 머릿속에서 딸깍 소리가 납니다.</p>
 
