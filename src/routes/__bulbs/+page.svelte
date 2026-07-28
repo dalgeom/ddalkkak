@@ -1,7 +1,8 @@
 <script lang="ts">
 	/**
-	 * 필라멘트 5버전 시안 — 배포용 아님, 선택 후 제거.
-	 * 코일·스프링은 나선의 측면도를 파라메트릭으로 계산해 실제 코일처럼 보이게 그린다.
+	 * 필라멘트 아이콘 시안 — 배포용 아님, 선택 후 제거.
+	 * 광점이 파형을 그리며 들어와 전구 안에서 아이콘 모양 필라멘트를 그리고 나간다.
+	 * 선으로 이을 수 없는 점(느낌표 점, 스마일 눈)은 딸깍 번쩍이는 순간 팝 하고 나타난다.
 	 */
 	const W = 260;
 	const H = 66;
@@ -37,10 +38,18 @@
 		return pts;
 	}
 
-	type Ver = { key: string; name: string; desc: string; d: string; delay: number };
+	type Dot = { x: number; y: number; r: number };
+	type Ver = { key: string; name: string; desc: string; d: string; delay: number; dots: Dot[] };
 
-	/** 바깥 파형 + 전구 안 모양(inner)을 이어 붙이고, inner의 midIdx 지점에서 번쩍이게 계산 */
-	function build(key: string, name: string, desc: string, inner: [number, number][], midIdx: number): Ver {
+	/** 바깥 파형 + 전구 안 아이콘(inner)을 이어 붙이고, flashAt에 가장 가까운 지점에서 번쩍 */
+	function build(
+		key: string,
+		name: string,
+		desc: string,
+		inner: [number, number][],
+		flashAt: [number, number],
+		dots: Dot[] = []
+	): Ver {
 		const left = basePts().filter(([x]) => x <= 114);
 		const right = basePts().filter(([x]) => x >= 146);
 		const seq: [number, number][] = [...left, ...inner, [146, CY], ...right, [W, CY]];
@@ -50,39 +59,125 @@
 			total += Math.hypot(seq[i][0] - seq[i - 1][0], seq[i][1] - seq[i - 1][1]);
 			cum.push(total);
 		}
-		const idx = Math.min(left.length + midIdx, cum.length - 1);
+		let best = 0;
+		let bestD = Infinity;
+		for (let i = 0; i < inner.length; i++) {
+			const dd = Math.hypot(inner[i][0] - flashAt[0], inner[i][1] - flashAt[1]);
+			if (dd < bestD) {
+				bestD = dd;
+				best = i;
+			}
+		}
 		return {
 			key,
 			name,
 			desc,
+			dots,
 			d: 'M' + seq.map(([x, y]) => `${x.toFixed(1)} ${y.toFixed(1)}`).join(' L'),
-			delay: Math.round((cum[idx] / total) * DRAW * T)
+			delay: Math.round((cum[left.length + best] / total) * DRAW * T)
 		};
 	}
 
 	const VERS: Ver[] = [];
 
-	/* V1 — 미세 지글: 거의 평평, ±1.2px */
+	/* V1 — 클래식 컬: 전구 아이콘의 그 필라멘트. 스파이럴 컬 2개 + 소켓으로 사라지는 다리.
+	   왼쪽 절반을 만들고 x=130 기준 미러+역순으로 오른쪽 절반을 얻는다(진행 방향이 맞아떨어짐). */
 	{
-		const inner: [number, number][] = [[116.5, CY]];
-		for (let x = 119, i = 0; x <= 141; x += 3, i++) inner.push([x, CY + (i % 2 === 0 ? -1.2 : 1.2)]);
-		inner.push([143.5, CY]);
-		VERS.push(build('v1', 'V1. 미세 지글', '거의 평평한 아주 얇은 선이 살짝만 지글거리며 관통.', inner, Math.floor(inner.length / 2)));
-	}
-
-	/* V2 — 세로 코일(CFL): 나선 측면도. 루프가 살짝만 겹치게(loop 높이 4.8 > pitch 3.6) */
-	{
-		const inner: [number, number][] = [[116.5, CY], [119.5, 29.5], [123.2, 32.5]];
-		const TURNS = 4.5, STEP = 24, A = 6.8, B = 2.4, PITCH = 3.6, Y0 = 32.5;
-		for (let i = 0; i <= TURNS * STEP; i++) {
-			const t = i / STEP;
-			inner.push([130 + A * Math.cos(2 * Math.PI * t + Math.PI), Y0 - PITCH * t + B * Math.sin(2 * Math.PI * t + Math.PI)]);
+		const leftSeq: [number, number][] = [
+			[116.5, 26],
+			[118.6, 24.2]
+		];
+		const SC = [126.8, 21.8]; // 왼쪽 컬 중심
+		const STEPS = 20;
+		for (let i = 0; i <= STEPS; i++) {
+			const t = i / STEPS;
+			const th = ((180 + 576 * t) * Math.PI) / 180; // 1.6바퀴 감김
+			const r = 3.8 - 2.1 * t;
+			leftSeq.push([SC[0] + r * Math.cos(th), SC[1] + r * Math.sin(th)]);
 		}
-		inner.push([140, 19], [142.5, 22.5], [143.5, CY]);
-		VERS.push(build('v2', 'V2. 세로 코일 (CFL)', '촘촘한 나선을 아래에서 위로 감아 올라갔다가 오른쪽으로 내려와 빠져나감.', inner, 3 + Math.floor((TURNS * STEP) / 2)));
+		const last = leftSeq[leftSeq.length - 1];
+		leftSeq.push([last[0], 39.3], [129.2, 39.7]); // 다리가 소켓 쪽으로 내려가 마스크 밖으로 사라짐
+		const rightSeq = leftSeq.map(([x, y]) => [260 - x, y] as [number, number]).reverse();
+		const inner: [number, number][] = [...leftSeq, ...rightSeq];
+		VERS.push(build('v1', 'V1. 클래식 컬', '전구 아이콘의 그 필라멘트 — 양쪽 컬을 감고 다리가 소켓 속으로 사라짐.', inner, [129.2, 39.7]));
 	}
 
-	/* V3 — 무한대(∞): 가운데서 8자를 그리고, 위쪽 절반을 되밟아 빠져나감 */
+	/* V2 — 느낌표(!): 세로 획을 긋고, 점은 딸깍 순간 팝 */
+	{
+		const inner: [number, number][] = [
+			[116.5, 26],
+			[121, 26.7],
+			[126, 27.4],
+			[129.4, 28.2],
+			[130, 28.6],
+			[130, 16.6],
+			// 획을 되밟아 내려와 옆으로 빠져나감(광점이 긋고 내려찍는 느낌)
+			[130, 24.2],
+			[133.5, 25],
+			[138.5, 25.6],
+			[143.5, 26]
+		];
+		VERS.push(
+			build('v2', 'V2. 느낌표 (!)', "'아!' — 획을 위로 긋고 같은 선을 타고 내려와 나감. 점은 팝 하고 찍힘.", inner, [130, 16.6], [
+				{ x: 130, y: 33.4, r: 2 }
+			])
+		);
+	}
+
+	/* V3 — 하트(♥): 아래 꼭짓점에서 시작해 한 획으로 */
+	{
+		const inner: [number, number][] = [
+			[116.5, 26],
+			[120, 29.5],
+			[125, 32.3],
+			[130, 33.8],
+			[126.5, 30.5],
+			[123.5, 27.5],
+			[122.3, 24],
+			[123.3, 21.3],
+			[125.8, 20],
+			[128.2, 20.8],
+			[130, 23],
+			[131.8, 20.8],
+			[134.2, 20],
+			[136.7, 21.3],
+			[137.7, 24],
+			[136.5, 27.5],
+			[133.5, 30.5],
+			[130, 33.8],
+			[134.5, 31.5],
+			[139, 28.7],
+			[143.5, 26]
+		];
+		VERS.push(build('v3', 'V3. 하트 (♥)', '아래 꼭짓점에서 시작해 한 획으로 하트를 그리고 나감.', inner, [130, 23]));
+	}
+
+	/* V4 — 스마일(☺): 입꼬리를 그리면 눈 두 개가 딸깍 순간 팝 */
+	{
+		const inner: [number, number][] = [
+			[116.5, 26],
+			[119.5, 25.3],
+			[122, 26.3],
+			[123.5, 28.5],
+			[125.5, 30.5],
+			[128, 31.8],
+			[130, 32.1],
+			[132, 31.8],
+			[134.5, 30.5],
+			[136.5, 28.5],
+			[138, 26.3],
+			[140.5, 25.3],
+			[143.5, 26]
+		];
+		VERS.push(
+			build('v4', 'V4. 스마일 (☺)', '입을 그리고 나가는 순간 눈 두 개가 팝 — 전구가 웃는 얼굴이 됨.', inner, [130, 32.1], [
+				{ x: 125.5, y: 21, r: 1.7 },
+				{ x: 134.5, y: 21, r: 1.7 }
+			])
+		);
+	}
+
+	/* V5 — 무한대(∞): 8자를 그리고 같은 선을 따라 나감 */
 	{
 		const inner: [number, number][] = [
 			[116.5, CY],
@@ -103,7 +198,6 @@
 			[123, 31.8],
 			[119.5, 30],
 			[118, 26],
-			// 되밟기(같은 선 위) — 왼쪽 위→중앙→오른쪽 아래→오른끝 → 탈출
 			[119.5, 22],
 			[123, 20.2],
 			[127, 22.5],
@@ -114,31 +208,36 @@
 			[142, 26],
 			[143.5, CY]
 		];
-		VERS.push(build('v3', 'V3. 무한대 (∞)', '가운데에 무한대를 그리고 같은 선을 따라 빠져나감. 광점이 8자를 도는 게 보임.', inner, 9));
+		VERS.push(build('v5', 'V5. 무한대 (∞)', '가운데에 8자를 그리고 같은 선을 따라 나감.', inner, [133, 29.5]));
 	}
 
-	/* V4 — 세로 스프링(루즈): 느슨한 나선 2.5바퀴, 루프 사이가 떨어져 있음(pitch 6.6 > loop 높이 6.4) */
+	/* V6 — 클로버(♣): 동그란 잎 3개를 가운데서 차례로 감고 줄기로 나감 */
 	{
-		const inner: [number, number][] = [[116.5, CY], [119.5, 29.5], [123, 32.5]];
-		const TURNS = 2.5, STEP = 24, A = 7, B = 3.2, PITCH = 6.6, Y0 = 32.5;
-		for (let i = 0; i <= TURNS * STEP; i++) {
-			const t = i / STEP;
-			inner.push([130 + A * Math.cos(2 * Math.PI * t + Math.PI), Y0 - PITCH * t + B * Math.sin(2 * Math.PI * t + Math.PI)]);
-		}
-		inner.push([140, 19], [142.5, 22.5], [143.5, CY]);
-		VERS.push(build('v4', 'V4. 세로 스프링 (루즈)', '느슨한 스프링을 감아 올라갔다가 내려와 빠져나감.', inner, 3 + Math.floor((TURNS * STEP) / 2)));
-	}
-
-	/* V5 — 가로 스프링: 눕힌 나선을 코르크따개처럼 뚫고 지나감. 유리 원 안에 맞게 중앙 배치 */
-	{
-		const inner: [number, number][] = [[116.5, CY], [118, 30], [120.5, 33]];
-		const TURNS = 2.75, STEP = 24, A = 7, B = 3, PITCH = 7.3, X0 = 120.5;
-		for (let i = 0; i <= TURNS * STEP; i++) {
-			const t = i / STEP;
-			inner.push([X0 + PITCH * t + B * Math.sin(2 * Math.PI * t), 26 + A * Math.cos(2 * Math.PI * t)]);
-		}
-		inner.push([143.5, CY]);
-		VERS.push(build('v5', 'V5. 가로 스프링', '눕힌 스프링을 코르크따개처럼 감으며 그대로 통과.', inner, 3 + Math.floor((TURNS * STEP) / 2)));
+		const leaf = (cx: number, cy: number, deg: number): [number, number][] => {
+			const a = (deg * Math.PI) / 180;
+			const LC: [number, number] = [cx + 6.5 * Math.cos(a), cy + 6.5 * Math.sin(a)];
+			const pts: [number, number][] = [[cx, cy]];
+			// 잎 = 원형 고리: 중심 반대편에서 시작해 320° 감고 돌아옴 — 잎끼리 안 겹치게 간격 확보
+			for (let i = 0; i <= 12; i++) {
+				const th = a + Math.PI + ((-160 + 320 * (i / 12)) * Math.PI) / 180;
+				pts.push([LC[0] + 2.9 * Math.cos(th), LC[1] + 2.9 * Math.sin(th)]);
+			}
+			pts.push([cx, cy]);
+			return pts;
+		};
+		const inner: [number, number][] = [
+			[116.5, 26],
+			[120.5, 27.8],
+			[126, 28.6],
+			...leaf(130, 28, 205),
+			...leaf(130, 28, 270),
+			...leaf(130, 28, 335),
+			[130.5, 32.5],
+			[134, 31],
+			[139, 28.4],
+			[143.5, 26]
+		];
+		VERS.push(build('v6', 'V6. 클로버 (♣)', '동그란 잎 세 개를 가운데서 차례로 감고 줄기로 나감.', inner, [130, 18.6]));
 	}
 
 	/* 색은 골드 고정(색 선택은 별도) */
@@ -149,10 +248,21 @@
 		tip: '#fff3c4',
 		fil: '#a97f12'
 	};
+
+	/* 팝 점(느낌표 점, 스마일 눈): 각자 딸깍 시점부터 잔상 소멸까지만 보이게 키프레임 생성 */
+	const popCss = VERS.filter((v) => v.dots.length)
+		.map((v) => {
+			const end = ((0.94 * T - v.delay) / T) * 100;
+			const hold = (end - 5).toFixed(1);
+			return `@keyframes pop-${v.key}{0%{opacity:0;transform:scale(.2)}1.2%{opacity:1;transform:scale(1.35)}2.6%{transform:scale(1)}${hold}%{opacity:1;transform:scale(1)}${end.toFixed(1)}%{opacity:0;transform:scale(1)}100%{opacity:0;transform:scale(.2)}}`;
+		})
+		.join('');
 </script>
 
+{@html `<style>${popCss}</style>`}
+
 <div class="page">
-	<h1>필라멘트 5버전 시안 (색은 골드 고정)</h1>
+	<h1>필라멘트 아이콘 시안 (색은 골드 고정)</h1>
 	<p class="note">버전을 골라주세요. 색(A~E)은 따로 골라주면 그대로 적용합니다.</p>
 
 	{#each VERS as v (v.key)}
@@ -188,6 +298,16 @@
 						<g mask="url(#in-{v.key})">
 							<path class="trace fil" pathLength="100" d={v.d} />
 						</g>
+
+						{#each v.dots as dt (dt.x)}
+							<circle
+								class="pop"
+								cx={dt.x}
+								cy={dt.y}
+								r={dt.r}
+								style="animation: pop-{v.key} 4.5s linear {v.delay}ms infinite; transform-origin: {dt.x}px {dt.y}px;"
+							/>
+						{/each}
 
 						<circle class="glass-ring" cx={CX} cy={CY} r="16" />
 						<rect class="socket" x={CX - 7} y={CY + 17} width="14" height="6" rx="1.5" />
@@ -260,7 +380,7 @@
 	}
 	.trace.fil {
 		stroke: var(--fil);
-		stroke-width: 1.1;
+		stroke-width: 1.3;
 		filter: drop-shadow(0 0 1.2px var(--g1));
 	}
 	@keyframes draw {
@@ -283,6 +403,11 @@
 		100% {
 			opacity: 0;
 		}
+	}
+	.pop {
+		fill: var(--fil);
+		opacity: 0;
+		filter: drop-shadow(0 0 1.5px var(--g1));
 	}
 	.tip {
 		fill: var(--tip);
