@@ -295,50 +295,60 @@
 
 <div class="mroot">
 {#if screen === 'menu'}
-	<div class="card menu">
-		<h2>성냥개비</h2>
-		<p class="desc">성냥개비 <b>하나만 옮겨</b> 등식을 참으로 만드세요.</p>
-
-		<div class="mode-sec daily-sec">
-			<div class="mode-title">
-				<Icon name="match" size={16} /> 오늘 치는 여기가 아니에요
-				<span class="hintTxt">성냥개비 3문제는 '오늘의 10문제'에 들어 있어요</span>
+	<div class="menu">
+		<header class="mcover">
+			<span class="kicker">성냥개비</span>
+			<h1>성냥 <b>하나만</b> 옮겨<br />틀린 식을 참으로</h1>
+			<p class="mlead">획을 눌러 집고, 빈 자리를 눌러 놓으면 됩니다. 준비된 문제 {problems.length}개.</p>
+			<div class="mstats">
+				<div class="ms"><b>{stats.solved}</b><span>푼 판</span></div>
+				<div class="ms"><b>{stats.best}</b><span>최고 연속</span></div>
+				<div class="ms"><b>{problems.length - done.length}</b><span>남은 새 문제</span></div>
 			</div>
-			<a class="btn wide" href="/">오늘의 10문제 풀러 가기</a>
-		</div>
+		</header>
 
-		<div class="mode-sec">
-			<div class="mode-title">무한 연습</div>
-			<button class="btn wide ghost" onclick={() => startMode({ type: 'free' })}>시작</button>
-		</div>
+		<a class="today" href="/">
+			<span class="t-t">오늘 치는 여기가 아니에요</span>
+			<span class="t-d">성냥개비 3문제는 '오늘의 10문제'에 들어 있어요</span>
+			<span class="t-go">오늘의 10문제 풀러 가기 <span class="arr" aria-hidden="true">→</span></span>
+		</a>
 
-		<div class="mode-sec">
-			<div class="mode-title"><Icon name="timer" size={16} /> 타임어택 <span class="hintTxt">제한시간 안에 최대한 많이!</span></div>
-			<div class="opt-row">
-				{#each [180, 300, 600] as s (s)}
-					<button class="btn opt" onclick={() => startMode({ type: 'time', seconds: s })}>
-						{s / 60}분
-						{#if bests[`time-${s}`]}<span class="best">최고 {bests[`time-${s}`]}</span>{/if}
+		<section class="msec">
+			<h2 class="mh">무한 연습</h2>
+			<p class="mp">시간·개수 제한 없이 계속 풉니다.</p>
+			<button class="big" onclick={() => startMode({ type: 'free' })}>
+				시작하기 <span class="arr" aria-hidden="true">→</span>
+			</button>
+		</section>
+
+		<section class="msec">
+			<h2 class="mh">타임어택</h2>
+			<p class="mp">제한 시간 안에 최대한 많이.</p>
+			<div class="opts">
+				{#each [180, 300, 600] as sec (sec)}
+					<button class="opt" onclick={() => startMode({ type: 'time', seconds: sec })}>
+						<b>{sec / 60}분</b>
+						{#if bests[`time-${sec}`]}<span class="bst">최고 {bests[`time-${sec}`]}</span>{/if}
 					</button>
 				{/each}
 			</div>
-		</div>
+		</section>
 
-		<div class="mode-sec">
-			<div class="mode-title"><Icon name="trophy" size={16} /> 개수 도전 <span class="hintTxt">시간 무제한, 몇 개나 풀까?</span></div>
-			<div class="opt-row">
+		<section class="msec">
+			<h2 class="mh">개수 도전</h2>
+			<p class="mp">시간은 무제한, 정해진 개수를 끝까지.</p>
+			<div class="opts">
 				{#each [5, 10, 20] as n (n)}
-					<button class="btn opt" onclick={() => startMode({ type: 'count', total: n })}>
-						{n}문제
-						{#if bests[`count-${n}`]}<span class="best">최고 {bests[`count-${n}`]}</span>{/if}
+					<button class="opt" onclick={() => startMode({ type: 'count', total: n })}>
+						<b>{n}문제</b>
+						{#if bests[`count-${n}`]}<span class="bst">최고 {bests[`count-${n}`]}</span>{/if}
 					</button>
 				{/each}
 			</div>
-		</div>
-
-		<div class="lifetime">통산 {stats.solved}판 성공 · 최고 연속 {stats.best}판 · 남은 새 문제 {problems.length - done.length}개</div>
+		</section>
 	</div>
-{:else if screen === 'play'}
+
+	{:else if screen === 'play'}
 	<div class="topbar">
 		{#if mode.type === 'time'}
 			<div class="timer" class:danger={timeLeft <= 10}><Icon name="timer" size={15} />{timeStr}</div>
@@ -409,6 +419,202 @@
 {/if}
 
 <style>
+	/* ── 메뉴 화면 ── */
+	.menu {
+		display: flex;
+		flex-direction: column;
+		gap: 14px;
+	}
+	.mcover {
+		background: var(--panel);
+		border: 1px solid var(--border-strong);
+		border-radius: 20px;
+		padding: 24px 20px 20px;
+	}
+	.kicker {
+		display: inline-block;
+		font-size: 11.5px;
+		font-weight: 800;
+		letter-spacing: 0.4px;
+		color: var(--accent);
+		background: var(--correct-bg);
+		border-radius: 999px;
+		padding: 4px 11px;
+	}
+	.mcover h1 {
+		margin: 12px 0 8px;
+		font-size: 24px;
+		font-weight: 800;
+		line-height: 1.35;
+		letter-spacing: -0.4px;
+		word-break: keep-all;
+	}
+	.mcover h1 b {
+		color: var(--accent);
+	}
+	.mlead {
+		font-size: 13.5px;
+		line-height: 1.7;
+		color: var(--muted);
+		word-break: keep-all;
+	}
+	.mstats {
+		display: grid;
+		grid-template-columns: repeat(3, 1fr);
+		gap: 8px;
+		margin-top: 16px;
+	}
+	.ms {
+		background: var(--panel-2);
+		border: 1px solid var(--border);
+		border-radius: 12px;
+		padding: 11px 6px;
+		text-align: center;
+	}
+	.ms b {
+		display: block;
+		font-size: 18px;
+		font-weight: 800;
+		color: var(--accent);
+		font-variant-numeric: tabular-nums;
+	}
+	.ms span {
+		font-size: 11.5px;
+		color: var(--muted-2);
+	}
+
+	.today {
+		display: block;
+		background: var(--gold-bg);
+		border: 1px solid var(--gold);
+		border-radius: 16px;
+		padding: 15px 16px;
+		text-decoration: none;
+		color: var(--gold-text);
+	}
+	.t-t {
+		display: block;
+		font-size: 14px;
+		font-weight: 800;
+	}
+	.t-d {
+		display: block;
+		margin-top: 3px;
+		font-size: 12.5px;
+		opacity: 0.9;
+		word-break: keep-all;
+	}
+	.t-go {
+		display: block;
+		margin-top: 9px;
+		font-size: 13px;
+		font-weight: 800;
+		text-decoration: underline;
+	}
+
+	.msec {
+		background: var(--panel);
+		border: 1px solid var(--border-strong);
+		border-radius: 16px;
+		padding: 16px;
+	}
+	.mh {
+		font-size: 16px;
+		font-weight: 800;
+		margin: 0 0 3px;
+	}
+	.mp {
+		font-size: 12.5px;
+		color: var(--muted);
+		margin: 0 0 12px;
+	}
+	.big {
+		width: 100%;
+		padding: 15px;
+		border: none;
+		border-radius: 14px;
+		background: var(--accent);
+		color: #fff;
+		font-size: 16px;
+		font-weight: 800;
+		font-family: inherit;
+		cursor: pointer;
+		box-shadow: 0 5px 0 var(--accent-press);
+		transition:
+			transform var(--dur-tap) var(--ease-out),
+			box-shadow var(--dur-tap) var(--ease-out);
+	}
+	.big:active {
+		transform: translateY(2px);
+		box-shadow: 0 3px 0 var(--accent-press);
+	}
+	/* 3열 고정 — 예전엔 가로로 넘쳐 버튼이 잘렸다 */
+	.opts {
+		display: grid;
+		grid-template-columns: repeat(3, 1fr);
+		gap: 8px;
+	}
+	.opt {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 3px;
+		min-width: 0;
+		padding: 13px 4px;
+		border-radius: 13px;
+		background: var(--panel-2);
+		border: 1px solid var(--border-strong);
+		color: var(--text);
+		font-family: inherit;
+		cursor: pointer;
+		transition:
+			transform var(--dur-tap) var(--ease-out),
+			border-color var(--dur-move) ease;
+	}
+	.opt:hover {
+		transform: translateY(-2px);
+		border-color: var(--accent);
+	}
+	.opt b {
+		font-size: 15px;
+		font-weight: 800;
+	}
+	.bst {
+		font-size: 11px;
+		color: var(--muted-2);
+		font-variant-numeric: tabular-nums;
+	}
+	.arr {
+		display: inline-block;
+		animation: arrm 1.6s var(--ease-out) infinite;
+	}
+	@keyframes arrm {
+		0%,
+		55%,
+		100% {
+			transform: translateX(0);
+		}
+		70% {
+			transform: translateX(5px);
+		}
+		85% {
+			transform: translateX(1px);
+		}
+	}
+	@media (prefers-reduced-motion: reduce) {
+		.arr {
+			animation: none;
+		}
+	}
+	@media (min-width: 768px) {
+		.mcover {
+			padding: 32px 28px 26px;
+		}
+		.mcover h1 {
+			font-size: 28px;
+		}
+	}
+
 	.mroot {
 		max-width: 640px;
 		margin: 0 auto;
@@ -422,54 +628,12 @@
 			0 12px 40px rgba(0, 0, 0, 0.45),
 			inset 0 1px 0 #ffffff08;
 	}
-	.menu h2 {
-		font-size: 26px;
-		margin-bottom: 4px;
-	}
-	.desc {
-		font-size: 15px;
-		color: var(--muted);
-		margin-bottom: 18px;
-	}
-	.desc :global(b) {
-		color: var(--accent);
-	}
-	.mode-sec {
-		border-top: 1px solid var(--border);
-		padding: 16px 0;
-	}
-	.mode-title {
-		font-size: 16px;
-		font-weight: 800;
-		margin-bottom: 12px;
-	}
-	.hintTxt {
-		font-size: 12px;
-		color: var(--muted);
-		font-weight: 400;
-		margin-left: 6px;
-	}
-	.opt-row {
-		display: flex;
-		gap: 10px;
-	}
 	.opt {
 		flex: 1;
 		display: flex;
 		flex-direction: column;
 		align-items: center;
 		gap: 3px;
-	}
-	.best {
-		font-size: 10px;
-		opacity: 0.9;
-		font-weight: 600;
-	}
-	.lifetime {
-		margin-top: 16px;
-		font-size: 12px;
-		color: var(--muted);
-		text-align: center;
 	}
 	.topbar {
 		display: flex;
@@ -629,14 +793,5 @@
 		font-size: 14px;
 		z-index: 30;
 		box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
-	}
-	.daily-sec {
-		background: var(--accent-soft);
-		border: 1px solid #cfe6d8;
-		border-radius: 14px;
-		padding: 14px 16px;
-	}
-	.daily-sec .mode-title {
-		color: #1f6b41;
 	}
 </style>
