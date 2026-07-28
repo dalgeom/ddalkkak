@@ -1,8 +1,16 @@
 <script lang="ts">
 	/**
-	 * 전구×파형 '통과 방식' 시안 4종 + 색상 5안 — 배포용 아님, 선택 후 제거.
+	 * L1(관통) + 필라멘트 디테일 시안 — 배포용 아님, 선택 후 제거.
+	 *
+	 * 선이 전구 안에서 끊기지 않는다: 유리 안에서는 같은 경로가 '얇은 필라멘트'로
+	 * 이어지고, 광점이 그 필라멘트를 지나는 찰나에 전구가 번쩍인다.
+	 * 구현: 같은 경로를 두 번 그린다 — 바깥은 굵게(전구 영역 마스크로 숨김),
+	 * 안쪽은 가늘게(전구 영역만 보이게). 같은 경로라 드로잉이 정확히 이어진다.
 	 */
 	const W = 260;
+	const H = 66;
+	const CX = 130;
+	const CY = 26;
 	const T = 4500;
 	const DRAW = 0.86;
 
@@ -21,208 +29,110 @@
 		[50, 0],
 		[56, 0]
 	];
+	const BEATS = [0.1, 0.64];
+	const SCALES = [1, 0.9];
 
-	function beatsAt(cy: number, beats: number[], scales: number[]): [number, number][] {
-		const pts: [number, number][] = [[0, cy]];
-		for (let i = 0; i < beats.length; i++) {
-			const x0 = beats[i] * W;
-			for (const [dx, dy] of BEAT_PTS) pts.push([x0 + dx, cy + dy * scales[i]]);
-		}
-		return pts;
+	const pts: [number, number][] = [[0, CY]];
+	for (let i = 0; i < BEATS.length; i++) {
+		const x0 = BEATS[i] * W;
+		for (const [dx, dy] of BEAT_PTS) pts.push([x0 + dx, CY + dy * SCALES[i]]);
 	}
+	// 전구 유리 안 — 얇은 필라멘트 지그재그(W자)
+	const FIL: [number, number][] = [
+		[114, CY],
+		[119, CY],
+		[122, CY - 5.5],
+		[126, CY + 5.5],
+		[130, CY - 5.5],
+		[134, CY + 5.5],
+		[138, CY - 5.5],
+		[141, CY],
+		[146, CY]
+	];
+	for (const p of FIL) pts.push(p);
+	pts.sort((a, b) => a[0] - b[0]);
+	pts.push([W, CY]);
 
-	function toPath(pts: [number, number][]): string {
-		return 'M' + pts.map(([x, y]) => `${x.toFixed(1)} ${y.toFixed(1)}`).join(' L');
-	}
+	const d = 'M' + pts.map(([x, y]) => `${x.toFixed(1)} ${y.toFixed(1)}`).join(' L');
 
-	/** targetX에 도달하는 호 길이 비율 → 번쩍임 지연(ms) */
-	function delayAt(pts: [number, number][], targetX: number): number {
+	/** 광점이 필라멘트 중앙(x=130)을 지나는 순간의 지연(ms) */
+	let flashDelay = 0;
+	{
 		let total = 0;
 		const cum = [0];
 		for (let i = 1; i < pts.length; i++) {
 			total += Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]);
 			cum.push(total);
 		}
-		let frac = 1;
+		let frac = 0.5;
 		for (let i = 1; i < pts.length; i++) {
-			if (pts[i][0] >= targetX) {
+			if (pts[i][0] >= CX) {
 				const x1 = pts[i - 1][0];
 				const seg = cum[i] - cum[i - 1];
-				const r = pts[i][0] === x1 ? 0 : (targetX - x1) / (pts[i][0] - x1);
+				const r = pts[i][0] === x1 ? 0 : (CX - x1) / (pts[i][0] - x1);
 				frac = (cum[i - 1] + seg * Math.max(0, Math.min(1, r))) / total;
 				break;
 			}
 		}
-		return Math.round(frac * DRAW * T);
+		flashDelay = Math.round(frac * DRAW * T);
 	}
 
-	type Layout = {
-		key: string;
-		name: string;
-		desc: string;
-		H: number;
-		bulb: { x: number; y: number };
-		d: string;
-		delay: number;
-		gap: { r: number } | null;
-	};
-
-	const LAYOUTS: Layout[] = [];
-
-	/* L1. 관통(현재 시안) — 전구 자리를 비워 선이 꽂혔다 나오는 방식 */
-	{
-		const cy = 26;
-		const pts = beatsAt(cy, [0.1, 0.64], [1, 0.9]);
-		pts.push([W, cy]);
-		LAYOUTS.push({
-			key: 'L1',
-			name: 'L1. 관통 — 전구에 꽂혔다 반대편으로',
-			desc: '전구 주변을 비워 배선에 전구가 끼워진 느낌. (앞서 보여준 방식)',
-			H: 66,
-			bulb: { x: 130, y: 26 },
-			d: toPath(pts),
-			delay: delayAt(pts, 130 - 22),
-			gap: { r: 22 }
-		});
-	}
-
-	/* L2. 아래서 딸깍 — 전구는 선 위에 떠 있고, 스파이크 하나가 소켓을 건드린다 */
-	{
-		const cy = 62;
-		const pts = beatsAt(cy, [0.08, 0.7], [0.85, 0.8]);
-		// 중앙: 소켓을 건드리는 트리거 스파이크
-		pts.push([118, cy], [124, cy], [130, 49], [136, cy], [142, cy]);
-		pts.sort((a, b) => a[0] - b[0]);
-		pts.push([W, cy]);
-		LAYOUTS.push({
-			key: 'L2',
-			name: 'L2. 아래서 딸깍 — 스파이크가 전구를 친다',
-			desc: '전구가 선 위에 떠 있고, 그 자리의 스파이크가 소켓에 닿는 순간 켜진다.',
-			H: 84,
-			bulb: { x: 130, y: 20 },
-			d: toPath(pts),
-			delay: delayAt(pts, 129),
-			gap: null
-		});
-	}
-
-	/* L3. 종착지 — 선이 전구로 들어가며 끝난다 */
-	{
-		const cy = 26;
-		const pts = beatsAt(cy, [0.14, 0.52], [0.9, 1]);
-		pts.push([214, cy]); // 전구 왼쪽에서 끝
-		LAYOUTS.push({
-			key: 'L3',
-			name: 'L3. 종착지 — 신호가 전구에 도착하며 끝',
-			desc: '선이 전구를 지나치지 않는다. 신호가 도착해 켜지고, 잔상이 사라진 뒤 다시.',
-			H: 66,
-			bulb: { x: 234, y: 26 },
-			d: toPath(pts),
-			delay: Math.round(0.995 * DRAW * T) - 120,
-			gap: null
-		});
-	}
-
-	/* L4. 타넘기 — 회로도처럼 전구 위로 폴짝 넘어간다 */
-	{
-		const cy = 34;
-		const pts = beatsAt(cy, [0.08, 0.7], [0.9, 0.85]);
-		// 중앙: 전구를 타넘는 반원 점프(회로도 관용 표기)
-		pts.push([104, cy]);
-		pts.sort((a, b) => a[0] - b[0]);
-		const before = pts.filter(([x]) => x <= 104);
-		const after = beatsAt(cy, [0.7], [0.85]).slice(1).filter(([x]) => x >= 156);
-		const dd =
-			toPath(before) +
-			` A 26 26 0 0 1 156 ${cy}` +
-			' L' +
-			after.map(([x, y]) => `${x.toFixed(1)} ${y.toFixed(1)}`).join(' L') +
-			` L${W} ${cy}`;
-		LAYOUTS.push({
-			key: 'L4',
-			name: 'L4. 타넘기 — 전구 위로 폴짝',
-			desc: '회로도에서 선이 겹칠 때 쓰는 점프 표기. 선이 전구 위로 넘어가며 정수리를 스칠 때 켜진다.',
-			H: 74,
-			bulb: { x: 130, y: 40 },
-			d: dd,
-			delay: delayAt(before, 104) + 260,
-			gap: null
-		});
-	}
-
-	/** 색상 5안(레이아웃은 시안 편의상 L1 고정 — 색은 어느 레이아웃에도 적용 가능) */
 	const VARIANTS = [
-		{ name: 'A. 진주황 (현재)', line: '#c0632e', g1: 'rgba(192,99,46,0.9)', g2: 'rgba(246,211,78,0.5)', tip: '#ffe9a0' },
-		{ name: 'B. 골드 — 전구와 같은 계열', line: '#e8b820', g1: 'rgba(246,211,78,0.95)', g2: 'rgba(246,211,78,0.55)', tip: '#fff3c4' },
-		{ name: 'C. 빛 — 흰 코어 + 금빛 발광', line: '#fffdf2', g1: 'rgba(246,211,78,1)', g2: 'rgba(232,184,32,0.75)', tip: '#ffffff' },
-		{ name: 'D. 딸깍 그린 — 메인 컬러', line: '#2f8f5b', g1: 'rgba(47,143,91,0.85)', g2: 'rgba(47,143,91,0.4)', tip: '#c8f5da' },
-		{ name: 'E. 그린 선 + 골드 광점 — 투톤', line: '#2f8f5b', g1: 'rgba(47,143,91,0.75)', g2: 'rgba(246,211,78,0.45)', tip: '#ffe9a0' }
+		{ name: 'A. 진주황 (현재)', line: '#c0632e', g1: 'rgba(192,99,46,0.9)', g2: 'rgba(246,211,78,0.5)', tip: '#ffe9a0', fil: '#8a4a24' },
+		{ name: 'B. 골드 — 전구와 같은 계열', line: '#e8b820', g1: 'rgba(246,211,78,0.95)', g2: 'rgba(246,211,78,0.55)', tip: '#fff3c4', fil: '#a97f12' },
+		{ name: 'C. 빛 — 흰 코어 + 금빛 발광', line: '#fffdf2', g1: 'rgba(246,211,78,1)', g2: 'rgba(232,184,32,0.75)', tip: '#ffffff', fil: '#c9a83c' },
+		{ name: 'D. 딸깍 그린 — 메인 컬러', line: '#2f8f5b', g1: 'rgba(47,143,91,0.85)', g2: 'rgba(47,143,91,0.4)', tip: '#c8f5da', fil: '#1f5e3c' },
+		{ name: 'E. 그린 선 + 골드 광점 — 투톤', line: '#2f8f5b', g1: 'rgba(47,143,91,0.75)', g2: 'rgba(246,211,78,0.45)', tip: '#ffe9a0', fil: '#1f5e3c' }
 	];
-	const GOLD = VARIANTS[1];
 </script>
 
 <div class="page">
-	<h1>① 전구 통과 방식 시안 (4종 · 색은 골드 고정)</h1>
-	<p class="note">먼저 방식을 골라주세요. 색은 아래 ②에서 따로 고르면 됩니다.</p>
+	<h1>L1 관통 + 필라멘트 시안 (5색)</h1>
+	<p class="note">
+		선이 전구 안에서 끊기지 않습니다 — 유리 안에서는 얇은 필라멘트로 이어지고, 광점이
+		필라멘트를 지나는 찰나에 번쩍입니다.
+	</p>
 
-	{#each LAYOUTS as L (L.key)}
+	{#each VARIANTS as v, vi (v.name)}
 		<section>
-			<h2>{L.name}</h2>
-			<p class="desc">{L.desc}</p>
+			<h2>{v.name}</h2>
 			<div class="stage">
-				<span class="wrap" style="--ln:{GOLD.line}; --g1:{GOLD.g1}; --g2:{GOLD.g2}; --tip:{GOLD.tip}">
-					<svg viewBox="0 0 {W} {L.H}" width="100%" height="100%">
+				<span class="wrap" style="--ln:{v.line}; --g1:{v.g1}; --g2:{v.g2}; --tip:{v.tip}; --fil:{v.fil}">
+					<svg viewBox="0 0 {W} {H}" width="100%" height="100%">
 						<defs>
-							<linearGradient id="f-{L.key}" x1="0" x2="1" y1="0" y2="0">
+							<linearGradient id="f{vi}" x1="0" x2="1" y1="0" y2="0">
 								<stop offset="0" stop-color="white" stop-opacity="0" />
 								<stop offset="0.12" stop-color="white" stop-opacity="1" />
 								<stop offset="0.88" stop-color="white" stop-opacity="1" />
 								<stop offset="1" stop-color="white" stop-opacity="0" />
 							</linearGradient>
-							<mask id="m-{L.key}">
-								<rect x="0" y="0" width={W} height={L.H} fill="url(#f-{L.key})" />
-								{#if L.gap}
-									<circle cx={L.bulb.x} cy={L.bulb.y} r={L.gap.r} fill="black" />
-								{/if}
+							<!-- 바깥 선: 전구(링 포함) 영역은 숨김 -->
+							<mask id="out{vi}">
+								<rect x="0" y="0" width={W} height={H} fill="url(#f{vi})" />
+								<circle cx={CX} cy={CY} r="18" fill="black" />
+							</mask>
+							<!-- 필라멘트: 유리 안쪽만 보임 -->
+							<mask id="in{vi}">
+								<circle cx={CX} cy={CY} r="13.5" fill="white" />
 							</mask>
 						</defs>
 
-						<g mask="url(#m-{L.key})">
-							<path class="trace" pathLength="100" d={L.d} />
-						</g>
-						<circle class="tip" r="3.4" style="offset-path: path('{L.d}')" />
+						<circle class="halo" cx={CX} cy={CY} r="17" style="animation-delay: {flashDelay}ms" />
+						<!-- 유리(채움) → 번쩍(필라멘트가 실루엣으로 남게 아래) → 필라멘트 → 링 → 소켓 -->
+						<circle class="glass-fill" cx={CX} cy={CY} r="16" />
+						<circle class="flash" cx={CX} cy={CY} r="14" style="animation-delay: {flashDelay}ms" />
 
-						<circle class="halo" cx={L.bulb.x} cy={L.bulb.y} r="17" style="animation-delay: {L.delay}ms; transform-origin: {L.bulb.x}px {L.bulb.y}px" />
-						<circle class="glass" cx={L.bulb.x} cy={L.bulb.y} r="16" />
-						<circle class="flash" cx={L.bulb.x} cy={L.bulb.y} r="14" style="animation-delay: {L.delay}ms" />
-						<rect class="socket" x={L.bulb.x - 7} y={L.bulb.y + 17} width="14" height="6" rx="1.5" />
-					</svg>
-				</span>
-			</div>
-		</section>
-	{/each}
-
-	<h1 class="second">② 색상 시안 (5종 · 방식은 L1 고정)</h1>
-	{#each VARIANTS as v (v.name)}
-		<section>
-			<h2>{v.name}</h2>
-			<div class="stage">
-				<span class="wrap" style="--ln:{v.line}; --g1:{v.g1}; --g2:{v.g2}; --tip:{v.tip}">
-					<svg viewBox="0 0 {W} {LAYOUTS[0].H}" width="100%" height="100%">
-						<defs>
-							<mask id="mc-{v.name}">
-								<rect x="0" y="0" width={W} height={LAYOUTS[0].H} fill="white" />
-								<circle cx="130" cy="26" r="22" fill="black" />
-							</mask>
-						</defs>
-						<g mask="url(#mc-{v.name})">
-							<path class="trace" pathLength="100" d={LAYOUTS[0].d} />
+						<g mask="url(#out{vi})">
+							<path class="trace" pathLength="100" {d} />
 						</g>
-						<circle class="tip" r="3.4" style="offset-path: path('{LAYOUTS[0].d}')" />
-						<circle class="halo" cx="130" cy="26" r="17" style="animation-delay: {LAYOUTS[0].delay}ms; transform-origin: 130px 26px" />
-						<circle class="glass" cx="130" cy="26" r="16" />
-						<circle class="flash" cx="130" cy="26" r="14" style="animation-delay: {LAYOUTS[0].delay}ms" />
-						<rect class="socket" x="123" y="43" width="14" height="6" rx="1.5" />
+						<g mask="url(#in{vi})">
+							<path class="trace fil" pathLength="100" {d} />
+						</g>
+
+						<circle class="glass-ring" cx={CX} cy={CY} r="16" />
+						<rect class="socket" x={CX - 7} y={CY + 17} width="14" height="6" rx="1.5" />
+
+						<circle class="tip" r="3.2" style="offset-path: path('{d}')" />
 					</svg>
 				</span>
 			</div>
@@ -241,9 +151,6 @@
 		font-weight: 800;
 		margin-bottom: 6px;
 	}
-	h1.second {
-		margin-top: 34px;
-	}
 	.note {
 		font-size: 12.5px;
 		color: var(--muted);
@@ -256,13 +163,7 @@
 	h2 {
 		font-size: 13.5px;
 		font-weight: 800;
-		margin-bottom: 3px;
-	}
-	.desc {
-		font-size: 12px;
-		color: var(--muted);
 		margin-bottom: 6px;
-		word-break: keep-all;
 	}
 	.stage {
 		background: var(--panel);
@@ -270,7 +171,6 @@
 		border-radius: 14px;
 		padding: 14px 8px;
 	}
-
 	.wrap {
 		display: block;
 		width: 100%;
@@ -280,6 +180,7 @@
 		display: block;
 		overflow: visible;
 	}
+
 	.trace {
 		fill: none;
 		stroke: var(--ln);
@@ -291,6 +192,12 @@
 		animation:
 			draw 4.5s linear infinite,
 			trail 4.5s linear infinite;
+	}
+	/* 유리 안 필라멘트 — 가늘고 발광 약하게 */
+	.trace.fil {
+		stroke: var(--fil);
+		stroke-width: 1.3;
+		filter: drop-shadow(0 0 1.5px var(--g1));
 	}
 	@keyframes draw {
 		0% {
@@ -341,8 +248,12 @@
 			opacity: 0;
 		}
 	}
-	.glass {
+
+	.glass-fill {
 		fill: var(--gold);
+	}
+	.glass-ring {
+		fill: none;
 		stroke: var(--text);
 		stroke-width: 4;
 	}
@@ -359,7 +270,7 @@
 			opacity: 0;
 		}
 		1% {
-			opacity: 0.85;
+			opacity: 0.9;
 		}
 		6% {
 			opacity: 0;
@@ -370,6 +281,7 @@
 	}
 	.halo {
 		fill: var(--gold);
+		transform-origin: 130px 26px;
 		opacity: 0;
 		animation: pulse-halo 4.5s ease-out infinite;
 	}
@@ -379,16 +291,16 @@
 			transform: scale(0.85);
 		}
 		2% {
-			opacity: 0.45;
-			transform: scale(1.5);
+			opacity: 0.5;
+			transform: scale(1.55);
 		}
 		8% {
 			opacity: 0;
-			transform: scale(1.8);
+			transform: scale(1.85);
 		}
 		100% {
 			opacity: 0;
-			transform: scale(1.8);
+			transform: scale(1.85);
 		}
 	}
 </style>
