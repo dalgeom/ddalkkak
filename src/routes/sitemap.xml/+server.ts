@@ -9,6 +9,8 @@ const SITE = 'https://ddalkkak.app';
 /** 라우트가 늘어도 여기 한 줄만 추가하면 사이트맵이 따라간다. */
 const PAGES: { path: string; freq: string; priority: string }[] = [
 	{ path: '/', freq: 'daily', priority: '1.0' },
+	{ path: '/discover', freq: 'monthly', priority: '0.8' },
+	{ path: '/trivia', freq: 'monthly', priority: '0.8' },
 	{ path: '/play', freq: 'weekly', priority: '0.7' },
 	{ path: '/matchstick', freq: 'weekly', priority: '0.7' },
 	{ path: '/archive', freq: 'daily', priority: '0.8' },

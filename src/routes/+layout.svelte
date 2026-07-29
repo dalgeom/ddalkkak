@@ -43,6 +43,10 @@
 			<span aria-hidden="true">·</span>
 			<a href="/play">연습</a>
 			<span aria-hidden="true">·</span>
+			<a href="/discover">발견형</a>
+			<span aria-hidden="true">·</span>
+			<a href="/trivia">상식퀴즈</a>
+			<span aria-hidden="true">·</span>
 			<a href="/matchstick">성냥개비</a>
 			<span aria-hidden="true">·</span>
 			<a href="/about">소개</a>

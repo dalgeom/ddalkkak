@@ -4,6 +4,7 @@
 	import Icon from '$lib/components/Icon.svelte';
 	import AdSlot from '$lib/components/AdSlot.svelte';
 	import { parseEq } from '$lib/matchstick';
+	import type { Problem } from '$lib/problems';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
@@ -14,6 +15,48 @@
 	$effect(() => {
 		matchReveal = data.match.map(() => false);
 		bonusReveal = false;
+	});
+
+	/* 검색엔진용 Quiz 구조화 데이터 — 이 페이지가 문제·정답 플래시카드형 Q&A임을 알린다 */
+	const strip = (s: string) => s.replace(/<[^>]*>/g, '').trim();
+	const qtext = (blocks: Problem['blocks']) =>
+		blocks
+			.map((b) => (b.kind === 'text' ? strip(b.html) : b.kind === 'pre' ? b.text : ''))
+			.filter(Boolean)
+			.join(' · ');
+	let quizLd = $derived.by(() => {
+		const qs: { q: string; a: string }[] = [];
+		const push = (p: Problem) => {
+			const a = p.answers?.[0] ?? p.choices?.[p.answerIndex ?? -1];
+			if (a) qs.push({ q: qtext(p.blocks), a: String(a) });
+		};
+		data.discover.forEach(push);
+		data.trivia.forEach(push);
+		for (const m of data.match)
+			qs.push({ q: `성냥개비 퍼즐: ${m.displayed} 에서 성냥 하나만 옮겨 참인 식으로 만들기`, a: m.solution });
+		if (data.bonus) {
+			if (data.bonus.kind === 'match')
+				qs.push({
+					q: `성냥개비 퍼즐: ${data.bonus.eq.displayed} 에서 성냥 하나만 옮겨 참인 식으로 만들기`,
+					a: data.bonus.eq.solution
+				});
+			else push(data.bonus.problem);
+		}
+		const ld = {
+			'@context': 'https://schema.org',
+			'@type': 'Quiz',
+			name: `${data.label} 오늘의 딸깍 10문제`,
+			inLanguage: 'ko',
+			about: { '@type': 'Thing', name: '두뇌 퍼즐·상식 퀴즈' },
+			hasPart: qs.map(({ q, a }) => ({
+				'@type': 'Question',
+				eduQuestionType: 'Flashcard',
+				text: q,
+				acceptedAnswer: { '@type': 'Answer', text: a }
+			}))
+		};
+		// '<'를 이스케이프해 스크립트 태그 조기 종료를 막는다
+		return JSON.stringify(ld).replace(/</g, '\\u003c');
 	});
 </script>
 
@@ -30,6 +73,7 @@
 		content="{data.label}의 10문제와 정답·해설. 발견형 3 · 상식 3 · 성냥개비 3 + 보너스 1."
 	/>
 	<meta property="og:url" content="https://ddalkkak.app/archive/{data.day}" />
+	{@html `<script type="application/ld+json">${quizLd}</` + `script>`}
 </svelte:head>
 
 <nav class="crumb">

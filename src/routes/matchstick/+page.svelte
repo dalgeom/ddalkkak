@@ -282,14 +282,14 @@
 </script>
 
 <svelte:head>
-	<title>성냥개비 — 딸깍</title>
+	<title>성냥개비 퍼즐 741문제 — 하나만 옮겨 식 완성 | 딸깍</title>
 	<meta
 		name="description"
-		content="성냥개비 하나만 옮겨 등식을 참으로! 타임어택·개수 도전 모드로 친구와 대결하세요."
+		content="성냥개비 문제 741개를 무료로. 성냥 하나만 옮겨 틀린 등식을 참으로 만드는 고전 퍼즐 — 무한 연습·타임어택·개수 도전 모드로 원하는 만큼 풀어보세요."
 	/>
 	<link rel="canonical" href="https://ddalkkak.app/matchstick" />
-	<meta property="og:title" content="성냥개비 — 딸깍" />
-	<meta property="og:description" content="성냥개비 하나만 옮겨 등식을 참으로! 타임어택·개수 도전 모드로 친구와 대결하세요." />
+	<meta property="og:title" content="성냥개비 퍼즐 741문제 — 하나만 옮겨 식 완성 | 딸깍" />
+	<meta property="og:description" content="성냥 하나만 옮겨 등식을 참으로! 무한 연습·타임어택·개수 도전." />
 	<meta property="og:url" content="https://ddalkkak.app/matchstick" />
 </svelte:head>
 
