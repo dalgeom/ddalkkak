@@ -40,14 +40,15 @@ describe('normalize', () => {
 });
 
 describe('isCorrectText', () => {
-	const holiday = PROBLEMS.find((p) => p.id === 'holiday')!;
+	// 실제 문제은행에 기대면 문제 삭제 때 테스트가 같이 죽는다 — 합성 문제로 검증
+	const p = { id: 't', chip: '', blocks: [], type: 'text', answers: ['815'], explain: '' } as Problem;
 	it('정답을 인정한다', () => {
-		expect(isCorrectText(holiday, '815')).toBe(true);
-		expect(isCorrectText(holiday, ' 8 1 5 ')).toBe(true);
+		expect(isCorrectText(p, '815')).toBe(true);
+		expect(isCorrectText(p, ' 8 1 5 ')).toBe(true);
 	});
 	it('오답과 빈 입력을 거부한다', () => {
-		expect(isCorrectText(holiday, '814')).toBe(false);
-		expect(isCorrectText(holiday, '   ')).toBe(false);
+		expect(isCorrectText(p, '814')).toBe(false);
+		expect(isCorrectText(p, '   ')).toBe(false);
 	});
 });
 

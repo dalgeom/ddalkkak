@@ -95,7 +95,7 @@
 
 	const KIND_LABEL: Record<DailyKind, string> = { discover: '발견', trivia: '상식', match: '성냥' };
 	// 랜딩 소개용 — 문제은행을 랜딩에서 받지 않으려고 개수는 상수로 둔다(레이아웃 서버 로드와 같은 값)
-	const KIND_COUNT = { discover: 163, trivia: 433, match: MATCH_TOTAL };
+	const KIND_COUNT = { discover: 143, trivia: 433, match: MATCH_TOTAL };
 	const TOTAL_PROBLEMS = KIND_COUNT.discover + KIND_COUNT.trivia + KIND_COUNT.match;
 	// 성냥개비 소개 카드에 띄우는 읽기전용 보드
 	const demoBoard = parseEq('8 - 0 = 8');
