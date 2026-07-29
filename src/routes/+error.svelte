@@ -6,6 +6,8 @@
 
 <svelte:head>
 	<title>{page.status} — 딸깍</title>
+	<meta name="robots" content="noindex" />
+	<meta name="description" content="찾는 페이지가 없어요. 오늘의 딸깍은 매일 자정에 새로 열립니다." />
 </svelte:head>
 
 <div class="err">
@@ -31,25 +33,25 @@
 		text-align: center;
 		padding: 40px 24px;
 	}
+	/* 주의: 예전 디자인 시스템의 --fs-*·--fw-* 토큰은 더 이상 없다 — 값을 직접 쓴다 */
 	.code {
 		font-size: clamp(56px, 18vw, 96px);
-		font-weight: var(--fw-number);
+		font-weight: 800;
 		font-variant-numeric: tabular-nums;
 		color: var(--accent);
-		letter-spacing: var(--ls-tight);
+		letter-spacing: -1px;
 		line-height: 1;
 	}
 	h1 {
 		margin-top: 12px;
-		font-size: var(--fs-xl);
-		font-weight: var(--fw-emphasis);
+		font-size: 20px;
+		font-weight: 800;
 		word-break: keep-all;
 	}
 	p {
 		margin-top: 12px;
-		font-size: var(--fs-sm);
-		font-weight: var(--fw-caption);
-		line-height: var(--lh-reading);
+		font-size: 14px;
+		line-height: 1.7;
 		color: var(--muted);
 		word-break: keep-all;
 	}
@@ -66,10 +68,10 @@
 		border-radius: 13px;
 		background: var(--accent);
 		color: #fff;
-		font-size: var(--fs-sm);
-		font-weight: var(--fw-emphasis);
+		font-size: 14px;
+		font-weight: 800;
 		text-decoration: none;
-		box-shadow: 0 1px 2px rgba(44, 40, 34, 0.16);
+		box-shadow: 0 4px 0 var(--accent-press);
 		transition:
 			filter 0.18s var(--ease-out),
 			transform var(--dur-tap) var(--ease-out);

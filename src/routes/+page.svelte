@@ -153,8 +153,8 @@
 
 	function sampleSubmitText() {
 		if (sampleDone || !data.sample || !sampleValue.trim()) return;
-		const norm = (v: string) => v.replace(/\s+/g, '').toLowerCase();
-		sampleOk = data.sample.answers.some((a) => norm(a) === norm(sampleValue));
+		// 본 게임과 같은 판정(isCorrectText) — 랜딩에서만 더 엄격하면 같은 답이 오답이 된다
+		sampleOk = isCorrectText({ answers: data.sample.answers } as Problem, sampleValue);
 		if (sampleOk) sampleDone = true;
 		else sampleShake = true;
 		setTimeout(() => (sampleShake = false), 420);
@@ -211,11 +211,16 @@
 		loading = true;
 		try {
 			if (!queue.length) await loadBank();
+			if (!queue.length) throw new Error('empty bank');
 			const saved = readDailyProgress(dayNum);
 			pos = Math.min(saved.pos, queue.length - 1);
 			marks = saved.marks.slice(0, queue.length);
 			phase = saved.done ? 'done' : 'play';
 			if (phase === 'play') resetProblem();
+		} catch {
+			// 문제은행 동적 로드 실패(오프라인 등) — 빈 화면 대신 홈에 남기고 안내한다
+			phase = 'home';
+			toast('문제를 불러오지 못했어요 — 네트워크 확인 후 다시 눌러주세요');
 		} finally {
 			loading = false;
 		}
@@ -384,7 +389,20 @@
 			await navigator.clipboard.writeText(shareText);
 			toast('결과가 복사됐어요 (링크 포함)');
 		} catch {
-			toast('복사에 실패했어요');
+			// clipboard API가 없는 구형·인앱 브라우저 폴백
+			try {
+				const ta = document.createElement('textarea');
+				ta.value = shareText;
+				ta.style.position = 'fixed';
+				ta.style.opacity = '0';
+				document.body.appendChild(ta);
+				ta.select();
+				document.execCommand('copy');
+				ta.remove();
+				toast('결과가 복사됐어요 (링크 포함)');
+			} catch {
+				toast('복사에 실패했어요');
+			}
 		}
 	}
 
@@ -411,7 +429,8 @@
 	/* ───────── 초기화 ───────── */
 
 	let savedProgress = $state({ pos: 0, marks: [] as Mark[], done: false });
-	let resumable = $derived(savedProgress.pos > 0 && !savedProgress.done);
+	// pos는 '다음'을 눌러야 오르므로 1번만 풀고 나간 경우 pos=0, marks만 1개다 — marks 기준이 맞다
+	let resumable = $derived(savedProgress.marks.length > 0 && !savedProgress.done);
 
 	/* 헤더 로고 클릭 → 랜딩 화면으로(진행은 저장). 이미 /에 있으면 링크가 죽은 버튼이라 신호로 받는다. */
 	let logoSeen = -1;
@@ -480,9 +499,9 @@
 					phase = savedProgress.done ? 'done' : 'home';
 				}
 			}
-			// KST 자정까지 남은 시간
-			const now = new Date();
-			const kst = new Date(now.getTime() + (9 * 60 - now.getTimezoneOffset()) * 60000);
+			// KST 자정까지 남은 시간 — epoch에 +9h만 더해 getUTC*로 읽는다.
+			// getTimezoneOffset()을 섞으면 로컬 오프셋이 이중으로 들어가(한국에서 +18h) 어긋난다.
+			const kst = new Date(Date.now() + 9 * 3600 * 1000);
 			const nextMid = Date.UTC(kst.getUTCFullYear(), kst.getUTCMonth(), kst.getUTCDate() + 1);
 			const diff = Math.max(0, nextMid - kst.getTime());
 			const h = String(Math.floor(diff / 3600000)).padStart(2, '0');
@@ -500,6 +519,8 @@
 		name="description"
 		content="하루 10문제. 발견형 퍼즐 3 · 상식 퀴즈 3 · 성냥개비 3 · 보너스 1. 매일 자정에 새로 열리고, 그날은 모두 같은 문제를 풉니다."
 	/>
+	<link rel="canonical" href="https://ddalkkak-1c2.pages.dev/" />
+	<meta property="og:url" content="https://ddalkkak-1c2.pages.dev/" />
 	<meta property="og:title" content="딸깍 — 매일 새로 열리는 두뇌 퍼즐 10문제" />
 	<meta
 		property="og:description"
@@ -1088,8 +1109,9 @@
 		font-weight: 600;
 		color: var(--muted-2);
 	}
+	/* 여백은 AdSlot 내부(.ad-slot, dev 전용)가 갖는다 — 프로덕션 빈 공백 방지 */
 	.adwrap {
-		margin-top: 26px;
+		margin: 0;
 	}
 
 	.card.sample {
@@ -1956,7 +1978,7 @@
 		font-size: 13px;
 		font-weight: 600;
 		padding: 10px 18px;
-		border-radius: 999px;
+		border-radius: 12px;
 		z-index: 60;
 	}
 </style>

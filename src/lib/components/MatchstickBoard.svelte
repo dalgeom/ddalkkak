@@ -38,6 +38,17 @@
 		}
 	}
 
+	/** 스크린리더용 세그먼트 위치 이름 — 35개가 전부 "N번째 자리 성냥"이면 구분이 안 된다 */
+	const SEG_NAME: Record<SegKey, string> = {
+		a: '위',
+		b: '오른쪽 위',
+		c: '오른쪽 아래',
+		d: '아래',
+		e: '왼쪽 아래',
+		f: '왼쪽 위',
+		g: '가운데'
+	};
+
 	const SEG_RECT: Record<SegKey, [number, number, number, number]> = {
 		a: [10, 0, 34, 8],
 		b: [46, 9, 8, 34],
@@ -183,7 +194,9 @@
 						class:ro={!interactive}
 						role={interactive ? 'button' : undefined}
 						tabindex={interactive ? 0 : undefined}
-						aria-label={interactive ? '연산자 세로 성냥' : undefined}
+						aria-label={interactive
+							? `연산자 세로 획 — ${board.opPlus ? '성냥 있음(+)' : '빈 자리(−)'}`
+							: undefined}
 						data-loc="op-v"
 						onclick={interactive ? () => onstick({ kind: 'op' }, board.opPlus) : undefined}
 						onkeydown={interactive ? (e) => onKey(e, { kind: 'op' }, board.opPlus) : undefined}
@@ -217,7 +230,9 @@
 						class:ro={!interactive}
 						role={interactive ? 'button' : undefined}
 						tabindex={interactive ? 0 : undefined}
-						aria-label={interactive ? `${gi + 1}번째 자리 성냥` : undefined}
+						aria-label={interactive
+							? `${gi + 1}번째 글자 ${SEG_NAME[seg]} 획 — ${lit ? '성냥 있음' : '빈 자리'}`
+							: undefined}
 						data-loc="g{gi}-{seg}"
 						onclick={interactive ? () => onstick({ kind: 'glyph', gi, seg }, lit) : undefined}
 						onkeydown={interactive ? (e) => onKey(e, { kind: 'glyph', gi, seg }, lit) : undefined}
@@ -256,6 +271,11 @@
 	}
 	.stick {
 		cursor: pointer;
+	}
+	/* 키보드 포커스가 검은 보드 위에서 보이게 */
+	.stick:focus-visible {
+		outline: 2px solid #ffd24a;
+		outline-offset: 2px;
 	}
 	.stick.ro {
 		cursor: default;

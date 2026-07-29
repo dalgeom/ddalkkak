@@ -141,7 +141,13 @@ export async function buildShareCard(d: ShareCardData): Promise<Blob | null> {
 	return new Promise((res) => canvas.toBlob((b) => res(b), 'image/png', 0.95));
 }
 
-export type ShareOutcome = 'shared' | 'copied-image' | 'downloaded' | 'copied-text' | 'failed';
+export type ShareOutcome =
+	| 'shared'
+	| 'copied-image'
+	| 'downloaded'
+	| 'copied-text'
+	| 'canceled'
+	| 'failed';
 
 /**
  * 공유. Wordle이 폭발한 핵심은 '이미지'가 아니라 '링크가 텍스트에 살아남는' 결과였다 —
@@ -169,8 +175,10 @@ export async function shareResult(card: ShareCardData, text: string): Promise<Sh
 				await navigator.share({ files: [file], text });
 				return 'shared';
 			}
-		} catch {
-			/* 취소/실패 → 텍스트 경로로 */
+		} catch (e) {
+			// 사용자가 공유 시트를 닫은 것 — 다른 경로로 밀어붙이면 시트가 또 뜬다
+			if ((e as Error)?.name === 'AbortError') return 'canceled';
+			/* 그 외 실패 → 텍스트 경로로 */
 		}
 	}
 
@@ -180,8 +188,8 @@ export async function shareResult(card: ShareCardData, text: string): Promise<Sh
 			await navigator.share({ text });
 			return 'shared';
 		}
-	} catch {
-		/* 취소 */
+	} catch (e) {
+		if ((e as Error)?.name === 'AbortError') return 'failed';
 	}
 	try {
 		if (navigator.clipboard?.writeText) {
@@ -222,6 +230,9 @@ export function outcomeMessage(o: ShareOutcome): string {
 	switch (o) {
 		case 'shared':
 			return '공유했어요!';
+		case 'canceled':
+			return ''; // 사용자가 직접 닫은 것 — 토스트를 띄우지 않는다
+
 		case 'copied-image':
 			return '결과 이미지가 복사됐어요 — 붙여넣기로 공유하세요!';
 		case 'downloaded':
