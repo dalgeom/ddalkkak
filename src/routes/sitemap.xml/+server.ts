@@ -4,7 +4,7 @@ import type { RequestHandler } from './$types';
 // 요청 시점에 오늘 기준 아카이브 30일을 나열한다(prerender 시 빌드 날짜에 고정됨).
 export const prerender = false;
 
-const SITE = 'https://ddalkkak-1c2.pages.dev';
+const SITE = 'https://ddalkkak.app';
 
 /** 라우트가 늘어도 여기 한 줄만 추가하면 사이트맵이 따라간다. */
 const PAGES: { path: string; freq: string; priority: string }[] = [

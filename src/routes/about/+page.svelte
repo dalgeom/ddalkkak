@@ -32,10 +32,10 @@
 		name="description"
 		content="딸깍은 매일 10문제가 새로 열리는 두뇌 퍼즐 사이트입니다. 발견형 퍼즐·상식 퀴즈·성냥개비를 매일 자정에 새로, 모두가 같은 문제로 풉니다."
 	/>
-	<link rel="canonical" href="https://ddalkkak-1c2.pages.dev/about" />
+	<link rel="canonical" href="https://ddalkkak.app/about" />
 	<meta property="og:title" content="소개 — 딸깍" />
 	<meta property="og:description" content="매일 10문제가 새로 열리는 두뇌 퍼즐 사이트, 딸깍." />
-	<meta property="og:url" content="https://ddalkkak-1c2.pages.dev/about" />
+	<meta property="og:url" content="https://ddalkkak.app/about" />
 </svelte:head>
 
 <article>

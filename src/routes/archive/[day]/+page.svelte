@@ -23,13 +23,13 @@
 		name="description"
 		content="{data.label}의 오늘의 딸깍 10문제. 발견형 퍼즐 3 · 상식 퀴즈 3 · 성냥개비 3 + 보너스 1의 문제와 정답·해설을 확인하세요."
 	/>
-	<link rel="canonical" href="https://ddalkkak-1c2.pages.dev/archive/{data.day}" />
+	<link rel="canonical" href="https://ddalkkak.app/archive/{data.day}" />
 	<meta property="og:title" content="{data.label} 오늘의 딸깍 — 지난 문제" />
 	<meta
 		property="og:description"
 		content="{data.label}의 10문제와 정답·해설. 발견형 3 · 상식 3 · 성냥개비 3 + 보너스 1."
 	/>
-	<meta property="og:url" content="https://ddalkkak-1c2.pages.dev/archive/{data.day}" />
+	<meta property="og:url" content="https://ddalkkak.app/archive/{data.day}" />
 </svelte:head>
 
 <nav class="crumb">
