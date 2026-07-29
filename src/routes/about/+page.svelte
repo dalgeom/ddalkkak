@@ -48,7 +48,7 @@
 		</p>
 		<div class="facts">
 			<div class="fact"><b>10</b><span>하루 문제 수</span></div>
-			<div class="fact"><b>1,317</b><span>누적 문제</span></div>
+			<div class="fact"><b>1,374</b><span>누적 문제</span></div>
 			<div class="fact"><b>0원</b><span>가입·결제</span></div>
 		</div>
 	</header>
