@@ -287,10 +287,10 @@
 		name="description"
 		content="성냥개비 하나만 옮겨 등식을 참으로! 타임어택·개수 도전 모드로 친구와 대결하세요."
 	/>
-	<link rel="canonical" href="https://ddalkkak-1c2.pages.dev/matchstick" />
+	<link rel="canonical" href="https://ddalkkak.app/matchstick" />
 	<meta property="og:title" content="성냥개비 — 딸깍" />
 	<meta property="og:description" content="성냥개비 하나만 옮겨 등식을 참으로! 타임어택·개수 도전 모드로 친구와 대결하세요." />
-	<meta property="og:url" content="https://ddalkkak-1c2.pages.dev/matchstick" />
+	<meta property="og:url" content="https://ddalkkak.app/matchstick" />
 </svelte:head>
 
 <div class="mroot">

@@ -287,13 +287,13 @@
 		name="description"
 		content="발견형 퍼즐·상식 퀴즈·성냥개비를 원하는 만큼. 유형을 골라 계속 풀어보세요."
 	/>
-	<link rel="canonical" href="https://ddalkkak-1c2.pages.dev/play" />
+	<link rel="canonical" href="https://ddalkkak.app/play" />
 	<meta property="og:title" content="무한 연습 — 딸깍" />
 	<meta
 		property="og:description"
 		content="발견형 퍼즐·상식 퀴즈·성냥개비를 원하는 만큼. 유형을 골라 계속 풀어보세요."
 	/>
-	<meta property="og:url" content="https://ddalkkak-1c2.pages.dev/play" />
+	<meta property="og:url" content="https://ddalkkak.app/play" />
 </svelte:head>
 
 <div class="topbar">

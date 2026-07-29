@@ -519,8 +519,8 @@
 		name="description"
 		content="하루 10문제. 발견형 퍼즐 3 · 상식 퀴즈 3 · 성냥개비 3 · 보너스 1. 매일 자정에 새로 열리고, 그날은 모두 같은 문제를 풉니다."
 	/>
-	<link rel="canonical" href="https://ddalkkak-1c2.pages.dev/" />
-	<meta property="og:url" content="https://ddalkkak-1c2.pages.dev/" />
+	<link rel="canonical" href="https://ddalkkak.app/" />
+	<meta property="og:url" content="https://ddalkkak.app/" />
 	<meta property="og:title" content="딸깍 — 매일 새로 열리는 두뇌 퍼즐 10문제" />
 	<meta
 		property="og:description"

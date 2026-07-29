@@ -1,10 +1,20 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import AdSlot from '$lib/components/AdSlot.svelte';
 	import Splash from '$lib/components/Splash.svelte';
 	import { logoClicks } from '$lib/nav';
 
 	let { children, data } = $props();
 	const year = new Date().getFullYear();
+
+	// 구주소(pages.dev) 접속을 커스텀 도메인으로 보낸다.
+	// 동적 라우트는 hooks.server.ts가 301로 처리하지만, 프리렌더된 정적 페이지는
+	// 서버 훅을 타지 않으므로 클라이언트에서 한 번 더 막는다.
+	onMount(() => {
+		if (location.hostname.endsWith('.pages.dev')) {
+			location.replace(`https://ddalkkak.app${location.pathname}${location.search}`);
+		}
+	});
 </script>
 
 <Splash />

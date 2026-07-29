@@ -37,9 +37,9 @@
 		name="description"
 		content="놓친 날의 오늘의 딸깍을 날짜별로 다시 볼 수 있어요. 발견형 퍼즐·상식 퀴즈·성냥개비 10문제의 문제와 정답·해설."
 	/>
-	<link rel="canonical" href="https://ddalkkak-1c2.pages.dev/archive" />
+	<link rel="canonical" href="https://ddalkkak.app/archive" />
 	<meta property="og:title" content="지난 문제 — 딸깍" />
-	<meta property="og:url" content="https://ddalkkak-1c2.pages.dev/archive" />
+	<meta property="og:url" content="https://ddalkkak.app/archive" />
 	<meta
 		property="og:description"
 		content="놓친 날의 오늘의 딸깍을 날짜별로 다시 확인하세요. 문제와 정답·해설."
