@@ -53,6 +53,8 @@
 		content="딸깍 이용약관. 회원가입 없이 무료로 이용할 수 있는 두뇌 퍼즐 서비스의 이용 조건입니다."
 	/>
 	<link rel="canonical" href="https://ddalkkak-1c2.pages.dev/terms" />
+	<meta property="og:title" content="이용약관 — 딸깍" />
+	<meta property="og:url" content="https://ddalkkak-1c2.pages.dev/terms" />
 </svelte:head>
 
 <article>

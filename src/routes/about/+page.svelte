@@ -35,6 +35,7 @@
 	<link rel="canonical" href="https://ddalkkak-1c2.pages.dev/about" />
 	<meta property="og:title" content="소개 — 딸깍" />
 	<meta property="og:description" content="매일 10문제가 새로 열리는 두뇌 퍼즐 사이트, 딸깍." />
+	<meta property="og:url" content="https://ddalkkak-1c2.pages.dev/about" />
 </svelte:head>
 
 <article>

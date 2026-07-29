@@ -1,6 +1,6 @@
 import { PROBLEMS, fieldOfChip, type Problem } from '$lib/problems';
 import { TRIVIA } from '$lib/trivia';
-import { kstDayNumber, buildDailySet, dailySample, MATCH_TOTAL } from '$lib/game';
+import { kstDayNumber, buildDailySet, dailySample, displayChoices, MATCH_TOTAL } from '$lib/game';
 
 // 홈의 '오늘'은 요청 시점에 계산해야 한다. prerender 하면 빌드 시점 날짜가 정적 HTML에
 // 박혀, 크롤러와 hydration 전 사용자가 매번 1970-01-01 + day-0 문제를 보는 FOUC가 생긴다.
@@ -26,7 +26,9 @@ export function load() {
 		.map((p) => p.index);
 
 	const idx = dailySample(PROBLEMS.length, dayNum, todaysDiscover);
-	const p: Problem | undefined = PROBLEMS[idx];
+	// 본 게임과 같은 보기 셔플 — 빼먹으면 맛보기에서만 정답이 원래 자리(주로 A)에 몰린다
+	const raw: Problem | undefined = PROBLEMS[idx];
+	const p = raw ? displayChoices(raw) : undefined;
 
 	return {
 		dayNum,

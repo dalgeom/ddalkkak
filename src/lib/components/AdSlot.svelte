@@ -20,12 +20,12 @@
 	.ad-slot {
 		border: 1px dashed var(--border);
 		border-radius: 12px;
-		color: #4d5b73;
+		color: var(--muted-2);
 		display: flex;
 		align-items: center;
 		justify-content: center;
 		font-size: 12px;
 		min-height: 90px;
-		margin: 18px 0 0;
+		margin: 24px 0 0;
 	}
 </style>

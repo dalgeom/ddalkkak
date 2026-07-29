@@ -81,6 +81,26 @@
 		--dur-move: 150ms;
 		--ease-out: ease-out;
 
+		/* ── 타이포·보조 토큰 ──
+		   ProblemView·아카이브 상세 등 이전 컴포넌트가 참조하는 토큰. 정의가 없으면
+		   var()가 무효 처리돼 h1이 본문 크기로, 배경이 투명으로 무너진다. */
+		--fs-2xs: 11.5px;
+		--fs-xs: 12.5px;
+		--fs-sm: 14px;
+		--fs-md: 15.5px;
+		--fs-lg: 17px;
+		--fs-xl: 21px;
+		--fw-body: 500;
+		--fw-caption: 600;
+		--fw-label: 700;
+		--fw-emphasis: 800;
+		--fw-number: 800;
+		--lh-reading: 1.7;
+		--accent-soft: #e7f3ec;
+		--seg-on-hud: #3aff62;
+		--ease-pop: cubic-bezier(0.34, 1.56, 0.64, 1);
+		--dur-judge: 420ms;
+
 		/* ── 형태 ── */
 		--seg-r: 3px;
 		--seg-off: rgba(44, 40, 34, 0.12);
@@ -224,8 +244,10 @@
 			margin-bottom: 34px;
 		}
 	}
+	/* 광고 승인 전 프로덕션에서 AdSlot이 아무것도 렌더하지 않으므로
+	   여백은 슬롯 쪽(.ad-slot)이 갖는다 — 빈 wrapper가 공백만 차지하지 않게 */
 	.bottom-ad {
-		margin-top: 24px;
+		margin: 0;
 	}
 
 	footer {

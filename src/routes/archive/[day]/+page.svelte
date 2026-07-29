@@ -10,8 +10,10 @@
 
 	// 성냥개비는 문제(displayed) → 정답(solution)을 각각 읽기 전용 보드로 보여준다.
 	let matchReveal = $state<boolean[]>([]);
+	let bonusReveal = $state(false);
 	$effect(() => {
 		matchReveal = data.match.map(() => false);
+		bonusReveal = false;
 	});
 </script>
 
@@ -19,13 +21,13 @@
 	<title>{data.label} 오늘의 딸깍 — 지난 문제</title>
 	<meta
 		name="description"
-		content="{data.label}의 오늘의 딸깍. 발견형 퍼즐 3, 상식 퀴즈 5, 성냥개비 3문제를 다시 풀어보세요."
+		content="{data.label}의 오늘의 딸깍 10문제. 발견형 퍼즐 3 · 상식 퀴즈 3 · 성냥개비 3 + 보너스 1의 문제와 정답·해설을 확인하세요."
 	/>
 	<link rel="canonical" href="https://ddalkkak-1c2.pages.dev/archive/{data.day}" />
 	<meta property="og:title" content="{data.label} 오늘의 딸깍 — 지난 문제" />
 	<meta
 		property="og:description"
-		content="{data.label}의 발견형 퍼즐 3, 상식 퀴즈 5, 성냥개비 3문제를 다시 풀어보세요."
+		content="{data.label}의 10문제와 정답·해설. 발견형 3 · 상식 3 · 성냥개비 3 + 보너스 1."
 	/>
 	<meta property="og:url" content="https://ddalkkak-1c2.pages.dev/archive/{data.day}" />
 </svelte:head>
@@ -75,6 +77,30 @@
 	</div>
 </section>
 
+{#if data.bonus}
+	<section class="grp">
+		<div class="grp-h"><Icon name="hint" size={16} /><h2>보너스 문제</h2></div>
+		<div class="grid">
+			{#if data.bonus.kind === 'match'}
+				<article class="mv">
+					<div class="mv-board"><MatchstickBoard board={parseEq(data.bonus.eq.displayed)} picked={null} onstick={() => {}} interactive={false} label={data.bonus.eq.displayed} /></div>
+					<div class="mv-cap">성냥 하나만 옮겨 참으로</div>
+					{#if bonusReveal}
+						<div class="mv-answer">
+							<div class="mv-answer-head"><Icon name="correct" size={15} /><span>정답</span></div>
+							<div class="mv-board sol"><MatchstickBoard board={parseEq(data.bonus.eq.solution)} picked={null} onstick={() => {}} interactive={false} label={"정답 " + data.bonus.eq.solution} /></div>
+						</div>
+					{:else}
+						<button class="mv-reveal" onclick={() => (bonusReveal = true)}>정답 보기</button>
+					{/if}
+				</article>
+			{:else}
+				<ProblemView problem={data.bonus.problem} />
+			{/if}
+		</div>
+	</section>
+{/if}
+
 <a class="today-cta" href="/">
 	<span><Icon name="arrow" size={15} /> 오늘의 딸깍 풀러 가기</span>
 </a>
@@ -103,7 +129,7 @@
 		margin-bottom: 30px;
 	}
 	.mid-ad {
-		margin: 6px 0 30px;
+		margin: 0;
 	}
 	.grp-h {
 		display: flex;

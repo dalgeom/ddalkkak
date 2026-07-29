@@ -9,9 +9,9 @@ const SITE = 'https://ddalkkak-1c2.pages.dev';
 /** 라우트가 늘어도 여기 한 줄만 추가하면 사이트맵이 따라간다. */
 const PAGES: { path: string; freq: string; priority: string }[] = [
 	{ path: '/', freq: 'daily', priority: '1.0' },
-	{ path: '/play', freq: 'weekly', priority: '0.9' },
-	{ path: '/matchstick', freq: 'weekly', priority: '0.8' },
-	{ path: '/archive', freq: 'daily', priority: '0.7' },
+	{ path: '/play', freq: 'weekly', priority: '0.7' },
+	{ path: '/matchstick', freq: 'weekly', priority: '0.7' },
+	{ path: '/archive', freq: 'daily', priority: '0.8' },
 	{ path: '/guide', freq: 'monthly', priority: '0.6' },
 	{ path: '/about', freq: 'monthly', priority: '0.4' },
 	{ path: '/privacy', freq: 'monthly', priority: '0.3' },
@@ -19,7 +19,12 @@ const PAGES: { path: string; freq: string; priority: string }[] = [
 ];
 
 export const GET: RequestHandler = () => {
-	const archive = archiveDays(kstDayNumber(Date.now())).map((d) => ({
+	const today = kstDayNumber(Date.now());
+	// KST 오늘 날짜(YYYY-MM-DD) — 매일 갱신되는 페이지의 lastmod
+	const lastmod = new Date(today * 86400000 - 9 * 3600 * 1000 + 43200000)
+		.toISOString()
+		.slice(0, 10);
+	const archive = archiveDays(today).map((d) => ({
 		path: `/archive/${d}`,
 		freq: 'yearly',
 		priority: '0.5'
@@ -30,7 +35,7 @@ export const GET: RequestHandler = () => {
 ${all
 	.map(
 		(p) =>
-			`\t<url><loc>${SITE}${p.path}</loc><changefreq>${p.freq}</changefreq><priority>${p.priority}</priority></url>`
+			`\t<url><loc>${SITE}${p.path}</loc><lastmod>${lastmod}</lastmod><changefreq>${p.freq}</changefreq><priority>${p.priority}</priority></url>`
 	)
 	.join('\n')}
 </urlset>`;

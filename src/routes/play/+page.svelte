@@ -25,6 +25,7 @@
 	let filter = $state<Filter>('all');
 	let combo = $state(0);
 	let loading = $state(true);
+	let loadFailed = $state(false);
 
 	/** 연습에 올라가는 한 문제. 성냥개비는 Problem이 아니라 등식 한 쌍이다. */
 	type Item = { problem?: Problem; eq?: { displayed: string; solution: string } };
@@ -262,11 +263,17 @@
 	onMount(() => {
 		const f = page.url.searchParams.get('filter');
 		if (f === 'all' || f === 'puzzle' || f === 'trivia' || f === 'match') filter = f;
-		loadBank().then(() => {
-			loading = false;
-			refillBag();
-			nextProblem();
-		});
+		loadBank()
+			.then(() => {
+				loading = false;
+				refillBag();
+				nextProblem();
+			})
+			.catch(() => {
+				// 문제은행 동적 로드 실패 — 영원한 스켈레톤 대신 안내와 재시도를 준다
+				loading = false;
+				loadFailed = true;
+			});
 		const iv = setInterval(() => {
 			if (!judged) elapsedMs = Date.now() - startedAt;
 		}, 1000);
@@ -280,6 +287,13 @@
 		name="description"
 		content="발견형 퍼즐·상식 퀴즈·성냥개비를 원하는 만큼. 유형을 골라 계속 풀어보세요."
 	/>
+	<link rel="canonical" href="https://ddalkkak-1c2.pages.dev/play" />
+	<meta property="og:title" content="무한 연습 — 딸깍" />
+	<meta
+		property="og:description"
+		content="발견형 퍼즐·상식 퀴즈·성냥개비를 원하는 만큼. 유형을 골라 계속 풀어보세요."
+	/>
+	<meta property="og:url" content="https://ddalkkak-1c2.pages.dev/play" />
 </svelte:head>
 
 <div class="topbar">
@@ -295,8 +309,21 @@
 	{/each}
 </div>
 
+<!-- 서버 렌더 소개문 — 문제는 클라이언트에서 로드되므로 정적 HTML에 최소한의 본문을 남긴다 -->
+<p class="intro">
+	발견형 퍼즐 {data.counts.discover}개 · 상식 퀴즈 {data.counts.trivia}개 · 성냥개비
+	{data.counts.match}개 — 총
+	{(data.counts.discover + data.counts.trivia + data.counts.match).toLocaleString()}문제를
+	시간·개수 제한 없이 풉니다. 유형을 고르면 아직 안 나온 문제부터 무작위로 나와요.
+</p>
+
 {#if loading}
 	<div class="card skeleton">문제를 불러오는 중…</div>
+{:else if loadFailed}
+	<div class="card skeleton">
+		문제를 불러오지 못했어요 — 네트워크를 확인해 주세요.
+		<button class="retry" onclick={() => location.reload()}>다시 시도</button>
+	</div>
 {:else if current}
 	<section class="card">
 		{#if shown?.chip}
@@ -484,11 +511,31 @@
 		border-radius: 18px;
 		padding: 18px;
 	}
+	.intro {
+		font-size: 12.5px;
+		color: var(--muted);
+		line-height: 1.65;
+		margin: -6px 2px 14px;
+		word-break: keep-all;
+	}
 	.card.skeleton {
 		text-align: center;
 		color: var(--muted-2);
 		font-size: 14px;
 		padding: 40px 18px;
+	}
+	.retry {
+		display: block;
+		margin: 14px auto 0;
+		padding: 10px 20px;
+		border-radius: 12px;
+		border: 1px solid var(--border-strong);
+		background: var(--panel-2);
+		color: var(--text);
+		font-size: 13.5px;
+		font-weight: 700;
+		font-family: inherit;
+		cursor: pointer;
 	}
 	.cat-chip {
 		display: inline-block;

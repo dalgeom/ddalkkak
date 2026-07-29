@@ -113,6 +113,12 @@
 		content="규칙을 알려주지 않는 발견형 퍼즐, 어떻게 풀까? 방황·발판·해금·검산 4단계와 자주 나오는 규칙의 결을 실제 예시로 정리했습니다."
 	/>
 	<link rel="canonical" href="https://ddalkkak-1c2.pages.dev/guide" />
+	<meta property="og:title" content="발견형 퍼즐 푸는 법 — 딸깍" />
+	<meta
+		property="og:description"
+		content="규칙을 알려주지 않는 발견형 퍼즐, 어떻게 풀까? 4단계 풀이법과 자주 나오는 규칙의 결."
+	/>
+	<meta property="og:url" content="https://ddalkkak-1c2.pages.dev/guide" />
 </svelte:head>
 
 <article>

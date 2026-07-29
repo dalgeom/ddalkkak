@@ -1,7 +1,7 @@
 {
 	"name": "딸깍 — 두뇌 퍼즐",
 	"short_name": "딸깍",
-	"description": "규칙을 발견하는 두뇌 퍼즐 + 상식 퀴즈. 매일 3문제, 연속 모드로 콤보 도전.",
+	"description": "하루 10문제, 매일 자정에 새로 열리는 두뇌 퍼즐. 발견형·상식·성냥개비.",
 	"start_url": "/",
 	"display": "standalone",
 	"background_color": "#efe7d8",

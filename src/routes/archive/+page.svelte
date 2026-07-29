@@ -35,23 +35,24 @@
 	<title>지난 문제 — 딸깍</title>
 	<meta
 		name="description"
-		content="놓친 날의 오늘의 딸깍을 다시 풀어보세요. 발견형 퍼즐·상식 퀴즈·성냥개비 10문제가 날짜별로 그대로 남아 있습니다."
+		content="놓친 날의 오늘의 딸깍을 날짜별로 다시 볼 수 있어요. 발견형 퍼즐·상식 퀴즈·성냥개비 10문제의 문제와 정답·해설."
 	/>
 	<link rel="canonical" href="https://ddalkkak-1c2.pages.dev/archive" />
 	<meta property="og:title" content="지난 문제 — 딸깍" />
+	<meta property="og:url" content="https://ddalkkak-1c2.pages.dev/archive" />
 	<meta
 		property="og:description"
-		content="놓친 날의 오늘의 딸깍을 다시 풀어보세요. 날짜별 10문제."
+		content="놓친 날의 오늘의 딸깍을 날짜별로 다시 확인하세요. 문제와 정답·해설."
 	/>
 </svelte:head>
 
 <article>
 	<header class="cover">
 		<span class="kicker">지난 문제</span>
-		<h1>놓친 날이 있다면<br /><b>지금 풀어도 돼요</b></h1>
+		<h1>놓친 날이 있다면<br /><b>지금 확인해 봐요</b></h1>
 		<p class="lead">
-			지난 {data.days.length}일치 오늘의 딸깍이 그대로 남아 있습니다. 날짜를 골라 그날의 10문제를
-			풀어보세요.
+			지난 {data.days.length}일치 오늘의 딸깍이 그대로 남아 있습니다. 날짜를 골라 그날의 10문제와
+			정답·해설을 확인해 보세요.
 		</p>
 		{#if doneCount > 0}
 			<div class="prog">
@@ -225,7 +226,7 @@
 		font-weight: 800;
 	}
 	.ad {
-		margin-top: 22px;
+		margin: 0;
 	}
 
 	@media (min-width: 768px) {

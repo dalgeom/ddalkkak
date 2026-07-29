@@ -164,8 +164,8 @@
 			persist();
 
 			if (mode.type === 'free') {
-				const gained = Math.max(20, 100 - attempts * 20);
-				feedback = `딸깍! +${gained}점 (시도 ${attempts + 1}회)`;
+				// 점수 시스템은 없다 — 있지도 않은 점수를 암시하지 말고 시도 횟수만 알려준다
+				feedback = attempts === 0 ? '딸깍! 한 번에 맞혔어요' : `딸깍! ${attempts + 1}번 만에 맞혔어요`;
 			} else {
 				runSolved++;
 				if (mode.type === 'count') runResults = [...runResults, 'win'];
@@ -377,7 +377,8 @@
 					<button class="btn ghost" onclick={endRun}>끝내기</button>
 				{:else}
 					<button class="btn ghost" onclick={reveal}>정답 보기</button>
-					{#if mode.type === 'count'}<button class="btn ghost" onclick={toMenu}>나가기</button>{/if}
+					<!-- 무한 연습도 풀지 않고 모드 화면으로 돌아갈 길이 있어야 한다 -->
+					<button class="btn ghost" onclick={toMenu}>나가기</button>
 				{/if}
 			</div>
 		{:else if mode.type === 'free'}
@@ -585,14 +586,12 @@
 		max-width: 640px;
 		margin: 0 auto;
 	}
+	/* 구 다크 테마의 검정 45% 그림자가 크림색 배경 위에 지저분하게 떠 있었다 */
 	.card {
 		background: var(--panel);
-		border: 1px solid var(--border);
+		border: 1px solid var(--border-strong);
 		border-radius: var(--radius);
 		padding: 24px 20px;
-		box-shadow:
-			0 12px 40px rgba(0, 0, 0, 0.45),
-			inset 0 1px 0 #ffffff08;
 	}
 	.opt {
 		flex: 1;
@@ -616,7 +615,6 @@
 	}
 	.timer.danger {
 		color: var(--danger);
-		text-shadow: 0 0 14px #ff5d7355;
 	}
 	.run-score {
 		font-size: 17px;
@@ -746,18 +744,18 @@
 			transform: translateX(6px);
 		}
 	}
+	/* 구 다크 테마의 남색 배경 + 어두운 글자 조합이 남아 글자가 안 보였다 — 현 토큰으로 교체 */
 	.toast {
 		position: fixed;
 		bottom: 32px;
 		left: 50%;
 		transform: translateX(-50%);
-		background: #1b2740;
-		color: var(--text);
-		border: 1px solid var(--border);
-		border-radius: 999px;
+		background: var(--text);
+		color: #fff;
+		border-radius: 12px;
 		padding: 12px 24px;
 		font-size: 14px;
 		z-index: 30;
-		box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+		box-shadow: 0 8px 30px rgba(44, 40, 34, 0.3);
 	}
 </style>

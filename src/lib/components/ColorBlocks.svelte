@@ -41,7 +41,8 @@
 	}
 </script>
 
-{#each rows as row (row)}
+<!-- 키를 row 문자열로 두면 같은 줄이 두 번 나오는 문제에서 중복 키 런타임 에러가 난다 -->
+{#each rows as row, ri (ri)}
 	<div class="crow" style="--n:{rowUnits(row)}">
 		{#each row.split(' ') as it, i (i)}
 			{#if it === '+' || it === '-' || it === '='}
