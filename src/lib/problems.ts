@@ -147,23 +147,6 @@ export const DISCOVER_FIELDS: DiscoverField[] = [
 
 export const PROBLEMS: Problem[] = [
 	{
-		id: 'holiday',
-		chip: '숫자 아님',
-		blocks: [
-			{ kind: 'text', html: '물음표에 들어갈 수는?' },
-			{ kind: 'pre', text: '11 - 31 - 55 - 66 - ? - 103 - 109 - 1225' }
-		],
-		type: 'text',
-		answers: ['815'],
-		hints: [
-			'수학이 아닙니다. 이 숫자들을 "무언가"로 읽어 보세요.',
-			'달력을 펴 보세요. 전부 빨간 날입니다.',
-			'6월 6일과 10월 3일 사이, 양력으로 고정된 공휴일은?'
-		],
-		explain:
-			'전부 날짜입니다 — <b>양력 고정 공휴일</b>: 1/1 신정, 3/1 삼일절, 5/5 어린이날, 6/6 현충일, <b>8/15 광복절</b>, 10/3 개천절, 10/9 한글날, 12/25 성탄절. 답 <b>815</b>.'
-	},
-	{
 		id: 'diamond-op',
 		chip: '이상한 연산',
 		blocks: [
@@ -198,20 +181,6 @@ export const PROBLEMS: Problem[] = [
 		],
 		explain:
 			'M·A·Y는 <b>좌우대칭 글자</b>라 거울에서 모양이 살아남고 순서만 뒤집힙니다. <b>YAM</b>(고구마) ↔ MAY.'
-	},
-	{
-		id: 'coin',
-		chip: '생활 상식',
-		blocks: [{ kind: 'pre', text: '10 = 돌\n50 = 풀\n100 = 사람\n500 = ?' }],
-		type: 'text',
-		answers: ['새', '학', '두루미'],
-		hints: [
-			'숫자에 단위를 붙여 보세요.',
-			'주머니 속 동전을 꺼내 뒷면을 보세요.',
-			'10원 다보탑(돌), 50원 벼(풀), 100원 이순신(사람)…'
-		],
-		explain:
-			'동전 뒷면 도안의 <b>범주</b>: 10원 다보탑=돌, 50원 벼=풀, 100원 이순신=사람, 500원 학 = <b>새</b>.'
 	},
 	{
 		id: 'chain-alpha',
@@ -405,19 +374,18 @@ export const PROBLEMS: Problem[] = [
 		id: 'elevator-4',
 		chip: '관찰',
 		blocks: [
-			{
-				kind: 'text',
-				html: '13층 건물인데 엘리베이터의 숫자 버튼은 <b>12개</b>뿐이다. 없는 숫자는?'
-			}
+			{ kind: 'text', html: '이 동네 건물들의 엘리베이터 숫자 버튼 개수다. 물음표는?' },
+			{ kind: 'pre', text: '13층 건물 = 버튼 12개\n15층 건물 = 버튼 14개\n20층 건물 = 버튼 19개\n3층 건물 = 버튼 ?개' }
 		],
 		type: 'text',
-		answers: ['4', '4층', '사'],
+		answers: ['3', '3개'],
 		hints: [
-			'버튼이 하나 모자란 이유는 고장이 아닙니다.',
-			'한국 건물에서 사람들이 꺼리는 숫자가 있죠.',
-			'병원 엘리베이터에서 특히 자주 사라지는 층입니다.'
+			'버튼이 층수보다 하나씩 모자라죠 — 왜일까요? 어떤 층이 없는 겁니다.',
+			'한국 건물이 꺼리는 숫자가 있어요. 병원에서 특히 자주 사라지는 층.',
+			'3층 건물에는 애초에 그 층이 없죠 — 뺄 것도 없어요.'
 		],
-		explain: '한국 건물은 발음 때문에 <b>4층</b>을 꺼려 F로 쓰거나 건너뜁니다. 답 <b>4</b>.'
+		explain:
+			'버튼이 모자란 이유는 <b>4층이 없어서</b>다(발음 때문에 F로 쓰거나 건너뜀). 규칙은 "층수−1"이 아니라 "4층이 있으면 −1". 3층 건물엔 4층 자체가 없으니 버튼은 그대로 <b>3</b>개.'
 	},
 	{
 		id: 'keyboard-left',
@@ -768,16 +736,12 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'text',
-				html: 'ELEVEN + TWO = TWELVE + ONE<br>이 등식은 <b>두 번</b> 참이다. 산술(11+2 = 12+1) 말고 또 무엇이 참일까?'
+				html: 'ELEVEN + TWO = TWELVE + ONE<br>이 등식은 산술(11+2 = 12+1) 말고 <b>또 한 번</b> 참이다. 같은 방식으로 "참"인 짝은?'
 			}
 		],
 		type: 'choice',
-		choices: [
-			'글자를 재배열하면 양변이 똑같다',
-			'로마 숫자로 써도 같다',
-			'발음이 같다',
-			'획수가 같다'
-		],
+		// 규칙(애너그램)을 선택지에 적어주면 발견이 아니라 고르기가 된다 — 같은 성질의 짝을 찾게 한다
+		choices: ['LISTEN = SILENT', 'NIGHT = KNIGHT', 'SEA = SEE', 'FOUR = FIVE'],
 		answerIndex: 0,
 		hints: [
 			'양변의 "값" 말고 "표기"를 비교해 보세요.',
@@ -785,7 +749,7 @@ export const PROBLEMS: Problem[] = [
 			'양변은 같은 글자들로 되어 있습니다.'
 		],
 		explain:
-			'ELEVEN+TWO와 TWELVE+ONE은 완전한 <b>애너그램</b> — 같은 글자들의 재배열이면서 값(13)도 같습니다.'
+			'ELEVEN+TWO와 TWELVE+ONE은 완전한 <b>애너그램</b> — 같은 글자들의 재배열이면서 값(13)도 같습니다. LISTEN과 SILENT도 같은 글자의 재배열이라 같은 방식으로 참입니다.'
 	},
 	{
 		id: 'weekday-add',
@@ -812,24 +776,6 @@ export const PROBLEMS: Problem[] = [
 			'12를 빼고 남는 달의 계절을 답하세요.'
 		],
 		explain: '12를 넘으면 한 바퀴: 13월=1월(겨울), 20월=8월(여름). 27월 = 27−24 = 3월 = <b>봄</b>.'
-	},
-	{
-		id: 'xmas-newyear',
-		chip: '달력',
-		blocks: [
-			{
-				kind: 'text',
-				html: '올해 크리스마스(12월 25일)가 <b>수요일</b>이라면, 같은 해 <b>12월 31일</b>은 무슨 요일?'
-			}
-		],
-		type: 'text',
-		answers: ['화', '화요일'],
-		hints: [
-			'12월 25일부터 31일까지 며칠 차이인지 세어 보세요.',
-			'딱 6일 차이입니다.',
-			'수요일에서 6일 뒤로 요일을 세어 보세요 — 목·금·토·일·월·화.'
-		],
-		explain: '12/25(수)부터 12/31까지는 <b>6일</b>. 수요일에서 6일 뒤 → 목·금·토·일·월·화, 그래서 <b>화요일</b>.'
 	},
 	{
 		id: 'tomorrow-yesterday',
@@ -965,16 +911,12 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'text',
-				html: '어떤 클럽: 2 ✓, 4 ✓, 6 ✓ — 그런데 <b>8은 거절</b>당했다. 이유는?'
+				html: '어떤 클럽: 2 ✓, 4 ✓, 6 ✓ — 그런데 <b>8은 거절</b>당했다.<br>다음 중 회원이 될 수 있는 수는?'
 			}
 		],
 		type: 'choice',
-		choices: [
-			'영어 이름에 E가 들어가서',
-			'획수가 많아서',
-			'2의 거듭제곱이라서',
-			'발음이 길어서'
-		],
+		// 규칙을 선택지에 적어주면 발견이 아니라 고르기가 된다 — 규칙을 찾아야만 고를 수 있는 후보로
+		choices: ['40', '9', '1', '10'],
 		answerIndex: 0,
 		hints: [
 			'짝수 클럽이라면 8이 거절될 리 없죠.',
@@ -982,7 +924,7 @@ export const PROBLEMS: Problem[] = [
 			'TWO, FOUR, SIX에는 없고 EIGHT에는 있는 글자.'
 		],
 		explain:
-			'TWO·FOUR·SIX엔 <b>E가 없습니다</b>. EIGHT는 E가 있어 탈락 — 짝수는 미끼였습니다.'
+			'TWO·FOUR·SIX엔 <b>E가 없습니다</b>. EIGHT는 E가 있어 탈락 — 짝수는 미끼였습니다. NINE·ONE·TEN도 전부 E가 있고, <b>FORTY(40)</b>만 E가 없어 합격.'
 	},
 	{
 		id: 'stairs',
@@ -1177,7 +1119,8 @@ export const PROBLEMS: Problem[] = [
 		chip: '이상한 연산',
 		blocks: [
 			{ kind: 'text', html: '물음표에 들어갈 값은?' },
-			{ kind: 'pre', text: '9 ★ 6 = 15\n4 ★ 7 = 3\n15 ★ 8 = 23\n12 ★ 5 = ?' }
+			// '3★10=13'이 없으면 "앞수가 크면 합, 작으면 차"라는 다른 규칙도 성립해 답이 갈린다
+			{ kind: 'pre', text: '9 ★ 6 = 15\n4 ★ 7 = 3\n15 ★ 8 = 23\n3 ★ 10 = 13\n12 ★ 5 = ?' }
 		],
 		type: 'text',
 		answers: ['7'],
@@ -1393,22 +1336,6 @@ export const PROBLEMS: Problem[] = [
 		explain: '월은 그 달의 영어 이름을, 일은 그 이름에서 몇 번째 글자인지를 가리킨다. 3월=MARCH의 3번째 글자는 R, 12월=DECEMBER(D-E-C-E-M)의 5번째 글자는 M.'
 	},
 	{
-		id: 'month-pairs',
-		chip: '달력',
-		blocks: [
-			{ kind: 'text', html: '차이가 정확히 2인 짝 중 곱이 가장 큰 값은?' },
-			{ kind: 'pre', text: '1년 열두 달 중 31일까지 있는 달의 번호와 30일까지 있는 달의 번호가 있다(2월은 제외).\n31일 달 번호 하나와 30일 달 번호 하나를 짝지어 차이가 정확히 2가 되는 짝을 모두 찾고, 그 중 곱이 가장 큰 값을 구하라.' }
-		],
-		type: 'text',
-		answers: ['63'],
-		hints: [
-			'31일까지 있는 달과 30일까지 있는 달을 각각 목록으로 적어보세요(2월 제외).',
-			'두 목록에서 숫자 차이가 정확히 2인 짝을 전부 찾아보세요.',
-			'그런 짝은 딱 두 쌍뿐입니다. 곱이 큰 쪽을 고르세요.'
-		],
-		explain: '31일까지 있는 달: 1,3,5,7,8,10,12. 30일까지 있는 달: 4,6,9,11. 이 두 목록에서 차이가 정확히 2인 짝은 (7,9)와 (8,6) 두 쌍뿐이다(7월=31일과 9월=30일, 8월=31일과 6월=30일). 곱은 각각 63과 48이므로 최댓값은 63.'
-	},
-	{
 		id: 'dice-double',
 		chip: '놀이',
 		blocks: [
@@ -1518,61 +1445,6 @@ export const PROBLEMS: Problem[] = [
 		explain: '펼친 <b>손가락 개수</b>: 바위=0, 가위=2, 보 = <b>5</b>.'
 	},
 	{
-		id: 'friday-13',
-		chip: '달력',
-		blocks: [
-			{
-				kind: 'text',
-				html: '어떤 달의 <b>13일이 금요일</b>이다. 그 달 <b>1일</b>은 무슨 요일일까?'
-			}
-		],
-		type: 'text',
-		answers: ['일요일', '일'],
-		hints: [
-			'13일에서 하루씩 거꾸로 세어 1일까지 가 보세요.',
-			'7일 전은 같은 요일입니다. 13일에서 7을 빼면?',
-			'6일 전 금요일 → 다시 거꾸로 세면 1일의 요일이 나옵니다.'
-		],
-		explain:
-			'13일이 금요일이면 6일(=13−7) 전도 금요일이고, 거기서 다시 세면 1일은 <b>일요일</b>입니다.'
-	},
-	{
-		id: 'three-dates-sum',
-		chip: '달력',
-		blocks: [
-			{
-				kind: 'text',
-				html: '달력에서 가로로 나란한 세 날짜의 <b>합이 45</b>다. 가운데 날짜는?'
-			}
-		],
-		type: 'text',
-		answers: ['15', '15일'],
-		hints: [
-			'가로로 이웃한 세 날짜는 1씩 차이 나는 연속된 수입니다.',
-			'연속된 세 수의 합은 가운데 수의 몇 배일까요?',
-			'가운데 수 = 합 ÷ 3.'
-		],
-		explain: '가로로 이웃한 세 날짜는 연속수라 합이 가운데×3. 45÷3 = <b>15</b>.'
-	},
-	{
-		id: 'not-on-calendar',
-		chip: '달력',
-		blocks: [
-			{
-				kind: 'text',
-				html: '일 년 내내, 어떤 달력에도 <b>인쇄되지 않는</b> 가장 작은 수는?'
-			}
-		],
-		type: 'text',
-		answers: ['32'],
-		hints: [
-			'달력에 적히는 날짜의 범위를 떠올려 보세요.',
-			'한 달은 아무리 길어도 며칠까지 있나요?',
-			'31 다음 수는 어떤 달에도 없습니다.'
-		],
-		explain: '달력의 날짜는 최대 31일까지. 그다음 <b>32</b>는 어떤 달에도 인쇄되지 않습니다.'
-	},
-	{
 		id: 'dice-opposite-max',
 		chip: '주사위',
 		blocks: [
@@ -1615,18 +1487,20 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'text',
-				html: '어떤 클럽: <b>SKY ✓  GYM ✓  FLY ✓</b> — 그런데 <b>SUN은 거절</b>당했다. 이유는?'
+				html: '어떤 클럽: <b>SKY ✓  GYM ✓  FLY ✓</b> — 그런데 <b>SUN은 거절</b>당했다.<br>다음 중 회원이 될 수 있는 단어는?'
 			}
 		],
 		type: 'choice',
-		choices: ['영어 이름에 모음(A,E,I,O,U)이 없어서', '세 글자라서', '하늘과 관련 없어서', '발음이 짧아서'],
+		// 규칙을 선택지에 적어주면 발견이 아니라 고르기가 된다 — 규칙을 찾아야만 고를 수 있는 후보로
+		choices: ['MYTH', 'SEA', 'CAT', 'ICE'],
 		answerIndex: 0,
 		hints: [
 			'세 글자라서? SUN도 세 글자입니다. 다른 이유를 찾으세요.',
 			'회원 단어들의 글자를 하나씩 보세요 — A,E,I,O,U가 하나라도 있나요?',
 			'SKY·GYM·FLY엔 모음이 없고, SUN엔 U가 있습니다.'
 		],
-		explain: 'SKY·GYM·FLY는 <b>모음이 하나도 없는</b> 단어. SUN은 U가 있어 탈락했습니다.'
+		explain:
+			'SKY·GYM·FLY는 <b>모음(A,E,I,O,U)이 하나도 없는</b> 단어. SUN은 U가 있어 탈락했습니다. SEA·CAT·ICE도 모음이 있고, <b>MYTH</b>만 모음이 없어 합격.'
 	},
 	{
 		id: 'prime-reject-club',
@@ -1654,18 +1528,18 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'text',
-				html: '어떤 클럽의 회원은 <b>1·3·5·7·8·10·12</b>, 거절은 <b>2·4·6·9·11</b>이다.<br>회원들의 공통점은? (그 달은 □일까지 있다 — □는?)'
+				html: '어떤 클럽의 회원은 <b>1·3·5·7·8·10·12</b>, 거절은 <b>2·4·6·9·11</b>이다.<br>거절된 수 중에서도 유독 <b>더 심하게</b> 자격 미달인 수가 하나 있다. 무엇일까?'
 			}
 		],
 		type: 'text',
-		answers: ['31', '31일'],
+		answers: ['2', '2월'],
 		hints: [
 			'숫자를 "달(월)"로 읽어 보세요.',
 			'7과 8이 나란히 회원인 게 결정적입니다 — 홀짝 규칙이 아니라는 뜻.',
-			'회원은 전부 그 달의 날 수가 가장 많은 달입니다.'
+			'거절된 달은 대부분 30일까지인데, 딱 하나만 28일까지예요.'
 		],
 		explain:
-			'회원은 모두 <b>31일까지 있는 달</b>(1,3,5,7,8,10,12월). 거절은 30일 이하인 달. 7·8월이 연속 회원인 게 홀짝 미끼를 깹니다. □ = <b>31</b>.'
+			'회원은 모두 <b>31일까지 있는 달</b>(1,3,5,7,8,10,12월). 7·8월이 연속 회원인 게 홀짝 미끼를 깹니다. 거절 중 4·6·9·11월은 그래도 30일인데 <b>2월</b>만 28일(윤년 29일) — 가장 심한 자격 미달입니다.'
 	},
 	{
 		id: 'riddle-yeol',
@@ -1993,22 +1867,6 @@ export const PROBLEMS: Problem[] = [
 		explain: '값은 글자 안에 완전히 <b>막힌 칸(구멍)</b>의 개수. 日 2칸·目 3칸·田 4칸이라 2·3·4가 되니 王도 5겠거니 싶지만, 王은 가로줄 셋을 세로줄이 관통할 뿐 어느 칸도 사방이 막혀 있지 않다 — 닫힌 칸 <b>0개</b>. 오르던 수열이 뚝 끊기는 게 함정.'
 	},
 	{
-		id: 'glyph-hole-abc',
-		chip: '닫힌 칸',
-		blocks: [
-			{ kind: 'text', html: '물음표에 들어갈 글자는?' },
-			{ kind: 'glyph', lines: ['田 = D', '目 = C', '日 = B', '口 = ?'] }
-		],
-		type: 'text',
-		answers: ['A', 'a'],
-		hints: [
-			'답이 D,C,B로 하나씩 내려가는 게 우연일까요? 각 한자 안의 닫힌 칸 개수를 세어서 알파벳 순서와 비교해보세요.',
-			'田=4칸=D(4번째 글자), 目=3칸=C(3번째 글자), 日=2칸=B(2번째 글자)예요. 숫자를 알파벳 순서로 바꾸는 규칙이에요.',
-			'口는 네모 하나뿐이라 닫힌 칸이 1개예요. 1번째 알파벳은 A.'
-		],
-		explain: '닫힌 칸 개수를 <b>알파벳 순서</b>로 바꾼 것. 田 4칸=D, 目 3칸=C, 日 2칸=B. D·C·B가 내려오니 그냥 A로 찍기 쉽지만, 규칙은 순서가 아니라 칸 개수→알파벳이다. 口는 네모 하나로 1칸 → 첫 글자 <b>A</b>.'
-	},
-	{
 		id: 'glyph-hole-concat',
 		chip: '닫힌 칸',
 		blocks: [
@@ -2329,22 +2187,6 @@ export const PROBLEMS: Problem[] = [
 		explain: '이웃한 두 글자 순번 합의 26 나머지 글자: D(4)+X(24)=28→28-26=2→B.'
 	},
 	{
-		id: 'fig-intersect',
-		chip: '교차점',
-		blocks: [
-			{ kind: 'text', html: '물음표에 들어갈 수는?' },
-			{ kind: 'figure', svg: '<svg viewBox=\'0 0 460 130\' role=\'img\' aria-label=\'선이 만나는 점 세기\'><line x1=\'15\' y1=\'45\' x2=\'95\' y2=\'45\' style=\'stroke:#2c2822;stroke-width:3;fill:none\'/><line x1=\'15\' y1=\'75\' x2=\'95\' y2=\'75\' style=\'stroke:#2c2822;stroke-width:3;fill:none\'/><text x=\'55\' y=\'118\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:19px;font-weight:800;fill:#2c2822\'>= 0</text><line x1=\'135\' y1=\'42\' x2=\'205\' y2=\'82\' style=\'stroke:#2c2822;stroke-width:3;fill:none\'/><line x1=\'135\' y1=\'82\' x2=\'205\' y2=\'42\' style=\'stroke:#2c2822;stroke-width:3;fill:none\'/><text x=\'170\' y=\'118\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:19px;font-weight:800;fill:#2c2822\'>= 1</text><path d=\'M285 36 L250 88 L320 88 Z\' style=\'stroke:#2c2822;stroke-width:3;fill:none\'/><text x=\'285\' y=\'118\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:19px;font-weight:800;fill:#2c2822\'>= 3</text><path d=\'M400 28 L417.6 82.3 L371.5 48.7 L428.5 48.7 L382.4 82.3 Z\' style=\'stroke:#2c2822;stroke-width:3;fill:none\'/><text x=\'400\' y=\'118\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:22px;font-weight:800;fill:#c0392b\'>= ?</text></svg>', caption: '선끼리 만나는 곳' }
-		],
-		type: 'text',
-		answers: ['5', '5개', '다섯'],
-		hints: [
-			'선이 몇 가닥인지 세는 게 아니에요.',
-			'평행하면 아무리 길게 그려도 절대 안 만나요.',
-			'선끼리 실제로 겹쳐 X자로 만나는 지점마다 점을 찍어 세어보세요.'
-		],
-		explain: '값은 선의 개수가 아니라 선끼리 겹쳐 만나는 <b>교차점</b>의 수. 평행선은 0(영영 안 만남), X는 1, 삼각형은 3. 별(펜타그램)을 한붓그리기로 그리면 안쪽에 교차점이 <b>5개</b> 생긴다.'
-	},
-	{
 		id: 'fig-fold',
 		chip: '종이접기',
 		blocks: [
@@ -2406,7 +2248,7 @@ export const PROBLEMS: Problem[] = [
 			'겹쳐서 생긴 하나의 커다란 테두리만 놓고 보세요.',
 			'테두리를 손가락으로 따라가며 뾰족하게·오목하게 꺾이는 지점마다 하나씩 세어보세요.'
 		],
-		explain: '값은 원래 도형들의 변을 더한 게 아니라, 겹쳐서 만들어진 <b>하나의 바깥 테두리</b>를 따라갈 때 꺾이는 꼭짓점의 수다. 사각형은 4, 삼각형은 3. 십자(+)는 뾰족한 점 4 + 오목한 점 8 = 12. 육각별도 뾰족한 점 6 + 오목한 점 6 = <b>12</b> — 전혀 다르게 생겼는데 세어보면 같다.'
+		explain: '값은 원래 도형들의 변을 더한 게 아니라, 겹쳐서 만들어진 <b>하나의 바깥 테두리</b>를 따라갈 때 꺾이는 꼭짓점의 수다. 사각형은 4, 삼각형은 3. 십자(+)는 팔 끝의 뾰족한 점 8 + 팔 사이 오목한 점 4 = 12. 육각별도 뾰족한 점 6 + 오목한 점 6 = <b>12</b> — 전혀 다르게 생겼는데 세어보면 같다.'
 	},
 	{
 		id: 'fig-chiral',
@@ -2423,22 +2265,6 @@ export const PROBLEMS: Problem[] = [
 			'물음표 짝은 그냥 90도 돌린 것뿐이라, 그 방향 관계가 그대로예요.'
 		],
 		explain: '핵심은 잘린 모서리와 점의 <b>상대 방향(손잡이 방향)</b>이다. 돌리기(회전)는 이 관계를 절대 바꾸지 못하지만, 좌우로 뒤집으면(거울) 반드시 반전된다 — 오른손과 왼손처럼. 물음표 짝은 반시계 90도로 돌린 것이라 손잡이 방향이 그대로이므로 <b>회전</b>이다.'
-	},
-	{
-		id: 'fig-laser',
-		chip: '레이저 반사',
-		blocks: [
-			{ kind: 'text', html: '레이저가 상자에서 나가는 방향은? (위 · 아래 · 왼쪽 · 오른쪽)' },
-			{ kind: 'figure', svg: '<svg viewBox=\'0 0 448 132\' role=\'img\' aria-label=\'레이저가 거울에 튕겨 어느 쪽으로 나가나\'><rect x=\'8\' y=\'22\' width=\'84\' height=\'84\' rx=\'4\' style=\'stroke:#2c2822;stroke-width:2.5;fill:none\'/><line x1=\'41\' y1=\'73\' x2=\'59\' y2=\'55\' style=\'stroke:#1e88ff;stroke-width:4;fill:none;stroke-linecap:round\'/><polyline points=\'8 64 50 64 50 22\' style=\'stroke:#c0392b;stroke-width:2.5;fill:none;stroke-dasharray:5 4\'/><polyline points=\'2 58 8 64 2 70\' style=\'stroke:#c0392b;stroke-width:2.5;fill:none\'/><line x1=\'50\' y1=\'22\' x2=\'50\' y2=\'10\' style=\'stroke:#c0392b;stroke-width:2.5;fill:none\'/><polyline points=\'44 16 50 10 56 16\' style=\'stroke:#c0392b;stroke-width:2.5;fill:none\'/><rect x=\'122\' y=\'22\' width=\'84\' height=\'84\' rx=\'4\' style=\'stroke:#2c2822;stroke-width:2.5;fill:none\'/><line x1=\'155\' y1=\'55\' x2=\'173\' y2=\'73\' style=\'stroke:#1e88ff;stroke-width:4;fill:none;stroke-linecap:round\'/><polyline points=\'122 64 164 64 164 106\' style=\'stroke:#c0392b;stroke-width:2.5;fill:none;stroke-dasharray:5 4\'/><polyline points=\'116 58 122 64 116 70\' style=\'stroke:#c0392b;stroke-width:2.5;fill:none\'/><line x1=\'164\' y1=\'106\' x2=\'164\' y2=\'118\' style=\'stroke:#c0392b;stroke-width:2.5;fill:none\'/><polyline points=\'158 112 164 118 170 112\' style=\'stroke:#c0392b;stroke-width:2.5;fill:none\'/><rect x=\'236\' y=\'22\' width=\'84\' height=\'84\' rx=\'4\' style=\'stroke:#2c2822;stroke-width:2.5;fill:none\'/><line x1=\'279\' y1=\'87\' x2=\'297\' y2=\'69\' style=\'stroke:#1e88ff;stroke-width:4;fill:none;stroke-linecap:round\'/><line x1=\'279\' y1=\'35\' x2=\'297\' y2=\'53\' style=\'stroke:#1e88ff;stroke-width:4;fill:none;stroke-linecap:round\'/><polyline points=\'236 78 288 78 288 44 236 44\' style=\'stroke:#c0392b;stroke-width:2.5;fill:none;stroke-dasharray:5 4\'/><polyline points=\'230 72 236 78 230 84\' style=\'stroke:#c0392b;stroke-width:2.5;fill:none\'/><line x1=\'236\' y1=\'44\' x2=\'224\' y2=\'44\' style=\'stroke:#c0392b;stroke-width:2.5;fill:none\'/><polyline points=\'230 38 224 44 230 50\' style=\'stroke:#c0392b;stroke-width:2.5;fill:none\'/><rect x=\'350\' y=\'22\' width=\'84\' height=\'84\' rx=\'4\' style=\'stroke:#2c2822;stroke-width:2.5;fill:none\'/><line x1=\'393\' y1=\'55\' x2=\'411\' y2=\'73\' style=\'stroke:#1e88ff;stroke-width:4;fill:none;stroke-linecap:round\'/><line x1=\'359\' y1=\'73\' x2=\'377\' y2=\'55\' style=\'stroke:#1e88ff;stroke-width:4;fill:none;stroke-linecap:round\'/><line x1=\'402\' y1=\'118\' x2=\'402\' y2=\'106\' style=\'stroke:#c0392b;stroke-width:2.5;fill:none\'/><polyline points=\'396 112 402 106 408 112\' style=\'stroke:#c0392b;stroke-width:2.5;fill:none\'/><line x1=\'402\' y1=\'106\' x2=\'402\' y2=\'84\' style=\'stroke:#c0392b;stroke-width:2.5;fill:none;stroke-dasharray:5 4\'/><text x=\'370\' y=\'72\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:24px;font-weight:800;fill:#c0392b\'>?</text></svg>', caption: '파란선은 거울, 빨간 점선은 빛의 경로' }
-		],
-		type: 'text',
-		answers: ['아래', '아래쪽', '↓', '밑', '아래로', '하'],
-		hints: [
-			'빛은 거울(파란 사선)에 부딪히면 90도 꺾여요. 예시 3칸에서 어떻게 꺾이는지 먼저 보세요.',
-			'기울기가 반대인 두 거울은 꺾는 방향도 반대예요 — 예시 1번(위로)과 2번(아래로)을 비교하세요.',
-			'물음표는 아래에서 위로 들어가, 첫 거울에서 왼쪽으로, 그 다음 거울에서 아래로 꺾여요.'
-		],
-		explain: '거울은 빛을 90도로 튕긴다. 오른쪽으로 향하던 빛이 / 거울을 만나면 위로, \\ 거울을 만나면 아래로 꺾인다(기울기가 반대면 결과도 반대). 물음표는 아래에서 위로 들어가 첫 거울에서 왼쪽으로, 이어 다음 거울에서 아래로 꺾여 <b>아래로</b> 나간다. 거울이 둘이면 예시 3번처럼 들어온 쪽으로 되돌아나갈 수도 있다.'
 	},
 	{
 		id: 'fig-shadow',
@@ -2473,38 +2299,6 @@ export const PROBLEMS: Problem[] = [
 		explain: '선이 겹쳐 보여도 교차점에 <b>검은 점</b>이 없으면 한쪽이 다른 쪽 위로 지나가는 다리일 뿐 연결이 아니다. 점이 있는 곳에서만 물길이 나뉘거나 꺾인다. 시작점에서 점 없는 교차를 무시하고 따라가면 <b>B</b>에 도착한다.'
 	},
 	{
-		id: 'fig-spill',
-		chip: '삐져나옴',
-		blocks: [
-			{ kind: 'text', html: '조각이 굵은 틀 밖으로 나간 칸은 모두 몇 개일까?' },
-			{ kind: 'figure', svg: '<svg viewBox=\'0 0 470 104\' role=\'img\' aria-label=\'틀 밖으로 나간 칸 세기\'><rect x=\'8\' y=\'18\' width=\'15\' height=\'15\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#e57373\'/><rect x=\'23\' y=\'18\' width=\'15\' height=\'15\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#e57373\'/><rect x=\'8\' y=\'33\' width=\'15\' height=\'15\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#e57373\'/><rect x=\'38\' y=\'48\' width=\'15\' height=\'15\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#64b5f6\'/><rect x=\'53\' y=\'48\' width=\'15\' height=\'15\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#64b5f6\'/><rect x=\'38\' y=\'63\' width=\'15\' height=\'15\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#64b5f6\'/><rect x=\'23\' y=\'63\' width=\'15\' height=\'15\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#81c784\'/><rect x=\'53\' y=\'18\' width=\'15\' height=\'15\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#ffb74d\'/><rect x=\'8\' y=\'18\' width=\'60\' height=\'60\' style=\'stroke:#2c2822;stroke-width:4;fill:none\'/><rect x=\'128\' y=\'18\' width=\'15\' height=\'15\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#e57373\'/><rect x=\'143\' y=\'18\' width=\'15\' height=\'15\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#e57373\'/><rect x=\'158\' y=\'18\' width=\'15\' height=\'15\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#e57373\'/><rect x=\'188\' y=\'18\' width=\'15\' height=\'15\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#e57373\'/><rect x=\'128\' y=\'48\' width=\'15\' height=\'15\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#64b5f6\'/><rect x=\'143\' y=\'48\' width=\'15\' height=\'15\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#64b5f6\'/><rect x=\'143\' y=\'3\' width=\'15\' height=\'15\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#81c784\'/><rect x=\'173\' y=\'63\' width=\'15\' height=\'15\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#ffb74d\'/><rect x=\'128\' y=\'18\' width=\'60\' height=\'60\' style=\'stroke:#2c2822;stroke-width:4;fill:none\'/><rect x=\'248\' y=\'18\' width=\'15\' height=\'15\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#e57373\'/><rect x=\'263\' y=\'18\' width=\'15\' height=\'15\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#e57373\'/><rect x=\'278\' y=\'18\' width=\'15\' height=\'15\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#e57373\'/><rect x=\'293\' y=\'18\' width=\'15\' height=\'15\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#e57373\'/><rect x=\'248\' y=\'33\' width=\'15\' height=\'15\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#64b5f6\'/><rect x=\'263\' y=\'33\' width=\'15\' height=\'15\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#64b5f6\'/><rect x=\'278\' y=\'33\' width=\'15\' height=\'15\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#81c784\'/><rect x=\'293\' y=\'33\' width=\'15\' height=\'15\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#81c784\'/><rect x=\'248\' y=\'48\' width=\'15\' height=\'15\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#ffb74d\'/><rect x=\'263\' y=\'48\' width=\'15\' height=\'15\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#ffb74d\'/><rect x=\'278\' y=\'48\' width=\'15\' height=\'15\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#ba68c8\'/><rect x=\'293\' y=\'48\' width=\'15\' height=\'15\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#ba68c8\'/><rect x=\'248\' y=\'63\' width=\'15\' height=\'15\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#e57373\'/><rect x=\'263\' y=\'63\' width=\'15\' height=\'15\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#e57373\'/><rect x=\'308\' y=\'63\' width=\'15\' height=\'15\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#64b5f6\'/><rect x=\'248\' y=\'18\' width=\'60\' height=\'60\' style=\'stroke:#2c2822;stroke-width:4;fill:none\'/><rect x=\'368\' y=\'18\' width=\'15\' height=\'15\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#e57373\'/><rect x=\'383\' y=\'18\' width=\'15\' height=\'15\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#e57373\'/><rect x=\'428\' y=\'33\' width=\'15\' height=\'15\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#e57373\'/><rect x=\'398\' y=\'3\' width=\'15\' height=\'15\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#64b5f6\'/><rect x=\'368\' y=\'63\' width=\'15\' height=\'15\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#81c784\'/><rect x=\'353\' y=\'48\' width=\'15\' height=\'15\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#ffb74d\'/><rect x=\'398\' y=\'48\' width=\'15\' height=\'15\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#ba68c8\'/><rect x=\'368\' y=\'18\' width=\'60\' height=\'60\' style=\'stroke:#2c2822;stroke-width:4;fill:none\'/><text x=\'398\' y=\'96\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:22px;font-weight:800;fill:#c0392b\'>?</text></svg>', caption: '굵은 사각형이 틀(경계선)' }
-		],
-		type: 'text',
-		answers: ['3', '3개', '세', '셋', '3칸'],
-		hints: [
-			'틀 안에 든 조각의 개수를 세는 게 아니에요.',
-			'굵은 테두리 선을 넘어 바깥으로 나간 색칸을 찾으세요.',
-			'그렇게 삐져나온 칸만 하나씩 세면 돼요.'
-		],
-		explain: '조각이 몇 개든 상관없이, 굵은 틀을 넘어 <b>바깥으로 나간 칸</b>의 개수만 값이다. 조각 5개가 빽빽한 예시도 실제 삐져나온 건 1칸뿐 — 조각 수에 속으면 안 된다. 물음표는 세 변으로 각각 나가 <b>3개</b>.'
-	},
-	{
-		id: 'fig-island',
-		chip: '고립된 섬',
-		blocks: [
-			{ kind: 'text', html: '사방이 완전히 막혀 갇힌 빈칸(섬)은 몇 개일까?' },
-			{ kind: 'figure', svg: '<svg viewBox=\'0 0 470 116\' role=\'img\' aria-label=\'사방이 막힌 빈칸 세기\'><rect x=\'6\' y=\'16\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#e57373\'/><rect x=\'19\' y=\'16\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#64b5f6\'/><rect x=\'32\' y=\'16\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#81c784\'/><rect x=\'45\' y=\'16\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#ffb74d\'/><rect x=\'58\' y=\'16\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#ba68c8\'/><rect x=\'71\' y=\'16\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#e57373\'/><rect x=\'6\' y=\'29\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#81c784\'/><rect x=\'19\' y=\'29\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#ffb74d\'/><rect x=\'32\' y=\'29\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#ba68c8\'/><rect x=\'45\' y=\'29\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#e57373\'/><rect x=\'58\' y=\'29\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#64b5f6\'/><rect x=\'71\' y=\'29\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#fdf6e9\'/><rect x=\'6\' y=\'42\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#ba68c8\'/><rect x=\'19\' y=\'42\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#e57373\'/><rect x=\'32\' y=\'42\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#fdf6e9\'/><rect x=\'45\' y=\'42\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#81c784\'/><rect x=\'58\' y=\'42\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#ffb74d\'/><rect x=\'71\' y=\'42\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#ba68c8\'/><rect x=\'6\' y=\'55\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#fdf6e9\'/><rect x=\'19\' y=\'55\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#81c784\'/><rect x=\'32\' y=\'55\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#ffb74d\'/><rect x=\'45\' y=\'55\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#ba68c8\'/><rect x=\'58\' y=\'55\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#e57373\'/><rect x=\'71\' y=\'55\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#64b5f6\'/><rect x=\'6\' y=\'68\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#ffb74d\'/><rect x=\'19\' y=\'68\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#ba68c8\'/><rect x=\'32\' y=\'68\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#e57373\'/><rect x=\'45\' y=\'68\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#64b5f6\'/><rect x=\'58\' y=\'68\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#81c784\'/><rect x=\'71\' y=\'68\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#ffb74d\'/><rect x=\'6\' y=\'81\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#e57373\'/><rect x=\'19\' y=\'81\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#64b5f6\'/><rect x=\'32\' y=\'81\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#81c784\'/><rect x=\'45\' y=\'81\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#ffb74d\'/><rect x=\'58\' y=\'81\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#ba68c8\'/><rect x=\'71\' y=\'81\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#e57373\'/><rect x=\'122\' y=\'16\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#e57373\'/><rect x=\'135\' y=\'16\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#64b5f6\'/><rect x=\'148\' y=\'16\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#81c784\'/><rect x=\'161\' y=\'16\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#ffb74d\'/><rect x=\'174\' y=\'16\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#ba68c8\'/><rect x=\'187\' y=\'16\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#e57373\'/><rect x=\'122\' y=\'29\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#81c784\'/><rect x=\'135\' y=\'29\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#ffb74d\'/><rect x=\'148\' y=\'29\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#ba68c8\'/><rect x=\'161\' y=\'29\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#e57373\'/><rect x=\'174\' y=\'29\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#64b5f6\'/><rect x=\'187\' y=\'29\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#81c784\'/><rect x=\'122\' y=\'42\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#ba68c8\'/><rect x=\'135\' y=\'42\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#e57373\'/><rect x=\'148\' y=\'42\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#64b5f6\'/><rect x=\'161\' y=\'42\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#81c784\'/><rect x=\'174\' y=\'42\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#ffb74d\'/><rect x=\'187\' y=\'42\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#ba68c8\'/><rect x=\'122\' y=\'55\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#64b5f6\'/><rect x=\'135\' y=\'55\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#81c784\'/><rect x=\'148\' y=\'55\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#ffb74d\'/><rect x=\'161\' y=\'55\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#ba68c8\'/><rect x=\'174\' y=\'55\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#e57373\'/><rect x=\'187\' y=\'55\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#64b5f6\'/><rect x=\'122\' y=\'68\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#ffb74d\'/><rect x=\'135\' y=\'68\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#ba68c8\'/><rect x=\'148\' y=\'68\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#e57373\'/><rect x=\'161\' y=\'68\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#64b5f6\'/><rect x=\'174\' y=\'68\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#81c784\'/><rect x=\'187\' y=\'68\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#ffb74d\'/><rect x=\'122\' y=\'81\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#e57373\'/><rect x=\'135\' y=\'81\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#64b5f6\'/><rect x=\'148\' y=\'81\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#81c784\'/><rect x=\'161\' y=\'81\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#ffb74d\'/><rect x=\'174\' y=\'81\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#ba68c8\'/><rect x=\'187\' y=\'81\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#fdf6e9\'/><rect x=\'238\' y=\'16\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#e57373\'/><rect x=\'251\' y=\'16\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#64b5f6\'/><rect x=\'264\' y=\'16\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#81c784\'/><rect x=\'277\' y=\'16\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#ffb74d\'/><rect x=\'290\' y=\'16\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#ba68c8\'/><rect x=\'303\' y=\'16\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#e57373\'/><rect x=\'238\' y=\'29\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#81c784\'/><rect x=\'251\' y=\'29\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#fdf6e9\'/><rect x=\'264\' y=\'29\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#ba68c8\'/><rect x=\'277\' y=\'29\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#e57373\'/><rect x=\'290\' y=\'29\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#64b5f6\'/><rect x=\'303\' y=\'29\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#81c784\'/><rect x=\'238\' y=\'42\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#ba68c8\'/><rect x=\'251\' y=\'42\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#e57373\'/><rect x=\'264\' y=\'42\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#64b5f6\'/><rect x=\'277\' y=\'42\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#fdf6e9\'/><rect x=\'290\' y=\'42\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#ffb74d\'/><rect x=\'303\' y=\'42\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#ba68c8\'/><rect x=\'238\' y=\'55\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#64b5f6\'/><rect x=\'251\' y=\'55\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#81c784\'/><rect x=\'264\' y=\'55\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#ffb74d\'/><rect x=\'277\' y=\'55\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#ba68c8\'/><rect x=\'290\' y=\'55\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#e57373\'/><rect x=\'303\' y=\'55\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#64b5f6\'/><rect x=\'238\' y=\'68\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#ffb74d\'/><rect x=\'251\' y=\'68\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#ba68c8\'/><rect x=\'264\' y=\'68\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#fdf6e9\'/><rect x=\'277\' y=\'68\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#64b5f6\'/><rect x=\'290\' y=\'68\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#fdf6e9\'/><rect x=\'303\' y=\'68\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#ffb74d\'/><rect x=\'238\' y=\'81\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#e57373\'/><rect x=\'251\' y=\'81\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#64b5f6\'/><rect x=\'264\' y=\'81\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#81c784\'/><rect x=\'277\' y=\'81\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#ffb74d\'/><rect x=\'290\' y=\'81\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#ba68c8\'/><rect x=\'303\' y=\'81\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#e57373\'/><rect x=\'354\' y=\'16\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#fdf6e9\'/><rect x=\'367\' y=\'16\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#64b5f6\'/><rect x=\'380\' y=\'16\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#81c784\'/><rect x=\'393\' y=\'16\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#ffb74d\'/><rect x=\'406\' y=\'16\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#ba68c8\'/><rect x=\'419\' y=\'16\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#e57373\'/><rect x=\'354\' y=\'29\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#81c784\'/><rect x=\'367\' y=\'29\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#ffb74d\'/><rect x=\'380\' y=\'29\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#fdf6e9\'/><rect x=\'393\' y=\'29\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#e57373\'/><rect x=\'406\' y=\'29\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#64b5f6\'/><rect x=\'419\' y=\'29\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#81c784\'/><rect x=\'354\' y=\'42\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#ba68c8\'/><rect x=\'367\' y=\'42\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#e57373\'/><rect x=\'380\' y=\'42\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#64b5f6\'/><rect x=\'393\' y=\'42\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#81c784\'/><rect x=\'406\' y=\'42\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#ffb74d\'/><rect x=\'419\' y=\'42\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#ba68c8\'/><rect x=\'354\' y=\'55\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#64b5f6\'/><rect x=\'367\' y=\'55\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#81c784\'/><rect x=\'380\' y=\'55\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#ffb74d\'/><rect x=\'393\' y=\'55\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#ba68c8\'/><rect x=\'406\' y=\'55\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#fdf6e9\'/><rect x=\'419\' y=\'55\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#64b5f6\'/><rect x=\'354\' y=\'68\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#ffb74d\'/><rect x=\'367\' y=\'68\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#ba68c8\'/><rect x=\'380\' y=\'68\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#e57373\'/><rect x=\'393\' y=\'68\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#64b5f6\'/><rect x=\'406\' y=\'68\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#81c784\'/><rect x=\'419\' y=\'68\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#ffb74d\'/><rect x=\'354\' y=\'81\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#e57373\'/><rect x=\'367\' y=\'81\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#64b5f6\'/><rect x=\'380\' y=\'81\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#81c784\'/><rect x=\'393\' y=\'81\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#ffb74d\'/><rect x=\'406\' y=\'81\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#ba68c8\'/><rect x=\'419\' y=\'81\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#e57373\'/><text x=\'393\' y=\'108\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:22px;font-weight:800;fill:#c0392b\'>?</text></svg>', caption: '크림색이 빈칸' }
-		],
-		type: 'text',
-		answers: ['2', '2개', '둘', '두개', '두 개', '2칸'],
-		hints: [
-			'보이는 빈칸을 전부 세면 안 돼요.',
-			'빈칸 하나를 골라 상하좌우를 살펴, 격자 바깥으로 뚫린 길이 있는지 보세요.',
-			'사방이 조각으로 완전히 막힌 빈칸만 섬이에요 — 그것만 세세요.'
-		],
-		explain: '빈칸이 몇 개 보이든, <b>사방이 조각으로 둘러싸여</b> 바깥으로 나갈 길이 없는 칸(섬)만 값이다. 가장자리에 붙어 트인 빈칸은 세지 않는다. 물음표는 갇힌 칸 2개 + 코너에 트인 칸 1개 → <b>2개</b>.'
-	},
-	{
 		id: 'fig-rotpair',
 		chip: '따로 도는 점',
 		blocks: [
@@ -2519,22 +2313,6 @@ export const PROBLEMS: Problem[] = [
 			'점은 세 자리를 도는 3칸 주기예요. 위 다음은 다시 왼아래.'
 		],
 		explain: '잘린 모서리는 4칸 주기(왼위→오른위→오른아래→왼아래)로, 점은 그와 <b>따로</b> 3칸 주기(위→왼아래→오른아래)로 돈다. 물음표 칸은 모서리가 왼위로 돌아와 첫 칸처럼 보이지만, 점은 자기 주기대로 위 다음 <b>왼아래</b>다. 두 표식이 같은 박자로 움직인다는 착각이 함정.'
-	},
-	{
-		id: 'fig-overlap',
-		chip: '색 겹침',
-		blocks: [
-			{ kind: 'text', html: '빨강과 파랑이 겹쳐 보라색이 된 칸은 몇 개일까?' },
-			{ kind: 'figure', svg: '<svg viewBox=\'0 0 470 104\' role=\'img\' aria-label=\'겹친 보라 칸 세기\'><rect x=\'8\' y=\'16\' width=\'15\' height=\'15\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#e57373\'/><rect x=\'23\' y=\'16\' width=\'15\' height=\'15\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#e57373\'/><rect x=\'8\' y=\'31\' width=\'15\' height=\'15\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#e57373\'/><rect x=\'23\' y=\'31\' width=\'15\' height=\'15\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#e57373\'/><rect x=\'53\' y=\'46\' width=\'15\' height=\'15\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#64b5f6\'/><rect x=\'53\' y=\'61\' width=\'15\' height=\'15\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#64b5f6\'/><rect x=\'38\' y=\'61\' width=\'15\' height=\'15\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#64b5f6\'/><rect x=\'128\' y=\'16\' width=\'15\' height=\'15\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#e57373\'/><rect x=\'143\' y=\'16\' width=\'15\' height=\'15\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#e57373\'/><rect x=\'143\' y=\'31\' width=\'15\' height=\'15\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#9c5bd1\'/><rect x=\'158\' y=\'31\' width=\'15\' height=\'15\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#e57373\'/><rect x=\'143\' y=\'46\' width=\'15\' height=\'15\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#64b5f6\'/><rect x=\'158\' y=\'46\' width=\'15\' height=\'15\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#64b5f6\'/><rect x=\'248\' y=\'31\' width=\'15\' height=\'15\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#e57373\'/><rect x=\'263\' y=\'31\' width=\'15\' height=\'15\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#9c5bd1\'/><rect x=\'278\' y=\'31\' width=\'15\' height=\'15\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#9c5bd1\'/><rect x=\'263\' y=\'16\' width=\'15\' height=\'15\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#e57373\'/><rect x=\'263\' y=\'46\' width=\'15\' height=\'15\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#64b5f6\'/><rect x=\'368\' y=\'16\' width=\'15\' height=\'15\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#e57373\'/><rect x=\'383\' y=\'16\' width=\'15\' height=\'15\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#9c5bd1\'/><rect x=\'398\' y=\'16\' width=\'15\' height=\'15\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#9c5bd1\'/><rect x=\'383\' y=\'31\' width=\'15\' height=\'15\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#e57373\'/><rect x=\'398\' y=\'31\' width=\'15\' height=\'15\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#9c5bd1\'/><rect x=\'398\' y=\'46\' width=\'15\' height=\'15\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#64b5f6\'/><text x=\'398\' y=\'96\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:22px;font-weight:800;fill:#c0392b\'>?</text></svg>', caption: '빨강과 파랑이 함께 차지한 칸은 보라' }
-		],
-		type: 'text',
-		answers: ['3', '3개', '세', '셋', '3칸'],
-		hints: [
-			'색칠된 칸을 전부 더하는 게 아니에요.',
-			'빨강도 파랑도 아닌 보라색 칸만 찾으세요.',
-			'두 조각이 동시에 차지한 그 보라 칸만 세면 돼요.'
-		],
-		explain: '값은 색칸의 총합이 아니라, 두 조각이 동시에 덮어 <b>보라색</b>이 된 칸의 수다. 서로 안 겹치면 색칸이 8개여도 값은 0. 물음표는 겹친 보라칸이 <b>3개</b>.'
 	},
 	{
 		id: 'fig-foldarrow',
@@ -2569,38 +2347,6 @@ export const PROBLEMS: Problem[] = [
 		explain: '세로축으로 접으면 점 (x,y)는 (−x,y)로 이동한다 — x 부호만 바뀌고 <b>높이(y)는 그대로여야</b> 원래 반대편 점과 정확히 겹친다. 물음표는 (−3,−1)·(3,−1)만 높이가 같아 짝이고, (−2,2)와 (2,−2)는 높이가 반대라 접어도 어긋나 각각 외톨이 → <b>2개</b>. 거리만 같으면 짝이라 여기는 게 함정.'
 	},
 	{
-		id: 'fig-axes',
-		chip: '바퀴살 대칭',
-		blocks: [
-			{ kind: 'text', html: '표식(●○△✕)까지 똑같이 포개지는 거울 대칭축은 몇 개일까?' },
-			{ kind: 'figure', svg: '<svg viewBox=\'0 0 470 102\' role=\'img\' aria-label=\'표식까지 맞는 대칭축 세기\'><circle cx=\'48\' cy=\'44\' r=\'30\' style=\'stroke:#c9c3b4;stroke-width:1.5;fill:none\'/><line x1=\'48\' y1=\'44\' x2=\'48\' y2=\'14\' style=\'stroke:#2c2822;stroke-width:2\'/><line x1=\'48\' y1=\'44\' x2=\'78\' y2=\'44\' style=\'stroke:#2c2822;stroke-width:2\'/><line x1=\'48\' y1=\'44\' x2=\'48\' y2=\'74\' style=\'stroke:#2c2822;stroke-width:2\'/><line x1=\'48\' y1=\'44\' x2=\'18\' y2=\'44\' style=\'stroke:#2c2822;stroke-width:2\'/><circle cx=\'48\' cy=\'14\' r=\'6\' fill=\'#2c2822\'/><circle cx=\'78\' cy=\'44\' r=\'6\' fill=\'#2c2822\'/><circle cx=\'48\' cy=\'74\' r=\'6\' fill=\'#2c2822\'/><circle cx=\'18\' cy=\'44\' r=\'6\' fill=\'#2c2822\'/><text x=\'48\' y=\'94\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:13px;font-weight:700;fill:#5f6368\'>축 4</text><circle cx=\'168\' cy=\'44\' r=\'30\' style=\'stroke:#c9c3b4;stroke-width:1.5;fill:none\'/><line x1=\'168\' y1=\'44\' x2=\'168\' y2=\'14\' style=\'stroke:#2c2822;stroke-width:2\'/><line x1=\'168\' y1=\'44\' x2=\'198\' y2=\'44\' style=\'stroke:#2c2822;stroke-width:2\'/><line x1=\'168\' y1=\'44\' x2=\'168\' y2=\'74\' style=\'stroke:#2c2822;stroke-width:2\'/><line x1=\'168\' y1=\'44\' x2=\'138\' y2=\'44\' style=\'stroke:#2c2822;stroke-width:2\'/><circle cx=\'168\' cy=\'14\' r=\'6\' fill=\'#2c2822\'/><circle cx=\'198\' cy=\'44\' r=\'6\' style=\'stroke:#2c2822;stroke-width:2;fill:none\'/><circle cx=\'168\' cy=\'74\' r=\'6\' fill=\'#2c2822\'/><circle cx=\'138\' cy=\'44\' r=\'6\' style=\'stroke:#2c2822;stroke-width:2;fill:none\'/><text x=\'168\' y=\'94\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:13px;font-weight:700;fill:#5f6368\'>2</text><circle cx=\'288\' cy=\'44\' r=\'30\' style=\'stroke:#c9c3b4;stroke-width:1.5;fill:none\'/><line x1=\'288\' y1=\'44\' x2=\'288\' y2=\'14\' style=\'stroke:#2c2822;stroke-width:2\'/><line x1=\'288\' y1=\'44\' x2=\'318\' y2=\'44\' style=\'stroke:#2c2822;stroke-width:2\'/><line x1=\'288\' y1=\'44\' x2=\'288\' y2=\'74\' style=\'stroke:#2c2822;stroke-width:2\'/><line x1=\'288\' y1=\'44\' x2=\'258\' y2=\'44\' style=\'stroke:#2c2822;stroke-width:2\'/><circle cx=\'288\' cy=\'14\' r=\'6\' fill=\'#2c2822\'/><circle cx=\'318\' cy=\'44\' r=\'6\' fill=\'#2c2822\'/><circle cx=\'288\' cy=\'74\' r=\'6\' style=\'stroke:#2c2822;stroke-width:2;fill:none\'/><circle cx=\'258\' cy=\'44\' r=\'6\' style=\'stroke:#2c2822;stroke-width:2;fill:none\'/><text x=\'288\' y=\'94\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:13px;font-weight:700;fill:#5f6368\'>1</text><circle cx=\'408\' cy=\'44\' r=\'30\' style=\'stroke:#c9c3b4;stroke-width:1.5;fill:none\'/><line x1=\'408\' y1=\'44\' x2=\'408\' y2=\'14\' style=\'stroke:#2c2822;stroke-width:2\'/><line x1=\'408\' y1=\'44\' x2=\'438\' y2=\'44\' style=\'stroke:#2c2822;stroke-width:2\'/><line x1=\'408\' y1=\'44\' x2=\'408\' y2=\'74\' style=\'stroke:#2c2822;stroke-width:2\'/><line x1=\'408\' y1=\'44\' x2=\'378\' y2=\'44\' style=\'stroke:#2c2822;stroke-width:2\'/><circle cx=\'408\' cy=\'14\' r=\'6\' fill=\'#2c2822\'/><circle cx=\'438\' cy=\'44\' r=\'6\' style=\'stroke:#2c2822;stroke-width:2;fill:none\'/><path d=\'M408 67 L414 79 L402 79 Z\' style=\'stroke:#2c2822;stroke-width:2;fill:none\'/><line x1=\'373\' y1=\'39\' x2=\'383\' y2=\'49\' style=\'stroke:#2c2822;stroke-width:2;fill:none\'/><line x1=\'383\' y1=\'39\' x2=\'373\' y2=\'49\' style=\'stroke:#2c2822;stroke-width:2;fill:none\'/><text x=\'408\' y=\'94\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:22px;font-weight:800;fill:#c0392b\'>?</text></svg>', caption: '살은 90도 간격, 살 끝 표식만 다름' }
-		],
-		type: 'text',
-		answers: ['0', '0개', '없음', '영', '없다', '0개'],
-		hints: [
-			'거울 대칭축 후보는 가로·세로·대각선 2개, 총 4개뿐이에요.',
-			'각 축으로 접었을 때 마주 닿는 두 살의 표식이 똑같아야 그 축이 성립해요.',
-			'살 배치는 규칙적이어도 표식이 다르면 그 축은 깨져요. 네 표식이 전부 다르면?'
-		],
-		explain: '살의 위치는 늘 90도 간격으로 대칭이지만, 진짜 거울 대칭은 <b>위치와 표식</b>이 함께 맞아야 한다. 후보 축 4개(가로·세로·대각선 2개)마다 마주 닿는 두 살의 표식이 같은지 본다. 물음표는 ●○△✕로 네 표식이 모두 달라 어느 축으로 접어도 표식이 어긋나 <b>0개</b>. 모양이 규칙적이라 4개일 거란 착각이 함정.'
-	},
-	{
-		id: 'fig-fakecircle',
-		chip: '가짜 원',
-		blocks: [
-			{ kind: 'text', html: '④번 가림막 뒤의 도형은 진짜 완전한 원일까, 이어지지 않는 가짜 원일까?' },
-			{ kind: 'figure', svg: '<svg viewBox=\'0 0 470 100\' role=\'img\' aria-label=\'가림막 뒤가 진짜 원인가\'><circle cx=\'50\' cy=\'42\' r=\'28\' style=\'stroke:#333;stroke-width:3;fill:none\'/><rect x=\'41\' y=\'8\' width=\'18\' height=\'68\' fill=\'#9a9a9a\'/><text x=\'50\' y=\'92\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:13px;font-weight:700;fill:#5f6368\'>진짜</text><circle cx=\'170\' cy=\'42\' r=\'28\' style=\'stroke:#333;stroke-width:3;fill:none\'/><rect x=\'161\' y=\'8\' width=\'18\' height=\'68\' fill=\'#9a9a9a\'/><text x=\'170\' y=\'92\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:13px;font-weight:700;fill:#5f6368\'>진짜</text><circle cx=\'290\' cy=\'42\' r=\'28\' style=\'stroke:#333;stroke-width:3;fill:none\'/><rect x=\'281\' y=\'8\' width=\'18\' height=\'68\' fill=\'#9a9a9a\'/><text x=\'290\' y=\'92\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:13px;font-weight:700;fill:#5f6368\'>진짜</text><path d=\'M406 14 A 28 28 0 0 0 406 70\' style=\'stroke:#333;stroke-width:3;fill:none\'/><path d=\'M414 26 A 16 16 0 0 1 414 58\' style=\'stroke:#333;stroke-width:3;fill:none\'/><rect x=\'401\' y=\'8\' width=\'18\' height=\'68\' fill=\'#9a9a9a\'/><text x=\'410\' y=\'92\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:22px;font-weight:800;fill:#c0392b\'>?</text></svg>', caption: '회색 막대가 가운데를 가림 — ①②③은 진짜 원' }
-		],
-		type: 'text',
-		answers: ['가짜', '가짜 원', '가짜원', '거짓', '안 이어짐', '가짜원임'],
-		hints: [
-			'뇌는 가려진 부분을 자동으로 완전한 원이라 채워 넣어요 — 그걸 의심하세요.',
-			'가림막 좌우로 삐져나온 두 호의 휘어진 정도(곡률)를 비교하세요.',
-			'①②③은 좌우 곡률이 같지만, ④만 왼쪽 호가 더 크게 휘어 오른쪽과 안 이어져요.'
-		],
-		explain: '①②③은 가림막 뒤에 반지름이 일정한 원 하나가 온전히 숨어 좌우 호의 곡률이 같다. ④는 왼쪽(큰 반지름)과 오른쪽(작은 반지름) 호를 따로 그려, 가림막을 치우면 둘이 이어지지 않는 <b>가짜 원</b>이다. 가려진 곳을 당연히 완전한 도형이라 메우는 지각(아모달 완성)을 역이용한 문제.'
-	},
-	{
 		id: 'txt-vowels',
 		chip: '모음 종류',
 		blocks: [
@@ -2631,36 +2377,6 @@ export const PROBLEMS: Problem[] = [
 		explain: '닭값의 \'닭\' 받침은 ㄹ+ㄱ(ㄺ), \'값\' 받침은 ㅂ+ㅅ(ㅄ)으로 둘 다 자음 두 개가 겹친 겹받침이다. 그래서 답은 2다.'
 	},
 	{
-		id: 'txt-soundstart',
-		chip: '소리 시작',
-		blocks: [
-			{ kind: 'text', html: '우리말 단어를 첫 글자 기준으로 나눈 거예요.<br><b>아침</b> = 모음시작<br><b>바람</b> = 자음시작<br><b>밤</b> = 자음시작<br><b>안개</b> = 모음시작<br>그럼 <b>우산</b>은?' }
-		],
-		type: 'text',
-		answers: ['모음시작', '모음 시작', '모음시작함', '모음', '모음으로 시작'],
-		hints: [
-			'단어가 시간을 뜻하는지 날씨를 뜻하는지는 상관없어요.',
-			'각 단어의 첫 글자를 보세요. 아침의 \'아\', 바람의 \'바\'. 자음이 붙어있나요?',
-			'\'아\'는 초성 자리가 소리 없는 \'ㅇ\'뿐이라 모음 소리 그대로 나고, \'바\'는 \'ㅂ\'이라는 진짜 자음 소리가 나요.'
-		],
-		explain: '아침의 \'아\'와 안개의 \'안\'은 초성이 소리 없는 \'ㅇ\'이라 실제로는 모음 소리로 시작해 \'모음시작\'. 바람의 \'바\'(ㅂ)와 밤의 \'바\'(ㅂ)는 진짜 자음 소리로 시작해 \'자음시작\'. 우산의 \'우\'도 초성이 \'ㅇ\'이므로 \'모음시작\'.'
-	},
-	{
-		id: 'txt-flipclock',
-		chip: '거꾸로 시계',
-		blocks: [
-			{ kind: 'text', html: '디지털시계 화면을 180도 뒤집어서 보면, 숫자의 순서가 반대로 바뀌고 6과 9는 서로 자리를 바꿔 보인다(그 외 0, 1, 8은 그대로다).<br><b>08:11</b>을 뒤집으면 → <b>11:80</b><br><b>01:88</b>을 뒤집으면 → <b>88:10</b><br><b>06:19</b>를 뒤집으면 → <b>61:90</b><br>그렇다면 <b>10:69</b>를 뒤집으면 화면에 뭐라고 쓰여 있는 것처럼 보일까?' }
-		],
-		type: 'text',
-		answers: ['69:01', '6901', '69시01분', '69:01처럼 보인다', '69 01'],
-		hints: [
-			'숫자의 순서만 바뀌는 게 아니라, 숫자 하나하나의 생김새도 바뀐다.',
-			'0, 1, 8은 뒤집어도 자기 자신 그대로다.',
-			'6은 9로, 9는 6으로 먼저 바꾼 다음 전체 순서를 뒤집어보자.'
-		],
-		explain: '화면을 180도 돌리면 맨 앞자리가 맨 뒷자리로 가면서 순서가 반전되고, 동시에 각 숫자 도형도 180도 회전한다. 0·1·8은 회전해도 모양이 같지만 6은 9처럼, 9는 6처럼 보인다. 10:69의 각 자리 1,0,6,9를 뒤집으면 6,9,0,1이 되어 69:01이 된다.'
-	},
-	{
 		id: 'txt-dateformat',
 		chip: '숨은 표기법',
 		blocks: [
@@ -2675,49 +2391,4 @@ export const PROBLEMS: Problem[] = [
 		],
 		explain: '25/03에서 앞자리 25는 달이 될 수 없으므로 이 앱은 \'일/월\' 순서로 표기한다는 게 드러난다. 따라서 04/07=4일 7월(7월4일), 11/09=11일 9월(9월11일)이 되고, 같은 규칙으로 08/06은 8일 6월, 즉 6월 8일이다.'
 	},
-	{
-		id: 'txt-swapends',
-		chip: '끝자리 교환',
-		blocks: [
-			{ kind: 'text', html: '단어의 첫 글자와 마지막 글자만 서로 자리를 바꾸고, 가운데 글자들은 순서 그대로 둔다. <b>사과나무</b> = 무과나사, <b>호랑이집</b> = 집랑이호, <b>기린모자</b> = 자린모기, <b>고양이고</b> = 고양이고. 그럼 <b>두더지굴이</b>는?' }
-		],
-		type: 'text',
-		answers: ['이더지굴두', '이더지굴 두'],
-		hints: [
-			'맨 앞 글자랑 맨 뒤 글자만 짚어봐. 가운데는 원래 그대로일지도 몰라.',
-			'\'고양이고\' 예시처럼 양 끝 글자가 같으면 겉보기엔 아무 변화가 없어.',
-			'전체를 뒤집는 게 아니라, 딱 두 글자의 자리만 바뀌는 거야.'
-		],
-		explain: '두더지굴이는 첫 글자 \'두\'와 마지막 글자 \'이\'만 서로 자리를 바꾸고 가운데 \'더지굴\'은 순서 그대로 둔다. 그 결과 \'이더지굴두\'가 된다.'
-	},
-	{
-		id: 'txt-selfref',
-		chip: '자기 확인',
-		blocks: [
-			{ kind: 'text', html: '스스로 자기 글자 수를 주장하는 문장들이다. 실제로 한 글자씩 세어봐야 참인지 거짓인지 알 수 있다. <b>전부 다섯 자</b> = 참, <b>전부 여섯 자</b> = 거짓, <b>전부 일곱 자</b> = 거짓. 그럼 <b>전부 넉 자</b>는?' }
-		],
-		type: 'text',
-		answers: ['참', '참이다', '맞음', 'true', 'O', 'ㅇ'],
-		hints: [
-			'\'전부 넉 자\'를 손가락으로 짚으며 글자를 하나하나 세어봐.',
-			'실제로 센 개수와 문장이 주장하는 숫자(\'넉\'=4)를 비교해봐.',
-			'이 문장들은 전부 \'전부+숫자+자\'꼴이라 길이가 비슷해. 실제 길이가 몇인지가 핵심이야.'
-		],
-		explain: '\'전부 넉 자\'를 세어보면 전,부,넉,자로 정확히 4글자다. 문장이 주장하는 숫자 \'넉\'도 4이므로 실제 글자 수와 주장이 일치해 참이 된다.'
-	},
-	{
-		id: 'txt-chosung-sort',
-		chip: '초성 순서',
-		blocks: [
-			{ kind: 'text', html: '단어의 <b>첫소리(초성)</b>가 ㄱㄴㄷㄹㅁ… 사전 순서로 나아가는지로 나눴어요.<br><b>나비</b> = 정렬<br><b>라디오</b> = 섞임<br><b>사자</b> = 정렬<br><b>비누</b> = 섞임<br>그럼 <b>가마솥</b>은?' }
-		],
-		type: 'text',
-		answers: ['정렬', '정렬됨', '오름차순', '가나다순'],
-		hints: [
-			'글자의 뜻이나 받침, 글자 수는 상관없어요. 각 글자의 첫 자음(초성)만 보세요.',
-			'초성을 순서대로 적고, ㄱ→ㄴ→ㄷ… 사전 순서로 계속 뒤로만 가는지 확인하세요.',
-			'사자는 ㅅ→ㅈ으로 끝까지 뒤로 가 정렬, 라디오는 ㄹ→ㄷ에서 앞으로 되돌아가 섞임. 가마솥의 ㄱ→ㅁ→ㅅ은?'
-		],
-		explain: '단어의 뜻·길이와 무관하게, 각 글자의 <b>초성이 ㄱㄴㄷ… 사전 순서로 끝까지 오름차순</b>이면 정렬이다. 나비(ㄴ→ㅂ)·사자(ㅅ→ㅈ)는 끝까지 뒤로 가 정렬, 라디오(ㄹ→ㄷ)·비누(ㅂ→ㄴ)는 앞으로 되돌아가 섞임. 가마솥은 ㄱ→ㅁ→ㅅ으로 끝까지 오름차순이라 <b>정렬</b>. 사자와 비누는 둘 다 두 글자인데 그룹이 달라 길이가 기준이 아님을 보여준다.'
-	}
 ];
