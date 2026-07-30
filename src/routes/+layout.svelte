@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import AdSlot from '$lib/components/AdSlot.svelte';
 	import Splash from '$lib/components/Splash.svelte';
+	import InAppNotice from '$lib/components/InAppNotice.svelte';
 	import { logoClicks } from '$lib/nav';
 
 	let { children, data } = $props();
@@ -30,6 +31,8 @@
 			<a href="/guide">가이드</a>
 		</nav>
 	</header>
+
+	<InAppNotice />
 
 	<main class="page">
 		{@render children()}
