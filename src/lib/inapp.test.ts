@@ -35,12 +35,14 @@ describe('detectInApp', () => {
 });
 
 describe('openWay / externalUrl', () => {
-	it('안드로이드는 intent 스킴으로 크롬을 띄운다', () => {
+	it('안드로이드는 intent 스킴으로 크롬을 띄우고, 없으면 원래 주소로 되돌린다', () => {
 		const way = openWay('kakao', UA.kakaoAndroid);
 		expect(way).toBe('android');
-		expect(externalUrl(way, 'https://ddalkkak.app/play')).toBe(
-			'intent://ddalkkak.app/play#Intent;scheme=https;package=com.android.chrome;end'
-		);
+		const url = externalUrl(way, 'https://ddalkkak.app/play')!;
+		expect(url).toContain('intent://ddalkkak.app/play#Intent;scheme=https;package=com.android.chrome;');
+		// 크롬이 없는 기기에서 죽은 버튼이 되지 않도록 폴백을 붙인다
+		expect(url).toContain('S.browser_fallback_url=https%3A%2F%2Fddalkkak.app%2Fplay');
+		expect(url.endsWith(';end')).toBe(true);
 	});
 	it('iOS 카카오톡은 외부 브라우저 열기 스킴을 쓴다', () => {
 		const way = openWay('kakao', UA.kakaoIOS);
