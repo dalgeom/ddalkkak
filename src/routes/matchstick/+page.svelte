@@ -299,7 +299,10 @@
 		<header class="mcover">
 			<span class="kicker">성냥개비</span>
 			<h1>성냥 <b>하나만</b> 옮겨<br />틀린 식을 참으로</h1>
-			<p class="mlead">획을 눌러 집고, 빈 자리를 눌러 놓으면 됩니다. 준비된 문제 {problems.length}개.</p>
+			<p class="mlead">
+				획을 눌러 집고, 빈 자리를 눌러 놓으면 됩니다. 준비된 문제 {problems.length}개.
+				<a class="glink" href="/matchstick/guide">푸는 법 보기 →</a>
+			</p>
 			<div class="mstats">
 				<div class="ms"><b>{stats.solved}</b><span>푼 판</span></div>
 				<div class="ms"><b>{stats.best}</b><span>최고 연속</span></div>
@@ -452,6 +455,15 @@
 		line-height: 1.7;
 		color: var(--muted);
 		word-break: keep-all;
+	}
+	.glink {
+		white-space: nowrap;
+		color: var(--accent);
+		font-weight: 700;
+		text-decoration: none;
+	}
+	.glink:hover {
+		text-decoration: underline;
 	}
 	.mstats {
 		display: grid;
