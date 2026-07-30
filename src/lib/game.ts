@@ -311,10 +311,15 @@ export function buildDailySet<D, T>(
 /** 아카이브에 노출하는 지난 날짜 수. 발견형 재순환 주기(104÷3≈35일)보다 짧게 둬 반복을 피한다. */
 export const ARCHIVE_DAYS = 30;
 
-/** 아카이브가 다룰 지난 날짜 목록(오늘 제외, 최신순). 빌드 시점 today 기준. */
+/**
+ * 아카이브가 다룰 지난 날짜 목록(오늘 제외, 최신순).
+ * 사이트 개설(SITE_START_DAY) 이전으로는 내려가지 않는다 — 문제 선택이 날짜 결정론적이라
+ * 개설 전 날짜도 계산은 되지만, 아무도 그날 풀지 않았으므로 "지난 문제"라고 내보내면 거짓이다.
+ */
 export function archiveDays(todayNum: number): number[] {
 	const out: number[] = [];
-	for (let d = todayNum - 1; d >= todayNum - ARCHIVE_DAYS; d--) out.push(d);
+	const oldest = Math.max(todayNum - ARCHIVE_DAYS, SITE_START_DAY);
+	for (let d = todayNum - 1; d >= oldest; d--) out.push(d);
 	return out;
 }
 

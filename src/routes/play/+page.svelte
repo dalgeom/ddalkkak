@@ -4,6 +4,7 @@
 	import { page } from '$app/state';
 	import type { Problem } from '$lib/problems';
 	import { isCorrectText, isCloseAnswer, hintUnlocked, displayChoices, recordSolve } from '$lib/game';
+	import { track } from '$lib/analytics';
 	import { parseEq, cloneBoard, isSolved, bit, type Board } from '$lib/matchstick';
 	import MatchstickBoard, { type PickLoc } from '$lib/components/MatchstickBoard.svelte';
 	import SevenSeg from '$lib/components/SevenSeg.svelte';
@@ -268,6 +269,7 @@
 				loading = false;
 				refillBag();
 				nextProblem();
+				track('practice_start', { filter });
 			})
 			.catch(() => {
 				// 문제은행 동적 로드 실패 — 영원한 스켈레톤 대신 안내와 재시도를 준다

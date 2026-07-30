@@ -21,6 +21,7 @@
 	} from '$lib/game';
 	import { shareResult, outcomeMessage } from '$lib/shareCard';
 	import { logoClicks } from '$lib/nav';
+	import { track } from '$lib/analytics';
 	import { parseEq, cloneBoard, isSolved, bit, type Board } from '$lib/matchstick';
 	import MatchstickBoard, { type PickLoc } from '$lib/components/MatchstickBoard.svelte';
 	import SevenSeg from '$lib/components/SevenSeg.svelte';
@@ -216,7 +217,10 @@
 			pos = Math.min(saved.pos, queue.length - 1);
 			marks = saved.marks.slice(0, queue.length);
 			phase = saved.done ? 'done' : 'play';
-			if (phase === 'play') resetProblem();
+			if (phase === 'play') {
+				resetProblem();
+				track(saved.marks.length ? 'daily_resume' : 'daily_start', { at: saved.marks.length });
+			}
 		} catch {
 			// 문제은행 동적 로드 실패(오프라인 등) — 빈 화면 대신 홈에 남기고 안내한다
 			phase = 'home';
@@ -367,6 +371,8 @@
 			phase = 'done';
 			persist(true);
 			completeDailySession(dayNum);
+			// 완주 퍼널의 끝 — 점수까지 함께 보내 정답률 분포를 본다
+			track('daily_complete', { score: correctCount, total: DAILY_SIZE });
 			if (browser) window.scrollTo({ top: 0, behavior: 'smooth' });
 		}
 	}
@@ -385,6 +391,7 @@
 	);
 
 	async function copyLink() {
+		track('share_click', { method: 'copy', score: correctCount });
 		try {
 			await navigator.clipboard.writeText(shareText);
 			toast('결과가 복사됐어요 (링크 포함)');
@@ -407,6 +414,7 @@
 	}
 
 	async function shareNative() {
+		track('share_click', { method: 'native', score: correctCount });
 		const outcome = await shareResult(
 			{
 				title: `딸깍 #${puzzleNo}`,
@@ -417,7 +425,9 @@
 			},
 			shareText
 		);
-		toast(outcomeMessage(outcome));
+		track('share_result', { outcome });
+		const msg = outcomeMessage(outcome);
+		if (msg) toast(msg);
 	}
 
 	function toast(msg: string) {
