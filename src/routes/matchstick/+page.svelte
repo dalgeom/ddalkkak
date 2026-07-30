@@ -299,16 +299,22 @@
 		<header class="mcover">
 			<span class="kicker">성냥개비</span>
 			<h1>성냥 <b>하나만</b> 옮겨<br />틀린 식을 참으로</h1>
-			<p class="mlead">
-				획을 눌러 집고, 빈 자리를 눌러 놓으면 됩니다. 준비된 문제 {problems.length}개.
-				<a class="glink" href="/matchstick/guide">푸는 법 보기 →</a>
-			</p>
+			<p class="mlead">획을 눌러 집고, 빈 자리를 눌러 놓으면 됩니다. 준비된 문제 {problems.length}개.</p>
 			<div class="mstats">
 				<div class="ms"><b>{stats.solved}</b><span>푼 판</span></div>
 				<div class="ms"><b>{stats.best}</b><span>최고 연속</span></div>
 				<div class="ms"><b>{problems.length - done.length}</b><span>남은 새 문제</span></div>
 			</div>
 		</header>
+
+		<!-- 처음 온 사람이 푸는 법을 찾을 수 있어야 한다(문장 속 링크는 눈에 안 띈다) -->
+		<a class="gbanner" href="/matchstick/guide">
+			<span class="gb-txt">
+				<b>성냥개비가 처음이라면</b>
+				<span>한 획 차이 숫자표로 푸는 법 익히기</span>
+			</span>
+			<span class="gb-go" aria-hidden="true">→</span>
+		</a>
 
 		<section class="msec">
 			<h2 class="mh">무한 연습</h2>
@@ -456,14 +462,44 @@
 		color: var(--muted);
 		word-break: keep-all;
 	}
-	.glink {
-		white-space: nowrap;
-		color: var(--accent);
-		font-weight: 700;
+	/* 풀이 가이드 배너 — 모드 카드와 구분되게 왼쪽 강조선 + 연한 바탕 */
+	.gbanner {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 12px;
+		background: var(--panel-2);
+		border: 1px solid var(--border);
+		border-left: 3px solid var(--accent);
+		border-radius: 14px;
+		padding: 13px 15px;
 		text-decoration: none;
+		color: inherit;
+		transition:
+			transform var(--dur-tap) var(--ease-out),
+			border-color var(--dur-move) ease;
 	}
-	.glink:hover {
-		text-decoration: underline;
+	.gbanner:hover {
+		transform: translateY(-2px);
+		border-color: var(--accent);
+	}
+	.gb-txt b {
+		display: block;
+		font-size: 14.5px;
+		font-weight: 800;
+		margin-bottom: 2px;
+	}
+	.gb-txt > span {
+		font-size: 12.5px;
+		color: var(--muted);
+		line-height: 1.55;
+		word-break: keep-all;
+	}
+	.gb-go {
+		flex: none;
+		font-size: 17px;
+		font-weight: 800;
+		color: var(--accent);
 	}
 	.mstats {
 		display: grid;
