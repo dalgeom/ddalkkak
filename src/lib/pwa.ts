@@ -43,3 +43,26 @@ export function isIOSInstallable(ua: string): boolean {
 	const inApp = /kakaotalk|instagram|fban|fbav|line\/|naver|daumapps/i.test(ua);
 	return ios && !inApp;
 }
+
+/**
+ * iOS 브라우저 종류. 공유 버튼 위치가 서로 달라서 안내 문구를 갈라야 한다
+ * (사파리는 화면 아래, 크롬은 오른쪽 아래 ⋯ 안에 있다).
+ */
+export type IOSBrowser = 'safari' | 'chrome' | 'firefox' | 'edge' | 'other';
+
+export function iosBrowser(ua: string): IOSBrowser {
+	if (/crios/i.test(ua)) return 'chrome';
+	if (/fxios/i.test(ua)) return 'firefox';
+	if (/edgios/i.test(ua)) return 'edge';
+	if (/safari/i.test(ua)) return 'safari';
+	return 'other';
+}
+
+/** 브라우저별 '홈 화면에 추가'까지 가는 경로 */
+export function iosInstallSteps(b: IOSBrowser): string[] {
+	if (b === 'safari') return ['화면 아래 공유 버튼', '홈 화면에 추가'];
+	if (b === 'chrome') return ['오른쪽 아래 ⋯', '공유', '홈 화면에 추가'];
+	if (b === 'edge') return ['아래 가운데 ⋯', '공유', '홈 화면에 추가'];
+	if (b === 'firefox') return ['오른쪽 아래 ⋯', '공유', '홈 화면에 추가'];
+	return ['브라우저 메뉴에서 공유', '홈 화면에 추가'];
+}

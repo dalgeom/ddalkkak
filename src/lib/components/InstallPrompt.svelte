@@ -1,6 +1,12 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { installEvent, isStandalone, isIOSInstallable } from '$lib/pwa';
+	import {
+		installEvent,
+		isStandalone,
+		isIOSInstallable,
+		iosBrowser,
+		iosInstallSteps
+	} from '$lib/pwa';
 	import { track } from '$lib/analytics';
 
 	/**
@@ -11,6 +17,7 @@
 
 	let mode = $state<'none' | 'button' | 'ios'>('none');
 	let hidden = $state(true);
+	let steps = $state<string[]>([]);
 
 	onMount(() => {
 		if (isStandalone()) return;
@@ -20,7 +27,12 @@
 			/* 저장소가 막혀 있으면 그냥 보여준다 */
 		}
 		hidden = false;
-		if (isIOSInstallable(navigator.userAgent)) mode = 'ios';
+		const ua = navigator.userAgent;
+		if (isIOSInstallable(ua)) {
+			mode = 'ios';
+			// 공유 버튼 위치가 브라우저마다 달라 경로를 갈라 안내한다
+			steps = iosInstallSteps(iosBrowser(ua));
+		}
 	});
 
 	// 크롬 계열은 설치 가능해지는 시점이 늦을 수 있어 이벤트가 오면 버튼으로 바꾼다
@@ -51,18 +63,25 @@
 {#if !hidden && mode !== 'none'}
 	<aside class="install">
 		<div class="head">
-			<b>내일도 여기서 이어서</b>
+			<b>홈 화면에 딸깍 추가하기</b>
 			<button class="x" onclick={dismiss} aria-label="닫기">✕</button>
 		</div>
 		<p class="d">
-			홈 화면에 추가하면 앱처럼 바로 열려요. 브라우저를 옮겨 다니지 않아서 연속 기록도 한곳에
-			쌓입니다.
+			앱처럼 바로 열리고, 매일 같은 자리에서 이어 풀 수 있어요.
 		</p>
 		{#if mode === 'button'}
 			<button class="go" onclick={install}>홈 화면에 추가</button>
 		{:else}
-			<p class="how">
-				아래 <b>공유 버튼</b>을 누르고 <b>홈 화면에 추가</b>를 선택하세요.
+			<ol class="steps">
+				{#each steps as s, i (i)}
+					<li><span class="n">{i + 1}</span><b>{s}</b></li>
+				{/each}
+			</ol>
+			<!-- 아이폰은 홈 화면 앱이 브라우저와 저장소를 공유하지 않는다.
+			     모르고 추가했다가 기록이 0으로 보이면 더 나쁜 경험이라 미리 알린다. -->
+			<p class="warn">
+				아이폰은 홈 화면 앱과 브라우저가 기록을 따로 저장해요. 지금까지 쌓인 기록은 함께 옮겨가지
+				않고, 추가한 뒤부터 그곳에 쌓입니다.
 			</p>
 		{/if}
 	</aside>
@@ -125,17 +144,44 @@
 		transform: translateY(2px);
 		box-shadow: 0 2px 0 var(--accent-press);
 	}
-	.how {
-		margin-top: 10px;
-		padding: 10px 12px;
+	.steps {
+		list-style: none;
+		margin: 11px 0 0;
+		padding: 11px 12px;
 		background: var(--panel-2);
 		border-radius: 10px;
-		font-size: 12.5px;
-		color: var(--muted);
+		display: flex;
+		flex-direction: column;
+		gap: 7px;
+	}
+	.steps li {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		font-size: 13px;
+	}
+	.steps .n {
+		flex: none;
+		width: 19px;
+		height: 19px;
+		border-radius: 50%;
+		background: var(--accent);
+		color: #fff;
+		font-size: 11px;
+		font-weight: 800;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+	.steps b {
+		font-weight: 700;
+		color: var(--text);
+	}
+	.warn {
+		margin-top: 9px;
+		font-size: 12px;
+		color: var(--muted-2);
 		line-height: 1.6;
 		word-break: keep-all;
-	}
-	.how b {
-		color: var(--text);
 	}
 </style>
