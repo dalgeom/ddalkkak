@@ -142,9 +142,11 @@
 		background: var(--bg);
 	}
 	:global(body) {
+		/* 'Pretendard Fallback'은 app.html에서 맑은 고딕에 Pretendard 메트릭을 씌운 것.
+		   웹폰트가 도착하기 전/실패해도 글자가 차지하는 자리가 같아 레이아웃이 안 밀린다. */
 		font-family:
-			'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, 'Segoe UI',
-			'Malgun Gothic', sans-serif;
+			'Pretendard Variable', Pretendard, 'Pretendard Fallback', -apple-system,
+			BlinkMacSystemFont, 'Segoe UI', 'Malgun Gothic', sans-serif;
 		color: var(--text);
 		min-height: 100vh;
 		-webkit-font-smoothing: antialiased;
