@@ -203,19 +203,21 @@
 		</div>
 	</section>
 
-	<!-- 다른 유형 -->
+	<!-- 다른 유형 — 각 유형의 전용 페이지로 이어준다 -->
 	<section class="sec">
 		<h2 class="sh">발견형 말고도 있어요</h2>
 		<div class="others">
-			<div class="other">
+			<a class="other" href="/trivia">
 				<b>상식 퀴즈</b>
 				<span>18개 분야, 초등부터 어른까지. 고르거나 짧게 답을 적고, 해설이 함께 나옵니다.</span>
-			</div>
-			<div class="other">
+				<span class="go">분야·난이도 보기 <span aria-hidden="true">→</span></span>
+			</a>
+			<a class="other" href="/matchstick/guide">
 				<div class="ob"><MatchstickBoard board={demoBoard} picked={null} onstick={() => {}} interactive={false} label="8 − 0 = 8" /></div>
 				<b>성냥개비</b>
 				<span>성냥 하나만 옮겨 틀린 식을 참으로 만듭니다. 획을 눌러 집고 빈 자리에 놓으세요.</span>
-			</div>
+				<span class="go">푸는 법 보기 <span aria-hidden="true">→</span></span>
+			</a>
 		</div>
 	</section>
 
@@ -412,10 +414,20 @@
 		gap: 10px;
 	}
 	.other {
+		display: block;
 		background: var(--panel);
 		border: 1px solid var(--border-strong);
 		border-radius: 16px;
 		padding: 15px;
+		text-decoration: none;
+		color: inherit;
+		transition:
+			transform var(--dur-tap) var(--ease-out),
+			border-color var(--dur-move) ease;
+	}
+	.other:hover {
+		transform: translateY(-2px);
+		border-color: var(--accent);
 	}
 	.ob {
 		margin-bottom: 12px;
@@ -430,6 +442,13 @@
 		color: var(--muted);
 		line-height: 1.6;
 		word-break: keep-all;
+	}
+	.other .go {
+		display: block;
+		margin-top: 9px;
+		font-size: 13px;
+		font-weight: 700;
+		color: var(--accent);
 	}
 
 	/* ── 마무리 ── */
