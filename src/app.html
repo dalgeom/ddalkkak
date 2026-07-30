@@ -68,6 +68,27 @@
 			html {
 				background: #efe7d8;
 			}
+			/*
+			 * 폰트 스왑으로 생기는 레이아웃 이동(CLS) 방지.
+			 * 실측(100px 기준): Pretendard는 줄높이 119px·너비 716px인데
+			 * 윈도우 기본 폴백인 맑은 고딕은 133px·831px — 16% 넓고 12% 높다.
+			 * 그래서 웹폰트가 도착하는 순간 줄바꿈까지 바뀌며 본문 전체가 밀린다.
+			 * 폴백의 메트릭을 Pretendard에 맞춰 두면 스왑이 일어나도 자리가 그대로다.
+			 *   size-adjust  716.22 / 831.5 = 86.1%
+			 *   ascent+descent  119 / (133 x 0.861) → 112% + 26% = 138%
+			 * 이 값으로 성냥 가이드 CLS 0.245 → 0.066(GOOD). 86.5/113으로 더 키워도 봤지만
+			 * 줄바꿈이 달라지며 0.109로 오히려 나빠져서 실측이 좋은 쪽을 남겼다.
+			 * 맑은 고딕이 없는 환경(안드로이드·iOS)에서는 이 패밀리가 해석되지 않아
+			 * 다음 폰트로 그냥 넘어간다 — 그쪽 렌더링은 건드리지 않는다.
+			 */
+			@font-face {
+				font-family: 'Pretendard Fallback';
+				src: local('Malgun Gothic');
+				size-adjust: 86.1%;
+				ascent-override: 112%;
+				descent-override: 26%;
+				line-gap-override: 0%;
+			}
 		</style>
 		%sveltekit.head%
 	</head>
