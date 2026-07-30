@@ -15,6 +15,13 @@
 		<meta name="apple-mobile-web-app-status-bar-style" content="default" />
 		<meta name="mobile-web-app-capable" content="yes" />
 		<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+		<!-- 폰트 CSS를 HTML 파싱보다 먼저 요청한다. 이 CSS가 늦게 시작하면 그 안의 woff2 subset도
+		     그만큼 밀려서, 폰트가 첫 페인트 뒤에 도착해 텍스트가 다시 흐르며 레이아웃이 밀린다(CLS). -->
+		<link
+			rel="preload"
+			as="style"
+			href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"
+		/>
 		<link
 			rel="stylesheet"
 			href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"

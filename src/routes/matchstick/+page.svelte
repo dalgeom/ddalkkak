@@ -271,7 +271,9 @@
 			{ title, scoreLabel, emojiRow, subLine, cta: '너도 도전해봐!' },
 			text
 		);
-		toast(outcomeMessage(outcome));
+		// 사용자가 공유 시트를 닫은 경우(canceled) 메시지가 비어 있다 — 빈 토스트를 띄우지 않는다
+		const msg = outcomeMessage(outcome);
+		if (msg) toast(msg);
 	}
 
 	onMount(() => {

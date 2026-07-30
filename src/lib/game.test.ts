@@ -20,7 +20,10 @@ import {
 	displayChoices,
 	advanceStreakIfComplete,
 	recordSolve,
-	readSolveStats
+	readSolveStats,
+	archiveDays,
+	ARCHIVE_DAYS,
+	SITE_START_DAY
 } from './game';
 import { PROBLEMS, type Problem } from './problems';
 
@@ -49,6 +52,21 @@ describe('isCorrectText', () => {
 	it('오답과 빈 입력을 거부한다', () => {
 		expect(isCorrectText(p, '814')).toBe(false);
 		expect(isCorrectText(p, '   ')).toBe(false);
+	});
+});
+
+describe('archiveDays', () => {
+	it('사이트 개설 전 날짜는 내보내지 않는다 (아무도 그날 풀지 않았다)', () => {
+		const days = archiveDays(SITE_START_DAY + 3);
+		expect(days).toEqual([SITE_START_DAY + 2, SITE_START_DAY + 1, SITE_START_DAY]);
+	});
+	it('개설 직후에는 목록이 비어 있다', () => {
+		expect(archiveDays(SITE_START_DAY)).toEqual([]);
+	});
+	it('충분히 지난 뒤에는 ARCHIVE_DAYS만큼 낸다', () => {
+		const days = archiveDays(SITE_START_DAY + 500);
+		expect(days.length).toBe(ARCHIVE_DAYS);
+		expect(days[0]).toBe(SITE_START_DAY + 499);
 	});
 });
 
