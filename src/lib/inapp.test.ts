@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { detectInApp, isIOS, openWay, externalUrl } from './inapp';
+import { iosBrowser, iosInstallSteps, isIOSInstallable } from './pwa';
 
 const UA = {
 	kakaoAndroid:
@@ -56,5 +57,31 @@ describe('openWay / externalUrl', () => {
 	it('isIOS 판별', () => {
 		expect(isIOS(UA.kakaoIOS)).toBe(true);
 		expect(isIOS(UA.kakaoAndroid)).toBe(false);
+	});
+});
+
+describe('iOS 홈 화면 추가 안내', () => {
+	const chromeIOS =
+		'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/120.0.6099.119 Mobile/15E148 Safari/604.1';
+	const edgeIOS =
+		'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) EdgiOS/120.0.0.0 Mobile/15E148 Safari/604.1';
+
+	it('크롬은 사파리로 오판하지 않는다 (UA에 Safari 문자열이 들어 있다)', () => {
+		expect(iosBrowser(chromeIOS)).toBe('chrome');
+		expect(iosBrowser(edgeIOS)).toBe('edge');
+		expect(iosBrowser(UA.safariIOS)).toBe('safari');
+	});
+
+	it('공유 버튼 위치가 브라우저마다 다르게 안내된다', () => {
+		expect(iosInstallSteps('safari')[0]).toContain('화면 아래');
+		expect(iosInstallSteps('chrome')[0]).toContain('오른쪽 아래');
+		expect(iosInstallSteps('chrome')).toContain('공유');
+	});
+
+	it('인앱 브라우저에는 홈 화면 추가를 권하지 않는다', () => {
+		expect(isIOSInstallable(UA.safariIOS)).toBe(true);
+		expect(isIOSInstallable(chromeIOS)).toBe(true);
+		expect(isIOSInstallable(UA.kakaoIOS)).toBe(false);
+		expect(isIOSInstallable(UA.chromeAndroid)).toBe(false);
 	});
 });
