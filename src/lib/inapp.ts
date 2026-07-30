@@ -48,10 +48,24 @@ export function openWay(app: Exclude<InApp, null>, ua: string): OpenWay {
 /** 기본 브라우저로 여는 URL(없으면 null — 안내만 한다) */
 export function externalUrl(way: OpenWay, href: string): string | null {
 	if (way === 'android') {
-		// intent 스킴에는 scheme을 뺀 주소를 넣는다
+		// intent 스킴에는 scheme을 뺀 주소를 넣는다.
+		// browser_fallback_url을 붙여 크롬이 없는 기기에서도 죽은 버튼이 되지 않게 한다.
 		const bare = href.replace(/^https?:\/\//, '');
-		return `intent://${bare}#Intent;scheme=https;package=com.android.chrome;end`;
+		return (
+			`intent://${bare}#Intent;scheme=https;package=com.android.chrome;` +
+			`S.browser_fallback_url=${encodeURIComponent(href)};end`
+		);
 	}
 	if (way === 'kakao-ios') return `kakaotalk://web/openExternal?url=${encodeURIComponent(href)}`;
 	return null;
+}
+
+/**
+ * 버튼으로 못 여는 경우(iOS의 카카오톡 외 인앱)의 수동 경로.
+ * 앱마다 메뉴 위치가 달라 아는 것만 구체적으로 적고, 나머지는 일반적으로 안내한다.
+ */
+export function manualSteps(app: Exclude<InApp, null>): string[] {
+	if (app === 'instagram' || app === 'facebook') return ['오른쪽 위 ⋯ 누르기', '외부 브라우저에서 열기'];
+	if (app === 'line') return ['오른쪽 아래 메뉴 누르기', '다른 앱으로 열기'];
+	return ['메뉴 열기', 'Safari로 열기'];
 }
