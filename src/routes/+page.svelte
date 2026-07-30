@@ -31,6 +31,7 @@
 	import ExampleList from '$lib/components/ExampleList.svelte';
 	import AdSlot from '$lib/components/AdSlot.svelte';
 	import Bulb from '$lib/components/Bulb.svelte';
+	import InstallPrompt from '$lib/components/InstallPrompt.svelte';
 
 	type Sample = {
 		chip: string;
@@ -954,6 +955,8 @@
 			</a>
 		{/if}
 	</div>
+
+	<InstallPrompt />
 
 	<p class="next-day">내일 10문제까지 {countdown || '--:--:--'}</p>
 {/if}

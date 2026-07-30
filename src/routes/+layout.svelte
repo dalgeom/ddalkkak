@@ -4,6 +4,7 @@
 	import Splash from '$lib/components/Splash.svelte';
 	import InAppNotice from '$lib/components/InAppNotice.svelte';
 	import { logoClicks } from '$lib/nav';
+	import { captureInstallPrompt } from '$lib/pwa';
 
 	let { children, data } = $props();
 	const year = new Date().getFullYear();
@@ -14,7 +15,11 @@
 	onMount(() => {
 		if (location.hostname.endsWith('.pages.dev')) {
 			location.replace(`https://ddalkkak.app${location.pathname}${location.search}`);
+			return;
 		}
+		// 설치 가능 이벤트는 한 번만 오고 다시 안 온다 — 앱 시작 시 붙잡아 뒀다가
+		// 10문제를 끝낸 순간에 쓴다(InstallPrompt).
+		captureInstallPrompt();
 	});
 </script>
 
