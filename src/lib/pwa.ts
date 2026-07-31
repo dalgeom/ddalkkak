@@ -58,11 +58,81 @@ export function iosBrowser(ua: string): IOSBrowser {
 	return 'other';
 }
 
-/** 브라우저별 '홈 화면에 추가'까지 가는 경로 */
-export function iosInstallSteps(b: IOSBrowser): string[] {
-	if (b === 'safari') return ['화면 아래 공유 버튼', '홈 화면에 추가'];
-	if (b === 'chrome') return ['오른쪽 아래 ⋯', '공유', '홈 화면에 추가'];
-	if (b === 'edge') return ['아래 가운데 ⋯', '공유', '홈 화면에 추가'];
-	if (b === 'firefox') return ['오른쪽 아래 ⋯', '공유', '홈 화면에 추가'];
-	return ['브라우저 메뉴에서 공유', '홈 화면에 추가'];
+/**
+ * 브라우저별 '홈 화면에 추가'까지 가는 경로.
+ * icon은 그 단계에서 눌러야 할 버튼 모양 — 글로만 쓰면 사용자가 못 찾는다.
+ */
+export type Step = { icon: 'share' | 'dots' | 'plus' | null; text: string };
+
+export function iosInstallSteps(b: IOSBrowser): Step[] {
+	if (b === 'safari')
+		return [
+			{ icon: 'share', text: '화면 아래 이 버튼을 누르고' },
+			{ icon: 'plus', text: '홈 화면에 추가를 선택하세요' }
+		];
+	if (b === 'chrome' || b === 'firefox')
+		return [
+			{ icon: 'dots', text: '오른쪽 아래 이 버튼을 누르고' },
+			{ icon: 'share', text: '공유를 고른 뒤' },
+			{ icon: 'plus', text: '홈 화면에 추가를 선택하세요' }
+		];
+	if (b === 'edge')
+		return [
+			{ icon: 'dots', text: '아래 가운데 이 버튼을 누르고' },
+			{ icon: 'share', text: '공유를 고른 뒤' },
+			{ icon: 'plus', text: '홈 화면에 추가를 선택하세요' }
+		];
+	return [
+		{ icon: 'share', text: '브라우저 메뉴에서 공유를 열고' },
+		{ icon: 'plus', text: '홈 화면에 추가를 선택하세요' }
+	];
+}
+
+/* ───────── 재노출 정책 ─────────
+ * 한 번 닫으면 영영 안 뜨게 두면, 첫날엔 관심 없다가 며칠 뒤 습관이 붙은 사람을
+ * 놓친다. 반대로 매번 띄우면 성가시다. 최대 3번, 2일 간격으로 다시 권한다.
+ */
+const KEY = 'ddal.install.dismiss';
+const MAX_SHOWS = 3;
+const GAP_DAYS = 2;
+
+type Dismiss = { n: number; at: number };
+
+function readDismiss(): Dismiss {
+	if (typeof localStorage === 'undefined') return { n: 0, at: 0 };
+	try {
+		const raw = JSON.parse(localStorage.getItem(KEY) || 'null');
+		if (raw && typeof raw.n === 'number' && typeof raw.at === 'number') return raw;
+	} catch {
+		/* 무시 */
+	}
+	return { n: 0, at: 0 };
+}
+
+/** 오늘(dayNum) 기준으로 설치 권유를 보여줄 때인가 */
+export function shouldOfferInstall(dayNum: number): boolean {
+	if (isStandalone()) return false;
+	const d = readDismiss();
+	if (d.n >= MAX_SHOWS) return false;
+	return dayNum - d.at >= GAP_DAYS;
+}
+
+export function noteInstallDismissed(dayNum: number): void {
+	if (typeof localStorage === 'undefined') return;
+	const d = readDismiss();
+	try {
+		localStorage.setItem(KEY, JSON.stringify({ n: d.n + 1, at: dayNum }));
+	} catch {
+		/* 무시 */
+	}
+}
+
+/** 설치했거나 더 볼 필요 없을 때 — 다시 묻지 않는다 */
+export function stopOfferingInstall(): void {
+	if (typeof localStorage === 'undefined') return;
+	try {
+		localStorage.setItem(KEY, JSON.stringify({ n: MAX_SHOWS, at: 0 }));
+	} catch {
+		/* 무시 */
+	}
 }

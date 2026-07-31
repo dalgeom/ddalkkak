@@ -75,9 +75,23 @@ describe('iOS 홈 화면 추가 안내', () => {
 	});
 
 	it('공유 버튼 위치가 브라우저마다 다르게 안내된다', () => {
-		expect(iosInstallSteps('safari')[0]).toContain('화면 아래');
-		expect(iosInstallSteps('chrome')[0]).toContain('오른쪽 아래');
-		expect(iosInstallSteps('chrome')).toContain('공유');
+		const safari = iosInstallSteps('safari');
+		const chrome = iosInstallSteps('chrome');
+		expect(safari[0].text).toContain('화면 아래');
+		expect(chrome[0].text).toContain('오른쪽 아래');
+		// 크롬은 ⋯ → 공유 → 추가로 한 단계 더 거친다
+		expect(chrome.length).toBeGreaterThan(safari.length);
+		expect(chrome.some((s) => s.text.includes('공유'))).toBe(true);
+	});
+
+	it('각 단계에 눌러야 할 버튼 모양이 붙는다 (글로만 쓰면 못 찾는다)', () => {
+		expect(iosInstallSteps('safari')[0].icon).toBe('share');
+		expect(iosInstallSteps('chrome')[0].icon).toBe('dots');
+		for (const b of ['safari', 'chrome', 'edge', 'firefox', 'other'] as const) {
+			const last = iosInstallSteps(b).at(-1)!;
+			expect(last.icon).toBe('plus');
+			expect(last.text).toContain('홈 화면에 추가');
+		}
 	});
 
 	it('인앱 브라우저에는 홈 화면 추가를 권하지 않는다', () => {
