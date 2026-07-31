@@ -32,6 +32,7 @@
 	import AdSlot from '$lib/components/AdSlot.svelte';
 	import Bulb from '$lib/components/Bulb.svelte';
 	import InstallPrompt from '$lib/components/InstallPrompt.svelte';
+	import InstallHint from '$lib/components/InstallHint.svelte';
 
 	type Sample = {
 		chip: string;
@@ -461,6 +462,9 @@
 		}
 	});
 
+	/** 홈에서도 연속 일수를 안다 — 재방문자에게만 설치 안내를 띄우는 판단에 쓴다 */
+	let streakNow = $state(0);
+
 	/* ── 결과 화면 기록: 연속·누적은 completeDailySession이 쌓는 ddal.stats에서, 어제 점수는 어제 진행에서 ── */
 	let doneStats = $state({ streak: 0, played: 0, yesterday: -1 });
 	$effect(() => {
@@ -494,6 +498,14 @@
 		marks = savedProgress.marks;
 		pos = savedProgress.pos;
 		if (savedProgress.done) phase = 'done';
+
+		// 재방문자 판별용 연속 일수(설치 안내 노출 조건)
+		try {
+			const s = JSON.parse(localStorage.getItem('ddal.stats') || 'null');
+			streakNow = s?.dayStreak ?? 0;
+		} catch {
+			streakNow = 0;
+		}
 
 		const iv = setInterval(() => {
 			if (phase === 'play' && !judged) elapsedMs = Date.now() - startedAt;
@@ -573,6 +585,9 @@
 		</button>
 
 		<p class="composition">발견 3 · 상식 3 · 성냥 3 · 보너스 1</p>
+
+		<!-- 한 번이라도 와 본 사람에게만 — 첫 방문자의 첫인상은 건드리지 않는다 -->
+		<InstallHint {dayNum} streak={streakNow} />
 	</section>
 
 	<!-- ② 오늘의 맛보기 — 시작 전에 한 문제 그냥 풀어볼 수 있다(오늘의 10문제와 겹치지 않음) -->
@@ -939,6 +954,10 @@
 		</button>
 	</div>
 
+	<!-- 설치가 사실상 유일한 재방문 경로다. 기록을 막 만든 지금이 가장 설득력 있는 순간이라
+	     연습 유도보다 위에 둔다. -->
+	<InstallPrompt {dayNum} streak={doneStats.streak} />
+
 	<!-- 다음 행동: 가장 약했던 유형의 연습으로 이어준다 -->
 	<div class="nudge">
 		{#if weakest}
@@ -955,8 +974,6 @@
 			</a>
 		{/if}
 	</div>
-
-	<InstallPrompt />
 
 	<p class="next-day">내일 10문제까지 {countdown || '--:--:--'}</p>
 {/if}
