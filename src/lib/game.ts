@@ -395,6 +395,27 @@ export function readDailyProgress(dayNum: number): DailyProgress {
 	}
 }
 
+/**
+ * 오늘 이전에 푼 흔적이 있는가 = 재방문자인가.
+ * 연속 일수(dayStreak)는 10문제를 완주해야 올라가서, 며칠째 들어와 몇 문제만 풀고
+ * 나가는 사람을 재방문자로 못 잡는다. 그런 사람에게야말로 홈 화면 추가가 필요하다.
+ */
+export function hasPlayedBefore(todayNum: number): boolean {
+	if (typeof localStorage === 'undefined') return false;
+	const prefix = 'ddal.day.';
+	try {
+		for (let i = 0; i < localStorage.length; i++) {
+			const k = localStorage.key(i);
+			if (!k?.startsWith(prefix)) continue;
+			const d = Number(k.slice(prefix.length));
+			if (Number.isFinite(d) && d < todayNum) return true;
+		}
+	} catch {
+		/* 저장소 접근이 막히면 재방문 여부를 알 수 없다 */
+	}
+	return false;
+}
+
 export function writeDailyProgress(dayNum: number, p: DailyProgress): void {
 	if (typeof localStorage === 'undefined') return;
 	try {

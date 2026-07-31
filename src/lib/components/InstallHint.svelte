@@ -20,7 +20,8 @@
 	 * 그래서 한 번 이상 와 본 사람(연속 기록이 있는 사람)에게만 홈에서도 한 줄 보여준다.
 	 * 첫 방문자에게는 뜨지 않으므로 검색으로 들어온 사람의 첫인상을 방해하지 않는다.
 	 */
-	let { dayNum, streak = 0 }: { dayNum: number; streak?: number } = $props();
+	/** returning: 오늘 이전에 푼 적이 있는 사람 — 완주 여부와 무관하게 잡는다 */
+	let { dayNum, returning = false }: { dayNum: number; returning?: boolean } = $props();
 
 	let ready = $state(false);
 	let closed = $state(false);
@@ -36,10 +37,10 @@
 		steps = installSteps(p, iosBrowser(ua));
 	});
 
-	/* streak은 부모가 onMount에서 읽어 넘긴다 — 자식 onMount는 그보다 먼저 실행되므로
-	   그때 한 번만 판단하면 영영 0으로 남는다. 값이 도착하면 다시 따지도록 반응형으로 둔다. */
+	/* returning은 부모가 onMount에서 읽어 넘긴다 — 자식 onMount는 그보다 먼저 실행되므로
+	   그때 한 번만 판단하면 영영 false로 남는다. 값이 도착하면 다시 따지도록 반응형으로 둔다. */
 	$effect(() => {
-		if (closed || streak < 1) return;
+		if (closed || !returning) return;
 		if (!shouldOfferInstall(dayNum)) return;
 		// 설치 버튼을 띄울 수 있거나(안드로이드 크롬), 수동 경로라도 안내할 수 있을 때만
 		if ($installEvent || steps.length) ready = true;

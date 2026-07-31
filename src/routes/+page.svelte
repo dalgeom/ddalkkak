@@ -15,6 +15,7 @@
 		recordSolve,
 		readDailyProgress,
 		writeDailyProgress,
+		hasPlayedBefore,
 		completeDailySession,
 		type Mark,
 		type DailyKind
@@ -462,8 +463,8 @@
 		}
 	});
 
-	/** 홈에서도 연속 일수를 안다 — 재방문자에게만 설치 안내를 띄우는 판단에 쓴다 */
-	let streakNow = $state(0);
+	/** 오늘 이전에 푼 적이 있는가 — 재방문자에게만 홈 설치 안내를 띄우는 판단에 쓴다 */
+	let returningVisitor = $state(false);
 
 	/* ── 결과 화면 기록: 연속·누적은 completeDailySession이 쌓는 ddal.stats에서, 어제 점수는 어제 진행에서 ── */
 	let doneStats = $state({ streak: 0, played: 0, yesterday: -1 });
@@ -499,13 +500,8 @@
 		pos = savedProgress.pos;
 		if (savedProgress.done) phase = 'done';
 
-		// 재방문자 판별용 연속 일수(설치 안내 노출 조건)
-		try {
-			const s = JSON.parse(localStorage.getItem('ddal.stats') || 'null');
-			streakNow = s?.dayStreak ?? 0;
-		} catch {
-			streakNow = 0;
-		}
+		// 설치 안내 노출 조건 — 완주하지 않고 나간 사람도 재방문자로 잡는다
+		returningVisitor = hasPlayedBefore(dayNum);
 
 		const iv = setInterval(() => {
 			if (phase === 'play' && !judged) elapsedMs = Date.now() - startedAt;
@@ -587,7 +583,7 @@
 		<p class="composition">발견 3 · 상식 3 · 성냥 3 · 보너스 1</p>
 
 		<!-- 한 번이라도 와 본 사람에게만 — 첫 방문자의 첫인상은 건드리지 않는다 -->
-		<InstallHint {dayNum} streak={streakNow} />
+		<InstallHint {dayNum} returning={returningVisitor} />
 	</section>
 
 	<!-- ② 오늘의 맛보기 — 시작 전에 한 문제 그냥 풀어볼 수 있다(오늘의 10문제와 겹치지 않음) -->

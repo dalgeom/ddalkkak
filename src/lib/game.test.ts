@@ -21,6 +21,7 @@ import {
 	advanceStreakIfComplete,
 	recordSolve,
 	readSolveStats,
+	hasPlayedBefore,
 	archiveDays,
 	ARCHIVE_DAYS,
 	SITE_START_DAY
@@ -52,6 +53,42 @@ describe('isCorrectText', () => {
 	it('오답과 빈 입력을 거부한다', () => {
 		expect(isCorrectText(p, '814')).toBe(false);
 		expect(isCorrectText(p, '   ')).toBe(false);
+	});
+});
+
+describe('hasPlayedBefore', () => {
+	// 키 순회(key/length)를 쓰는 함수라 목도 그걸 지원해야 한다
+	function mockLS() {
+		const store = new Map<string, string>();
+		return {
+			getItem: (k: string) => (store.has(k) ? store.get(k)! : null),
+			setItem: (k: string, v: string) => void store.set(k, String(v)),
+			removeItem: (k: string) => void store.delete(k),
+			clear: () => store.clear(),
+			key: (i: number) => [...store.keys()][i] ?? null,
+			get length() {
+				return store.size;
+			}
+		};
+	}
+	beforeEach(() => vi.stubGlobal('localStorage', mockLS()));
+	afterEach(() => vi.unstubAllGlobals());
+
+	it('처음 온 사람은 false', () => {
+		expect(hasPlayedBefore(20700)).toBe(false);
+	});
+	it('오늘만 푼 사람도 아직 재방문자가 아니다', () => {
+		localStorage.setItem('ddal.day.20700', JSON.stringify({ pos: 3, marks: ['clean'], done: false }));
+		expect(hasPlayedBefore(20700)).toBe(false);
+	});
+	it('완주하지 않고 나간 어제 기록도 재방문자로 잡는다 (연속 일수는 완주해야 오른다)', () => {
+		localStorage.setItem('ddal.day.20699', JSON.stringify({ pos: 4, marks: ['clean'], done: false }));
+		expect(hasPlayedBefore(20700)).toBe(true);
+	});
+	it('다른 키에는 반응하지 않는다', () => {
+		localStorage.setItem('ddal.stats', JSON.stringify({ dayStreak: 3 }));
+		localStorage.setItem('ddal.match.done', '[1,2]');
+		expect(hasPlayedBefore(20700)).toBe(false);
 	});
 });
 
