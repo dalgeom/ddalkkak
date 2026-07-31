@@ -8,6 +8,7 @@
 		shouldOfferInstall,
 		noteInstallDismissed,
 		stopOfferingInstall,
+		IOS_INSTALL_NOTE,
 		type Step
 	} from '$lib/pwa';
 	import { track } from '$lib/analytics';
@@ -112,6 +113,7 @@
 					</li>
 				{/each}
 			</ol>
+			<p class="note">{IOS_INSTALL_NOTE}</p>
 			<p class="note">아이폰은 홈 화면 앱이 기록을 따로 저장해요 — 추가한 뒤부터 그곳에 쌓입니다.</p>
 		{/if}
 	</section>

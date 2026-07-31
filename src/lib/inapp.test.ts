@@ -75,20 +75,22 @@ describe('iOS 홈 화면 추가 안내', () => {
 	});
 
 	it('공유 버튼 위치가 브라우저마다 다르게 안내된다', () => {
-		const safari = iosInstallSteps('safari');
-		const chrome = iosInstallSteps('chrome');
-		expect(safari[0].text).toContain('화면 아래');
-		expect(chrome[0].text).toContain('오른쪽 아래');
-		// 크롬은 ⋯ → 공유 → 추가로 한 단계 더 거친다
-		expect(chrome.length).toBeGreaterThan(safari.length);
-		expect(chrome.some((s) => s.text.includes('공유'))).toBe(true);
+		expect(iosInstallSteps('safari')[0].text).toContain('화면 아래');
+		// 크롬은 주소창 오른쪽. 하단 ⋯ 안의 'Chrome 공유'는 페이지가 아니라 앱 자체를
+		// 공유하는 메뉴라, 그쪽으로 안내하면 앱스토어로 빠진다.
+		expect(iosInstallSteps('chrome')[0].text).toContain('주소창 오른쪽');
+		for (const b of ['safari', 'chrome', 'edge', 'firefox', 'other'] as const) {
+			expect(iosInstallSteps(b).some((s) => s.text.includes('아래 이 버튼') && b !== 'safari')).toBe(
+				false
+			);
+		}
 	});
 
 	it('각 단계에 눌러야 할 버튼 모양이 붙는다 (글로만 쓰면 못 찾는다)', () => {
-		expect(iosInstallSteps('safari')[0].icon).toBe('share');
-		expect(iosInstallSteps('chrome')[0].icon).toBe('dots');
 		for (const b of ['safari', 'chrome', 'edge', 'firefox', 'other'] as const) {
-			const last = iosInstallSteps(b).at(-1)!;
+			const steps = iosInstallSteps(b);
+			expect(steps[0].icon).toBe('share');
+			const last = steps.at(-1)!;
 			expect(last.icon).toBe('plus');
 			expect(last.text).toContain('홈 화면에 추가');
 		}

@@ -65,28 +65,19 @@ export function iosBrowser(ua: string): IOSBrowser {
 export type Step = { icon: 'share' | 'dots' | 'plus' | null; text: string };
 
 export function iosInstallSteps(b: IOSBrowser): Step[] {
-	if (b === 'safari')
-		return [
-			{ icon: 'share', text: '화면 아래 이 버튼을 누르고' },
-			{ icon: 'plus', text: '홈 화면에 추가를 선택하세요' }
-		];
-	if (b === 'chrome' || b === 'firefox')
-		return [
-			{ icon: 'dots', text: '오른쪽 아래 이 버튼을 누르고' },
-			{ icon: 'share', text: '공유를 고른 뒤' },
-			{ icon: 'plus', text: '홈 화면에 추가를 선택하세요' }
-		];
-	if (b === 'edge')
-		return [
-			{ icon: 'dots', text: '아래 가운데 이 버튼을 누르고' },
-			{ icon: 'share', text: '공유를 고른 뒤' },
-			{ icon: 'plus', text: '홈 화면에 추가를 선택하세요' }
-		];
-	return [
-		{ icon: 'share', text: '브라우저 메뉴에서 공유를 열고' },
-		{ icon: 'plus', text: '홈 화면에 추가를 선택하세요' }
-	];
+	const add: Step = { icon: 'plus', text: '홈 화면에 추가를 선택하세요' };
+	// 사파리는 공유가 화면 아래 도구막대에 있다
+	if (b === 'safari') return [{ icon: 'share', text: '화면 아래 이 버튼을 누르고' }, add];
+	// 크롬은 주소창 오른쪽에 있다. 아래쪽 ⋯ 안의 'Chrome 공유'는 페이지가 아니라
+	// 크롬 앱 자체를 공유하는 메뉴라 여기로 안내하면 앱스토어 링크가 뜬다.
+	if (b === 'chrome') return [{ icon: 'share', text: '주소창 오른쪽 이 버튼을 누르고' }, add];
+	// 나머지는 위치를 단정하지 않는다 — 틀린 위치를 가리키면 아예 못 찾는다
+	return [{ icon: 'share', text: '브라우저의 공유 버튼을 누르고' }, add];
 }
+
+/** 공유 시트에서 '홈 화면에 추가'가 첫 화면에 안 보이는 경우가 많다 */
+export const IOS_INSTALL_NOTE =
+	"'홈 화면에 추가'가 안 보이면 목록을 아래로 내리거나 '더 보기'를 누르세요.";
 
 /* ───────── 재노출 정책 ─────────
  * 한 번 닫으면 영영 안 뜨게 두면, 첫날엔 관심 없다가 며칠 뒤 습관이 붙은 사람을
