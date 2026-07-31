@@ -351,6 +351,36 @@
 				{/each}
 			</div>
 		</section>
+
+		<!-- 검색으로 들어온 사람에게 이 퍼즐이 뭔지 설명한다. 놀이 흐름을 막지 않도록 모드 아래에 둔다. -->
+		<section class="msec about">
+			<h2 class="mh">성냥개비 퍼즐이란</h2>
+			<p class="mp long">
+				틀린 등식이 성냥개비로 놓여 있습니다. 성냥 <b>하나만</b> 다른 자리로 옮겨서 등식을 참으로
+				만들면 됩니다. 빼거나 더하는 것이 아니라 <b>옮기는</b> 것이라, 판 위의 성냥 개수는 처음과
+				끝이 똑같습니다.
+			</p>
+			<p class="mp long">
+				푸는 방법은 크게 둘입니다. 숫자에서 획 하나를 빼서 다른 숫자로 바꾸거나(6→5, 8→0, 9→3),
+				연산 기호를 건드리는 것입니다. <b>+에서 세로획을 빼면 −</b>가 되고 그 획이 숫자 쪽으로
+				가며, 반대로 <b>−에 획을 얹으면 +</b>가 되면서 숫자 하나가 획을 내놓습니다. 숫자만 붙들고
+				있다가 막혔다면 기호 쪽을 살펴보세요.
+			</p>
+			<p class="mp long">
+				준비된 {problems.length}개는 전부 프로그램으로 전수 검증했습니다. 모든 문제가 성냥 하나를
+				옮기는 것만으로 풀리고, 숫자의 개수는 바뀌지 않으며, 답이 여러 개로 갈리는 문제는 빼
+				두었습니다.
+			</p>
+			<div class="qa">
+				<h3>한 획 차이로 바뀌는 숫자</h3>
+				<p>
+					획을 <b>더하면</b> 0→8, 1→7, 3→9, 5→6, 5→9, 6→8, 9→8. 획을 <b>빼면</b> 6→5, 7→1, 8→0,
+					8→6, 8→9, 9→3, 9→5. 자기 안에서 옮기면 0↔6, 0↔9, 2↔3, 3↔5, 6↔9. 이 표만 외워도 절반은
+					풀립니다.
+				</p>
+			</div>
+			<a class="glink" href="/matchstick/guide">전체 숫자표와 4단계 풀이법 보기 →</a>
+		</section>
 	</div>
 
 	{:else if screen === 'play'}
@@ -544,6 +574,48 @@
 		font-size: 12.5px;
 		color: var(--muted);
 		margin: 0 0 12px;
+	}
+	.mp.long {
+		font-size: 13.5px;
+		line-height: 1.8;
+		word-break: keep-all;
+	}
+	.mp.long b {
+		color: var(--text);
+		font-weight: 700;
+	}
+	.about .qa {
+		background: var(--panel-2);
+		border: 1px solid var(--border);
+		border-radius: 12px;
+		padding: 13px 15px;
+		margin-bottom: 12px;
+	}
+	.about .qa h3 {
+		margin: 0 0 6px;
+		font-size: 13.5px;
+		font-weight: 800;
+		word-break: keep-all;
+	}
+	.about .qa p {
+		margin: 0;
+		font-size: 13px;
+		line-height: 1.8;
+		color: var(--muted);
+		word-break: keep-all;
+	}
+	.about .qa b {
+		color: var(--text);
+	}
+	.glink {
+		display: inline-block;
+		font-size: 13px;
+		font-weight: 700;
+		color: var(--accent);
+		text-decoration: none;
+	}
+	.glink:hover {
+		text-decoration: underline;
 	}
 	.big {
 		width: 100%;

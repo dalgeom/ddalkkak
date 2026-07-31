@@ -1,4 +1,5 @@
 import { TRIVIA } from '$lib/trivia';
+import { categoryByName } from '$lib/triviaCategories';
 
 // 상식 퀴즈 소개 랜딩 — 분야·난이도 집계와 맛보기 문제를 SSR로 내린다.
 export const prerender = false;
@@ -14,7 +15,7 @@ export function load() {
 	}
 	const categories = Object.entries(byCategory)
 		.sort((a, b) => b[1] - a[1])
-		.map(([name, count]) => ({ name, count }));
+		.map(([name, count]) => ({ name, count, slug: categoryByName(name)?.slug ?? '' }));
 	const grades = GRADE_ORDER.map((g) => ({ name: g, count: byGrade[g] ?? 0 }));
 
 	// 난이도별 맛보기 1문제씩 — 고정 표본(객관식만)
