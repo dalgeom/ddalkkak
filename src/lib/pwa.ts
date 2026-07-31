@@ -3,11 +3,11 @@ import { writable } from 'svelte/store';
 /**
  * 홈 화면 추가(PWA 설치) 지원.
  *
- * 왜 필요한가: 웹에는 '기기 저장소'가 없다. 브라우저마다 격리된 샌드박스를 쓰기 때문에
- * 같은 폰이라도 크롬·사파리·인앱 브라우저의 기록이 서로 안 보인다. 홈 화면에 추가해 두면
- * 매번 같은 자리로 들어오게 돼서, 적어도 기록이 흩어지는 일은 크게 줄어든다.
- * (안드로이드는 설치본이 크롬과 저장소를 공유해 기존 기록이 그대로 이어진다.
- *  iOS는 홈 화면 앱이 사파리와 별도 저장소라 설치 시점부터 새로 쌓인다.)
+ * 왜 중요한가: 설치하지 않으면 다음 날 다시 오려면 브라우저를 열고 주소를 기억해
+ * 직접 쳐야 한다. 사실상 재방문이 없다는 뜻이라, 설치가 데일리 서비스의 생명줄이다.
+ *
+ * 안내 문구는 실기기에서 확인된 것만 위치를 단정한다 — 틀린 위치를 가리키면
+ * 사용자가 아예 못 찾아서, 안내가 없느니만 못하다(실제로 겪었다).
  */
 
 /** 크롬 계열이 설치 가능 시점에 주는 이벤트 — 기본 배너를 막고 우리가 원하는 때 띄운다 */
@@ -34,20 +34,22 @@ export function isStandalone(): boolean {
 	return (navigator as Navigator & { standalone?: boolean }).standalone === true;
 }
 
-/**
- * iOS는 설치 API가 없어 사용자가 직접 공유 메뉴를 눌러야 한다 — 안내만 할 수 있다.
- * 인앱 브라우저는 홈 화면 추가 자체가 안 되므로 제외한다(그쪽은 InAppNotice가 맡는다).
- */
-export function isIOSInstallable(ua: string): boolean {
-	const ios = /iphone|ipad|ipod/i.test(ua);
-	const inApp = /kakaotalk|instagram|fban|fbav|line\/|naver|daumapps/i.test(ua);
-	return ios && !inApp;
+/** 인앱 브라우저는 홈 화면 추가 자체가 안 된다(그쪽은 InAppGate가 맡는다) */
+export function isInAppUA(ua: string): boolean {
+	return /kakaotalk|instagram|fban|fbav|line\/|naver|daumapps/i.test(ua);
 }
 
-/**
- * iOS 브라우저 종류. 공유 버튼 위치가 서로 달라서 안내 문구를 갈라야 한다
- * (사파리는 화면 아래, 크롬은 오른쪽 아래 ⋯ 안에 있다).
- */
+export type Platform = 'iphone' | 'ipad' | 'android' | 'desktop';
+
+export function platformOf(ua: string, maxTouchPoints = 0): Platform {
+	if (/iphone|ipod/i.test(ua)) return 'iphone';
+	if (/ipad/i.test(ua)) return 'ipad';
+	// iPadOS 13+ 사파리는 UA를 Macintosh로 보낸다 — 진짜 맥은 터치포인트가 0이라 이걸로 가른다
+	if (/macintosh/i.test(ua) && maxTouchPoints > 1) return 'ipad';
+	if (/android/i.test(ua)) return 'android';
+	return 'desktop';
+}
+
 export type IOSBrowser = 'safari' | 'chrome' | 'firefox' | 'edge' | 'other';
 
 export function iosBrowser(ua: string): IOSBrowser {
@@ -58,25 +60,40 @@ export function iosBrowser(ua: string): IOSBrowser {
 	return 'other';
 }
 
-/**
- * 브라우저별 '홈 화면에 추가'까지 가는 경로.
- * icon은 그 단계에서 눌러야 할 버튼 모양 — 글로만 쓰면 사용자가 못 찾는다.
- */
+/** 단계에 붙는 버튼 모양 — 글로만 쓰면 사용자가 못 찾는다 */
 export type Step = { icon: 'share' | 'dots' | 'plus' | null; text: string };
 
-export function iosInstallSteps(b: IOSBrowser): Step[] {
+/**
+ * 수동 설치 경로. 버튼(beforeinstallprompt)이 없는 환경에서 쓴다.
+ * 위치를 단정하는 건 확인된 것뿐이고, 나머지는 일부러 뭉뚱그린다.
+ */
+export function installSteps(p: Platform, b: IOSBrowser): Step[] {
 	const add: Step = { icon: 'plus', text: '홈 화면에 추가를 선택하세요' };
-	// 사파리는 공유가 화면 아래 도구막대에 있다
-	if (b === 'safari') return [{ icon: 'share', text: '화면 아래 이 버튼을 누르고' }, add];
-	// 크롬은 주소창 오른쪽에 있다. 아래쪽 ⋯ 안의 'Chrome 공유'는 페이지가 아니라
-	// 크롬 앱 자체를 공유하는 메뉴라 여기로 안내하면 앱스토어 링크가 뜬다.
-	if (b === 'chrome') return [{ icon: 'share', text: '주소창 오른쪽 이 버튼을 누르고' }, add];
-	// 나머지는 위치를 단정하지 않는다 — 틀린 위치를 가리키면 아예 못 찾는다
-	return [{ icon: 'share', text: '브라우저의 공유 버튼을 누르고' }, add];
+
+	if (p === 'iphone') {
+		if (b === 'safari') return [{ icon: 'share', text: '화면 아래 이 버튼을 누르고' }, add];
+		// 크롬은 주소창 오른쪽. 아래쪽 ⋯ 안의 'Chrome 공유'는 페이지가 아니라 앱 자체를
+		// 공유하는 메뉴라, 그리로 안내하면 앱스토어로 빠진다(실제로 겪었다).
+		if (b === 'chrome') return [{ icon: 'share', text: '주소창 오른쪽 이 버튼을 누르고' }, add];
+		return [{ icon: 'share', text: '브라우저의 공유 버튼을 누르고' }, add];
+	}
+
+	// 아이패드는 도구막대가 위에 있어 공유 버튼도 화면 위쪽이다
+	if (p === 'ipad') return [{ icon: 'share', text: '화면 위쪽 공유 버튼을 누르고' }, add];
+
+	// 안드로이드에서 설치 버튼이 뜨지 않는 브라우저(파이어폭스 등)를 위한 수동 경로.
+	// 메뉴 위치가 제각각이라 위치는 단정하지 않는다.
+	if (p === 'android')
+		return [
+			{ icon: 'dots', text: '브라우저 메뉴를 열고' },
+			{ icon: 'plus', text: "'홈 화면에 추가' 또는 '앱 설치'를 선택하세요" }
+		];
+
+	return [];
 }
 
-/** 공유 시트에서 '홈 화면에 추가'가 첫 화면에 안 보이는 경우가 많다 */
-export const IOS_INSTALL_NOTE =
+/** 공유 시트·메뉴에서 항목이 첫 화면에 안 보이는 경우가 많다 */
+export const INSTALL_NOTE =
 	"'홈 화면에 추가'가 안 보이면 목록을 아래로 내리거나 '더 보기'를 누르세요.";
 
 /* ───────── 재노출 정책 ─────────

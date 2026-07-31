@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { detectInApp, isIOS, openWay, externalUrl } from './inapp';
-import { iosBrowser, iosInstallSteps, isIOSInstallable } from './pwa';
+import { iosBrowser, installSteps, platformOf, isInAppUA } from './pwa';
 
 const UA = {
 	kakaoAndroid:
@@ -75,31 +75,53 @@ describe('iOS 홈 화면 추가 안내', () => {
 	});
 
 	it('공유 버튼 위치가 브라우저마다 다르게 안내된다', () => {
-		expect(iosInstallSteps('safari')[0].text).toContain('화면 아래');
+		expect(installSteps('iphone', 'safari')[0].text).toContain('화면 아래');
 		// 크롬은 주소창 오른쪽. 하단 ⋯ 안의 'Chrome 공유'는 페이지가 아니라 앱 자체를
 		// 공유하는 메뉴라, 그쪽으로 안내하면 앱스토어로 빠진다.
-		expect(iosInstallSteps('chrome')[0].text).toContain('주소창 오른쪽');
-		for (const b of ['safari', 'chrome', 'edge', 'firefox', 'other'] as const) {
-			expect(iosInstallSteps(b).some((s) => s.text.includes('아래 이 버튼') && b !== 'safari')).toBe(
-				false
-			);
+		expect(installSteps('iphone', 'chrome')[0].text).toContain('주소창 오른쪽');
+		// 확인 못 한 브라우저는 위치를 단정하지 않는다
+		for (const b of ['edge', 'firefox', 'other'] as const) {
+			expect(installSteps('iphone', b)[0].text).not.toMatch(/아래|위쪽|오른쪽/);
 		}
 	});
 
-	it('각 단계에 눌러야 할 버튼 모양이 붙는다 (글로만 쓰면 못 찾는다)', () => {
-		for (const b of ['safari', 'chrome', 'edge', 'firefox', 'other'] as const) {
-			const steps = iosInstallSteps(b);
-			expect(steps[0].icon).toBe('share');
-			const last = steps.at(-1)!;
+	it('아이패드는 도구막대가 위에 있어 공유 버튼 안내가 다르다', () => {
+		expect(installSteps('ipad', 'safari')[0].text).toContain('위쪽');
+		expect(installSteps('ipad', 'safari')[0].text).not.toContain('아래');
+	});
+
+	it('안드로이드도 설치 버튼이 없을 때 쓸 수동 경로가 있다 (아무것도 안 뜨는 게 최악)', () => {
+		const s = installSteps('android', 'other');
+		expect(s.length).toBeGreaterThan(0);
+		expect(s.at(-1)!.text).toContain('홈 화면에 추가');
+	});
+
+	it('각 단계 끝에는 홈 화면에 추가와 + 모양이 온다', () => {
+		for (const p of ['iphone', 'ipad', 'android'] as const) {
+			const last = installSteps(p, 'safari').at(-1)!;
 			expect(last.icon).toBe('plus');
 			expect(last.text).toContain('홈 화면에 추가');
 		}
 	});
 
+	it('플랫폼 판별 — iPadOS 사파리는 UA를 Macintosh로 보낸다', () => {
+		expect(platformOf(UA.safariIOS)).toBe('iphone');
+		expect(platformOf(chromeIOS)).toBe('iphone');
+		expect(platformOf(UA.chromeAndroid)).toBe('android');
+		// 진짜 맥은 터치포인트 0, 아이패드는 5
+		expect(platformOf(UA.desktop, 0)).toBe('desktop');
+		expect(platformOf('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Safari/605.1.15', 0)).toBe(
+			'desktop'
+		);
+		expect(platformOf('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Safari/605.1.15', 5)).toBe(
+			'ipad'
+		);
+	});
+
 	it('인앱 브라우저에는 홈 화면 추가를 권하지 않는다', () => {
-		expect(isIOSInstallable(UA.safariIOS)).toBe(true);
-		expect(isIOSInstallable(chromeIOS)).toBe(true);
-		expect(isIOSInstallable(UA.kakaoIOS)).toBe(false);
-		expect(isIOSInstallable(UA.chromeAndroid)).toBe(false);
+		expect(isInAppUA(UA.safariIOS)).toBe(false);
+		expect(isInAppUA(chromeIOS)).toBe(false);
+		expect(isInAppUA(UA.kakaoIOS)).toBe(true);
+		expect(isInAppUA(UA.instagram)).toBe(true);
 	});
 });
