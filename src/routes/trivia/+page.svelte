@@ -59,10 +59,13 @@
 
 	<section class="sec">
 		<h2 class="sh">{data.categories.length}개 분야, 골라 푸는 재미</h2>
-		<p class="sub">무한 연습에서 분야·난이도를 골라 원하는 만큼 풀 수 있습니다.</p>
+		<p class="sub">
+			분야를 누르면 그 분야 문제 전체를 정답·해설과 함께 볼 수 있습니다. 직접 풀고 싶다면 무한
+			연습에서 분야·난이도를 골라 원하는 만큼 풀 수 있어요.
+		</p>
 		<div class="cats">
 			{#each data.categories as c (c.name)}
-				<span class="cat">{c.name} <b>{c.count}</b></span>
+				<a class="cat" href="/trivia/{c.slug}">{c.name} <b>{c.count}</b></a>
 			{/each}
 		</div>
 	</section>
@@ -276,7 +279,11 @@
 		background: var(--panel);
 		border: 1px solid var(--border-strong);
 		border-radius: 9px;
-		padding: 6px 11px;
+		padding: 7px 11px;
+		text-decoration: none;
+	}
+	.cat:hover {
+		background: var(--panel-2);
 	}
 	.cat b {
 		color: var(--accent);
