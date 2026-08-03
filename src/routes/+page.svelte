@@ -17,6 +17,9 @@
 		writeDailyProgress,
 		hasPlayedBefore,
 		completeDailySession,
+		formatDuration,
+		bestDailyTime,
+		type DailyProgress,
 		type Mark,
 		type DailyKind
 	} from '$lib/game';
@@ -72,6 +75,25 @@
 	let queue = $state<Item[]>([]);
 	let pos = $state(0);
 	let marks = $state<Mark[]>([]);
+
+	/* ───────── 세션 타이머 (푸는 중엔 안 보이고 결과에서만 공개) ─────────
+	 * 벽시계로 재면 안 된다 — 아침에 3문제 풀고 저녁에 마저 풀면 11시간이 찍힌다.
+	 * 화면을 보고 있는 동안만 더하고, 탭을 떠나면 멈춘다.
+	 * 한 구간이 10분을 넘으면 자리를 비운 것으로 보고 10분까지만 센다
+	 * (창을 켜둔 채 밥 먹고 온 사람이 3시간으로 기록되면 비교가 무의미해진다). */
+	const SEGMENT_CAP_MS = 10 * 60 * 1000;
+	let sessionMs = $state(0);
+	let segStart: number | null = null;
+
+	function startTimer() {
+		if (phase !== 'play' || segStart !== null) return;
+		segStart = Date.now();
+	}
+	function flushTimer() {
+		if (segStart === null) return;
+		sessionMs += Math.min(Date.now() - segStart, SEGMENT_CAP_MS);
+		segStart = null;
+	}
 
 	// 한 문제를 푸는 동안의 상태
 	let hintsUsed = $state(0);
@@ -186,7 +208,7 @@
 	/* ───────── 진행 저장·복원 ───────── */
 
 	function persist(done = false) {
-		writeDailyProgress(dayNum, { pos, marks, done });
+		writeDailyProgress(dayNum, { pos, marks, done, elapsedMs: sessionMs });
 	}
 
 	/** 문제은행은 첫 화면에 필요 없다. 시작을 누른 순간에만 내려받아 홈을 가볍게 유지한다. */
@@ -227,9 +249,11 @@
 			const saved = readDailyProgress(dayNum);
 			pos = Math.min(saved.pos, queue.length - 1);
 			marks = saved.marks.slice(0, queue.length);
+			sessionMs = saved.elapsedMs ?? 0;
 			phase = saved.done ? 'done' : 'play';
 			if (phase === 'play') {
 				resetProblem();
+				startTimer();
 				track(saved.marks.length ? 'daily_resume' : 'daily_start', { at: saved.marks.length });
 			}
 		} catch {
@@ -374,21 +398,29 @@
 	/* ───────── 진행 ───────── */
 
 	function next() {
+		// 문제 단위로 끊어 더한다 — 구간 상한(10분)이 문제 하나 기준으로 걸리게
+		flushTimer();
 		if (pos + 1 < queue.length) {
 			pos += 1;
 			persist();
 			resetProblem();
+			startTimer();
 		} else {
 			phase = 'done';
 			persist(true);
 			completeDailySession(dayNum);
-			// 완주 퍼널의 끝 — 점수까지 함께 보내 정답률 분포를 본다
-			track('daily_complete', { score: correctCount, total: DAILY_SIZE });
+			// 완주 퍼널의 끝 — 점수와 걸린 시간을 함께 보내 분포를 본다
+			track('daily_complete', {
+				score: correctCount,
+				total: DAILY_SIZE,
+				seconds: Math.round(sessionMs / 1000)
+			});
 			if (browser) window.scrollTo({ top: 0, behavior: 'smooth' });
 		}
 	}
 
 	function quit() {
+		flushTimer();
 		persist();
 		phase = 'home';
 		savedProgress = readDailyProgress(dayNum);
@@ -397,8 +429,9 @@
 
 	/* ───────── 공유 ───────── */
 
+	// 같은 점수라도 시간으로 겨룰 수 있게 — 시간이 없는 예전 기록은 그 줄만 빠진다
 	let shareText = $derived(
-		`딸깍 — 오늘 ${correctCount}/${DAILY_SIZE} 맞혔어요\n오늘의 10문제, 당신은 몇 개 맞힐까요?\n${browser ? location.origin : ''}/?ref=daily`
+		`딸깍 — 오늘 ${correctCount}/${DAILY_SIZE} 맞혔어요${sessionMs > 0 ? ` (${formatDuration(sessionMs)})` : ''}\n오늘의 10문제, 당신은 몇 개 맞힐까요?\n${browser ? location.origin : ''}/?ref=daily`
 	);
 
 	async function copyLink() {
@@ -431,7 +464,7 @@
 				title: `딸깍 #${puzzleNo}`,
 				scoreLabel: `${correctCount} / ${DAILY_SIZE}`,
 				emojiRow: '',
-				subLine: `${todayLabel}의 10문제`,
+				subLine: sessionMs > 0 ? `${todayLabel} · ${formatDuration(sessionMs)}` : `${todayLabel}의 10문제`,
 				cta: '너도 오늘 문제 풀어볼래?'
 			},
 			shareText
@@ -449,7 +482,7 @@
 
 	/* ───────── 초기화 ───────── */
 
-	let savedProgress = $state({ pos: 0, marks: [] as Mark[], done: false });
+	let savedProgress = $state<DailyProgress>({ pos: 0, marks: [], done: false });
 	// pos는 '다음'을 눌러야 오르므로 1번만 풀고 나간 경우 pos=0, marks만 1개다 — marks 기준이 맞다
 	let resumable = $derived(savedProgress.marks.length > 0 && !savedProgress.done);
 
@@ -475,7 +508,7 @@
 	let returningVisitor = $state(false);
 
 	/* ── 결과 화면 기록: 연속·누적은 completeDailySession이 쌓는 ddal.stats에서, 어제 점수는 어제 진행에서 ── */
-	let doneStats = $state({ streak: 0, played: 0, yesterday: -1 });
+	let doneStats = $state({ streak: 0, played: 0, yesterday: -1, best: 0 });
 	$effect(() => {
 		if (phase !== 'done' || !browser) return;
 		let s: { dayStreak?: number; played?: number } | null = null;
@@ -488,8 +521,20 @@
 		doneStats = {
 			streak: s?.dayStreak || 1,
 			played: s?.played || 1,
-			yesterday: y.done ? y.marks.filter((m) => m !== 'miss').length : -1
+			yesterday: y.done ? y.marks.filter((m) => m !== 'miss').length : -1,
+			// 오늘 이전의 최고 기록 — 기록이 없던 시절에 푼 날은 자연히 빠진다
+			best: bestDailyTime(dayNum) ?? 0
 		};
+	});
+
+	/* 걸린 시간 표시. 기록이 없던 시절에 완주한 날은 0이라 아예 감춘다. */
+	let timeLabel = $derived(sessionMs > 0 ? formatDuration(sessionMs) : '');
+	let timeNote = $derived.by(() => {
+		if (!sessionMs || !doneStats.best) return '';
+		const diff = doneStats.best - sessionMs;
+		if (diff > 0) return `최고 기록! ${formatDuration(diff)} 단축`;
+		if (diff === 0) return '최고 기록과 같아요';
+		return `최고 기록보다 ${formatDuration(-diff)} 느려요`;
 	});
 
 	/** 가장 약했던 유형 — 결과 화면에서 그 유형 연습으로 이어준다(전부 맞았으면 null) */
@@ -506,10 +551,27 @@
 		savedProgress = readDailyProgress(dayNum);
 		marks = savedProgress.marks;
 		pos = savedProgress.pos;
+		// 결과 화면을 새로고침해도 걸린 시간이 0으로 사라지지 않게
+		sessionMs = savedProgress.elapsedMs ?? 0;
 		if (savedProgress.done) phase = 'done';
 
 		// 설치 안내 노출 조건 — 완주하지 않고 나간 사람도 재방문자로 잡는다
 		returningVisitor = hasPlayedBefore(dayNum);
+
+		/* 탭을 떠나면 타이머를 멈춘다. 이게 없으면 앱을 닫아둔 시간까지 다 세어져
+		   '오늘 11시간 걸림' 같은 기록이 남는다. pagehide는 모바일에서 탭이
+		   그냥 사라질 때 unload보다 확실히 불린다. */
+		const pause = () => {
+			if (phase !== 'play') return;
+			flushTimer();
+			persist();
+		};
+		const onVis = () => {
+			if (document.visibilityState === 'hidden') pause();
+			else startTimer();
+		};
+		document.addEventListener('visibilitychange', onVis);
+		window.addEventListener('pagehide', pause);
 
 		const iv = setInterval(() => {
 			if (phase === 'play' && !judged) elapsedMs = Date.now() - startedAt;
@@ -536,7 +598,11 @@
 			const s = String(Math.floor((diff % 60000) / 1000)).padStart(2, '0');
 			countdown = `${h}:${m}:${s}`;
 		}, 1000);
-		return () => clearInterval(iv);
+		return () => {
+			clearInterval(iv);
+			document.removeEventListener('visibilitychange', onVis);
+			window.removeEventListener('pagehide', pause);
+		};
 	});
 </script>
 
@@ -905,6 +971,22 @@
 	<div class="score">
 		<span class="num">{correctCount}</span><span class="rest"> / {DAILY_SIZE} 정답</span>
 	</div>
+
+	<!-- 걸린 시간은 푸는 동안 숨겨 두었다가 여기서만 공개한다.
+	     보면서 풀면 쫓기는 기분이 들어 발견형 퍼즐과 안 맞는다. -->
+	{#if timeLabel}
+		<div class="took">
+			<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+				<circle cx="12" cy="13" r="8" />
+				<path d="M12 9v4l2.5 2M9 2h6" />
+			</svg>
+			<b>{timeLabel}</b>
+			<span>만에 완주</span>
+		</div>
+		{#if timeNote}
+			<p class="took-note" class:record={doneStats.best > sessionMs}>{timeNote}</p>
+		{/if}
+	{/if}
 
 	<div class="rows">
 		{#each resultRows as r (r.label)}
@@ -1897,6 +1979,36 @@
 		color: var(--muted-2);
 		font-size: 24px;
 		font-weight: 700;
+	}
+	.took {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 6px;
+		margin-top: 6px;
+		font-size: 15px;
+		color: var(--muted);
+	}
+	.took svg {
+		width: 16px;
+		height: 16px;
+		color: var(--muted-2);
+	}
+	.took b {
+		font-size: 17px;
+		font-weight: 800;
+		color: var(--text);
+		font-variant-numeric: tabular-nums;
+	}
+	.took-note {
+		margin: 5px 0 0;
+		text-align: center;
+		font-size: 13px;
+		font-weight: 700;
+		color: var(--muted-2);
+	}
+	.took-note.record {
+		color: var(--accent);
 	}
 	.rows {
 		display: flex;

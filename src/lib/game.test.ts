@@ -24,7 +24,11 @@ import {
 	hasPlayedBefore,
 	archiveDays,
 	ARCHIVE_DAYS,
-	SITE_START_DAY
+	SITE_START_DAY,
+	formatDuration,
+	bestDailyTime,
+	readDailyProgress,
+	writeDailyProgress
 } from './game';
 import { PROBLEMS, type Problem } from './problems';
 
@@ -438,5 +442,91 @@ describe('오늘의 딸깍 — 하루 10문제 세트', () => {
 	it('pickDaily: 빈 배열·0개 요청에도 안전', () => {
 		expect(pickDaily([], 3, 1)).toEqual([]);
 		expect(pickDaily([1, 2, 3], 0, 1)).toEqual([]);
+	});
+});
+
+describe('formatDuration', () => {
+	it('1분 미만은 초만 읽는다', () => {
+		expect(formatDuration(0)).toBe('0초');
+		expect(formatDuration(9_400)).toBe('9초');
+		expect(formatDuration(59_000)).toBe('59초');
+	});
+	it('분과 초를 함께 읽는다', () => {
+		expect(formatDuration(632_000)).toBe('10분 32초');
+	});
+	it('초가 0이면 빼고 읽는다 (10분 0초는 어색하다)', () => {
+		expect(formatDuration(60_000)).toBe('1분');
+		expect(formatDuration(600_000)).toBe('10분');
+		expect(formatDuration(3_600_000)).toBe('1시간');
+	});
+	it('1시간을 넘으면 분까지만 읽는다', () => {
+		expect(formatDuration(3_720_000)).toBe('1시간 2분');
+	});
+	it('음수는 0으로 본다', () => {
+		expect(formatDuration(-5_000)).toBe('0초');
+	});
+});
+
+describe('걸린 시간 저장·비교', () => {
+	function mockLS() {
+		const store = new Map<string, string>();
+		return {
+			getItem: (k: string) => (store.has(k) ? store.get(k)! : null),
+			setItem: (k: string, v: string) => void store.set(k, String(v)),
+			removeItem: (k: string) => void store.delete(k),
+			clear: () => store.clear(),
+			key: (i: number) => [...store.keys()][i] ?? null,
+			get length() {
+				return store.size;
+			}
+		};
+	}
+	beforeEach(() => vi.stubGlobal('localStorage', mockLS()));
+	afterEach(() => vi.unstubAllGlobals());
+
+	const done = (elapsedMs?: number) => ({
+		pos: 9,
+		marks: new Array(10).fill('clean' as const),
+		done: true,
+		...(elapsedMs === undefined ? {} : { elapsedMs })
+	});
+
+	it('저장한 시간이 그대로 돌아온다', () => {
+		writeDailyProgress(100, done(632_000));
+		expect(readDailyProgress(100).elapsedMs).toBe(632_000);
+	});
+
+	it('기록이 없던 시절의 저장본은 시간이 undefined다', () => {
+		localStorage.setItem('ddal.day.100', JSON.stringify({ pos: 9, marks: [], done: true }));
+		expect(readDailyProgress(100).elapsedMs).toBeUndefined();
+	});
+
+	it('깨진 값은 무시한다', () => {
+		localStorage.setItem(
+			'ddal.day.100',
+			JSON.stringify({ pos: 0, marks: [], done: true, elapsedMs: 'abc' })
+		);
+		expect(readDailyProgress(100).elapsedMs).toBeUndefined();
+	});
+
+	it('지난 날들 중 가장 빠른 기록을 찾는다', () => {
+		writeDailyProgress(98, done(700_000));
+		writeDailyProgress(99, done(540_000));
+		expect(bestDailyTime(100)).toBe(540_000);
+	});
+
+	it('오늘 기록은 최고 기록 비교에 넣지 않는다 (자기 자신과 비교하게 된다)', () => {
+		writeDailyProgress(99, done(540_000));
+		writeDailyProgress(100, done(10_000));
+		expect(bestDailyTime(100)).toBe(540_000);
+	});
+
+	it('완주하지 않은 날은 세지 않는다', () => {
+		writeDailyProgress(99, { pos: 3, marks: ['clean'], done: false, elapsedMs: 5_000 });
+		expect(bestDailyTime(100)).toBeNull();
+	});
+
+	it('비교할 기록이 없으면 null', () => {
+		expect(bestDailyTime(100)).toBeNull();
 	});
 });

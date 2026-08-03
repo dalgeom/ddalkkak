@@ -377,7 +377,8 @@ export function dailySample(
 export type Mark = 'clean' | 'hinted' | 'miss';
 export const MARK_EMOJI: Record<Mark, string> = { clean: '🟩', hinted: '🟨', miss: '⬜' };
 
-export type DailyProgress = { pos: number; marks: Mark[]; done: boolean };
+/** elapsedMs는 화면을 보고 있던 시간의 누적치. 이 기능 이전에 푼 날에는 없다(undefined). */
+export type DailyProgress = { pos: number; marks: Mark[]; done: boolean; elapsedMs?: number };
 
 export function dailyProgressKey(dayNum: number): string {
 	return `ddal.day.${dayNum}`;
@@ -389,10 +390,49 @@ export function readDailyProgress(dayNum: number): DailyProgress {
 	try {
 		const raw = JSON.parse(localStorage.getItem(dailyProgressKey(dayNum)) || 'null');
 		if (!raw || typeof raw.pos !== 'number' || !Array.isArray(raw.marks)) return empty;
-		return { pos: raw.pos, marks: raw.marks, done: !!raw.done };
+		const p: DailyProgress = { pos: raw.pos, marks: raw.marks, done: !!raw.done };
+		if (typeof raw.elapsedMs === 'number' && Number.isFinite(raw.elapsedMs) && raw.elapsedMs >= 0) {
+			p.elapsedMs = raw.elapsedMs;
+		}
+		return p;
 	} catch {
 		return empty;
 	}
+}
+
+/** ms → '10분 32초'. 1분 미만은 초만, 1시간 넘으면 분까지만 읽는다. */
+export function formatDuration(ms: number): string {
+	const total = Math.max(0, Math.round(ms / 1000));
+	const h = Math.floor(total / 3600);
+	const m = Math.floor((total % 3600) / 60);
+	const s = total % 60;
+	if (h > 0) return m > 0 ? `${h}시간 ${m}분` : `${h}시간`;
+	if (m > 0) return s > 0 ? `${m}분 ${s}초` : `${m}분`;
+	return `${s}초`;
+}
+
+/**
+ * 오늘 이전에 완주한 날 중 가장 빨랐던 기록(ms). 없으면 null.
+ * 기록이 없던 시절에 푼 날은 elapsedMs가 없어 자연히 제외된다.
+ */
+export function bestDailyTime(todayNum: number): number | null {
+	if (typeof localStorage === 'undefined') return null;
+	const prefix = 'ddal.day.';
+	let best: number | null = null;
+	try {
+		for (let i = 0; i < localStorage.length; i++) {
+			const k = localStorage.key(i);
+			if (!k?.startsWith(prefix)) continue;
+			const d = Number(k.slice(prefix.length));
+			if (!Number.isFinite(d) || d >= todayNum) continue;
+			const p = readDailyProgress(d);
+			if (!p.done || !p.elapsedMs) continue;
+			if (best === null || p.elapsedMs < best) best = p.elapsedMs;
+		}
+	} catch {
+		/* 저장소 접근이 막히면 비교할 기록이 없는 것으로 본다 */
+	}
+	return best;
 }
 
 /**
