@@ -1,6 +1,14 @@
 import { PROBLEMS, fieldOfChip, type Problem } from '$lib/problems';
 import { TRIVIA } from '$lib/trivia';
+import { TRIVIA_CATEGORIES } from '$lib/triviaCategories';
 import { kstDayNumber, buildDailySet, dailySample, displayChoices, MATCH_TOTAL } from '$lib/game';
+
+/** 분야별 문제 모음으로 가는 입구. 홈에서 한 번에 닿아야 사람도 크롤러도 찾아간다. */
+const CATEGORY_LINKS = TRIVIA_CATEGORIES.map((c) => ({
+	slug: c.slug,
+	name: c.name,
+	count: TRIVIA.filter((t) => t.category === c.name).length
+})).sort((a, b) => b.count - a.count);
 
 // 홈의 '오늘'은 요청 시점에 계산해야 한다. prerender 하면 빌드 시점 날짜가 정적 HTML에
 // 박혀, 크롤러와 hydration 전 사용자가 매번 1970-01-01 + day-0 문제를 보는 FOUC가 생긴다.
@@ -32,6 +40,7 @@ export function load() {
 
 	return {
 		dayNum,
+		categories: CATEGORY_LINKS,
 		// 필요한 필드만 골라 보낸다
 		sample: p
 			? {

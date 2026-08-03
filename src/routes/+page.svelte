@@ -44,7 +44,15 @@
 		answerIndex: number;
 		explain: string;
 	};
-	let { data }: { data: { dayNum: number; sample: Sample | null } } = $props();
+	let {
+		data
+	}: {
+		data: {
+			dayNum: number;
+			sample: Sample | null;
+			categories: { slug: string; name: string; count: number }[];
+		};
+	} = $props();
 
 	// SSR 시점 날짜(FOUC·크롤러 stale 방지). 클라이언트에서 자정을 넘겼는지 다시 확인한다.
 	// svelte-ignore state_referenced_locally
@@ -720,6 +728,23 @@
 			</a>
 		</div>
 	</section>
+
+	<!-- ⑤ 문제를 눈으로 훑고 싶은 사람 — 푸는 게 아니라 읽는 입구.
+	     분야별 페이지가 푸터 링크 하나로만 닿아 있어서 사람도 크롤러도 못 찾았다. -->
+	<section class="sec reveal d3">
+		<h2 class="sec-h">분야별로 골라 보기<span>정답·해설 포함</span></h2>
+		<div class="catgrid">
+			{#each data.categories as c (c.slug)}
+				<a class="catlink" href="/trivia/{c.slug}">{c.name}<b>{c.count}</b></a>
+			{/each}
+		</div>
+		<div class="deeplinks">
+			<a href="/discover">발견형 퍼즐이란</a>
+			<a href="/matchstick/guide">성냥개비 푸는 법</a>
+			<a href="/guide">발견형 푸는 법</a>
+			<a href="/archive">지난 문제</a>
+		</div>
+	</section>
 {:else if phase === 'play' && current}
 	<div class="topbar">
 		<button class="exit" onclick={quit}><span class="ar" aria-hidden="true">←</span>나가기</button>
@@ -1350,6 +1375,51 @@
 	.mall:active {
 		transform: translateY(2px);
 		box-shadow: 0 2px 0 var(--accent-press);
+	}
+
+	.catgrid {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 6px;
+	}
+	.catlink {
+		display: inline-flex;
+		align-items: baseline;
+		gap: 5px;
+		padding: 8px 11px;
+		background: var(--panel);
+		border: 1px solid var(--border-strong);
+		border-radius: 9px;
+		font-size: 13px;
+		font-weight: 700;
+		color: var(--text);
+		text-decoration: none;
+	}
+	.catlink:hover {
+		background: var(--panel-2);
+	}
+	.catlink b {
+		font-size: 12px;
+		color: var(--accent);
+		font-variant-numeric: tabular-nums;
+	}
+	.deeplinks {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 6px 14px;
+		margin-top: 14px;
+		padding-top: 12px;
+		border-top: 1px solid var(--border);
+	}
+	.deeplinks a {
+		font-size: 13px;
+		font-weight: 600;
+		color: var(--muted);
+		text-decoration: none;
+	}
+	.deeplinks a:hover {
+		color: var(--accent);
+		text-decoration: underline;
 	}
 
 	@media (min-width: 768px) {
