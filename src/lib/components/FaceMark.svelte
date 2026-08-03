@@ -21,10 +21,16 @@
 		<circle cx="0.5" cy="0.5" r={R - 0.045} fill="none" stroke={f.color} stroke-width="0.11" />
 	{:else if f.shape === 'square'}
 		<rect x={0.5 - R} y={0.5 - R} width={R * 2} height={R * 2} rx="0.04" fill={f.color} />
-	{:else if f.shape === 'diamond'}
-		<polygon
-			points="0.5,{0.5 - R - 0.03} {0.5 + R + 0.03},0.5 0.5,{0.5 + R + 0.03} {0.5 - R - 0.03},0.5"
-			fill={f.color}
+	{:else if f.shape === 'frame'}
+		<rect
+			x={0.5 - R + 0.055}
+			y={0.5 - R + 0.055}
+			width={(R - 0.055) * 2}
+			height={(R - 0.055) * 2}
+			rx="0.03"
+			fill="none"
+			stroke={f.color}
+			stroke-width="0.11"
 		/>
 	{:else if f.shape === 'plus'}
 		<path
@@ -35,13 +41,13 @@
 			fill="none"
 		/>
 	{:else}
-		<path
-			d="M{0.5 - R * 0.8},{0.5 - R * 0.8} L{0.5 + R * 0.8},{0.5 + R * 0.8} M{0.5 + R * 0.8},{0.5 -
-				R * 0.8} L{0.5 - R * 0.8},{0.5 + R * 0.8}"
-			stroke={f.color}
-			stroke-width="0.15"
-			stroke-linecap="round"
-			fill="none"
-		/>
+		{#each [
+			[0.5 - R * 0.72, 0.5 - R * 0.72],
+			[0.5 + R * 0.72, 0.5 - R * 0.72],
+			[0.5 - R * 0.72, 0.5 + R * 0.72],
+			[0.5 + R * 0.72, 0.5 + R * 0.72]
+		] as [cx, cy], i (i)}
+			<circle {cx} {cy} r="0.095" fill={f.color} />
+		{/each}
 	{/if}
 </g>

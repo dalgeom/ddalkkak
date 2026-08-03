@@ -6,8 +6,11 @@
  *
  * ── 접기 ──
  * 전개도 위에서 주사위를 굴린다고 생각하면 된다. 칸 하나에 주사위를 올려놓고
- * 이웃 칸으로 굴리면, 바닥에 닿는 면이 그 칸의 면이 된다. 6칸을 다 돌면
+ * 이웃 칸으로 굴리면, 닿는 면이 그 칸의 면이 된다. 6칸을 다 돌면
  * 어느 면이 어디에 붙는지가 정해진다.
+ *
+ * 단, 주사위는 종이 '아래쪽'에 있다고 봐야 한다. 그림이 바깥으로 오게 접으면
+ * 상자가 종이 반대편에 생기기 때문이다. 위에 놓고 굴리면 거울상이 나온다(paperFace 주석 참고).
  *
  * ── 마주 보는 면 ──
  * 굴려도 (바닥,천장) (앞,뒤) (좌,우) 짝은 절대 안 바뀐다. 그래서 이 세 짝이
@@ -95,10 +98,17 @@ function matMul(A: Mat, B: Mat): Mat {
 	return out;
 }
 
-/** 지금 종이에 닿아 있는 면을 주사위 고유 좌표계에서 본 법선. */
+/**
+ * 지금 종이에 닿아 있는 면의 바깥쪽 법선을 주사위 고유 좌표계에서 본 것.
+ *
+ * 여기서 한 번 크게 틀렸다. 처음엔 주사위를 종이 '위에서' 굴린다고 보고
+ * 닿는 면의 법선을 아래쪽(0,0,-1)으로 잡았다. 그런데 전개도를 실제로 접을 때는
+ * 그림이 바깥으로 오도록 종이 '아래쪽으로' 접는다 — 상자가 종이의 반대편에 생긴다.
+ * 두 모형은 종이면을 사이에 둔 거울상이라, 정답과 오답이 통째로 뒤바뀐다.
+ * 브라우저에서 실제로 접어 렌더한 결과와 대조해서야 잡았다.
+ */
 function paperFace(M: Mat): Vec {
-	// 세계의 아래쪽(0,0,-1)을 주사위 좌표계로 되돌리면 M의 셋째 행을 뒤집은 것이 된다
-	return [-M[2][0], -M[2][1], -M[2][2]];
+	return [M[2][0], M[2][1], M[2][2]];
 }
 
 const NORMAL_SLOT: Record<string, keyof Cube> = {
@@ -263,16 +273,21 @@ export const NETS: Net[] = generateNets();
  * 접히면서 기호가 돌아가는데, 화살표나 숫자를 쓰면 "6이야 9야" 같은 시비가 붙는다.
  * 색만으로 구분하면 색각 이상이 있는 사람이 못 푼다. 그래서 색과 모양을 함께 준다.
  */
-export type FaceShape = 'disc' | 'ring' | 'square' | 'diamond' | 'plus' | 'cross';
+export type FaceShape = 'disc' | 'ring' | 'square' | 'frame' | 'plus' | 'dots';
 export type Face = { shape: FaceShape; color: string; name: string };
 
+/**
+ * 처음엔 마름모와 엑스도 썼다. 그런데 마름모는 사각을 45도 돌린 것이고
+ * 엑스는 십자를 45도 돌린 것이라, 3D로 돌려 보면 서로 구분이 안 됐다.
+ * 그래서 회전이 아니라 채움 여부(원/고리, 사각/테두리)와 구조(십자/네 점)로 가른다.
+ */
 export const FACES: Face[] = [
 	{ shape: 'disc', color: '#2f8f5b', name: '초록 원' },
 	{ shape: 'ring', color: '#c0632e', name: '주황 고리' },
 	{ shape: 'square', color: '#2f6f9f', name: '파랑 사각' },
-	{ shape: 'diamond', color: '#8a4fa8', name: '보라 마름모' },
+	{ shape: 'frame', color: '#8a4fa8', name: '보라 테두리' },
 	{ shape: 'plus', color: '#c93b3b', name: '빨강 십자' },
-	{ shape: 'cross', color: '#6b6258', name: '회색 엑스' }
+	{ shape: 'dots', color: '#6b6258', name: '회색 네점' }
 ];
 
 /* ───────────── 문제 만들기 ───────────── */
