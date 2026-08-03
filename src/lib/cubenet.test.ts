@@ -84,6 +84,35 @@ describe('접기 수학', () => {
 		}
 	});
 
+	/**
+	 * 손으로 접어서 확인한 기준점. 위 검사들은 전부 '내부 일관성'만 보기 때문에
+	 * 주사위 전체가 거울로 뒤집혀 있어도 통과한다(실제로 처음엔 뒤집혀 있었다).
+	 * 이 검사만이 실제 종이와 맞는지를 본다.
+	 *
+	 *   . E . .        그림이 그려진 면이 바깥으로 오도록 아래쪽으로 접으면
+	 *   A B C D        B가 윗면, D가 바닥, A가 서쪽, C가 동쪽, E가 북쪽, F가 남쪽.
+	 *   . F . .        따라서 (윗면 B, 왼쪽=남 F, 오른쪽=동 C)를 만들 수 있어야 한다.
+	 */
+	it('손으로 접은 결과와 일치한다 — 거울로 뒤집히지 않았는가', () => {
+		const cells = parseNet(['.#..', '####', '.#..']);
+		// 읽는 순서: 0=E, 1=A, 2=B, 3=C, 4=D, 5=F
+		const cube = foldNet(cells)!;
+		expect(cube).not.toBeNull();
+
+		const opp = new Map<number, number>();
+		for (const [a, b] of oppositePairs(cube)) {
+			opp.set(a, b);
+			opp.set(b, a);
+		}
+		expect(opp.get(2)).toBe(4); // B ↔ D
+		expect(opp.get(1)).toBe(3); // A ↔ C
+		expect(opp.get(0)).toBe(5); // E ↔ F
+
+		const ok = achievableViews(cube);
+		expect(ok.has('2,5,3')).toBe(true); // 윗면 B, 왼쪽 F, 오른쪽 C
+		expect(ok.has('2,3,5')).toBe(false); // 그 거울상은 나오면 안 된다
+	});
+
 	it('거울상은 어떻게 돌려도 안 나온다', () => {
 		for (const n of NETS) {
 			const ok = achievableViews(n.cube);

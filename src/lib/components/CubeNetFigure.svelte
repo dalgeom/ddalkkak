@@ -21,7 +21,12 @@
 
 <svg viewBox="0 0 {w} {h}" width={w} height={h} role="img" aria-label={label}>
 	{#each cells as cell, i (i)}
-		<g transform="translate({pad + cell.c * size},{pad + cell.r * size})">
+		<g
+			transform="translate({pad + cell.c * size},{pad + cell.r * size})"
+			data-face={faceOf[i]}
+			data-r={cell.r}
+			data-c={cell.c}
+		>
 			<rect
 				width={size}
 				height={size}

@@ -2,6 +2,7 @@
 	import { problemAt, FACES, type CubeNetProblem, type View } from '$lib/cubenet';
 	import CubeNetFigure from '$lib/components/CubeNetFigure.svelte';
 	import CubeDie from '$lib/components/CubeDie.svelte';
+	import CubeFold from '$lib/components/CubeFold.svelte';
 	import FaceMark from '$lib/components/FaceMark.svelte';
 
 	/* 판단용 프로토타입. 오늘의 딸깍에는 아직 안 들어간다.
@@ -49,7 +50,39 @@
 		idx += 1;
 		picked = null;
 		startedAt = Date.now();
+		fold = 0;
+		rotX = -22;
+		rotY = -38;
 	}
+
+	/* ── 접히는 과정 보기 ── */
+	let fold = $state(0);
+	let rotX = $state(-22);
+	let rotY = $state(-38);
+	let drag: { x: number; y: number; rx: number; ry: number } | null = null;
+
+	function onDown(e: PointerEvent) {
+		drag = { x: e.clientX, y: e.clientY, rx: rotX, ry: rotY };
+		(e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+	}
+	function onMove(e: PointerEvent) {
+		if (!drag) return;
+		rotY = drag.ry + (e.clientX - drag.x) * 0.6;
+		rotX = drag.rx - (e.clientY - drag.y) * 0.6;
+	}
+	function onUp() {
+		drag = null;
+	}
+
+	/**
+	 * 윗면을 축으로 옆면 넷이 도는 순서. 마주 보는 면은 고리에서 항상 두 칸 떨어지므로
+	 * 정답의 (왼, 오른)에 각각의 반대편을 붙이면 고리가 완성된다.
+	 * 거울상이 왜 불가능한지가 여기서 드러난다 — 이 고리는 한 방향으로만 돈다.
+	 */
+	const ring = $derived.by(() => {
+		const [, left, right] = p.options[p.answer];
+		return [left, right, oppOf.get(left)!, oppOf.get(right)!];
+	});
 
 	function reset() {
 		idx = 0;
@@ -123,6 +156,59 @@
 					{/each}
 				</p>
 			</div>
+			<!-- 말로만 "거울처럼 뒤집혔어요" 하면 아무도 못 알아듣는다. 실제로 접어 보여준다. -->
+			<section class="fold">
+				<h2>직접 접어보기</h2>
+				<p class="fsub">
+					접는 방향은 하나뿐이에요. 반대로 접으면 그림이 상자 <b>안쪽</b>에 갇혀서, 겉에서는 백지
+					여섯 장만 보입니다.
+				</p>
+
+				<div
+					class="stage"
+					onpointerdown={onDown}
+					onpointermove={onMove}
+					onpointerup={onUp}
+					onpointercancel={onUp}
+					role="img"
+					aria-label="전개도가 접히는 모습. 끌어서 돌릴 수 있습니다."
+				>
+					<CubeFold cells={p.net.cells} faceOf={p.net.faceOf} t={fold} {rotX} {rotY} />
+				</div>
+
+				<div class="ctrl">
+					<label for="foldrange">접기</label>
+					<input id="foldrange" type="range" min="0" max="1" step="0.01" bind:value={fold} />
+					<button class="mini" onclick={() => (fold = fold > 0.5 ? 0 : 1)}>
+						{fold > 0.5 ? '펼치기' : '접기'}
+					</button>
+				</div>
+				<p class="hintline">그림을 손가락으로 끌면 돌려볼 수 있어요.</p>
+
+				<div class="ringbox">
+					<p class="ringlead">
+						<b>{FACES[p.options[p.answer][0]].name}</b>을 위로 두면, 옆면 넷은 항상 이 순서로만 돕니다.
+					</p>
+					<div class="ringrow">
+						{#each ring as f, i (i)}
+							<span class="rf">
+								<svg viewBox="0 0 1 1" width="20" height="20" aria-hidden="true">
+									<FaceMark face={f} />
+								</svg>
+								{FACES[f].name.split(' ')[1]}
+							</span>
+							<span class="arrow" aria-hidden="true">→</span>
+						{/each}
+						<span class="rf back">처음으로</span>
+					</div>
+					<p class="ringnote">
+						정답은 <b>{FACES[ring[0]].name.split(' ')[1]}</b> 다음이
+						<b>{FACES[ring[1]].name.split(' ')[1]}</b>. 이 순서를 거꾸로 그린 그림은 아무리 돌려도
+						안 나와요. 오른손을 아무리 돌려도 왼손이 되지 않는 것과 같습니다.
+					</p>
+				</div>
+			</section>
+
 			<button class="nextbtn" onclick={next}>다음 문제 <span aria-hidden="true">→</span></button>
 		{/if}
 	</section>
@@ -334,6 +420,121 @@
 	.nextbtn:active {
 		transform: translateY(2px);
 		box-shadow: 0 3px 0 var(--accent-press);
+	}
+
+	.fold {
+		margin-top: 16px;
+		padding: 16px;
+		background: var(--panel);
+		border: 1px solid var(--border-strong);
+		border-radius: 16px;
+	}
+	.fold h2 {
+		margin: 0 0 6px;
+		font-size: 15.5px;
+		font-weight: 800;
+	}
+	.fsub {
+		margin: 0 0 12px;
+		font-size: 13px;
+		line-height: 1.75;
+		color: var(--muted);
+		word-break: keep-all;
+	}
+	.fsub b {
+		color: var(--text);
+	}
+	.stage {
+		background: var(--panel-2);
+		border: 1px solid var(--border);
+		border-radius: 12px;
+		touch-action: none;
+		cursor: grab;
+		user-select: none;
+	}
+	.stage:active {
+		cursor: grabbing;
+	}
+	.ctrl {
+		display: flex;
+		align-items: center;
+		gap: 10px;
+		margin-top: 12px;
+	}
+	.ctrl label {
+		font-size: 12.5px;
+		font-weight: 700;
+		color: var(--muted);
+		flex: none;
+	}
+	.ctrl input {
+		flex: 1;
+		accent-color: var(--accent);
+	}
+	.mini {
+		flex: none;
+		padding: 7px 12px;
+		background: var(--panel-2);
+		border: 1px solid var(--border-strong);
+		border-radius: 9px;
+		font-family: inherit;
+		font-size: 12.5px;
+		font-weight: 700;
+		color: var(--text);
+		cursor: pointer;
+	}
+	.hintline {
+		margin: 7px 0 0;
+		font-size: 12px;
+		color: var(--muted-2);
+	}
+	.ringbox {
+		margin-top: 14px;
+		padding: 13px 14px;
+		background: var(--panel-2);
+		border-left: 3px solid var(--accent);
+		border-radius: 0 12px 12px 0;
+	}
+	.ringlead {
+		margin: 0 0 9px;
+		font-size: 13.5px;
+		line-height: 1.6;
+		word-break: keep-all;
+	}
+	.ringrow {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 5px;
+	}
+	.rf {
+		display: inline-flex;
+		align-items: center;
+		gap: 4px;
+		padding: 4px 8px 4px 5px;
+		background: var(--panel);
+		border: 1px solid var(--border-strong);
+		border-radius: 8px;
+		font-size: 12px;
+		font-weight: 700;
+	}
+	.rf.back {
+		color: var(--muted-2);
+		font-weight: 600;
+	}
+	.arrow {
+		font-size: 12px;
+		color: var(--muted-2);
+	}
+	.ringnote {
+		margin: 10px 0 0;
+		font-size: 12.5px;
+		line-height: 1.75;
+		color: var(--muted);
+		word-break: keep-all;
+	}
+	.ringnote b {
+		color: var(--text);
 	}
 
 	.legend {
