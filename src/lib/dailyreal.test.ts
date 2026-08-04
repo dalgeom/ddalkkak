@@ -9,7 +9,8 @@ import {
 	DAILY_COUNTS,
 	DAILY_COUNTS_LEGACY,
 	dailyKinds,
-	dailyKindOrder
+	dailyKindOrder,
+	CUBE_TOTAL
 } from './game';
 
 /** 실제 문제은행으로 "오늘의 딸깍" 하루 세트를 검증한다(합성 데이터로는 분포 편향을 못 잡는다). */
@@ -70,12 +71,29 @@ describe('오늘의 딸깍 — 실제 문제은행 검증', () => {
 		for (let day = START; day < START + 120; day++)
 			for (const p of build(day)) {
 				expect(p.index).toBeGreaterThanOrEqual(0);
-				// 전개도는 번호만 있으면 그 자리에서 만들어지므로 상한이 없다
-				if (p.kind === 'cube') continue;
 				const max =
-					p.kind === 'discover' ? PROBLEMS.length : p.kind === 'trivia' ? TRIVIA.length : MATCH_TOTAL;
-				expect(p.index).toBeLessThan(max);
+					p.kind === 'discover'
+						? PROBLEMS.length
+						: p.kind === 'trivia'
+							? TRIVIA.length
+							: p.kind === 'cube'
+								? CUBE_TOTAL
+								: MATCH_TOTAL;
+				expect(p.index, `day ${day} ${p.kind}`).toBeLessThan(max);
 			}
+	});
+
+	/**
+	 * 전개도는 번호만 있으면 만들어져서 상한을 안 두면 무한정 커진다. 그러면 화면에
+	 * 적어 둔 "전개도 700개"가 거짓이 되고, 연습의 문제 수와도 어긋난다.
+	 */
+	it('전개도 번호가 10년치 내내 700 안에 머문다', () => {
+		for (let day = CUBE_START_DAY; day < CUBE_START_DAY + 3650; day++)
+			for (const p of build(day))
+				if (p.kind === 'cube') {
+					expect(p.index, `day ${day}`).toBeGreaterThanOrEqual(0);
+					expect(p.index, `day ${day}`).toBeLessThan(CUBE_TOTAL);
+				}
 	});
 
 	/**
