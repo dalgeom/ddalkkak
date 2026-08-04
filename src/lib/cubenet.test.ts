@@ -210,3 +210,79 @@ describe('makeProblem', () => {
 		}
 	});
 });
+
+/**
+ * /cubenet/guide 가 가르치는 요령들. 어림짐작을 요령이라고 쓰면 안 되므로
+ * 전개도 64종 전부에서 반례가 없는지 확인한다.
+ */
+describe('전개도 읽는 요령', () => {
+	const key = (r: number, c: number) => `${r},${c}`;
+	const each = (fn: (net: (typeof NETS)[number], at: Map<string, number>, opp: Map<number, number>) => void) => {
+		for (const n of NETS) {
+			const at = new Map(n.cells.map((x, i) => [key(x.r, x.c), i]));
+			const opp = new Map<number, number>();
+			for (const [a, b] of oppositePairs(n.cube)) {
+				opp.set(a, b);
+				opp.set(b, a);
+			}
+			fn(n, at, opp);
+		}
+	};
+
+	it('일직선으로 한 칸 건너뛴 두 칸은 마주 본다', () => {
+		let n = 0;
+		each((net, at, opp) => {
+			for (const { r, c } of net.cells)
+				for (const [dr, dc] of [
+					[0, 1],
+					[1, 0]
+				]) {
+					const mid = at.get(key(r + dr, c + dc));
+					const far = at.get(key(r + dr * 2, c + dc * 2));
+					if (mid === undefined || far === undefined) continue;
+					n++;
+					expect(opp.get(at.get(key(r, c))!), net.rows.join('/')).toBe(far);
+				}
+		});
+		expect(n).toBeGreaterThan(100); // 검사가 헛돌지 않았는지
+	});
+
+	it('ㄱ자로 꺾인 두 칸은 이웃이다 (마주 보지 않는다)', () => {
+		let n = 0;
+		each((net, at, opp) => {
+			for (const { r, c } of net.cells)
+				for (const [dr, dc] of [
+					[1, 1],
+					[1, -1]
+				]) {
+					const other = at.get(key(r + dr, c + dc));
+					if (other === undefined) continue;
+					const bridge =
+						at.get(key(r, c + dc)) !== undefined || at.get(key(r + dr, c)) !== undefined;
+					if (!bridge) continue;
+					n++;
+					expect(opp.get(at.get(key(r, c))!), net.rows.join('/')).not.toBe(other);
+				}
+		});
+		expect(n).toBeGreaterThan(150);
+	});
+
+	it('네 칸이 일직선이면 양 끝은 마주 보는 게 아니라 이웃이다 (상자를 감는 띠)', () => {
+		let n = 0;
+		each((net, at, opp) => {
+			for (const { r, c } of net.cells)
+				for (const [dr, dc] of [
+					[0, 1],
+					[1, 0]
+				]) {
+					const all = [1, 2, 3].every((k) => at.get(key(r + dr * k, c + dc * k)) !== undefined);
+					if (!all) continue;
+					n++;
+					expect(opp.get(at.get(key(r, c))!), net.rows.join('/')).not.toBe(
+						at.get(key(r + dr * 3, c + dc * 3))
+					);
+				}
+		});
+		expect(n).toBeGreaterThan(20);
+	});
+});
