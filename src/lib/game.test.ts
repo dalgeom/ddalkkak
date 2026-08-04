@@ -28,7 +28,10 @@ import {
 	formatDuration,
 	bestDailyTime,
 	readDailyProgress,
-	writeDailyProgress
+	writeDailyProgress,
+	CUBE_START_DAY,
+	DAILY_COUNTS,
+	DAILY_COUNTS_LEGACY
 } from './game';
 import { PROBLEMS, type Problem } from './problems';
 
@@ -389,7 +392,7 @@ describe('오늘의 딸깍 — 하루 10문제 세트', () => {
 	const trivia = Array.from({ length: 433 }, (_, i) => ({ id: 't' + i, category: CATS[i % 18] }));
 	const build = (day: number) => buildDailySet(discover, trivia, 741, day, (d) => d.field, (t) => t.category);
 
-	it('하루 10문제, 유형별 발견3·상식3·성냥3 + 보너스1', () => {
+	it('하루 10문제, 그날 구성대로 + 보너스1', () => {
 		for (const day of [20649, 20650, 20651, 20700, 21000]) {
 			const set = build(day);
 			expect(set.length).toBe(DAILY_SIZE);
@@ -397,9 +400,11 @@ describe('오늘의 딸깍 — 하루 10문제 세트', () => {
 			expect(bonus.length).toBe(1);
 			const base = set.filter((p) => !p.bonus);
 			const cnt = (k: string) => base.filter((p) => p.kind === k).length;
-			expect(cnt('discover')).toBe(3);
-			expect(cnt('trivia')).toBe(3);
-			expect(cnt('match')).toBe(3);
+			const want = day >= CUBE_START_DAY ? DAILY_COUNTS : { ...DAILY_COUNTS_LEGACY, cube: 0 };
+			expect(cnt('discover'), `day ${day}`).toBe(want.discover);
+			expect(cnt('trivia'), `day ${day}`).toBe(want.trivia);
+			expect(cnt('match'), `day ${day}`).toBe(want.match);
+			expect(cnt('cube'), `day ${day}`).toBe(want.cube);
 		}
 	});
 
