@@ -32,8 +32,10 @@
 			<span class="bulb" aria-hidden="true"></span>
 			<span class="name">딸깍</span>
 		</a>
+		<!-- "연습"만으로는 뭘 하는 곳인지 안 읽힌다. 원하는 만큼 계속 풀 수 있다는 걸 이름으로 알린다 -->
 		<nav>
-			<a href="/play">연습</a>
+			<a href="/play">무한 연습</a>
+			<span class="sep" aria-hidden="true"></span>
 			<a href="/guide">가이드</a>
 		</nav>
 	</header>
@@ -232,9 +234,15 @@
 	}
 	header nav {
 		display: flex;
-		gap: 14px;
+		align-items: center;
+		gap: 11px;
 		font-size: 13px;
 		font-weight: 600;
+	}
+	header nav .sep {
+		width: 1px;
+		height: 12px;
+		background: var(--border-strong);
 	}
 	header nav a {
 		color: var(--muted);
