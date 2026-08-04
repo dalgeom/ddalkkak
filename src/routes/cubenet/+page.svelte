@@ -1,19 +1,20 @@
 <script lang="ts">
 	import { problemAt, FACES, NETS, type CubeNetProblem } from '$lib/cubenet';
+	import { CUBE_TOTAL } from '$lib/game';
 	import CubeNetFigure from '$lib/components/CubeNetFigure.svelte';
 	import CubeDie from '$lib/components/CubeDie.svelte';
 	import CubeFold from '$lib/components/CubeFold.svelte';
 	import AdSlot from '$lib/components/AdSlot.svelte';
 	import { track } from '$lib/analytics';
 
-	/* 전개도 무한 연습. 문제는 번호만 있으면 그 자리에서 만들어지므로 바닥나지 않는다. */
+	/* 전개도 연습. 다른 유형과 같은 규모(CUBE_TOTAL)로 끊어 돌린다. */
 
 	let started = $state(false);
 	let idx = $state(0);
 	let picked = $state<number | null>(null);
 	let log = $state<boolean[]>([]);
 
-	const p = $derived<CubeNetProblem>(problemAt(idx));
+	const p = $derived<CubeNetProblem>(problemAt(idx % CUBE_TOTAL));
 	const answered = $derived(picked !== null);
 	const correct = $derived(picked === p.answer);
 	const solved = $derived(log.filter(Boolean).length);
@@ -69,16 +70,16 @@
 </script>
 
 <svelte:head>
-	<title>전개도 문제 — 접으면 어떤 주사위? 무한 연습 | 딸깍</title>
+	<title>전개도 문제 700개 — 접으면 어떤 주사위? | 딸깍</title>
 	<meta
 		name="description"
-		content="정육면체 전개도를 접으면 어떤 주사위가 될까요? 공간 지각 문제를 가입 없이 무제한으로 풉니다. 틀리면 실제로 접히는 과정을 3D로 보여줘요."
+		content="정육면체 전개도를 접으면 어떤 주사위가 될까요? 공간 지각 문제 700개를 가입 없이 무료로 풉니다. 틀리면 실제로 접히는 과정을 3D로 보여줘요."
 	/>
 	<link rel="canonical" href="https://ddalkkak.app/cubenet" />
 	<meta property="og:title" content="전개도 문제 — 접으면 어떤 주사위? | 딸깍" />
 	<meta
 		property="og:description"
-		content="공간 지각 문제를 무제한으로. 틀리면 접히는 과정을 3D로 보여줍니다."
+		content="공간 지각 문제 700개. 틀리면 접히는 과정을 3D로 보여줍니다."
 	/>
 	<meta property="og:url" content="https://ddalkkak.app/cubenet" />
 </svelte:head>
@@ -95,7 +96,7 @@
 			<div class="facts">
 				<div class="fact"><b>{solved}/{log.length}</b><span>맞힌 개수</span></div>
 				<div class="fact"><b>{Math.round((solved / log.length) * 100)}%</b><span>정답률</span></div>
-				<div class="fact"><b>{NETS.length}종</b><span>전개도 모양</span></div>
+				<div class="fact"><b>{CUBE_TOTAL}</b><span>전개도 문제</span></div>
 			</div>
 		{/if}
 	</header>
