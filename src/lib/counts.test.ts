@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { PROBLEMS } from './problems';
 import { TRIVIA } from './trivia';
-import { MATCH_TOTAL, CUBE_TOTAL } from './game';
+import { MATCH_TOTAL, CUBE_TOTAL, DAILY_COUNTS } from './game';
 
 /**
  * 문제 수를 화면에 숫자로 박아두면, 문제를 추가할 때마다 그 화면만 옛 숫자로 남는다.
@@ -13,6 +13,11 @@ const PAGES: Record<string, string> = import.meta.glob(
 	{ query: '?raw', import: 'default', eager: true }
 );
 const LAYOUT: Record<string, string> = import.meta.glob('/src/routes/+layout.server.ts', {
+	query: '?raw',
+	import: 'default',
+	eager: true
+});
+const OG_GEN: Record<string, string> = import.meta.glob('/scripts/og-gen.mjs', {
 	query: '?raw',
 	import: 'default',
 	eager: true
@@ -49,5 +54,18 @@ describe('문제 수는 화면에 박아두지 않는다', () => {
 			expect(src, `${k}가 counts에 없다`).toContain(k);
 		expect(src).toContain('PROBLEMS.length');
 		expect(src).toContain('TRIVIA.length');
+	});
+
+	/* 공유 카드는 PNG라 위 검사가 못 본다. 유형이 하나 늘었을 때 카드만
+	   "발견형·상식·성냥개비"로 남아 있던 적이 있어, 생성기 문구를 대신 센다. */
+	it('공유 카드 생성기가 모든 유형을 적고 있다', () => {
+		const src = Object.values(OG_GEN)[0];
+		expect(src, 'scripts/og-gen.mjs를 못 읽었다').toBeTruthy();
+		const line = src.split('\n').find((l) => l.includes('하루 <b>10문제</b>'));
+		expect(line, '카드 부제 줄을 못 찾았다').toBeTruthy();
+		const listed = line!.split('—')[1].split('·').length;
+		expect(listed, `카드에 ${listed}개만 적혀 있다 — node scripts/og-gen.mjs 다시 돌릴 것`).toBe(
+			Object.keys(DAILY_COUNTS).length
+		);
 	});
 });
