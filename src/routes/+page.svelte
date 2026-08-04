@@ -60,6 +60,8 @@
 			dayNum: number;
 			sample: Sample | null;
 			categories: { slug: string; name: string; count: number }[];
+			// 레이아웃 서버 로드가 합쳐 내려주는 실제 문제 수
+			counts: { discover: number; trivia: number; match: number; cube: number };
 		};
 	} = $props();
 
@@ -141,9 +143,12 @@
 		cube: '전개도'
 	};
 	// 랜딩 소개용 — 문제은행을 랜딩에서 받지 않으려고 개수는 상수로 둔다(레이아웃 서버 로드와 같은 값)
-	const KIND_COUNT = { discover: 200, trivia: 405, match: MATCH_TOTAL, cube: CUBE_TOTAL };
-	const TOTAL_PROBLEMS =
-		KIND_COUNT.discover + KIND_COUNT.trivia + KIND_COUNT.match + KIND_COUNT.cube;
+	/* 개수는 레이아웃 서버 로드가 실제 문제은행에서 세어 내려준다.
+	   예전엔 여기에 숫자를 박아뒀는데, 문제를 추가할 때마다 홈만 옛 숫자로 남았다. */
+	const KIND_COUNT = $derived(data.counts);
+	const TOTAL_PROBLEMS = $derived(
+		data.counts.discover + data.counts.trivia + data.counts.match + data.counts.cube
+	);
 	// 성냥개비 소개 카드에 띄우는 읽기전용 보드
 	const demoBoard = parseEq('8 - 0 = 8');
 

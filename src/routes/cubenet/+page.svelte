@@ -70,16 +70,16 @@
 </script>
 
 <svelte:head>
-	<title>전개도 문제 700개 — 접으면 어떤 주사위? | 딸깍</title>
+	<title>전개도 문제 {CUBE_TOTAL}개 — 접으면 어떤 주사위? | 딸깍</title>
 	<meta
 		name="description"
-		content="정육면체 전개도를 접으면 어떤 주사위가 될까요? 공간 지각 문제 700개를 가입 없이 무료로 풉니다. 틀리면 실제로 접히는 과정을 3D로 보여줘요."
+		content="정육면체 전개도를 접으면 어떤 주사위가 될까요? 공간 지각 문제 {CUBE_TOTAL}개를 가입 없이 무료로 풉니다. 틀리면 실제로 접히는 과정을 3D로 보여줘요."
 	/>
 	<link rel="canonical" href="https://ddalkkak.app/cubenet" />
 	<meta property="og:title" content="전개도 문제 — 접으면 어떤 주사위? | 딸깍" />
 	<meta
 		property="og:description"
-		content="공간 지각 문제 700개. 틀리면 접히는 과정을 3D로 보여줍니다."
+		content="공간 지각 문제 {CUBE_TOTAL}개. 틀리면 접히는 과정을 3D로 보여줍니다."
 	/>
 	<meta property="og:url" content="https://ddalkkak.app/cubenet" />
 </svelte:head>
