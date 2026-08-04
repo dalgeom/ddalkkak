@@ -17,7 +17,8 @@
 		t = 1,
 		rotX = -22,
 		rotY = -38,
-		size = 50
+		size = 50,
+		smooth = true
 	}: {
 		cells: Cell[];
 		faceOf: number[];
@@ -26,6 +27,8 @@
 		rotX?: number;
 		rotY?: number;
 		size?: number;
+		/** 슬라이더를 끄는 동안은 꺼야 한다 — 켜두면 손가락을 못 따라온다 */
+		smooth?: boolean;
 	} = $props();
 
 	type Dir = 'e' | 'w' | 's' | 'n';
@@ -109,7 +112,7 @@
 	</div>
 {/snippet}
 
-<div class="scene" style="height:{size * 4.4}px;">
+<div class="scene" style="height:{size * 4.4}px;" class:instant={!smooth}>
 	<div class="shift" style="transform:translate({shift.dx}px,{shift.dy}px);">
 		<div
 			class="pivot"
@@ -129,10 +132,11 @@
 		perspective: 1100px;
 		overflow: hidden;
 	}
+	/* 접히는 걸 눈으로 따라갈 수 있어야 한다 — 0.6초는 너무 빨라 그냥 튀어 보였다 */
 	.shift {
 		position: relative;
 		transform-style: preserve-3d;
-		transition: transform 0.6s ease;
+		transition: transform 1.8s cubic-bezier(0.33, 0, 0.2, 1);
 	}
 	.pivot {
 		position: relative;
@@ -145,7 +149,12 @@
 		background: var(--panel);
 		border: 1.5px solid var(--border-strong);
 		box-sizing: border-box;
-		transition: transform 0.6s ease;
+		transition: transform 1.8s cubic-bezier(0.33, 0, 0.2, 1);
+	}
+	/* 슬라이더를 끄는 동안엔 손가락을 그대로 따라와야 한다 */
+	.scene.instant .face,
+	.scene.instant .shift {
+		transition: none;
 	}
 	.face svg {
 		display: block;

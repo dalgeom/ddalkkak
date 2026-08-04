@@ -1,6 +1,8 @@
 <script lang="ts">
 	import ProblemView from '$lib/components/ProblemView.svelte';
 	import MatchstickBoard from '$lib/components/MatchstickBoard.svelte';
+	import CubeNetFigure from '$lib/components/CubeNetFigure.svelte';
+	import CubeDie from '$lib/components/CubeDie.svelte';
 	import Icon from '$lib/components/Icon.svelte';
 	import AdSlot from '$lib/components/AdSlot.svelte';
 	import { parseEq } from '$lib/matchstick';
@@ -11,9 +13,11 @@
 
 	// 성냥개비는 문제(displayed) → 정답(solution)을 각각 읽기 전용 보드로 보여준다.
 	let matchReveal = $state<boolean[]>([]);
+	let cubeReveal = $state<boolean[]>([]);
 	let bonusReveal = $state(false);
 	$effect(() => {
 		matchReveal = data.match.map(() => false);
+		cubeReveal = data.cube.map(() => false);
 		bonusReveal = false;
 	});
 
@@ -24,6 +28,17 @@
 			.map((b) => (b.kind === 'text' ? strip(b.html) : b.kind === 'pre' ? b.text : ''))
 			.filter(Boolean)
 			.join(' · ');
+	/** 그날 실제 구성 — 전개도가 들어오기 전 날짜는 옛 구성 그대로 표기해야 한다 */
+	const composition = $derived(
+		[
+			`발견형 ${data.discover.length}`,
+			`상식 ${data.trivia.length}`,
+			`성냥개비 ${data.match.length}`,
+			...(data.cube.length ? [`전개도 ${data.cube.length}`] : []),
+			'보너스 1'
+		].join(' · ')
+	);
+
 	let quizLd = $derived.by(() => {
 		const qs: { q: string; a: string }[] = [];
 		const push = (p: Problem) => {
@@ -34,11 +49,21 @@
 		data.trivia.forEach(push);
 		for (const m of data.match)
 			qs.push({ q: `성냥개비 퍼즐: ${m.displayed} 에서 성냥 하나만 옮겨 참인 식으로 만들기`, a: m.solution });
+		for (const c of data.cube)
+			qs.push({
+				q: '전개도 퍼즐: 이 전개도를 접으면 어떤 주사위가 되는지 고르기',
+				a: '보기 ' + ['A', 'B', 'C', 'D'][c.answer]
+			});
 		if (data.bonus) {
 			if (data.bonus.kind === 'match')
 				qs.push({
 					q: `성냥개비 퍼즐: ${data.bonus.eq.displayed} 에서 성냥 하나만 옮겨 참인 식으로 만들기`,
 					a: data.bonus.eq.solution
+				});
+			else if (data.bonus.kind === 'cube')
+				qs.push({
+					q: '전개도 퍼즐: 이 전개도를 접으면 어떤 주사위가 되는지 고르기',
+					a: '보기 ' + ['A', 'B', 'C', 'D'][data.bonus.cube.answer]
 				});
 			else push(data.bonus.problem);
 		}
@@ -64,13 +89,13 @@
 	<title>{data.label} 오늘의 딸깍 — 지난 문제</title>
 	<meta
 		name="description"
-		content="{data.label}의 오늘의 딸깍 10문제. 발견형 퍼즐 3 · 상식 퀴즈 3 · 성냥개비 3 + 보너스 1의 문제와 정답·해설을 확인하세요."
+		content="{data.label}의 오늘의 딸깍 10문제와 정답·해설. {composition}."
 	/>
 	<link rel="canonical" href="https://ddalkkak.app/archive/{data.day}" />
 	<meta property="og:title" content="{data.label} 오늘의 딸깍 — 지난 문제" />
 	<meta
 		property="og:description"
-		content="{data.label}의 10문제와 정답·해설. 발견형 3 · 상식 3 · 성냥개비 3 + 보너스 1."
+		content="{data.label}의 10문제와 정답·해설. {composition}."
 	/>
 	<meta property="og:url" content="https://ddalkkak.app/archive/{data.day}" />
 	{@html `<script type="application/ld+json">${quizLd}</` + `script>`}
@@ -121,6 +146,28 @@
 	</div>
 </section>
 
+{#if data.cube.length}
+	<section class="grp">
+		<div class="grp-h"><Icon name="match" size={16} /><h2>오늘의 전개도</h2></div>
+		<div class="grid">
+			{#each data.cube as c, i (i)}
+				<article class="mv">
+					<CubeNetFigure rows={c.net.rows} cells={c.net.cells} faceOf={c.net.faceOf} />
+					<div class="mv-cap">접으면 어떤 주사위가 될까요?</div>
+					{#if cubeReveal[i]}
+						<div class="mv-answer">
+							<div class="mv-answer-head"><Icon name="correct" size={15} /><span>정답</span></div>
+							<CubeDie view={c.options[c.answer]} />
+						</div>
+					{:else}
+						<button class="mv-reveal" onclick={() => (cubeReveal[i] = true)}>정답 보기</button>
+					{/if}
+				</article>
+			{/each}
+		</div>
+	</section>
+{/if}
+
 {#if data.bonus}
 	<section class="grp">
 		<div class="grp-h"><Icon name="hint" size={16} /><h2>보너스 문제</h2></div>
@@ -133,6 +180,23 @@
 						<div class="mv-answer">
 							<div class="mv-answer-head"><Icon name="correct" size={15} /><span>정답</span></div>
 							<div class="mv-board sol"><MatchstickBoard board={parseEq(data.bonus.eq.solution)} picked={null} onstick={() => {}} interactive={false} label={"정답 " + data.bonus.eq.solution} /></div>
+						</div>
+					{:else}
+						<button class="mv-reveal" onclick={() => (bonusReveal = true)}>정답 보기</button>
+					{/if}
+				</article>
+			{:else if data.bonus.kind === 'cube'}
+				<article class="mv">
+					<CubeNetFigure
+						rows={data.bonus.cube.net.rows}
+						cells={data.bonus.cube.net.cells}
+						faceOf={data.bonus.cube.net.faceOf}
+					/>
+					<div class="mv-cap">접으면 어떤 주사위가 될까요?</div>
+					{#if bonusReveal}
+						<div class="mv-answer">
+							<div class="mv-answer-head"><Icon name="correct" size={15} /><span>정답</span></div>
+							<CubeDie view={data.bonus.cube.options[data.bonus.cube.answer]} />
 						</div>
 					{:else}
 						<button class="mv-reveal" onclick={() => (bonusReveal = true)}>정답 보기</button>

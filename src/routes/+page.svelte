@@ -19,6 +19,7 @@
 		completeDailySession,
 		formatDuration,
 		bestDailyTime,
+		dailyKindOrder,
 		type DailyProgress,
 		type Mark,
 		type DailyKind
@@ -28,6 +29,10 @@
 	import { track } from '$lib/analytics';
 	import { parseEq, cloneBoard, isSolved, bit, type Board } from '$lib/matchstick';
 	import MatchstickBoard, { type PickLoc } from '$lib/components/MatchstickBoard.svelte';
+	import CubeNetFigure from '$lib/components/CubeNetFigure.svelte';
+	import CubeDie from '$lib/components/CubeDie.svelte';
+	import CubeFold from '$lib/components/CubeFold.svelte';
+	import { FACES as CUBE_FACES, type CubeNetProblem } from '$lib/cubenet';
 	import SevenSeg from '$lib/components/SevenSeg.svelte';
 	import ColorBlocks from '$lib/components/ColorBlocks.svelte';
 	import Glyph from '$lib/components/Glyph.svelte';
@@ -65,12 +70,13 @@
 	let phase = $state<Phase>('home');
 	let loading = $state(false);
 
-	/** 세션에 올라가는 한 문제. 성냥개비는 Problem이 아니라 등식 한 쌍이다. */
+	/** 세션에 올라가는 한 문제. 성냥개비는 등식 한 쌍, 전개도는 그림 문제라 Problem이 아니다. */
 	type Item = {
 		kind: DailyKind;
 		bonus: boolean;
 		problem?: Problem;
 		eq?: { displayed: string; solution: string };
+		cube?: CubeNetProblem;
 	};
 	let queue = $state<Item[]>([]);
 	let pos = $state(0);
@@ -127,7 +133,12 @@
 	let correctCount = $derived(marks.filter((m) => m !== 'miss').length);
 	let puzzleNo = $derived(puzzleNumber(dayNum));
 
-	const KIND_LABEL: Record<DailyKind, string> = { discover: '발견', trivia: '상식', match: '성냥' };
+	const KIND_LABEL: Record<DailyKind, string> = {
+		discover: '발견',
+		trivia: '상식',
+		match: '성냥',
+		cube: '전개도'
+	};
 	// 랜딩 소개용 — 문제은행을 랜딩에서 받지 않으려고 개수는 상수로 둔다(레이아웃 서버 로드와 같은 값)
 	const KIND_COUNT = { discover: 200, trivia: 405, match: MATCH_TOTAL };
 	const TOTAL_PROBLEMS = KIND_COUNT.discover + KIND_COUNT.trivia + KIND_COUNT.match;
@@ -152,10 +163,19 @@
 			discover: { label: '발견형', ok: 0, total: 0 },
 			trivia: { label: '상식', ok: 0, total: 0 },
 			match: { label: '성냥개비', ok: 0, total: 0 },
+			cube: { label: '전개도', ok: 0, total: 0 },
 			bonus: { label: '보너스', ok: 0, total: 0 }
 		};
+		// 배치 순서는 그날 구성만 알면 복원된다(다 풀고 새로고침하면 queue가 비어 있다)
+		const order = dailyKindOrder(dayNum);
 		const kindAt = (i: number): string =>
-			queue[i] ? (queue[i].bonus ? 'bonus' : queue[i].kind) : i >= 9 ? 'bonus' : (['discover', 'trivia', 'match'] as const)[i % 3];
+			queue[i]
+				? queue[i].bonus
+					? 'bonus'
+					: queue[i].kind
+				: i >= order.length - 1
+					? 'bonus'
+					: (order[i] ?? 'discover');
 		const n = Math.max(queue.length, marks.length);
 		for (let i = 0; i < n; i++) {
 			const row = base[kindAt(i)];
@@ -213,10 +233,11 @@
 
 	/** 문제은행은 첫 화면에 필요 없다. 시작을 누른 순간에만 내려받아 홈을 가볍게 유지한다. */
 	async function loadBank() {
-		const [p, t, m] = await Promise.all([
+		const [p, t, m, cn] = await Promise.all([
 			import('$lib/problems'),
 			import('$lib/trivia'),
-			import('$lib/data/matchstick-problems.json')
+			import('$lib/data/matchstick-problems.json'),
+			import('$lib/cubenet')
 		]);
 		const eqs = (m.default ?? m) as { displayed: string; solution: string }[];
 		const picks = buildDailySet(
@@ -236,7 +257,8 @@
 					: pick.kind === 'trivia'
 						? t.TRIVIA[pick.index]
 						: undefined,
-			eq: pick.kind === 'match' ? eqs[pick.index] : undefined
+			eq: pick.kind === 'match' ? eqs[pick.index] : undefined,
+			cube: pick.kind === 'cube' ? cn.problemAt(pick.index) : undefined
 		}));
 	}
 
@@ -278,6 +300,11 @@
 		mMisses = 0;
 		mPicked = null;
 		mAnimFrom = null;
+		// 전개도 해설은 다음 문제에서 다시 펼친 상태로 시작해야 한다
+		cubeFold = 0;
+		cubeRotX = -22;
+		cubeRotY = -38;
+		cubeSmooth = true;
 		const it = queue[pos];
 		if (it?.eq) {
 			mOrig = parseEq(it.eq.displayed);
@@ -329,6 +356,37 @@
 		else {
 			wrongAttempts += 1;
 			// 한 번 더 고를 기회를 주고, 두 번째도 틀리면 정답을 공개한다
+			if (wrongAttempts >= 2) settle('miss', '정답을 확인했어요', false);
+			else feedback = { msg: '아쉬워요 — 한 번 더 골라볼까요?', ok: false };
+		}
+	}
+
+	/* ───────── 전개도 해설용 접기 ───────── */
+	let cubeFold = $state(0);
+	let cubeRotX = $state(-22);
+	let cubeRotY = $state(-38);
+	let cubeSmooth = $state(true);
+	let cubeDrag: { x: number; y: number; rx: number; ry: number } | null = null;
+	function cubeDown(e: PointerEvent) {
+		cubeDrag = { x: e.clientX, y: e.clientY, rx: cubeRotX, ry: cubeRotY };
+		(e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+	}
+	function cubeMove(e: PointerEvent) {
+		if (!cubeDrag) return;
+		cubeRotY = cubeDrag.ry + (e.clientX - cubeDrag.x) * 0.6;
+		cubeRotX = cubeDrag.rx - (e.clientY - cubeDrag.y) * 0.6;
+	}
+	function cubeUp() {
+		cubeDrag = null;
+	}
+
+	/** 전개도는 그림 보기라 별도 판정이 필요하다(문제 구조가 Problem이 아니다) */
+	function submitCube(i: number) {
+		if (judged || !current?.cube) return;
+		picked = i;
+		if (i === current.cube.answer) settle(wrongAttempts === 0 ? 'clean' : 'hinted', '정답이에요', true);
+		else {
+			wrongAttempts += 1;
 			if (wrongAttempts >= 2) settle('miss', '정답을 확인했어요', false);
 			else feedback = { msg: '아쉬워요 — 한 번 더 골라볼까요?', ok: false };
 		}
@@ -736,7 +794,7 @@
 
 	<!-- ③ 어떤 문제가 나오나 — 설명이 아니라 실제 생김새로 -->
 	<section class="sec reveal d2">
-		<h2 class="sec-h">세 가지가 매일 섞여 나와요</h2>
+		<h2 class="sec-h">네 가지가 매일 섞여 나와요</h2>
 		<div class="kinds">
 			<div class="kind">
 				<div class="kind-vis rule">
@@ -762,6 +820,11 @@
 				</div>
 				<b>성냥개비 {KIND_COUNT.match}</b>
 				<span>성냥 하나만 옮겨 식을 참으로. 획을 눌러 집고 빈 자리에 놓습니다.</span>
+			</div>
+			<div class="kind">
+				<div class="kind-vis"><CubeDie view={[2, 3, 4]} size={78} /></div>
+				<b>전개도</b>
+				<span>머릿속에서 종이를 접어 어떤 주사위가 되는지 맞힙니다. 틀리면 접히는 과정을 보여줘요.</span>
 			</div>
 		</div>
 	</section>
@@ -837,7 +900,16 @@
 			{/if}
 
 			<div class="q">
-				{#if current.eq && mCur}
+				{#if current.cube}
+					<div class="qtext">이 전개도를 접어 주사위를 만들면, 어떤 모양이 될까요?</div>
+					<div class="netbox">
+						<CubeNetFigure
+							rows={current.cube.net.rows}
+							cells={current.cube.net.cells}
+							faceOf={current.cube.net.faceOf}
+						/>
+					</div>
+				{:else if current.eq && mCur}
 					<div class="qtext">성냥 <b>하나만</b> 옮겨 식을 참으로 만드세요.</div>
 					<div class="board-wrap">
 						<MatchstickBoard
@@ -869,6 +941,23 @@
 					{/each}
 				{/if}
 			</div>
+
+			{#if current.cube}
+				<div class="cubeopts">
+					{#each current.cube.options as opt, i (i)}
+						<button
+							class="cubeopt"
+							class:ok={judged && i === current.cube.answer}
+							class:bad={picked === i && i !== current.cube.answer}
+							disabled={judged}
+							onclick={() => submitCube(i)}
+						>
+							<span class="badge">{['A', 'B', 'C', 'D'][i]}</span>
+							<CubeDie view={opt} size={84} />
+						</button>
+					{/each}
+				</div>
+			{/if}
 
 			{#if current.problem && !current.eq}
 				{#if current.problem.type === 'choice'}
@@ -944,10 +1033,44 @@
 					<b>해설</b>
 					{#if current.eq}
 						성냥 하나만 옮겨 <b>{current.eq.solution.replace('-', '−')}</b>을 만들면 참이 됩니다.
+					{:else if current.cube}
+						마주 보는 면은
+						{#each current.cube.opposites as [a, b], k (k)}<span class="oppair"
+								>{CUBE_FACES[a].name} ↔ {CUBE_FACES[b].name}</span
+							>{k < current.cube.opposites.length - 1 ? ', ' : ''}{/each}
+						입니다. 마주 본 두 면은 한 화면에 같이 보이지 않아요.
 					{:else if current.problem}
 						{@html current.problem.explain}
 					{/if}
 				</div>
+
+				<!-- 말로 설명하면 안 와닿는다. 실제로 접히는 걸 보여준다. -->
+				{#if current.cube}
+					<div class="foldbox">
+						<button class="foldbtn" onclick={() => { cubeSmooth = true; cubeFold = cubeFold > 0.5 ? 0 : 1; }}>
+							{cubeFold > 0.5 ? '다시 펼치기' : '접히는 과정 보기'}
+						</button>
+						<div
+							class="foldstage"
+							onpointerdown={cubeDown}
+							onpointermove={cubeMove}
+							onpointerup={cubeUp}
+							onpointercancel={cubeUp}
+							role="img"
+							aria-label="전개도가 접히는 모습. 끌어서 돌릴 수 있습니다."
+						>
+							<CubeFold
+								cells={current.cube.net.cells}
+								faceOf={current.cube.net.faceOf}
+								t={cubeFold}
+								rotX={cubeRotX}
+								rotY={cubeRotY}
+								smooth={cubeSmooth}
+							/>
+						</div>
+						<p class="foldhint">그림을 끌면 돌려볼 수 있어요.</p>
+					</div>
+				{/if}
 				<button class="submit" onclick={next}>
 					{pos + 1 < queue.length ? '다음' : '결과 보기'}
 				</button>
@@ -956,7 +1079,8 @@
 					<button class="ghost" disabled={!mPicked} onclick={resetBoard}>처음부터</button>
 					<button class="ghost" onclick={giveUp}>모르겠어요</button>
 				</div>
-			{:else if current.problem?.type === 'choice'}
+			{:else if current.cube || current.problem?.type === 'choice'}
+				<!-- 보기를 눌러 답하는 유형에는 제출 버튼이 필요 없다 -->
 				<button class="ghost wide" onclick={giveUp}>모르겠어요</button>
 			{:else}
 				<div class="dual">
@@ -1883,6 +2007,94 @@
 	.answer-line b {
 		color: var(--accent);
 		font-weight: 800;
+	}
+
+	/* ── 전개도 ── */
+	.netbox {
+		display: flex;
+		justify-content: center;
+		padding: 6px 0 2px;
+	}
+	.cubeopts {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 9px;
+		margin-top: 4px;
+	}
+	.cubeopt {
+		position: relative;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		min-height: 124px;
+		padding: 16px 8px 10px;
+		background: var(--panel);
+		border: 2px solid var(--border-strong);
+		border-radius: 14px;
+		font-family: inherit;
+		cursor: pointer;
+	}
+	.cubeopt:disabled {
+		cursor: default;
+	}
+	.cubeopt .badge {
+		position: absolute;
+		top: 7px;
+		left: 9px;
+		font-size: 12px;
+		font-weight: 800;
+		color: var(--muted-2);
+	}
+	.cubeopt.ok {
+		border-color: var(--accent);
+		background: var(--correct-bg, var(--panel-2));
+	}
+	.cubeopt.ok .badge {
+		color: var(--accent);
+	}
+	.cubeopt.bad {
+		border-color: var(--accent-2);
+	}
+	.cubeopt.bad .badge {
+		color: var(--accent-2);
+	}
+	.oppair {
+		font-weight: 700;
+		color: var(--text);
+		white-space: nowrap;
+	}
+	.foldbox {
+		margin-top: 10px;
+	}
+	.foldbtn {
+		width: 100%;
+		padding: 11px;
+		background: var(--panel-2);
+		border: 1px solid var(--border-strong);
+		border-radius: 12px;
+		font-family: inherit;
+		font-size: 13.5px;
+		font-weight: 700;
+		color: var(--text);
+		cursor: pointer;
+	}
+	.foldstage {
+		margin-top: 8px;
+		background: var(--panel-2);
+		border: 1px solid var(--border);
+		border-radius: 12px;
+		touch-action: none;
+		cursor: grab;
+		user-select: none;
+	}
+	.foldstage:active {
+		cursor: grabbing;
+	}
+	.foldhint {
+		margin: 6px 0 0;
+		text-align: center;
+		font-size: 12px;
+		color: var(--muted-2);
 	}
 
 	.explain {

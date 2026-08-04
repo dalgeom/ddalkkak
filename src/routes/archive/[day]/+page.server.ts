@@ -3,6 +3,7 @@ import { PROBLEMS, fieldOfChip, type Problem } from '$lib/problems';
 import { TRIVIA } from '$lib/trivia';
 import matchData from '$lib/data/matchstick-problems.json';
 import { kstDayNumber, dayLabel, buildDailySet, MATCH_TOTAL, SITE_START_DAY } from '$lib/game';
+import { problemAt, type CubeNetProblem } from '$lib/cubenet';
 import type { PageServerLoad } from './$types';
 
 // 요청 시점에 '오늘'을 계산한다. prerender 하면 빌드 시점 기준으로 고정돼 날짜가 넘어가도
@@ -34,18 +35,25 @@ export const load: PageServerLoad = ({ params }) => {
 	const discover: Problem[] = [];
 	const trivia: Problem[] = [];
 	const match: Eq[] = [];
-	let bonus: { kind: 'discover' | 'trivia'; problem: Problem } | { kind: 'match'; eq: Eq } | null =
-		null;
+	const cube: CubeNetProblem[] = [];
+	let bonus:
+		| { kind: 'discover' | 'trivia'; problem: Problem }
+		| { kind: 'match'; eq: Eq }
+		| { kind: 'cube'; cube: CubeNetProblem }
+		| null = null;
 	for (const p of picks) {
 		if (p.bonus) {
 			bonus =
 				p.kind === 'match'
 					? { kind: 'match', eq: eqs[p.index] }
-					: { kind: p.kind, problem: (p.kind === 'discover' ? PROBLEMS : TRIVIA)[p.index] };
+					: p.kind === 'cube'
+						? { kind: 'cube', cube: problemAt(p.index) }
+						: { kind: p.kind, problem: (p.kind === 'discover' ? PROBLEMS : TRIVIA)[p.index] };
 		} else if (p.kind === 'discover') discover.push(PROBLEMS[p.index]);
 		else if (p.kind === 'trivia') trivia.push(TRIVIA[p.index]);
+		else if (p.kind === 'cube') cube.push(problemAt(p.index));
 		else match.push(eqs[p.index]);
 	}
 
-	return { day, label: dayLabel(day), discover, trivia, match, bonus };
+	return { day, label: dayLabel(day), discover, trivia, match, cube, bonus };
 };

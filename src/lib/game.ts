@@ -180,12 +180,50 @@ export const MATCH_TOTAL = 741;
 
 /* ─────────────────────────── 오늘의 딸깍: 하루 10문제 ─────────────────────────── */
 
-/** 하루치 구성: 발견형 3 + 상식 3 + 성냥개비 3 + 보너스 1 = 10문제. */
-export const DAILY_COUNTS = { discover: 3, trivia: 3, match: 3 } as const;
+/**
+ * 하루치 구성.
+ *   2026-08-04(20669) 전: 발견형 3 + 상식 3 + 성냥개비 3 + 보너스 1
+ *   그 이후          : 발견형 3 + 상식 2 + 성냥개비 2 + 전개도 2 + 보너스 1
+ *
+ * 구성을 바꾸면 그날의 문제가 통째로 달라진다. 이미 지나간 날과 오늘 풀던 사람의
+ * 문제까지 바뀌면 아카이브가 거짓이 되고 진행 중이던 사람은 다른 문제를 만난다.
+ * 그래서 새 구성은 정해진 날부터만 적용한다.
+ */
+export const CUBE_START_DAY = 20669;
+export const DAILY_COUNTS_LEGACY = { discover: 3, trivia: 3, match: 3 } as const;
+export const DAILY_COUNTS = { discover: 3, trivia: 2, match: 2, cube: 2 } as const;
 export const DAILY_SIZE = 10;
 
-export type DailyKind = 'discover' | 'trivia' | 'match';
+export type DailyKind = 'discover' | 'trivia' | 'match' | 'cube';
 export type DailyPick = { kind: DailyKind; index: number; bonus?: boolean };
+
+/** 그날 어떤 유형들이 나오는지 — 결과 화면과 아카이브가 이 순서를 그대로 쓴다. */
+export function dailyKinds(dayNum: number): DailyKind[] {
+	return dayNum >= CUBE_START_DAY
+		? ['discover', 'trivia', 'match', 'cube']
+		: ['discover', 'trivia', 'match'];
+}
+
+/**
+ * 그날 10문제가 어떤 유형 순서로 나오는지. 마지막 한 칸은 보너스다.
+ *
+ * 결과 화면은 다 푼 뒤 새로고침하면 문제은행이 없어 queue가 비는데, 그때도 유형별
+ * 집계를 보여줘야 한다. i % 유형수 로 때우면 유형별 개수가 서로 다를 때(3·2·2·2)
+ * 마지막 줄에서 어긋난다 — 그래서 실제 배치와 같은 방식으로 만든다.
+ * buildDailySet과 같은 결과가 나오는지는 테스트가 지킨다.
+ */
+export function dailyKindOrder(dayNum: number): DailyKind[] {
+	const d = Math.max(0, dayNum);
+	const kinds = dailyKinds(d);
+	const counts: Record<DailyKind, number> =
+		d >= CUBE_START_DAY ? { ...DAILY_COUNTS } : { ...DAILY_COUNTS_LEGACY, cube: 0 };
+	const lanes = kinds.map((k) => Array.from({ length: counts[k] }, () => k));
+	const out: DailyKind[] = [];
+	for (let r = 0; r < Math.max(...lanes.map((l) => l.length)); r++)
+		for (const lane of lanes) if (lane[r]) out.push(lane[r]);
+	out.push(kinds[d % kinds.length]); // 보너스
+	return out;
+}
 
 /**
  * 하루치 문제를 고른다. 전 방문자·같은 날이면 항상 같은 결과.
@@ -270,36 +308,58 @@ export function buildDailySet<D, T>(
 	catOf: (t: T) => string
 ): DailyPick[] {
 	const d = Math.max(0, dayNum);
-	// 보너스는 세 유형을 하루씩 돌아가며 붙는다(0→발견, 1→상식, 2→성냥).
-	const bonusKind: DailyKind = (['discover', 'trivia', 'match'] as const)[d % 3];
+	const kinds = dailyKinds(d);
+	const counts: Record<DailyKind, number> =
+		d >= CUBE_START_DAY
+			? { ...DAILY_COUNTS }
+			: { ...DAILY_COUNTS_LEGACY, cube: 0 };
 
-	// 유형별 커서 = 지금까지 그 유형에서 쓴 칸 수 = 정규 3칸/일 + 그 유형이 보너스였던 날 1칸.
-	// 이렇게 이어 붙여야 순열을 한 칸도 건너뛰거나 겹치지 않고 소비해 재출제가 최대한 늦춰진다.
-	const cursorOf = (residue: number) => 3 * d + Math.max(0, Math.floor((d - residue + 2) / 3));
-	const cd = cursorOf(0);
-	const ct = cursorOf(1);
-	const cm = cursorOf(2);
+	// 보너스는 유형을 하루씩 돌아가며 붙는다
+	const bonusKind = kinds[d % kinds.length];
+
+	/**
+	 * 유형별 커서 = 지금까지 그 유형에서 쓴 칸 수 = 정규 칸/일 + 그 유형이 보너스였던 날 1칸.
+	 * 이렇게 이어 붙여야 순열을 한 칸도 건너뛰거나 겹치지 않고 소비해 재출제가 최대한 늦춰진다.
+	 * 구성이 바뀐 날(CUBE_START_DAY) 전후로 칸 수가 다르므로 두 구간을 나눠 더한다.
+	 */
+	// 보너스로 한 칸 더 쓴 날 세기 — 네 유형을 한 번에 센다(유형마다 훑으면 같은 일을 네 번 한다)
+	const bonusUsed: Record<string, number> = { discover: 0, trivia: 0, match: 0, cube: 0 };
+	for (let e = 0; e < d; e++) {
+		const ks = dailyKinds(e);
+		bonusUsed[ks[e % ks.length]] += 1;
+	}
+	const cursorOf = (kind: DailyKind): number => {
+		const legacyDays = Math.min(d, CUBE_START_DAY);
+		const newDays = Math.max(0, d - CUBE_START_DAY);
+		const legacyPer = (DAILY_COUNTS_LEGACY as Record<string, number>)[kind] ?? 0;
+		return legacyPer * legacyDays + DAILY_COUNTS[kind] * newDays + bonusUsed[kind];
+	};
 
 	const matchIdx = Array.from({ length: matchTotal }, (_, i) => i);
-	// 보너스인 유형만 4칸을 집고, 마지막 한 칸이 보너스 문제가 된다
-	const dAll = pickAtCursor(discover, cd, bonusKind === 'discover' ? 4 : 3, fieldOf);
-	const tAll = pickAtCursor(trivia, ct, bonusKind === 'trivia' ? 4 : 3, catOf, 20260202);
-	const mAll = pickAtCursor(matchIdx, cm, bonusKind === 'match' ? 4 : 3, undefined, 20260303);
+	const take = (kind: DailyKind) => counts[kind] + (bonusKind === kind ? 1 : 0);
 
-	const dIdx = dAll.slice(0, DAILY_COUNTS.discover);
-	const tIdx = tAll.slice(0, DAILY_COUNTS.trivia);
-	const mIdx = mAll.slice(0, DAILY_COUNTS.match);
-	const extra =
-		bonusKind === 'discover' ? dAll[3] : bonusKind === 'trivia' ? tAll[3] : mAll[3];
+	const dAll = pickAtCursor(discover, cursorOf('discover'), take('discover'), fieldOf);
+	const tAll = pickAtCursor(trivia, cursorOf('trivia'), take('trivia'), catOf, 20260202);
+	const mAll = pickAtCursor(matchIdx, cursorOf('match'), take('match'), undefined, 20260303);
+	// 전개도는 번호만 있으면 그 자리에서 만들어지므로 순번을 그대로 쓴다
+	const cStart = cursorOf('cube');
+	const cAll = Array.from({ length: take('cube') }, (_, i) => cStart + i);
+
+	const picked: Record<DailyKind, number[]> = {
+		discover: dAll,
+		trivia: tAll,
+		match: mAll,
+		cube: cAll
+	};
+
+	const extra = picked[bonusKind][counts[bonusKind]];
 	const bonus: DailyPick | null =
 		extra === undefined ? null : { kind: bonusKind, index: extra, bonus: true };
 
 	// 한 유형이 몰리면 지루하므로 유형을 번갈아 배치한다
-	const lanes: DailyPick[][] = [
-		dIdx.map((index) => ({ kind: 'discover' as const, index })),
-		tIdx.map((index) => ({ kind: 'trivia' as const, index })),
-		mIdx.map((index) => ({ kind: 'match' as const, index }))
-	];
+	const lanes: DailyPick[][] = kinds.map((kind) =>
+		picked[kind].slice(0, counts[kind]).map((index) => ({ kind, index }))
+	);
 	const out: DailyPick[] = [];
 	for (let r = 0; r < Math.max(...lanes.map((l) => l.length)); r++) {
 		for (const lane of lanes) if (lane[r]) out.push(lane[r]);
