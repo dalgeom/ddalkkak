@@ -870,6 +870,7 @@
 		<div class="deeplinks">
 			<a href="/discover">발견형 퍼즐이란</a>
 			<a href="/matchstick/guide">성냥개비 푸는 법</a>
+			<a href="/cubenet/guide">전개도 푸는 법</a>
 			<a href="/guide">발견형 푸는 법</a>
 			<a href="/archive">지난 문제</a>
 		</div>

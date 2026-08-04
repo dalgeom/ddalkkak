@@ -15,6 +15,8 @@ const PAGES: { path: string; freq: string; priority: string }[] = [
 	{ path: '/play', freq: 'weekly', priority: '0.7' },
 	{ path: '/matchstick', freq: 'weekly', priority: '0.7' },
 	{ path: '/matchstick/guide', freq: 'monthly', priority: '0.8' },
+	{ path: '/cubenet', freq: 'weekly', priority: '0.7' },
+	{ path: '/cubenet/guide', freq: 'monthly', priority: '0.8' },
 	{ path: '/archive', freq: 'daily', priority: '0.8' },
 	{ path: '/guide', freq: 'monthly', priority: '0.6' },
 	{ path: '/about', freq: 'monthly', priority: '0.4' },

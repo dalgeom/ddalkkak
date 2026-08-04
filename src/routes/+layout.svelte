@@ -56,6 +56,8 @@
 			<span aria-hidden="true">·</span>
 			<a href="/matchstick">성냥개비</a>
 			<span aria-hidden="true">·</span>
+			<a href="/cubenet">전개도</a>
+			<span aria-hidden="true">·</span>
 			<a href="/about">소개</a>
 			<span aria-hidden="true">·</span>
 			<a href="/archive">지난 문제</a>
