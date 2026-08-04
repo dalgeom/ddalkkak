@@ -4,6 +4,9 @@
 	import CubeDie from '$lib/components/CubeDie.svelte';
 	import { parseEq } from '$lib/matchstick';
 
+	/* 누적 문제 수는 레이아웃 서버 로드가 실제로 세어 내려준다(숫자를 박아두면 반드시 어긋난다) */
+	let { data }: { data: { totalProblems: number } } = $props();
+
 	const CONTACT = 'hyun7219@gmail.com';
 	const demoBoard = parseEq('8 - 0 = 8');
 
@@ -49,7 +52,7 @@
 		</p>
 		<div class="facts">
 			<div class="fact"><b>10</b><span>하루 문제 수</span></div>
-			<div class="fact"><b>1,346</b><span>누적 문제</span></div>
+			<div class="fact"><b>{data.totalProblems.toLocaleString()}</b><span>누적 문제</span></div>
 			<div class="fact"><b>0원</b><span>가입·결제</span></div>
 		</div>
 	</header>
