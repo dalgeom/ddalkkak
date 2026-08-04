@@ -35,7 +35,7 @@
 	<title>지난 문제 — 딸깍</title>
 	<meta
 		name="description"
-		content="놓친 날의 오늘의 딸깍을 날짜별로 다시 볼 수 있어요. 발견형 퍼즐·상식 퀴즈·성냥개비 10문제의 문제와 정답·해설."
+		content="놓친 날의 오늘의 딸깍을 날짜별로 다시 볼 수 있어요. 발견형 퍼즐·상식 퀴즈·성냥개비·전개도 10문제의 문제와 정답·해설."
 	/>
 	<link rel="canonical" href="https://ddalkkak.app/archive" />
 	<meta property="og:title" content="지난 문제 — 딸깍" />
@@ -79,7 +79,7 @@
 							{#if solvedOf[d.day] !== undefined}
 								<b>{solvedOf[d.day]} / {DAILY_SIZE}</b> 정답
 							{:else}
-								발견 3 · 상식 3 · 성냥 3 · 보너스 1
+								매일 10문제 · 보너스 1
 							{/if}
 							<span class="go" aria-hidden="true">→</span>
 						</span>

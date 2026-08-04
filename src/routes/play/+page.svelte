@@ -12,15 +12,25 @@
 	import Glyph from '$lib/components/Glyph.svelte';
 	import Figure from '$lib/components/Figure.svelte';
 	import ExampleList from '$lib/components/ExampleList.svelte';
+	import CubeNetFigure from '$lib/components/CubeNetFigure.svelte';
+	import CubeDie from '$lib/components/CubeDie.svelte';
+	import CubeFold from '$lib/components/CubeFold.svelte';
+	import { problemAt as cubeAt, FACES as CUBE_FACES, CUBE_VARIANTS, type CubeNetProblem } from '$lib/cubenet';
+
+	/* 전개도는 저장된 문제가 아니라 번호를 넣으면 만들어진다. 전개도만 고르면 46,080가지를
+	   전부 쓰지만, '전체'에서는 이 숫자가 다른 유형을 압도하므로 일부만 섞는다
+	   (성냥개비 741과 비슷한 규모). */
+	const CUBE_MIX = 600;
 
 	let { data }: { data: { counts: { discover: number; trivia: number; match: number } } } = $props();
 
-	type Filter = 'all' | 'puzzle' | 'trivia' | 'match';
+	type Filter = 'all' | 'puzzle' | 'trivia' | 'match' | 'cube';
 	const FILTERS: { key: Filter; label: string }[] = [
 		{ key: 'all', label: '전체' },
 		{ key: 'puzzle', label: '발견형' },
 		{ key: 'trivia', label: '상식' },
-		{ key: 'match', label: '성냥개비' }
+		{ key: 'match', label: '성냥개비' },
+		{ key: 'cube', label: '전개도' }
 	];
 
 	let filter = $state<Filter>('all');
@@ -29,7 +39,7 @@
 	let loadFailed = $state(false);
 
 	/** 연습에 올라가는 한 문제. 성냥개비는 Problem이 아니라 등식 한 쌍이다. */
-	type Item = { problem?: Problem; eq?: { displayed: string; solution: string } };
+	type Item = { problem?: Problem; eq?: { displayed: string; solution: string }; cube?: CubeNetProblem };
 	let current = $state<Item | null>(null);
 	let shown = $derived(current?.problem ? displayChoices(current.problem) : undefined);
 
@@ -75,7 +85,9 @@
 				? data.counts.trivia
 				: filter === 'match'
 					? data.counts.match
-					: data.counts.discover + data.counts.trivia + data.counts.match
+					: filter === 'cube'
+						? CUBE_VARIANTS
+						: data.counts.discover + data.counts.trivia + data.counts.match + CUBE_MIX
 	);
 
 	async function loadBank() {
@@ -97,7 +109,8 @@
 		if (filter === 'puzzle') return bank.puzzle.length;
 		if (filter === 'trivia') return bank.trivia.length;
 		if (filter === 'match') return bank.match.length;
-		return bank.puzzle.length + bank.trivia.length + bank.match.length;
+		if (filter === 'cube') return CUBE_VARIANTS;
+		return bank.puzzle.length + bank.trivia.length + bank.match.length + CUBE_MIX;
 	}
 
 	/** 통합 인덱스 → 실제 문제 */
@@ -106,11 +119,14 @@
 		if (filter === 'puzzle') return { problem: bank.puzzle[i] };
 		if (filter === 'trivia') return { problem: bank.trivia[i] };
 		if (filter === 'match') return { eq: bank.match[i] };
+		if (filter === 'cube') return { cube: cubeAt(i) };
 		const a = bank.puzzle.length;
 		const b = a + bank.trivia.length;
+		const c = b + bank.match.length;
 		if (i < a) return { problem: bank.puzzle[i] };
 		if (i < b) return { problem: bank.trivia[i - a] };
-		return { eq: bank.match[i - b] };
+		if (i < c) return { eq: bank.match[i - b] };
+		return { cube: cubeAt(i - c) };
 	}
 
 	function refillBag() {
@@ -144,6 +160,9 @@
 		mMisses = 0;
 		mPicked = null;
 		mAnimFrom = null;
+		cubeFold = 0;
+		cubeRotX = -22;
+		cubeRotY = -38;
 		if (current?.eq) {
 			mOrig = parseEq(current.eq.displayed);
 			mCur = cloneBoard(mOrig);
@@ -194,6 +213,36 @@
 			if (wrongAttempts >= 2) settle(false, '정답을 확인했어요');
 			else feedback = { msg: '아쉬워요 — 한 번 더 골라볼까요?', ok: false };
 		}
+	}
+
+	/** 전개도는 그림 보기라 별도 판정이 필요하다 */
+	function submitCube(i: number) {
+		if (judged || !current?.cube) return;
+		picked = i;
+		if (i === current.cube.answer) settle(true, '정답이에요');
+		else {
+			wrongAttempts += 1;
+			if (wrongAttempts >= 2) settle(false, '정답을 확인했어요');
+			else feedback = { msg: '아쉬워요 — 한 번 더 골라볼까요?', ok: false };
+		}
+	}
+
+	/* 전개도 해설용 접기 */
+	let cubeFold = $state(0);
+	let cubeRotX = $state(-22);
+	let cubeRotY = $state(-38);
+	let cubeDrag: { x: number; y: number; rx: number; ry: number } | null = null;
+	function cubeDown(e: PointerEvent) {
+		cubeDrag = { x: e.clientX, y: e.clientY, rx: cubeRotX, ry: cubeRotY };
+		(e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+	}
+	function cubeMove(e: PointerEvent) {
+		if (!cubeDrag) return;
+		cubeRotY = cubeDrag.ry + (e.clientX - cubeDrag.x) * 0.6;
+		cubeRotX = cubeDrag.rx - (e.clientY - cubeDrag.y) * 0.6;
+	}
+	function cubeUp() {
+		cubeDrag = null;
 	}
 
 	function showHint() {
@@ -287,13 +336,13 @@
 	<title>무한 연습 — 딸깍</title>
 	<meta
 		name="description"
-		content="발견형 퍼즐·상식 퀴즈·성냥개비를 원하는 만큼. 유형을 골라 계속 풀어보세요."
+		content="발견형 퍼즐·상식 퀴즈·성냥개비·전개도를 원하는 만큼. 유형을 골라 계속 풀어보세요."
 	/>
 	<link rel="canonical" href="https://ddalkkak.app/play" />
 	<meta property="og:title" content="무한 연습 — 딸깍" />
 	<meta
 		property="og:description"
-		content="발견형 퍼즐·상식 퀴즈·성냥개비를 원하는 만큼. 유형을 골라 계속 풀어보세요."
+		content="발견형 퍼즐·상식 퀴즈·성냥개비·전개도를 원하는 만큼. 유형을 골라 계속 풀어보세요."
 	/>
 	<meta property="og:url" content="https://ddalkkak.app/play" />
 </svelte:head>
@@ -314,9 +363,8 @@
 <!-- 서버 렌더 소개문 — 문제는 클라이언트에서 로드되므로 정적 HTML에 최소한의 본문을 남긴다 -->
 <p class="intro">
 	발견형 퍼즐 {data.counts.discover}개 · 상식 퀴즈 {data.counts.trivia}개 · 성냥개비
-	{data.counts.match}개 — 총
-	{(data.counts.discover + data.counts.trivia + data.counts.match).toLocaleString()}문제를
-	시간·개수 제한 없이 풉니다. 유형을 고르면 아직 안 나온 문제부터 무작위로 나와요.
+	{data.counts.match}개 · 전개도 {CUBE_VARIANTS.toLocaleString()}가지를 시간·개수 제한 없이 풉니다.
+	유형을 고르면 아직 안 나온 문제부터 무작위로 나와요.
 </p>
 
 {#if loading}
@@ -332,10 +380,21 @@
 			<span class="cat-chip">{shown.chip}{shown.grade ? ` · ${shown.grade}` : ''}</span>
 		{:else if current.eq}
 			<span class="cat-chip">성냥개비</span>
+		{:else if current.cube}
+			<span class="cat-chip">전개도</span>
 		{/if}
 
 		<div class="q">
-			{#if current.eq && mCur}
+			{#if current.cube}
+				<div class="qtext">이 전개도를 접어 주사위를 만들면, 어떤 모양이 될까요?</div>
+				<div class="netbox">
+					<CubeNetFigure
+						rows={current.cube.net.rows}
+						cells={current.cube.net.cells}
+						faceOf={current.cube.net.faceOf}
+					/>
+				</div>
+			{:else if current.eq && mCur}
 				<MatchstickBoard
 					board={mCur}
 					picked={mPicked}
@@ -420,6 +479,23 @@
 			<div class="hint-box">{h}</div>
 		{/each}
 
+		{#if current.cube}
+			<div class="cubeopts">
+				{#each current.cube.options as opt, i (i)}
+					<button
+						class="cubeopt"
+						class:ok={judged && i === current.cube.answer}
+						class:bad={picked === i && i !== current.cube.answer}
+						disabled={judged}
+						onclick={() => submitCube(i)}
+					>
+						<span class="cbadge">{['A', 'B', 'C', 'D'][i]}</span>
+						<CubeDie view={opt} size={84} />
+					</button>
+				{/each}
+			</div>
+		{/if}
+
 		{#if feedback}
 			<div class="feedback" class:ok={feedback.ok}>
 				<span class="fmark">{feedback.ok ? '✓' : '✕'}</span>
@@ -435,10 +511,40 @@
 				<b>해설</b>
 				{#if current.eq}
 					성냥 하나만 옮겨 <b>{current.eq.solution.replace('-', '−')}</b>을 만들면 참이 됩니다.
+				{:else if current.cube}
+					마주 보는 면은
+					{#each current.cube.opposites as [a, b], k (k)}<span class="oppair"
+							>{CUBE_FACES[a].name} ↔ {CUBE_FACES[b].name}</span
+						>{k < current.cube.opposites.length - 1 ? ', ' : ''}{/each}
+					입니다. 마주 본 두 면은 한 화면에 같이 보이지 않아요.
 				{:else if shown}
 					{@html shown.explain}
 				{/if}
 			</div>
+			{#if current.cube}
+				<div class="foldbox">
+					<button class="foldbtn" onclick={() => (cubeFold = cubeFold > 0.5 ? 0 : 1)}>
+						{cubeFold > 0.5 ? '다시 펼치기' : '접히는 과정 보기'}
+					</button>
+					<div
+						class="foldstage"
+						onpointerdown={cubeDown}
+						onpointermove={cubeMove}
+						onpointerup={cubeUp}
+						onpointercancel={cubeUp}
+						role="img"
+						aria-label="전개도가 접히는 모습. 끌어서 돌릴 수 있습니다."
+					>
+						<CubeFold
+							cells={current.cube.net.cells}
+							faceOf={current.cube.net.faceOf}
+							t={cubeFold}
+							rotX={cubeRotX}
+							rotY={cubeRotY}
+						/>
+					</div>
+				</div>
+			{/if}
 			<button class="btn-primary wide" onclick={skip}>다음 문제</button>
 		{:else}
 			<div class="actions">
@@ -446,7 +552,7 @@
 				{#if current.eq}
 					<button class="btn-outline" onclick={giveUp}>모르겠어요</button>
 					<button class="btn-outline" disabled={!mPicked} onclick={resetBoard}>처음부터</button>
-				{:else if shown?.type === 'choice'}
+				{:else if current.cube || shown?.type === 'choice'}
 					<button class="btn-outline" onclick={giveUp}>모르겠어요</button>
 				{:else}
 					<button class="btn-primary" onclick={submitText}>확인</button>
@@ -726,6 +832,84 @@
 	.answer-line b {
 		color: var(--accent);
 		font-weight: 800;
+	}
+
+	.netbox {
+		display: flex;
+		justify-content: center;
+		padding: 4px 0 2px;
+	}
+	.cubeopts {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 9px;
+		margin-top: 10px;
+	}
+	.cubeopt {
+		position: relative;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		min-height: 124px;
+		padding: 16px 8px 10px;
+		background: var(--panel);
+		border: 2px solid var(--border-strong);
+		border-radius: 14px;
+		font-family: inherit;
+		cursor: pointer;
+	}
+	.cubeopt:disabled {
+		cursor: default;
+	}
+	.cbadge {
+		position: absolute;
+		top: 7px;
+		left: 9px;
+		font-size: 12px;
+		font-weight: 800;
+		color: var(--muted-2);
+	}
+	.cubeopt.ok {
+		border-color: var(--accent);
+		background: var(--correct-bg, var(--panel-2));
+	}
+	.cubeopt.ok .cbadge {
+		color: var(--accent);
+	}
+	.cubeopt.bad {
+		border-color: var(--accent-2);
+	}
+	.cubeopt.bad .cbadge {
+		color: var(--accent-2);
+	}
+	.oppair {
+		font-weight: 700;
+		color: var(--text);
+		white-space: nowrap;
+	}
+	.foldbox {
+		margin-bottom: 10px;
+	}
+	.foldbtn {
+		width: 100%;
+		padding: 11px;
+		background: var(--panel-2);
+		border: 1px solid var(--border-strong);
+		border-radius: 12px;
+		font-family: inherit;
+		font-size: 13.5px;
+		font-weight: 700;
+		color: var(--text);
+		cursor: pointer;
+	}
+	.foldstage {
+		margin-top: 8px;
+		background: var(--panel-2);
+		border: 1px solid var(--border);
+		border-radius: 12px;
+		touch-action: none;
+		cursor: grab;
+		user-select: none;
 	}
 
 	.explain {

@@ -32,7 +32,7 @@
 	import CubeNetFigure from '$lib/components/CubeNetFigure.svelte';
 	import CubeDie from '$lib/components/CubeDie.svelte';
 	import CubeFold from '$lib/components/CubeFold.svelte';
-	import { FACES as CUBE_FACES, type CubeNetProblem } from '$lib/cubenet';
+	import { FACES as CUBE_FACES, CUBE_VARIANTS, type CubeNetProblem } from '$lib/cubenet';
 	import SevenSeg from '$lib/components/SevenSeg.svelte';
 	import ColorBlocks from '$lib/components/ColorBlocks.svelte';
 	import Glyph from '$lib/components/Glyph.svelte';
@@ -144,6 +144,26 @@
 	const TOTAL_PROBLEMS = KIND_COUNT.discover + KIND_COUNT.trivia + KIND_COUNT.match;
 	// 성냥개비 소개 카드에 띄우는 읽기전용 보드
 	const demoBoard = parseEq('8 - 0 = 8');
+
+	/** 오늘 구성 — 유형이 늘어도 문구가 저절로 따라오게 계산해서 쓴다 */
+	const LONG_LABEL: Record<DailyKind, string> = {
+		discover: '발견형 퍼즐',
+		trivia: '상식 퀴즈',
+		match: '성냥개비',
+		cube: '전개도'
+	};
+	let todayCounts = $derived.by(() => {
+		const order = dailyKindOrder(dayNum);
+		const c: Partial<Record<DailyKind, number>> = {};
+		for (const k of order.slice(0, -1)) c[k] = (c[k] ?? 0) + 1;
+		return order.slice(0, -1).filter((k, i, a) => a.indexOf(k) === i).map((k) => ({ kind: k, n: c[k]! }));
+	});
+	let compositionShort = $derived(
+		todayCounts.map((x) => `${KIND_LABEL[x.kind]} ${x.n}`).join(' · ') + ' · 보너스 1'
+	);
+	let compositionLong = $derived(
+		todayCounts.map((x) => `${LONG_LABEL[x.kind]} ${x.n}`).join(' · ') + ' · 보너스 1'
+	);
 
 	/** 상단 유형 칩: "발견 · 2/3" — 같은 유형 안에서 몇 번째인지 */
 	let typeChip = $derived.by(() => {
@@ -668,14 +688,14 @@
 	<title>딸깍 — 매일 새로 열리는 두뇌 퍼즐 10문제</title>
 	<meta
 		name="description"
-		content="하루 10문제. 발견형 퍼즐 3 · 상식 퀴즈 3 · 성냥개비 3 · 보너스 1. 매일 자정에 새로 열리고, 그날은 모두 같은 문제를 풉니다."
+		content="하루 10문제. {compositionLong}. 매일 자정에 새로 열리고, 그날은 모두 같은 문제를 풉니다."
 	/>
 	<link rel="canonical" href="https://ddalkkak.app/" />
 	<meta property="og:url" content="https://ddalkkak.app/" />
 	<meta property="og:title" content="딸깍 — 매일 새로 열리는 두뇌 퍼즐 10문제" />
 	<meta
 		property="og:description"
-		content="하루 10문제. 발견형 퍼즐 3 · 상식 퀴즈 3 · 성냥개비 3 · 보너스 1."
+		content="하루 10문제. {compositionLong}."
 	/>
 </svelte:head>
 
@@ -712,7 +732,7 @@
 			{/if}
 		</button>
 
-		<p class="composition">발견 3 · 상식 3 · 성냥 3 · 보너스 1</p>
+		<p class="composition">{compositionShort}</p>
 
 		<!-- 한 번이라도 와 본 사람에게만 — 첫 방문자의 첫인상은 건드리지 않는다 -->
 		<InstallHint {dayNum} returning={returningVisitor} />
@@ -823,7 +843,7 @@
 			</div>
 			<div class="kind">
 				<div class="kind-vis"><CubeDie view={[2, 3, 4]} size={78} /></div>
-				<b>전개도</b>
+				<b>전개도 {CUBE_VARIANTS.toLocaleString()}</b>
 				<span>머릿속에서 종이를 접어 어떤 주사위가 되는지 맞힙니다. 틀리면 접히는 과정을 보여줘요.</span>
 			</div>
 		</div>
@@ -836,7 +856,7 @@
 		<div class="more">
 			<p class="more-h">더 풀고 싶다면?</p>
 			<p class="more-s">
-				딸깍이 준비한 <b>{TOTAL_PROBLEMS.toLocaleString()}</b>문제! 유형별로 계속 풀어봐요
+				딸깍이 준비한 <b>{TOTAL_PROBLEMS.toLocaleString()}</b>문제에 전개도까지! 유형별로 계속 풀어봐요
 			</p>
 			<div class="more-grid">
 				<a class="mbtn" href="/play?filter=puzzle">
@@ -850,6 +870,10 @@
 				<a class="mbtn" href="/play?filter=match">
 					<span class="mb-t">성냥개비</span>
 					<span class="mb-n">{KIND_COUNT.match}</span>
+				</a>
+				<a class="mbtn" href="/play?filter=cube">
+					<span class="mb-t">전개도</span>
+					<span class="mb-n">{CUBE_VARIANTS.toLocaleString()}</span>
 				</a>
 			</div>
 			<a class="mall" href="/play?filter=all">

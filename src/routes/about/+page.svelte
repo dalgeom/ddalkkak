@@ -1,6 +1,7 @@
 <script lang="ts">
 	import ExampleList from '$lib/components/ExampleList.svelte';
 	import MatchstickBoard from '$lib/components/MatchstickBoard.svelte';
+	import CubeDie from '$lib/components/CubeDie.svelte';
 	import { parseEq } from '$lib/matchstick';
 
 	const CONTACT = 'hyun7219@gmail.com';
@@ -30,7 +31,7 @@
 	<title>소개 — 딸깍</title>
 	<meta
 		name="description"
-		content="딸깍은 매일 10문제가 새로 열리는 두뇌 퍼즐 사이트입니다. 발견형 퍼즐·상식 퀴즈·성냥개비를 매일 자정에 새로, 모두가 같은 문제로 풉니다."
+		content="딸깍은 매일 10문제가 새로 열리는 두뇌 퍼즐 사이트입니다. 발견형 퍼즐·상식 퀴즈·성냥개비·전개도를 매일 자정에 새로, 모두가 같은 문제로 풉니다."
 	/>
 	<link rel="canonical" href="https://ddalkkak.app/about" />
 	<meta property="og:title" content="소개 — 딸깍" />
@@ -54,7 +55,7 @@
 	</header>
 
 	<section class="sec">
-		<h2 class="sh">세 가지 문제</h2>
+		<h2 class="sh">네 가지 문제</h2>
 		<div class="cards">
 			<div class="card">
 				<div class="ct"><b>발견형 퍼즐</b><span class="tag">딸깍의 간판</span></div>
@@ -84,6 +85,14 @@
 					interactive={false}
 					label="8 − 0 = 8"
 				/>
+			</div>
+			<div class="card">
+				<div class="ct"><b>전개도</b><span class="tag">머릿속으로 접기</span></div>
+				<p class="cd">
+					펼쳐진 정육면체를 접으면 어떤 주사위가 되는지 맞힙니다. 규칙을 외워 푸는 게 아니라
+					도형을 실제로 돌려봐야 풀려요. 틀리면 접히는 과정을 그대로 보여줍니다.
+				</p>
+				<div class="dieRow"><CubeDie view={[2, 3, 4]} size={84} /></div>
 			</div>
 		</div>
 		<p class="note">발견형 푸는 법은 <a href="/guide">풀이 가이드</a>에 단계별로 정리해 두었습니다.</p>
@@ -191,6 +200,11 @@
 		font-size: 13px;
 		color: var(--muted);
 		word-break: keep-all;
+	}
+	.dieRow {
+		display: flex;
+		justify-content: center;
+		padding: 4px 0;
 	}
 	.note {
 		margin: 12px 2px 0;

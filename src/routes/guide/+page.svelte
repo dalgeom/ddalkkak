@@ -1,6 +1,7 @@
 <script lang="ts">
 	import ExampleList from '$lib/components/ExampleList.svelte';
 	import MatchstickBoard from '$lib/components/MatchstickBoard.svelte';
+	import CubeDie from '$lib/components/CubeDie.svelte';
 	import { parseEq } from '$lib/matchstick';
 
 	/** 4단계 — 설명만 하면 안 읽힌다. 각 단계에 그 단계에서 실제로 하는 생각을 붙인다. */
@@ -218,13 +219,19 @@
 				<span>성냥 하나만 옮겨 틀린 식을 참으로 만듭니다. 획을 눌러 집고 빈 자리에 놓으세요.</span>
 				<span class="go">푸는 법 보기 <span aria-hidden="true">→</span></span>
 			</a>
+			<a class="other" href="/cubenet/guide">
+				<div class="ob"><CubeDie view={[2, 3, 4]} size={76} /></div>
+				<b>전개도</b>
+				<span>펼쳐진 정육면체를 접으면 어떤 주사위가 될까요. 머릿속에서 종이를 접어 봅니다.</span>
+				<span class="go">푸는 법 보기 <span aria-hidden="true">→</span></span>
+			</a>
 		</div>
 	</section>
 
 	<section class="sec closing">
 		<h2 class="sh">매일 자정에 새로 열립니다</h2>
 		<p class="sub">
-			발견형·상식·성냥개비를 섞은 10문제가 매일 새로 열리고, 그날은 모두가 같은 문제를 풉니다.
+			발견형·상식·성냥개비·전개도를 섞은 10문제가 매일 새로 열리고, 그날은 모두가 같은 문제를 풉니다.
 		</p>
 		<a class="cta" href="/">오늘의 10문제 풀어보기 <span class="arr" aria-hidden="true">→</span></a>
 	</section>
