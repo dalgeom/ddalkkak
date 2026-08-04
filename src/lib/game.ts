@@ -178,6 +178,16 @@ export function dailyIndices(total: number, dayNum: number, size: number = ROUND
  *  matchstick.test.ts가 실제 데이터 길이와 일치하는지 검사한다. */
 export const MATCH_TOTAL = 741;
 
+/**
+ * 전개도 문제 수.
+ *
+ * 전개도는 번호만 있으면 만들어져서 이론상 46,080가지(전개도 64종 × 기호 배치 6!)까지
+ * 뽑을 수 있다. 그런데 그 숫자를 그대로 쓰니 발견형 200·상식 405·성냥개비 741 옆에서
+ * 혼자 튀어 "이것만 왜 이렇게 많아?" 하는 그림이 됐고, 연습 '전체'에서도 화면을 차지했다.
+ * 성냥개비와 같은 규모로 끊어 다른 유형과 나란히 놓이게 한다. 모자라면 그때 늘리면 된다.
+ */
+export const CUBE_TOTAL = 700;
+
 /* ─────────────────────────── 오늘의 딸깍: 하루 10문제 ─────────────────────────── */
 
 /**
@@ -341,9 +351,9 @@ export function buildDailySet<D, T>(
 	const dAll = pickAtCursor(discover, cursorOf('discover'), take('discover'), fieldOf);
 	const tAll = pickAtCursor(trivia, cursorOf('trivia'), take('trivia'), catOf, 20260202);
 	const mAll = pickAtCursor(matchIdx, cursorOf('match'), take('match'), undefined, 20260303);
-	// 전개도는 번호만 있으면 그 자리에서 만들어지므로 순번을 그대로 쓴다
+	// 전개도는 번호만 있으면 만들어지지만, 다른 유형과 같은 규모(CUBE_TOTAL)로 끊어 돈다
 	const cStart = cursorOf('cube');
-	const cAll = Array.from({ length: take('cube') }, (_, i) => cStart + i);
+	const cAll = Array.from({ length: take('cube') }, (_, i) => (cStart + i) % CUBE_TOTAL);
 
 	const picked: Record<DailyKind, number[]> = {
 		discover: dAll,

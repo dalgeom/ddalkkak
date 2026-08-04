@@ -15,12 +15,19 @@
 	import CubeNetFigure from '$lib/components/CubeNetFigure.svelte';
 	import CubeDie from '$lib/components/CubeDie.svelte';
 	import CubeFold from '$lib/components/CubeFold.svelte';
-	import { problemAt as cubeAt, FACES as CUBE_FACES, CUBE_VARIANTS, type CubeNetProblem } from '$lib/cubenet';
+	import { problemAt as cubeAt, FACES as CUBE_FACES, type CubeNetProblem } from '$lib/cubenet';
+	import { CUBE_TOTAL } from '$lib/game';
 
-	/* 전개도는 저장된 문제가 아니라 번호를 넣으면 만들어진다. 전개도만 고르면 46,080가지를
-	   전부 쓰지만, '전체'에서는 이 숫자가 다른 유형을 압도하므로 일부만 섞는다
-	   (성냥개비 741과 비슷한 규모). */
-	const CUBE_MIX = 600;
+	/**
+	 * '전체'는 문제 수에 비례해 뽑고 있었다. 그러면 은행이 큰 유형이 화면을 다 차지한다 —
+	 * 실측하니 성냥개비 43% · 전개도 33%인데 간판인 발견형은 10%였다.
+	 * 오늘의 딸깍과 같은 비율(발견 3 : 상식 2 : 성냥 2 : 전개도 2)로 돌아가며 뽑는다.
+	 */
+	const MIX: Exclude<Filter, 'all'>[] = [
+		'puzzle', 'trivia', 'match', 'cube',
+		'puzzle', 'trivia', 'match', 'cube',
+		'puzzle'
+	];
 
 	let { data }: { data: { counts: { discover: number; trivia: number; match: number } } } = $props();
 
@@ -50,8 +57,11 @@
 		match: { displayed: string; solution: string }[];
 	} | null>(null);
 
-	// 이미 낸 문제를 다시 안 내기 위한 셔플백
-	let bag = $state<number[]>([]);
+	// 이미 낸 문제를 다시 안 내기 위한 유형별 셔플백
+	type Kind = Exclude<Filter, 'all'>;
+	let bags: Record<Kind, number[]> = { puzzle: [], trivia: [], match: [], cube: [] };
+	// '전체'에서 유형을 돌아가며 뽑기 위한 순서표(한 바퀴 돌 때마다 섞는다)
+	let mixQueue: Kind[] = [];
 
 	// 한 문제 상태
 	let hintsUsed = $state(0);
@@ -86,8 +96,8 @@
 				: filter === 'match'
 					? data.counts.match
 					: filter === 'cube'
-						? CUBE_VARIANTS
-						: data.counts.discover + data.counts.trivia + data.counts.match + CUBE_MIX
+						? CUBE_TOTAL
+						: data.counts.discover + data.counts.trivia + data.counts.match + CUBE_TOTAL
 	);
 
 	async function loadBank() {
@@ -104,46 +114,47 @@
 	}
 
 	/** 현재 필터의 전체 후보 수 */
-	function poolLen(): number {
+	function kindLen(k: Kind): number {
 		if (!bank) return 0;
-		if (filter === 'puzzle') return bank.puzzle.length;
-		if (filter === 'trivia') return bank.trivia.length;
-		if (filter === 'match') return bank.match.length;
-		if (filter === 'cube') return CUBE_VARIANTS;
-		return bank.puzzle.length + bank.trivia.length + bank.match.length + CUBE_MIX;
+		if (k === 'puzzle') return bank.puzzle.length;
+		if (k === 'trivia') return bank.trivia.length;
+		if (k === 'match') return bank.match.length;
+		return CUBE_TOTAL;
 	}
 
-	/** 통합 인덱스 → 실제 문제 */
-	function itemAt(i: number): Item {
+	function itemOf(k: Kind, i: number): Item {
 		if (!bank) return {};
-		if (filter === 'puzzle') return { problem: bank.puzzle[i] };
-		if (filter === 'trivia') return { problem: bank.trivia[i] };
-		if (filter === 'match') return { eq: bank.match[i] };
-		if (filter === 'cube') return { cube: cubeAt(i) };
-		const a = bank.puzzle.length;
-		const b = a + bank.trivia.length;
-		const c = b + bank.match.length;
-		if (i < a) return { problem: bank.puzzle[i] };
-		if (i < b) return { problem: bank.trivia[i - a] };
-		if (i < c) return { eq: bank.match[i - b] };
-		return { cube: cubeAt(i - c) };
+		if (k === 'puzzle') return { problem: bank.puzzle[i] };
+		if (k === 'trivia') return { problem: bank.trivia[i] };
+		if (k === 'match') return { eq: bank.match[i] };
+		return { cube: cubeAt(i) };
 	}
 
-	function refillBag() {
-		const n = poolLen();
-		const idx = Array.from({ length: n }, (_, i) => i);
-		for (let i = n - 1; i > 0; i--) {
+	function shuffle<T>(a: T[]): T[] {
+		for (let i = a.length - 1; i > 0; i--) {
 			const j = Math.floor(Math.random() * (i + 1));
-			[idx[i], idx[j]] = [idx[j], idx[i]];
+			[a[i], a[j]] = [a[j], a[i]];
 		}
-		bag = idx;
+		return a;
+	}
+
+	function refillBag(k?: Kind) {
+		const kinds: Kind[] = k ? [k] : ['puzzle', 'trivia', 'match', 'cube'];
+		for (const kind of kinds) bags[kind] = shuffle(Array.from({ length: kindLen(kind) }, (_, i) => i));
+		mixQueue = [];
 	}
 
 	function nextProblem() {
-		if (!bag.length) refillBag();
-		const i = bag[0];
-		bag = bag.slice(1);
-		current = itemAt(i);
+		let k: Kind;
+		if (filter === 'all') {
+			if (!mixQueue.length) mixQueue = shuffle(MIX.slice());
+			k = mixQueue.shift()!;
+		} else {
+			k = filter;
+		}
+		if (!bags[k].length) bags[k] = shuffle(Array.from({ length: kindLen(k) }, (_, i) => i));
+		const i = bags[k].shift()!;
+		current = itemOf(k, i);
 		resetProblem();
 	}
 
@@ -363,8 +374,9 @@
 <!-- 서버 렌더 소개문 — 문제는 클라이언트에서 로드되므로 정적 HTML에 최소한의 본문을 남긴다 -->
 <p class="intro">
 	발견형 퍼즐 {data.counts.discover}개 · 상식 퀴즈 {data.counts.trivia}개 · 성냥개비
-	{data.counts.match}개 · 전개도 {CUBE_VARIANTS.toLocaleString()}가지를 시간·개수 제한 없이 풉니다.
-	유형을 고르면 아직 안 나온 문제부터 무작위로 나와요.
+	{data.counts.match}개 · 전개도 {CUBE_TOTAL}개 — 총
+	{(data.counts.discover + data.counts.trivia + data.counts.match + CUBE_TOTAL).toLocaleString()}문제를
+	시간·개수 제한 없이 풉니다. 전체로 두면 오늘의 딸깍과 같은 비율로 네 유형이 돌아가며 나와요.
 </p>
 
 {#if loading}

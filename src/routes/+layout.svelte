@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { CUBE_VARIANTS } from '$lib/cubenet';
 	import { onMount } from 'svelte';
 	import AdSlot from '$lib/components/AdSlot.svelte';
 	import Splash from '$lib/components/Splash.svelte';
@@ -69,9 +68,7 @@
 			<span aria-hidden="true">·</span>
 			<a href="/privacy">개인정보</a>
 		</nav>
-		<p class="copy">
-			© {year} 딸깍 · 문제 {data.totalProblems.toLocaleString()}개 · 전개도 {CUBE_VARIANTS.toLocaleString()}가지
-		</p>
+		<p class="copy">© {year} 딸깍 · 문제 {data.totalProblems.toLocaleString()}개</p>
 	</footer>
 </div>
 

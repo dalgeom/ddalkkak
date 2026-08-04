@@ -20,6 +20,7 @@
 		formatDuration,
 		bestDailyTime,
 		dailyKindOrder,
+		CUBE_TOTAL,
 		type DailyProgress,
 		type Mark,
 		type DailyKind
@@ -32,7 +33,7 @@
 	import CubeNetFigure from '$lib/components/CubeNetFigure.svelte';
 	import CubeDie from '$lib/components/CubeDie.svelte';
 	import CubeFold from '$lib/components/CubeFold.svelte';
-	import { FACES as CUBE_FACES, CUBE_VARIANTS, type CubeNetProblem } from '$lib/cubenet';
+	import { FACES as CUBE_FACES, type CubeNetProblem } from '$lib/cubenet';
 	import SevenSeg from '$lib/components/SevenSeg.svelte';
 	import ColorBlocks from '$lib/components/ColorBlocks.svelte';
 	import Glyph from '$lib/components/Glyph.svelte';
@@ -140,8 +141,9 @@
 		cube: '전개도'
 	};
 	// 랜딩 소개용 — 문제은행을 랜딩에서 받지 않으려고 개수는 상수로 둔다(레이아웃 서버 로드와 같은 값)
-	const KIND_COUNT = { discover: 200, trivia: 405, match: MATCH_TOTAL };
-	const TOTAL_PROBLEMS = KIND_COUNT.discover + KIND_COUNT.trivia + KIND_COUNT.match;
+	const KIND_COUNT = { discover: 200, trivia: 405, match: MATCH_TOTAL, cube: CUBE_TOTAL };
+	const TOTAL_PROBLEMS =
+		KIND_COUNT.discover + KIND_COUNT.trivia + KIND_COUNT.match + KIND_COUNT.cube;
 	// 성냥개비 소개 카드에 띄우는 읽기전용 보드
 	const demoBoard = parseEq('8 - 0 = 8');
 
@@ -843,7 +845,7 @@
 			</div>
 			<div class="kind">
 				<div class="kind-vis"><CubeDie view={[2, 3, 4]} size={78} /></div>
-				<b>전개도 {CUBE_VARIANTS.toLocaleString()}</b>
+				<b>전개도 {KIND_COUNT.cube}</b>
 				<span>머릿속에서 종이를 접어 어떤 주사위가 되는지 맞힙니다. 틀리면 접히는 과정을 보여줘요.</span>
 			</div>
 		</div>
@@ -856,7 +858,7 @@
 		<div class="more">
 			<p class="more-h">더 풀고 싶다면?</p>
 			<p class="more-s">
-				딸깍이 준비한 <b>{TOTAL_PROBLEMS.toLocaleString()}</b>문제에 전개도까지! 유형별로 계속 풀어봐요
+				딸깍이 준비한 <b>{TOTAL_PROBLEMS.toLocaleString()}</b>문제! 유형별로 계속 풀어봐요
 			</p>
 			<div class="more-grid">
 				<a class="mbtn" href="/play?filter=puzzle">
@@ -873,7 +875,7 @@
 				</a>
 				<a class="mbtn" href="/play?filter=cube">
 					<span class="mb-t">전개도</span>
-					<span class="mb-n">{CUBE_VARIANTS.toLocaleString()}</span>
+					<span class="mb-n">{KIND_COUNT.cube}</span>
 				</a>
 			</div>
 			<a class="mall" href="/play?filter=all">
