@@ -17,7 +17,7 @@
  *
  * 필요한 것: ffmpeg, 크롬 계열 브라우저. 자막은 윈도우 맑은 고딕을 쓴다.
  */
-import { writeFileSync, copyFileSync, mkdirSync, rmSync, existsSync } from 'node:fs';
+import { writeFileSync, copyFileSync, renameSync, mkdirSync, rmSync, existsSync } from 'node:fs';
 import { spawn, spawnSync } from 'node:child_process';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -61,7 +61,8 @@ const TYPES = {
 		이름: '성냥개비',
 		파일: '쇼츠-성냥개비.mp4',
 		자막: ['성냥 하나만 옮겨서', '참으로 만들 수 있나요?'],
-		방식: '전후',
+		// 정답을 누르면 성냥이 집혔다 날아가 안착한다. 두 장으로 끊지 말고 그 과정을 찍는다.
+		방식: '실시간',
 		url: 'https://ddalkkak.app/matchstick?p=42',
 		대상: '.mboard',
 		공개: 'button'
@@ -378,6 +379,52 @@ async function shoot(key) {
 		const r0 = await br.call(measure, sel, sec, idx);
 		if (!r0) throw new Error(`${JSON.stringify(cfg.대상)} 를 못 찾았다`);
 
+		if (cfg.방식 === '실시간') {
+			/* 정답을 누르면 성냥이 집혔다 날아가 안착한다. 그 과정을 한 프레임씩
+			   찍는다. 두 장으로 끊으면 어느 성냥이 움직였는지 알 수가 없다.
+
+			   정답을 누르는 순간 위에 피드백 줄이 생겨 보드가 밀리고, 날아가는
+			   성냥이 보드 밖으로 나가면서 상자도 커진다. 두 상태의 큰 쪽 크기를
+			   기준으로 각각 제 보드 한가운데를 잘라내면, 크기는 같으면서
+			   보드가 화면 안에서 튀지도 않는다. */
+			if (!(await br.call(openAnswer, sel, sec, idx, cfg.공개)))
+				throw new Error('정답을 펼치지 못했다');
+			const r1 = (await br.call(measure, sel, sec, idx)) || r0;
+
+			const cw = Math.max(r0.w, r1.w);
+			const ch = Math.max(r0.h, r1.h);
+			const centered = (r) => ({
+				x: r.x + (r.w - cw) / 2, y: r.y + (r.h - ch) / 2,
+				width: cw, height: ch, scale: SCALE
+			});
+
+			// 움직이는 구간을 먼저 찍어 따로 보관한다(문제 프레임에 덮이지 않게)
+			const moveN = Math.round(T.reveal * FPS);
+			const moved = [];
+			for (let i = 0; i < moveN; i++) {
+				const p = await grab(centered(r1));
+				const keep = join(FRAMES, `m${String(i).padStart(4, '0')}.png`);
+				renameSync(p, keep);
+				moved.push(keep);
+			}
+
+			// 문제 화면은 새로 불러 처음부터
+			await br.send('Page.navigate', { url: cfg.url });
+			await sleep(4500);
+			const r0b = (await br.call(measure, sel, sec, idx)) || r0;
+			n = 0;
+			const first = await grab(centered(r0b));
+			repeat(first, Math.round(T.hold * FPS) - 1);
+			for (const src of moved) {
+				copyFileSync(src, join(FRAMES, `f${String(n).padStart(4, '0')}.png`));
+				n++;
+			}
+
+			const last = join(FRAMES, `f${String(n - 1).padStart(4, '0')}.png`);
+			repeat(last, Math.round(T.tail * FPS) - 1);
+			return { n, w: cw * SCALE, h: ch * SCALE };
+		}
+
 		const ok = await br.call(openAnswer, sel, sec, idx, cfg.공개);
 		if (!ok) throw new Error('정답을 펼치지 못했다');
 		await sleep(900);
@@ -436,13 +483,25 @@ function buildFilter(cfg, dim, txtDir) {
 		srcW = cw; srcH = ch;
 		cropPart = `crop=${cw}:${ch}:${cx}:${cy},`;
 	}
+	/**
+	 * 확대해도 그림이 잘리지 않게 미리 줄여 여백을 만든다.
+	 *
+	 * zoompan은 화면을 파고들며 가장자리를 잘라낸다. 그냥 확대했더니 카드 왼쪽이
+	 * 화면 밖으로 밀려나 깨져 보였다. 최대 배율만큼 미리 줄여 둘레에 여백을 두면,
+	 * 확대가 먹는 건 여백이고 카드는 끝까지 온전하다. 다 확대됐을 때 딱 맞는다.
+	 */
+	const ZMAX = 1.14;
 	const s = Math.min(BOX.w / srcW, BOX.h / srcH);
-	const W = even(srcW * s);
+	const W = even(srcW * s);          // 다 확대됐을 때 크기
 	const H = even(srcH * s);
+	const W0 = even(W / ZMAX);          // 처음 크기
+	const H0 = even(H / ZMAX);
 	const Y = BOX.top + Math.round((BOX.h - H) / 2);
+	const pad = `scale=${W0}:${H0},pad=${W}:${H}:(ow-iw)/2:(oh-ih)/2:color=${C.bg}`;
 
 	const lines = [];
 	const N = (sec) => Math.round(sec * FPS);
+	const ZP = `x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d=1:s=${W}x${H}:fps=${FPS}`;
 
 	if (dim.pair) {
 		/* 두 장 → 각각 영상으로 늘리고 크로스페이드로 잇는다.
@@ -454,8 +513,8 @@ function buildFilter(cfg, dim, txtDir) {
 		const aLen = TOTAL - T.hold + 0.05;
 		const punch = N(0.45);
 		lines.push(
-			`[0:v]scale=${W}:${H},zoompan=z='1+0.14*on/${N(qLen)}':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d=1:s=${W}x${H}:fps=${FPS}[q]`,
-			`[1:v]scale=${W}:${H},zoompan=z='if(lt(on,${punch}),1.14-0.14*on/${punch},1+0.07*(on-${punch})/${N(aLen) - punch})':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d=1:s=${W}x${H}:fps=${FPS}[a]`,
+			`[0:v]${pad},zoompan=z='1+${(ZMAX - 1).toFixed(2)}*on/${N(qLen)}':${ZP}[q]`,
+			`[1:v]${pad},zoompan=z='if(lt(on,${punch}),${ZMAX}-${(ZMAX - 1).toFixed(2)}*on/${punch},1+${((ZMAX - 1) / 2).toFixed(3)}*(on-${punch})/${N(aLen) - punch})':${ZP}[a]`,
 			`[q][a]xfade=transition=fade:duration=${XF}:offset=${(T.hold - XF / 2).toFixed(2)}[art]`
 		);
 	} else {
@@ -464,8 +523,9 @@ function buildFilter(cfg, dim, txtDir) {
 		const inN = N(T.hold);
 		const outN = N(T.reveal);
 		const tailN = N(T.tail);
+		const d = (ZMAX - 1).toFixed(2);
 		lines.push(
-			`[0:v]${cropPart}scale=${W}:${H},zoompan=z='if(lt(on,${inN}),1+0.14*on/${inN},if(lt(on,${inN + outN}),1.14-0.14*(on-${inN})/${outN},1+0.07*(on-${inN + outN})/${tailN}))':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d=1:s=${W}x${H}:fps=${FPS}[art]`
+			`[0:v]${cropPart}${pad},zoompan=z='if(lt(on,${inN}),1+${d}*on/${inN},if(lt(on,${inN + outN}),${ZMAX}-${d}*(on-${inN})/${outN},1+${((ZMAX - 1) / 2).toFixed(3)}*(on-${inN + outN})/${tailN}))':${ZP}[art]`
 		);
 	}
 

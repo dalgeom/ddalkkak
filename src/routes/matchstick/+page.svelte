@@ -24,6 +24,9 @@
 	let pIdx = $state(-1);
 	let orig = $state<Board | null>(null);
 	let cur = $state<Board | null>(null);
+	/** 정답 공개 시 원래 배치 — 성냥이 집혔다 날아가 안착하는 연출에 쓴다.
+	    홈·연속모드엔 있었는데 여기만 보드가 툭 바뀌어서 뭐가 움직였는지 알 수 없었다. */
+	let animFrom = $state<Board | null>(null);
 	let picked = $state<PickLoc | null>(null);
 	let attempts = $state(0);
 	let solvedThis = $state<'no' | 'won' | 'revealed'>('no');
@@ -128,6 +131,7 @@
 		attempts = 0;
 		solvedThis = 'no';
 		feedback = '';
+		animFrom = null;
 	}
 
 	function revert() {
@@ -213,6 +217,8 @@
 	}
 	function reveal() {
 		if (solvedThis !== 'no') return;
+		// 원래 배치에서 성냥이 날아가 정답 자리에 안착하는 연출로 보여준다
+		if (orig) animFrom = cloneBoard(orig);
 		cur = parseEq(problems[pIdx].solution);
 		picked = null;
 		solvedThis = 'revealed';
@@ -402,7 +408,13 @@
 	<div class="card">
 		{#if cur}
 			<div class:shaking>
-				<MatchstickBoard board={cur} {picked} onstick={handleStick} label={pIdx >= 0 ? problems[pIdx].displayed : undefined} />
+				<MatchstickBoard
+					board={cur}
+					{picked}
+					onstick={handleStick}
+					animateFrom={animFrom}
+					label={pIdx >= 0 ? problems[pIdx].displayed : undefined}
+				/>
 			</div>
 		{/if}
 
