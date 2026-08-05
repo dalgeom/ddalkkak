@@ -260,8 +260,15 @@ function buildFilter(txtDir) {
 	const esc = (p) => p.replace(/:/g, '\\\\:');
 	const tf = (name) => `textfile=${esc(join(txtDir, name).replace(/\\/g, '/'))}`;
 	const dt = (opts) => `drawtext=fontfile=${esc(FONT_B)}:${opts}`;
+	/**
+	 * 카운트다운 숫자 하나.
+	 *
+	 * between(t,a,b)를 쓰면 안 된다 — 양 끝을 포함해서, 경계 시각에 앞뒤 숫자가
+	 * 한 프레임 겹쳐 그려진다(3.5초에 3과 2가 포개져 보였다).
+	 * 시작은 포함하고 끝은 빼는 gte*lt 로 구간을 닫는다.
+	 */
 	const num = (d, t0, t1, color) =>
-		`${dt(`text='${d}':fontcolor=${color}:fontsize=132:x=(w-tw)/2:y=1555:enable='between(t,${t0},${t1})'`)}`;
+		`${dt(`text='${d}':fontcolor=${color}:fontsize=132:x=(w-tw)/2:y=1555:enable='gte(t,${t0})*lt(t,${t1})'`)}`;
 
 	const lines = [
 		`color=c=${C.bg}:s=1080x1920:r=${FPS}:d=${TOTAL}[bg]`,
@@ -276,7 +283,7 @@ function buildFilter(txtDir) {
 		const t0 = (T.hold - k).toFixed(2);
 		const t1 = (T.hold - k + 1).toFixed(2);
 		const tag = `c${k}`;
-		lines.push(`[${prev}]${num(6 - k > 3 ? k : k, t0, t1, k <= 2 ? C.warn : C.dim)}[${tag}]`);
+		lines.push(`[${prev}]${num(k, t0, t1, k <= 2 ? C.warn : C.dim)}[${tag}]`);
 		prev = tag;
 	}
 	const brandAt = (T.hold + T.fold - 0.4).toFixed(2);
