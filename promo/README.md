@@ -18,16 +18,23 @@ promo/
 | 파일 | 문제 | 출처 |
 |---|---|---|
 | `쇼츠-전개도.mp4` | 접으면 어떤 주사위가 될까 | `/cubenet/guide`의 고정 예제 |
-| `쇼츠-성냥개비.mp4` | `0 + 8 = 3` → `0 + 9 = 9` | `/matchstick?p=42` |
-| `쇼츠-발견형.mp4` | `4+6=46 … 5+8=?` | `/archive/20668` |
-| `쇼츠-상식.mp4` | 애국가를 작곡한 사람은 | `/archive/20668` |
+| `쇼츠-성냥개비-42.mp4` | `0 + 8 = 3` → `0 + 9 = 9` | `/matchstick?p=42` |
+| `쇼츠-발견형-20668-0.mp4` | `4+6=46 … 5+8=?` | `/archive/20668` 첫 카드 |
+| `쇼츠-상식-20668-0.mp4` | 애국가를 작곡한 사람은 | `/archive/20668` 첫 카드 |
+
+파일 이름 뒤의 숫자가 어느 문제인지다. 다른 문제로 뽑아도 덮어쓰지 않는다.
 
 **다시 만들기**
 
 ```
-node scripts/shorts-gen.mjs            네 개 모두
-node scripts/shorts-gen.mjs cube       하나만 (cube·match·discover·trivia)
+node scripts/shorts-gen.mjs                     네 개 기본 문제로
+node scripts/shorts-gen.mjs match               성냥개비만
+node scripts/shorts-gen.mjs match 137           성냥개비 137번 문제로
+node scripts/shorts-gen.mjs discover 20666:1    8/2 아카이브 두 번째 발견형으로
 ```
+
+매일 하나씩 올리려면 문제를 바꿔가며 뽑는다. 성냥개비만 741개고, 발견형과
+상식은 아카이브가 하루씩 늘어난다. 전개도는 가이드의 예제 하나뿐이라 못 고른다.
 
 합성 화면이 아니라 실제 딸깍을 헤드리스 브라우저로 찍는다. 문제가 매번 달라지면
 다시 만들 수 없으므로 고정된 주소만 쓴다 — 전개도는 가이드의 고정 예제,
