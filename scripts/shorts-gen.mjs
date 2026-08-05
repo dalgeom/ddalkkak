@@ -1,12 +1,15 @@
 /**
  * 쇼츠(세로 영상)를 만든다. 유형별로 하나씩.
  *
- *   node scripts/shorts-gen.mjs            네 유형 모두
- *   node scripts/shorts-gen.mjs cube       하나만
+ *   node scripts/shorts-gen.mjs                     네 유형 기본 문제로
+ *   node scripts/shorts-gen.mjs match               성냥개비만
+ *   node scripts/shorts-gen.mjs match 137           성냥개비 137번 문제로
+ *   node scripts/shorts-gen.mjs discover 20665:1    8/1 아카이브 두 번째 발견형으로
  *
  * 합성 화면이 아니라 실제 딸깍을 헤드리스 브라우저로 찍는다. 문제가 매번 달라지면
- * 다시 만들 수 없으므로 고정된 주소만 쓴다 — 전개도는 가이드의 고정 예제,
- * 성냥개비는 ?p=번호, 발견형과 상식은 지난 문제(날짜로 고정)다.
+ * 다시 만들 수 없으므로 주소로 문제를 못 박는다 — 성냥개비는 ?p=번호, 발견형과
+ * 상식은 아카이브 날짜와 그날 몇 번째 카드인지. 전개도는 가이드의 고정 예제뿐이라
+ * 고를 수 없다.
  *
  * 구성은 넷 다 같다.
  *   0.0s   딸깍!    문제 등장
@@ -44,7 +47,16 @@ const FONT_R = 'C:/Windows/Fonts/malgun.ttf';
 
 /* ═══════════ 유형 ═══════════ */
 
-const ARCHIVE = 'https://ddalkkak.app/archive/20668';
+/**
+ * 문제를 고르는 법.
+ *
+ *   성냥개비        번호 하나. 741개 중 아무거나 (?p=번호)
+ *   발견형·상식     아카이브 날짜와 그날 몇 번째 카드인지 (날짜:순번)
+ *   전개도          가이드의 고정 예제 하나뿐이라 못 고른다
+ *
+ * 안 주면 아래 기본값을 쓴다. 파일 이름에 고른 값이 붙어 덮어쓰지 않는다.
+ */
+const DEFAULT_PICK = { match: '42', discover: '20668:0', trivia: '20668:0' };
 
 const TYPES = {
 	cube: {
@@ -52,37 +64,38 @@ const TYPES = {
 		파일: '쇼츠-전개도.mp4',
 		자막: ['이 전개도를 접으면', '어떤 주사위가 될까?'],
 		방식: 'fold',
-		url: 'https://ddalkkak.app/cubenet/guide',
-		대상: '.stage',
+		url: () => 'https://ddalkkak.app/cubenet/guide',
+		대상: () => '.stage',
+		고를수있나: false,
 		// 무대 테두리를 잘라내고 큐브를 가운데 둔다 (촬영된 이미지 픽셀 기준 — 이미 SCALE 배)
 		crop: [530, 640, 487, 12]
 	},
 	match: {
 		이름: '성냥개비',
-		파일: '쇼츠-성냥개비.mp4',
+		파일: (p) => `쇼츠-성냥개비-${p}.mp4`,
 		자막: ['성냥 하나만 옮겨서', '참으로 만들 수 있나요?'],
 		// 정답을 누르면 성냥이 집혔다 날아가 안착한다. 두 장으로 끊지 말고 그 과정을 찍는다.
 		방식: '실시간',
-		url: 'https://ddalkkak.app/matchstick?p=42',
-		대상: '.mboard',
+		url: (p) => `https://ddalkkak.app/matchstick?p=${p}`,
+		대상: () => '.mboard',
 		공개: 'button'
 	},
 	discover: {
 		이름: '발견형',
-		파일: '쇼츠-발견형.mp4',
+		파일: (p) => `쇼츠-발견형-${p.replace(':', '-')}.mp4`,
 		자막: ['규칙은 알려주지 않습니다', '직접 찾아보세요'],
 		방식: '전후',
-		url: ARCHIVE,
-		대상: { 섹션: '발견', 순번: 0 },
+		url: (p) => `https://ddalkkak.app/archive/${p.split(':')[0]}`,
+		대상: (p) => ({ 섹션: '발견', 순번: Number(p.split(':')[1] ?? 0) }),
 		공개: 'details'
 	},
 	trivia: {
 		이름: '상식',
-		파일: '쇼츠-상식.mp4',
+		파일: (p) => `쇼츠-상식-${p.replace(':', '-')}.mp4`,
 		자막: ['오늘의 상식 퀴즈', '몇 초 만에 맞힐까?'],
 		방식: '전후',
-		url: ARCHIVE,
-		대상: { 섹션: '상식', 순번: 0 },
+		url: (p) => `https://ddalkkak.app/archive/${p.split(':')[0]}`,
+		대상: (p) => ({ 섹션: '상식', 순번: Number(p.split(':')[1] ?? 0) }),
 		공개: 'details'
 	}
 };
@@ -313,19 +326,21 @@ const setFold = new Function('v', `
 
 /* ═══════════ 3. 촬영 ═══════════ */
 
-async function shoot(key) {
+async function shoot(key, pick) {
 	const cfg = TYPES[key];
+	const url = cfg.url(pick);
+	const 대상 = cfg.대상(pick);
 	rmSync(FRAMES, { recursive: true, force: true });
 	mkdirSync(FRAMES, { recursive: true });
 
 	const br = await openBrowser();
 	try {
-		await br.send('Page.navigate', { url: cfg.url });
+		await br.send('Page.navigate', { url });
 		await sleep(4500);
 
-		const sel = typeof cfg.대상 === 'string' ? cfg.대상 : null;
-		const sec = sel ? null : cfg.대상.섹션;
-		const idx = sel ? 0 : cfg.대상.순번;
+		const sel = typeof 대상 === 'string' ? 대상 : null;
+		const sec = sel ? null : 대상.섹션;
+		const idx = sel ? 0 : 대상.순번;
 
 		let n = 0;
 		const grab = async (clip) => {
@@ -348,7 +363,7 @@ async function shoot(key) {
 
 		if (cfg.방식 === 'fold') {
 			const rect = await br.call(measure, sel, sec, idx);
-			if (!rect) throw new Error(`${cfg.대상} 를 못 찾았다`);
+			if (!rect) throw new Error(`${sel} 를 못 찾았다`);
 			const clip = { x: rect.x, y: rect.y, width: rect.w, height: rect.h, scale: SCALE };
 			// 앱의 cubic-bezier(0.33, 0, 0.2, 1) 를 비슷하게 흉내낸다
 			const ease = (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
@@ -377,7 +392,7 @@ async function shoot(key) {
 		   페이지를 새로 불러 문제를 찍는다. 프레임 번호는 문제가 앞이 되도록
 		   따로 매긴다. */
 		const r0 = await br.call(measure, sel, sec, idx);
-		if (!r0) throw new Error(`${JSON.stringify(cfg.대상)} 를 못 찾았다`);
+		if (!r0) throw new Error(`${JSON.stringify(대상)} 를 못 찾았다`);
 
 		if (cfg.방식 === '실시간') {
 			/* 정답을 누르면 성냥이 집혔다 날아가 안착한다. 그 과정을 한 프레임씩
@@ -409,7 +424,7 @@ async function shoot(key) {
 			}
 
 			// 문제 화면은 새로 불러 처음부터
-			await br.send('Page.navigate', { url: cfg.url });
+			await br.send('Page.navigate', { url });
 			await sleep(4500);
 			const r0b = (await br.call(measure, sel, sec, idx)) || r0;
 			n = 0;
@@ -441,7 +456,7 @@ async function shoot(key) {
 
 		/* 두 장이면 충분하다. 사이를 채우는 건 ffmpeg가 크로스페이드로 한다. */
 		const after = await grab(clip);
-		await br.send('Page.navigate', { url: cfg.url });
+		await br.send('Page.navigate', { url });
 		await sleep(4500);
 		await br.call(measure, sel, sec, idx);   // 배경 통일 + 대상 밖 감추기
 		const before = await grab(clip);
@@ -578,6 +593,7 @@ function buildFilter(cfg, dim, txtDir) {
 /* ═══════════ 실행 ═══════════ */
 
 const want = process.argv[2];
+const pickArg = process.argv[3];
 const keys = want ? [want] : Object.keys(TYPES);
 for (const k of keys) {
 	if (!TYPES[k]) {
@@ -585,6 +601,14 @@ for (const k of keys) {
 		process.exit(1);
 	}
 }
+if (pickArg && (!want || TYPES[want].고를수있나 === false)) {
+	console.error('문제 지정은 유형 하나를 고른 뒤에만 되고, 전개도는 예제가 하나뿐이라 못 고른다.');
+	console.error('  node scripts/shorts-gen.mjs match 137');
+	console.error('  node scripts/shorts-gen.mjs discover 20665:1');
+	process.exit(1);
+}
+/** 고른 값. 안 주면 기본값. */
+const pickOf = (k) => (keys.length === 1 && pickArg ? pickArg : DEFAULT_PICK[k] ?? '');
 
 mkdirSync(OUT_DIR, { recursive: true });
 const work = join(tmpdir(), `ddal-shorts-${process.pid}`);
@@ -595,8 +619,9 @@ writeFileSync(join(work, 't4.txt'), '매일 두뇌 퍼즐 10문제  ·  ddalkkak
 
 for (const key of keys) {
 	const cfg = TYPES[key];
-	console.log(`\n[${cfg.이름}] 촬영`);
-	const dim = await shoot(key);
+	const pick = pickOf(key);
+	console.log(`\n[${cfg.이름}${pick ? ' ' + pick : ''}] 촬영`);
+	const dim = await shoot(key, pick);
 	console.log(
 		dim.pair
 			? `  문제·정답 두 장, 원본 ${Math.round(dim.w)}x${Math.round(dim.h)}`
@@ -617,7 +642,7 @@ for (const key of keys) {
 		: ['-framerate', String(FPS), '-i', join(FRAMES, 'f%04d.png')];
 	const audioIdx = dim.pair ? '2:a' : '1:a';
 
-	const out = join(OUT_DIR, cfg.파일);
+	const out = join(OUT_DIR, typeof cfg.파일 === 'function' ? cfg.파일(pick) : cfg.파일);
 	const r = spawnSync('ffmpeg', [
 		'-y', ...inputs,
 		'-i', join(work, 'sfx.wav'), '-filter_complex_script', filterPath,
