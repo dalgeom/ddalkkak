@@ -392,23 +392,14 @@ async function shoot(key) {
 			scale: SCALE
 		};
 
-		const holdN = Math.round(T.hold * FPS);
-		const restN = Math.round((T.reveal + T.tail) * FPS);
-
-		n = holdN;                       // 정답은 뒤쪽 번호부터 채운다
+		/* 두 장이면 충분하다. 사이를 채우는 건 ffmpeg가 크로스페이드로 한다. */
 		const after = await grab(clip);
-		repeat(after, restN - 1);
-		const total = n;
-
 		await br.send('Page.navigate', { url: cfg.url });
 		await sleep(4500);
 		await br.call(measure, sel, sec, idx);   // 배경 통일 + 대상 밖 감추기
-
-		n = 0;                           // 문제는 앞쪽 번호로
 		const before = await grab(clip);
-		repeat(before, holdN - 1);
 
-		return { n: total, w: clip.width * SCALE, h: clip.height * SCALE };
+		return { pair: { before, after }, w: clip.width * SCALE, h: clip.height * SCALE };
 	} finally {
 		br.close();
 	}
@@ -418,48 +409,109 @@ async function shoot(key) {
 
 const even = (v) => Math.max(2, Math.round(v / 2) * 2);
 
+/** 크로스페이드 길이. 정답이 툭 바뀌지 않고 넘어가도록. */
+const XF = 0.4;
+
+/**
+ * 움직임을 만든다. 정지 화면 두 장을 이어 붙이면 슬라이드쇼지 영상이 아니다.
+ *
+ *   등장      아래에서 올라오며 서서히 나타난다 (0~0.35s)
+ *   숨 고르기 문제를 보는 동안 아주 천천히 확대된다 (Ken Burns)
+ *   시간 막대 화면 맨 아래에서 오른쪽으로 줄어든다
+ *   숫자      매 초 살짝 위로 튀며 나타난다
+ *   공개      크로스페이드로 넘어가고, 정답이 조금 커졌다 제자리로 (punch)
+ *   마무리    브랜드가 떠오른다
+ */
 function buildFilter(cfg, dim, txtDir) {
 	const esc = (p) => p.replace(/:/g, '\\\\:');
 	const tf = (name) => `textfile=${esc(join(txtDir, name).replace(/\\/g, '/'))}`;
 	const dt = (o) => `drawtext=fontfile=${esc(FONT_B)}:${o}`;
-	/**
-	 * 카운트다운 숫자 하나.
-	 * between(t,a,b)를 쓰면 안 된다 — 양 끝을 포함해서 경계 시각에 앞뒤 숫자가
-	 * 한 프레임 겹쳐 그려진다(3.5초에 3과 2가 포개져 보였다).
-	 */
-	const num = (d, t0, t1, color) =>
-		dt(`text='${d}':fontcolor=${color}:fontsize=132:x=(w-tw)/2:y=1555:enable='gte(t,${t0})*lt(t,${t1})'`);
 
+	/* ── 그림 크기 ── */
 	let srcW = dim.w;
 	let srcH = dim.h;
 	let cropPart = '';
 	if (cfg.crop) {
 		const [cw, ch, cx, cy] = cfg.crop;
-		srcW = cw;
-		srcH = ch;
+		srcW = cw; srcH = ch;
 		cropPart = `crop=${cw}:${ch}:${cx}:${cy},`;
 	}
 	const s = Math.min(BOX.w / srcW, BOX.h / srcH);
-	const outW = even(srcW * s);
-	const outH = even(srcH * s);
-	const y = BOX.top + Math.round((BOX.h - outH) / 2);
+	const W = even(srcW * s);
+	const H = even(srcH * s);
+	const Y = BOX.top + Math.round((BOX.h - H) / 2);
 
-	const lines = [
+	const lines = [];
+	const N = (sec) => Math.round(sec * FPS);
+
+	if (dim.pair) {
+		/* 두 장 → 각각 영상으로 늘리고 크로스페이드로 잇는다.
+		   확대 폭이 너무 작으면 프레임이 그대로라 정지 화면처럼 보인다(0.09로
+		   했더니 중간중간 프레임 차이가 0이었다). 넉넉히 준다.
+		   정답 쪽도 튀어나왔다 멈추면 뒤 2초가 죽는다 — 제자리로 온 뒤 다시
+		   천천히 당겨서 끝까지 움직이게 한다. */
+		const qLen = T.hold + XF - 0.05;
+		const aLen = TOTAL - T.hold + 0.05;
+		const punch = N(0.45);
+		lines.push(
+			`[0:v]scale=${W}:${H},zoompan=z='1+0.14*on/${N(qLen)}':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d=1:s=${W}x${H}:fps=${FPS}[q]`,
+			`[1:v]scale=${W}:${H},zoompan=z='if(lt(on,${punch}),1.14-0.14*on/${punch},1+0.07*(on-${punch})/${N(aLen) - punch})':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d=1:s=${W}x${H}:fps=${FPS}[a]`,
+			`[q][a]xfade=transition=fade:duration=${XF}:offset=${(T.hold - XF / 2).toFixed(2)}[art]`
+		);
+	} else {
+		/* 접히는 과정은 이미 움직인다. 문제를 보는 동안 천천히 당겼다가
+		   접히기 시작하면 물러나고, 다 접힌 뒤에도 아주 조금씩 계속 당긴다. */
+		const inN = N(T.hold);
+		const outN = N(T.reveal);
+		const tailN = N(T.tail);
+		lines.push(
+			`[0:v]${cropPart}scale=${W}:${H},zoompan=z='if(lt(on,${inN}),1+0.14*on/${inN},if(lt(on,${inN + outN}),1.14-0.14*(on-${inN})/${outN},1+0.07*(on-${inN + outN})/${tailN}))':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d=1:s=${W}x${H}:fps=${FPS}[art]`
+		);
+	}
+
+	/* 등장 — 아래에서 올라오며 서서히 */
+	lines.push(
+		`[art]format=yuva420p,fade=t=in:st=0:d=0.35:alpha=1[artf]`,
 		`color=c=${C.bg}:s=1080x1920:r=${FPS}:d=${TOTAL}[bg]`,
-		`[0:v]${cropPart}scale=${outW}:${outH}[art]`,
-		`[bg][art]overlay=x=(1080-w)/2:y=${y}[v0]`,
-		`[v0]${dt(`${tf('t1.txt')}:fontcolor=${C.text}:fontsize=70:x=(w-tw)/2:y=205`)}[v1]`,
-		`[v1]${dt(`${tf('t2.txt')}:fontcolor=${C.accent}:fontsize=70:x=(w-tw)/2:y=305`)}[v2]`
-	];
-	let prev = 'v2';
+		`[bg][artf]overlay=x=(1080-w)/2:y='${Y}+70*max(0\\,1-t/0.35)'[v0]`
+	);
+
+	/* 자막 — 그림보다 살짝 늦게 */
+	lines.push(
+		`[v0]${dt(`${tf('t1.txt')}:fontcolor=${C.text}:fontsize=70:x=(w-tw)/2:y=205:alpha='min(1\\,max(0\\,(t-0.15)/0.35))'`)}[v1]`,
+		`[v1]${dt(`${tf('t2.txt')}:fontcolor=${C.accent}:fontsize=70:x=(w-tw)/2:y=305:alpha='min(1\\,max(0\\,(t-0.28)/0.35))'`)}[v2]`
+	);
+
+	/* 시간 막대 — 맨 아래에서 줄어든다 */
+	lines.push(
+		`[v2]drawbox=x=0:y=1898:w='1080*(1-min(t/${T.hold}\\,1))':h=14:color=0x2F8F5B@0.9:t=fill:enable='lt(t,${T.hold})'[v2b]`
+	);
+
+	/* 카운트다운 — 매 초 살짝 튀어 오르며 나타난다.
+	   between(t,a,b)를 쓰면 안 된다 — 양 끝을 포함해 경계에서 앞뒤 숫자가
+	   한 프레임 겹쳐 그려진다(3.5초에 3과 2가 포개져 보였다). */
+	let prev = 'v2b';
 	for (let k = 5; k >= 1; k--) {
+		const t0 = (T.hold - k).toFixed(2);
+		const t1 = (T.hold - k + 1).toFixed(2);
 		const tag = `c${k}`;
-		lines.push(`[${prev}]${num(k, (T.hold - k).toFixed(2), (T.hold - k + 1).toFixed(2), k <= 2 ? C.warn : C.dim)}[${tag}]`);
+		lines.push(
+			`[${prev}]${dt(
+				`text='${k}':fontcolor=${k <= 2 ? C.warn : C.dim}:fontsize=132:x=(w-tw)/2` +
+				`:y='1555-26*max(0\\,1-(t-${t0})/0.22)'` +
+				`:alpha='min(1\\,(t-${t0})/0.14)'` +
+				`:enable='gte(t,${t0})*lt(t,${t1})'`
+			)}[${tag}]`
+		);
 		prev = tag;
 	}
-	const brandAt = (T.hold + T.reveal - 0.4).toFixed(2);
-	lines.push(`[${prev}]${dt(`${tf('t3.txt')}:fontcolor=${C.text}:fontsize=60:x=(w-tw)/2:y=1585:enable='gte(t,${brandAt})'`)}[v3]`);
-	lines.push(`[v3]drawtext=fontfile=${esc(FONT_R)}:${tf('t4.txt')}:fontcolor=${C.muted}:fontsize=36:x=(w-tw)/2:y=1675:enable='gte(t,${brandAt})'[vout]`);
+
+	/* 마무리 — 브랜드가 떠오른다 */
+	const bAt = (T.hold + T.reveal - 0.4).toFixed(2);
+	lines.push(
+		`[${prev}]${dt(`${tf('t3.txt')}:fontcolor=${C.text}:fontsize=60:x=(w-tw)/2:y='1585-18*max(0\\,1-(t-${bAt})/0.4)':alpha='min(1\\,max(0\\,(t-${bAt})/0.4))'`)}[v3]`,
+		`[v3]drawtext=fontfile=${esc(FONT_R)}:${tf('t4.txt')}:fontcolor=${C.muted}:fontsize=36:x=(w-tw)/2:y=1675:alpha='min(1\\,max(0\\,(t-${bAt}-0.12)/0.4))'[vout]`
+	);
 	return lines.join(';\n');
 }
 
@@ -485,20 +537,33 @@ for (const key of keys) {
 	const cfg = TYPES[key];
 	console.log(`\n[${cfg.이름}] 촬영`);
 	const dim = await shoot(key);
-	console.log(`  ${dim.n}장 (${(dim.n / FPS).toFixed(1)}초), 원본 ${Math.round(dim.w)}x${Math.round(dim.h)}`);
+	console.log(
+		dim.pair
+			? `  문제·정답 두 장, 원본 ${Math.round(dim.w)}x${Math.round(dim.h)}`
+			: `  ${dim.n}장 (${(dim.n / FPS).toFixed(1)}초), 원본 ${Math.round(dim.w)}x${Math.round(dim.h)}`
+	);
 
 	writeFileSync(join(work, 't1.txt'), cfg.자막[0], 'utf-8');
 	writeFileSync(join(work, 't2.txt'), cfg.자막[1], 'utf-8');
 	const filterPath = join(work, 'filter.txt');
 	writeFileSync(filterPath, buildFilter(cfg, dim, work), 'utf-8');
 
+	// 두 장짜리는 각각을 영상으로 늘려 넣고, 접기는 프레임 묶음을 그대로 넣는다
+	const inputs = dim.pair
+		? [
+			'-loop', '1', '-framerate', String(FPS), '-t', String(T.hold + XF), '-i', dim.pair.before,
+			'-loop', '1', '-framerate', String(FPS), '-t', String(TOTAL - T.hold + XF), '-i', dim.pair.after
+		]
+		: ['-framerate', String(FPS), '-i', join(FRAMES, 'f%04d.png')];
+	const audioIdx = dim.pair ? '2:a' : '1:a';
+
 	const out = join(OUT_DIR, cfg.파일);
 	const r = spawnSync('ffmpeg', [
-		'-y', '-framerate', String(FPS), '-i', join(FRAMES, 'f%04d.png'),
+		'-y', ...inputs,
 		'-i', join(work, 'sfx.wav'), '-filter_complex_script', filterPath,
-		'-map', '[vout]', '-map', '1:a',
+		'-map', '[vout]', '-map', audioIdx,
 		'-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-r', String(FPS), '-crf', '20',
-		'-c:a', 'aac', '-b:a', '160k', '-shortest', out
+		'-c:a', 'aac', '-b:a', '160k', '-t', String(TOTAL), out
 	], { stdio: ['ignore', 'ignore', 'pipe'] });
 	if (r.status !== 0) {
 		console.error(String(r.stderr).split('\n').slice(-12).join('\n'));
