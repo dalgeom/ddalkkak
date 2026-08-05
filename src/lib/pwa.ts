@@ -1,4 +1,5 @@
 import { writable } from 'svelte/store';
+import { detectInApp } from './inapp';
 
 /**
  * 홈 화면 추가(PWA 설치) 지원.
@@ -34,9 +35,12 @@ export function isStandalone(): boolean {
 	return (navigator as Navigator & { standalone?: boolean }).standalone === true;
 }
 
-/** 인앱 브라우저는 홈 화면 추가 자체가 안 된다(그쪽은 InAppGate가 맡는다) */
+/**
+ * 인앱 브라우저는 홈 화면 추가 자체가 안 된다(그쪽은 InAppGate가 맡는다).
+ * 목록을 여기에 또 두면 한쪽만 고쳐져 어긋난다 — 실제로 스레드가 그렇게 샜다.
+ */
 export function isInAppUA(ua: string): boolean {
-	return /kakaotalk|instagram|fban|fbav|line\/|naver|daumapps/i.test(ua);
+	return detectInApp(ua) !== null;
 }
 
 export type Platform = 'iphone' | 'ipad' | 'android' | 'desktop';

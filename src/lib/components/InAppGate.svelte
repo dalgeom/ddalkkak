@@ -9,6 +9,7 @@
 		type InApp,
 		type OpenWay
 	} from '$lib/inapp';
+	import { isStandalone } from '$lib/pwa';
 	import { track } from '$lib/analytics';
 
 	/**
@@ -26,6 +27,10 @@
 	let skipped = $state(false);
 
 	onMount(() => {
+		// 홈 화면에 설치한 PWA는 iOS에서 인앱 WebView와 UA가 구별되지 않는다.
+		// 잘 설치해서 쓰는 사람에게 "브라우저로 여세요"가 뜨는 게 최악이라 여기서 먼저 뺀다.
+		if (isStandalone()) return;
+
 		const ua = navigator.userAgent;
 		const found = detectInApp(ua);
 		if (!found) return;
