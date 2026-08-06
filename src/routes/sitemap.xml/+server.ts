@@ -1,6 +1,7 @@
 import { kstDayNumber, archiveDays } from '$lib/game';
 import { TRIVIA_CATEGORIES } from '$lib/triviaCategories';
 import { DISCOVER_FIELD_META } from '$lib/discoverFields';
+import { MATCH_KINDS } from '$lib/matchstickKinds';
 import type { RequestHandler } from './$types';
 
 // 요청 시점에 오늘 기준 아카이브 30일을 나열한다(prerender 시 빌드 날짜에 고정됨).
@@ -47,7 +48,12 @@ export const GET: RequestHandler = () => {
 		freq: 'monthly',
 		priority: '0.7'
 	}));
-	const all = [...PAGES, ...triviaCats, ...discoverFields, ...archive];
+	const matchKinds = MATCH_KINDS.map((k) => ({
+		path: `/matchstick/${k.slug}`,
+		freq: 'monthly',
+		priority: '0.7'
+	}));
+	const all = [...PAGES, ...triviaCats, ...discoverFields, ...matchKinds, ...archive];
 	const body = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${all
