@@ -29,7 +29,7 @@ const T = {
 	tickFrom: 2.0,                   // 카운트다운 시작
 	reveal: 5.5,                     // 정답 공개
 	rule: 6.1,                       // 규칙 설명
-	brand: 7.8,
+	brand: 6.9,                      // 주소. 쇼츠는 링크가 안 걸려서 이게 유일한 경로다
 	total: 10.6
 };
 
@@ -141,11 +141,22 @@ ${문제.줄.map((_, i) => `.row.r${i}{animation-delay:${T.rows[i]}s}`).join('')
   14%{opacity:1;transform:none}86%{opacity:1}100%{opacity:0;transform:scale(.9)}}
 ${[0, 1, 2, 3].map((i) => `.timer .num span:nth-child(${i + 1}){animation-delay:${(T.tickFrom + i * 0.875).toFixed(3)}s}`).join('')}
 
-.foot{display:flex;align-items:center;gap:16px;opacity:0;
-  animation:footIn .5s ${T.brand}s cubic-bezier(.2,1,.3,1)}
-@keyframes footIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
-.foot b{font-size:40px;font-weight:800;color:${C.text};letter-spacing:-.02em}
-.foot span{font-size:31px;color:${C.muted}}
+/* 주소 — 유튜브 쇼츠는 설명·댓글 링크가 전부 막혀 있다(스팸 방지 정책).
+   사람이 기억했다가 직접 치거나 채널 프로필로 넘어가는 수밖에 없다.
+   그래서 작게 흘리지 않고 크게, 오래 남긴다. */
+.foot{display:flex;flex-direction:column;align-items:center;gap:10px;opacity:0;
+  animation:footIn .55s ${T.brand}s cubic-bezier(.2,1.2,.3,1)}
+@keyframes footIn{from{opacity:0;transform:translateY(26px) scale(.94)}to{opacity:1;transform:none}}
+.foot .who{display:flex;align-items:center;gap:12px}
+.foot .who b{font-size:34px;font-weight:800;color:${C.text};letter-spacing:-.02em}
+.url{position:relative;font-size:64px;font-weight:800;color:${C.text};letter-spacing:-.01em;
+  padding:0 6px;animation:urlPulse .7s ${T.brand + 1.7}s cubic-bezier(.3,1.4,.4,1)}
+@keyframes urlPulse{0%{transform:none}38%{transform:scale(1.075)}100%{transform:none}}
+/* 밑줄이 좌에서 우로 그어진다 — 규칙 밑줄과 같은 결 */
+.url::after{content:'';position:absolute;left:0;right:0;bottom:-9px;height:7px;
+  background:${C.gold};border-radius:3px;transform-origin:left;transform:scaleX(0);
+  animation:wipe .55s ${T.brand + 0.3}s cubic-bezier(.3,1,.4,1)}
+.tag{margin-top:14px;font-size:28px;color:${C.muted};letter-spacing:-.02em}
 </style></head><body>
 <div class="card">
   <span class="chip">${문제.chip}</span>
@@ -168,7 +179,11 @@ ${[0, 1, 2, 3].map((i) => `.timer .num span:nth-child(${i + 1}){animation-delay:
   <div class="num"><span>4</span><span>3</span><span>2</span><span>1</span></div>
 </div>
 
-<div class="foot">${bulb(48)}<b>딸깍</b><span>· ddalkkak.app</span></div>
+<div class="foot">
+  <div class="who">${bulb(40)}<b>딸깍</b></div>
+  <div class="url">ddalkkak.app</div>
+  <div class="tag">매일 자정, 두뇌 퍼즐 10문제</div>
+</div>
 </body></html>`;
 
 /* ═══════════ 소리 — shorts-gen.mjs와 같은 파형 ═══════════ */
