@@ -64,6 +64,19 @@
 	</section>
 
 	<section class="sec">
+		<h2 class="sh">분야별로 모아 보기</h2>
+		<p class="sub">
+			{data.total}문제를 6개 분야로 나눠 두었습니다. 각 분야 페이지에 문제 전체와 해설이 정리되어
+			있어요.
+		</p>
+		<div class="fields">
+			{#each data.fields as f (f.slug)}
+				<a class="field" href="/discover/{f.slug}">{f.name} <b>{f.count}</b></a>
+			{/each}
+		</div>
+	</section>
+
+	<section class="sec">
 		<h2 class="sh">'문제적 남자' 같은 문제를 찾고 있다면</h2>
 		<div class="card">
 			<p class="cd">
@@ -177,6 +190,29 @@
 	.note a {
 		color: var(--accent);
 		font-weight: 700;
+	}
+
+	.fields {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 6px;
+	}
+	.field {
+		font-size: 13px;
+		font-weight: 700;
+		color: var(--text);
+		background: var(--panel);
+		border: 1px solid var(--border-strong);
+		border-radius: 9px;
+		padding: 7px 11px;
+		text-decoration: none;
+	}
+	.field:hover {
+		background: var(--panel-2);
+	}
+	.field b {
+		color: var(--accent);
+		font-variant-numeric: tabular-nums;
 	}
 
 	.samples {

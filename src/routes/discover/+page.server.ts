@@ -1,4 +1,5 @@
-import { PROBLEMS, type Problem } from '$lib/problems';
+import { PROBLEMS, fieldOfChip, type Problem } from '$lib/problems';
+import { DISCOVER_FIELD_META } from '$lib/discoverFields';
 
 // 발견형 소개 랜딩 — 맛보기 문제를 SSR 텍스트로 내려 크롤러가 실제 콘텐츠를 읽게 한다.
 // 문제은행 전체(96KB)를 싣지 않도록 표본만 직렬화한다.
@@ -17,5 +18,13 @@ export function load() {
 			answer: p.answers?.[0] ?? '',
 			explain: p.explain
 		}));
-	return { total: PROBLEMS.length, samples };
+	// 분야별 문제 모음으로 가는 입구 — 크롤러가 여기서 6개 페이지를 발견한다
+	const fields = DISCOVER_FIELD_META.map((f) => ({
+		slug: f.slug,
+		name: f.name,
+		title: f.title,
+		count: PROBLEMS.filter((p) => fieldOfChip(p.chip) === f.name).length
+	}));
+
+	return { total: PROBLEMS.length, samples, fields };
 }
