@@ -4,6 +4,7 @@
 	import { page } from '$app/state';
 	import problems from '$lib/data/matchstick-problems.json';
 	import { parseEq, cloneBoard, isSolved, bit, type Board } from '$lib/matchstick';
+	import { MATCH_KINDS } from '$lib/matchstickKinds';
 	import { shareResult as shareCardResult, outcomeMessage } from '$lib/shareCard';
 	import MatchstickBoard, { type PickLoc } from '$lib/components/MatchstickBoard.svelte';
 	import AdSlot from '$lib/components/AdSlot.svelte';
@@ -386,6 +387,16 @@
 				</p>
 			</div>
 			<a class="glink" href="/matchstick/guide">전체 숫자표와 4단계 풀이법 보기 →</a>
+			<h3 class="kh">해법별로 모아 보기</h3>
+			<p class="mp">
+				{problems.length}개를 성냥이 어디로 가는지에 따라 셋으로 나눠 두었습니다. 유형마다 요령과 정답이
+				정리되어 있어요.
+			</p>
+			<div class="kinds">
+				{#each MATCH_KINDS as k (k.slug)}
+					<a class="kind" href="/matchstick/{k.slug}">{k.short}</a>
+				{/each}
+			</div>
 		</section>
 	</div>
 
@@ -628,6 +639,31 @@
 	}
 	.glink:hover {
 		text-decoration: underline;
+	}
+	.kh {
+		margin: 22px 0 6px;
+		font-size: 14.5px;
+		font-weight: 800;
+		word-break: keep-all;
+	}
+	.kinds {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 6px;
+		margin-top: 10px;
+	}
+	.kind {
+		font-size: 13px;
+		font-weight: 700;
+		color: var(--text);
+		background: var(--panel);
+		border: 1px solid var(--border-strong);
+		border-radius: 9px;
+		padding: 7px 11px;
+		text-decoration: none;
+	}
+	.kind:hover {
+		background: var(--panel-2);
 	}
 	.big {
 		width: 100%;
