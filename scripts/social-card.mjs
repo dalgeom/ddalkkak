@@ -44,6 +44,12 @@ const C = {
  *   id     src/lib/problems.ts의 문제 id — 나중에 대조할 수 있게 남긴다
  */
 const CARDS = {
+	'2026-08-07': {
+		id: 'ob-stair-gap',
+		chip: '관찰·추리',
+		물음: '계단은 몇 칸일까요?',
+		줄: ['1층 → 3층 = 40칸', '1층 → 5층 = 80칸', '2층 → 6층 = ?']
+	},
 	'2026-08-06': {
 		id: 'odd-even-branch',
 		chip: '이상한 연산',
