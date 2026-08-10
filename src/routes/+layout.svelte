@@ -50,6 +50,8 @@
 		<nav class="flinks">
 			<a href="/guide">가이드</a>
 			<span aria-hidden="true">·</span>
+			<a href="/read">읽을거리</a>
+			<span aria-hidden="true">·</span>
 			<a href="/play">연습</a>
 			<span aria-hidden="true">·</span>
 			<a href="/discover">발견형</a>
