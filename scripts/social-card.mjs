@@ -44,6 +44,12 @@ const C = {
  *   id     src/lib/problems.ts의 문제 id — 나중에 대조할 수 있게 남긴다
  */
 const CARDS = {
+	'2026-08-10': {
+		id: 'cal-clock-wrap',
+		chip: '이상한 연산',
+		물음: '이 덧셈의 규칙은?',
+		줄: ['10 + 5 = 3', '11 + 3 = 2', '9 + 6 = 3', '8 + 9 = ?']
+	},
 	'2026-08-07': {
 		id: 'ob-stair-gap',
 		chip: '관찰·추리',
