@@ -64,6 +64,8 @@
 			<span aria-hidden="true">·</span>
 			<a href="/about">소개</a>
 			<span aria-hidden="true">·</span>
+			<a href="/record">내 기록</a>
+			<span aria-hidden="true">·</span>
 			<a href="/archive">지난 문제</a>
 			<span aria-hidden="true">·</span>
 			<a href="/terms">이용약관</a>

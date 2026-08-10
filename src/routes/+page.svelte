@@ -26,6 +26,7 @@
 		type DailyKind
 	} from '$lib/game';
 	import { shareResult, outcomeMessage } from '$lib/shareCard';
+	import { weekOf, readDayRecord } from '$lib/record';
 	import { logoClicks } from '$lib/nav';
 	import { track } from '$lib/analytics';
 	import { parseEq, cloneBoard, isSolved, bit, type Board } from '$lib/matchstick';
@@ -612,6 +613,17 @@
 		};
 	});
 
+	/* ── 결과 화면 주간 스트립: 이번 주(월~일) 완주 기록 — /record로 이어진다 ── */
+	const WEEK_LABELS = ['월', '화', '수', '목', '금', '토', '일'];
+	let weekCells = $state<{ label: string; correct: number; isToday: boolean }[]>([]);
+	$effect(() => {
+		if (phase !== 'done' || !browser) return;
+		weekCells = weekOf(dayNum).map((d, i) => {
+			const r = readDayRecord(d);
+			return { label: WEEK_LABELS[i], correct: r ? r.correct : -1, isToday: d === dayNum };
+		});
+	});
+
 	/* 걸린 시간 표시. 기록이 없던 시절에 완주한 날은 0이라 아예 감춘다. */
 	let timeLabel = $derived(sessionMs > 0 ? formatDuration(sessionMs) : '');
 	let timeNote = $derived.by(() => {
@@ -1178,6 +1190,17 @@
 			{/if}
 		</div>
 	</div>
+
+	<!-- 이번 주 잔디: 매일의 완주가 칸으로 쌓이는 걸 보여주고 전체 달력으로 이어준다 -->
+	<a class="week" href="/record">
+		{#each weekCells as c (c.label)}
+			<span class="wcell" class:done={c.correct >= 0} class:tod={c.isToday}>
+				<i>{c.label}</i>
+				<b>{c.correct >= 0 ? c.correct : "·"}</b>
+			</span>
+		{/each}
+		<span class="wmore">전체<br />기록<span class="arr" aria-hidden="true">→</span></span>
+	</a>
 
 	<p class="share-label">결과 공유</p>
 	<div class="share-btns">
@@ -2318,6 +2341,74 @@
 		font-size: 11.5px;
 		color: var(--muted-2);
 		font-weight: 600;
+	}
+
+	/* 이번 주 잔디 스트립 */
+	.week {
+		display: flex;
+		align-items: stretch;
+		gap: 5px;
+		margin-top: 8px;
+		text-decoration: none;
+	}
+	.wcell {
+		flex: 1;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 2px;
+		background: var(--panel);
+		border: 1px solid var(--border);
+		border-radius: 10px;
+		padding: 8px 0 7px;
+	}
+	.wcell.done {
+		background: var(--accent-soft);
+		border-color: #cfe6d8;
+	}
+	.wcell.tod {
+		outline: 2px solid var(--accent);
+		outline-offset: -1px;
+	}
+	.wcell i {
+		font-style: normal;
+		font-size: 10.5px;
+		font-weight: 700;
+		color: var(--muted-2);
+	}
+	.wcell b {
+		font-size: 14px;
+		font-weight: 800;
+		color: var(--text);
+		font-variant-numeric: tabular-nums;
+		line-height: 1;
+	}
+	.wcell.done b {
+		color: #1f6b41;
+	}
+	.wmore {
+		flex: none;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		gap: 1px;
+		padding: 0 10px;
+		border: 1px solid var(--border-strong);
+		border-radius: 10px;
+		background: var(--panel);
+		font-size: 10.5px;
+		font-weight: 700;
+		color: var(--muted);
+		line-height: 1.35;
+		text-align: center;
+	}
+	.wmore .arr {
+		color: var(--accent);
+		font-size: 12px;
+	}
+	.week:hover .wmore {
+		background: var(--panel-2);
 	}
 
 	.share-label {
