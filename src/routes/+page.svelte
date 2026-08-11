@@ -27,6 +27,7 @@
 	} from '$lib/game';
 	import { shareResult, outcomeMessage } from '$lib/shareCard';
 	import { weekOf, readDayRecord } from '$lib/record';
+	import { bankSizesAt } from '$lib/bankHistory';
 	import { logoClicks } from '$lib/nav';
 	import { track } from '$lib/analytics';
 	import { parseEq, cloneBoard, isSolved, bit, type Board } from '$lib/matchstick';
@@ -268,9 +269,11 @@
 			import('$lib/cubenet')
 		]);
 		const eqs = (m.default ?? m) as { displayed: string; solution: string }[];
+		// 그날 자정 시점의 은행 크기로 잘라야 문제 추가 배포에도 오늘 세트가 안 바뀐다
+		const sizes = bankSizesAt(dayNum);
 		const picks = buildDailySet(
-			p.PROBLEMS,
-			t.TRIVIA,
+			p.PROBLEMS.slice(0, sizes.discover),
+			t.TRIVIA.slice(0, sizes.trivia),
 			MATCH_TOTAL,
 			dayNum,
 			(x) => p.fieldOfChip(x.chip),
