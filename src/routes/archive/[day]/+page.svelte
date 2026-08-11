@@ -1,26 +1,11 @@
 <script lang="ts">
-	import ProblemView from '$lib/components/ProblemView.svelte';
-	import MatchstickBoard from '$lib/components/MatchstickBoard.svelte';
-	import CubeNetFigure from '$lib/components/CubeNetFigure.svelte';
-	import CubeDie from '$lib/components/CubeDie.svelte';
+	import DayReview from '$lib/components/DayReview.svelte';
 	import Icon from '$lib/components/Icon.svelte';
 	import AdSlot from '$lib/components/AdSlot.svelte';
-	import { parseEq } from '$lib/matchstick';
 	import type { Problem } from '$lib/problems';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
-
-	// 성냥개비는 문제(displayed) → 정답(solution)을 각각 읽기 전용 보드로 보여준다.
-	let matchReveal = $state<boolean[]>([]);
-	let cubeReveal = $state<boolean[]>([]);
-	let bonusReveal = $state(false);
-	$effect(() => {
-		matchReveal = data.match.map(() => false);
-		cubeReveal = data.cube.map(() => false);
-		bonusReveal = false;
-	});
-
 	/* 검색엔진용 Quiz 구조화 데이터 — 이 페이지가 문제·정답 플래시카드형 Q&A임을 알린다 */
 	const strip = (s: string) => s.replace(/<[^>]*>/g, '').trim();
 	const qtext = (blocks: Problem['blocks']) =>
@@ -106,108 +91,9 @@
 </nav>
 <h1>{data.label}</h1>
 
-<section class="grp">
-	<div class="grp-h"><Icon name="search" size={16} /><h2>오늘의 발견</h2></div>
-	<div class="grid">
-		{#each data.discover as p (p.id)}
-			<ProblemView problem={p} />
-		{/each}
-	</div>
-</section>
-
-<section class="grp">
-	<div class="grp-h"><Icon name="book" size={16} /><h2>오늘의 상식</h2></div>
-	<div class="grid">
-		{#each data.trivia as p (p.id)}
-			<ProblemView problem={p} />
-		{/each}
-	</div>
-</section>
+<DayReview view={data} />
 
 <div class="mid-ad"><AdSlot label="지난 문제" /></div>
-
-<section class="grp">
-	<div class="grp-h"><Icon name="match" size={16} /><h2>오늘의 성냥개비</h2></div>
-	<div class="grid">
-		{#each data.match as m, i (i)}
-			<article class="mv">
-				<div class="mv-board"><MatchstickBoard board={parseEq(m.displayed)} picked={null} onstick={() => {}} interactive={false} label={m.displayed} /></div>
-				<div class="mv-cap">성냥 하나만 옮겨 참으로</div>
-				{#if matchReveal[i]}
-					<div class="mv-answer">
-						<div class="mv-answer-head"><Icon name="correct" size={15} /><span>정답</span></div>
-						<div class="mv-board sol"><MatchstickBoard board={parseEq(m.solution)} picked={null} onstick={() => {}} interactive={false} label={"정답 " + m.solution} /></div>
-					</div>
-				{:else}
-					<button class="mv-reveal" onclick={() => (matchReveal[i] = true)}>정답 보기</button>
-				{/if}
-			</article>
-		{/each}
-	</div>
-</section>
-
-{#if data.cube.length}
-	<section class="grp">
-		<div class="grp-h"><Icon name="match" size={16} /><h2>오늘의 전개도</h2></div>
-		<div class="grid">
-			{#each data.cube as c, i (i)}
-				<article class="mv">
-					<CubeNetFigure rows={c.net.rows} cells={c.net.cells} faceOf={c.net.faceOf} />
-					<div class="mv-cap">접으면 어떤 주사위가 될까요?</div>
-					{#if cubeReveal[i]}
-						<div class="mv-answer">
-							<div class="mv-answer-head"><Icon name="correct" size={15} /><span>정답</span></div>
-							<CubeDie view={c.options[c.answer]} />
-						</div>
-					{:else}
-						<button class="mv-reveal" onclick={() => (cubeReveal[i] = true)}>정답 보기</button>
-					{/if}
-				</article>
-			{/each}
-		</div>
-	</section>
-{/if}
-
-{#if data.bonus}
-	<section class="grp">
-		<div class="grp-h"><Icon name="hint" size={16} /><h2>보너스 문제</h2></div>
-		<div class="grid">
-			{#if data.bonus.kind === 'match'}
-				<article class="mv">
-					<div class="mv-board"><MatchstickBoard board={parseEq(data.bonus.eq.displayed)} picked={null} onstick={() => {}} interactive={false} label={data.bonus.eq.displayed} /></div>
-					<div class="mv-cap">성냥 하나만 옮겨 참으로</div>
-					{#if bonusReveal}
-						<div class="mv-answer">
-							<div class="mv-answer-head"><Icon name="correct" size={15} /><span>정답</span></div>
-							<div class="mv-board sol"><MatchstickBoard board={parseEq(data.bonus.eq.solution)} picked={null} onstick={() => {}} interactive={false} label={"정답 " + data.bonus.eq.solution} /></div>
-						</div>
-					{:else}
-						<button class="mv-reveal" onclick={() => (bonusReveal = true)}>정답 보기</button>
-					{/if}
-				</article>
-			{:else if data.bonus.kind === 'cube'}
-				<article class="mv">
-					<CubeNetFigure
-						rows={data.bonus.cube.net.rows}
-						cells={data.bonus.cube.net.cells}
-						faceOf={data.bonus.cube.net.faceOf}
-					/>
-					<div class="mv-cap">접으면 어떤 주사위가 될까요?</div>
-					{#if bonusReveal}
-						<div class="mv-answer">
-							<div class="mv-answer-head"><Icon name="correct" size={15} /><span>정답</span></div>
-							<CubeDie view={data.bonus.cube.options[data.bonus.cube.answer]} />
-						</div>
-					{:else}
-						<button class="mv-reveal" onclick={() => (bonusReveal = true)}>정답 보기</button>
-					{/if}
-				</article>
-			{:else}
-				<ProblemView problem={data.bonus.problem} />
-			{/if}
-		</div>
-	</section>
-{/if}
 
 <a class="today-cta" href="/">
 	<span><Icon name="arrow" size={15} /> 오늘의 딸깍 풀러 가기</span>
@@ -233,85 +119,8 @@
 		font-variant-numeric: tabular-nums;
 		margin-bottom: 22px;
 	}
-	.grp {
-		margin-bottom: 30px;
-	}
 	.mid-ad {
 		margin: 0;
-	}
-	.grp-h {
-		display: flex;
-		align-items: center;
-		gap: 7px;
-		margin-bottom: 12px;
-	}
-	.grp-h h2 {
-		font-size: var(--fs-md);
-		font-weight: var(--fw-emphasis);
-	}
-	.grid {
-		display: grid;
-		grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-		gap: 12px;
-		align-items: start;
-	}
-	.mv {
-		background: var(--panel);
-		border: 1px solid var(--border);
-		border-radius: var(--radius);
-		padding: 20px;
-		display: flex;
-		flex-direction: column;
-		gap: 12px;
-		align-items: center;
-	}
-	.mv-board {
-		max-width: 200px;
-	}
-	.mv-board :global(svg) {
-		height: 72px;
-		width: auto;
-	}
-	.mv-cap {
-		font-size: var(--fs-2xs);
-		font-weight: var(--fw-caption);
-		color: var(--muted);
-	}
-	.mv-reveal {
-		font-family: inherit;
-		font-size: var(--fs-xs);
-		font-weight: var(--fw-emphasis);
-		color: var(--muted);
-		background: var(--panel-2);
-		border: 1.5px solid var(--border-strong);
-		border-bottom-width: 3px;
-		border-radius: 12px;
-		padding: 9px 18px;
-		cursor: pointer;
-	}
-	.mv-reveal:hover {
-		color: var(--text);
-		border-color: var(--accent);
-	}
-	.mv-reveal:active {
-		border-bottom-width: 1px;
-	}
-	.mv-answer {
-		width: 100%;
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		gap: 8px;
-		padding-top: 12px;
-		border-top: 1px solid var(--border);
-	}
-	.mv-answer-head {
-		display: flex;
-		align-items: center;
-		gap: 6px;
-		font-size: var(--fs-2xs);
-		font-weight: var(--fw-emphasis);
-		color: #1f6b41;
 	}
 	.today-cta {
 		display: inline-flex;

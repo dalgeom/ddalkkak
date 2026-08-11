@@ -156,7 +156,7 @@
 						<span><b>{formatDuration(picked.elapsedMs)}</b> 만에 완주</span>
 					{/if}
 				</div>
-				<a class="dlink" href="/archive/{picked.dayNum}">그날 문제 다시 보기 →</a>
+				<a class="dlink" href={picked.dayNum === today ? '/today' : `/archive/${picked.dayNum}`}>그날 문제 다시 보기 →</a>
 			</div>
 		</section>
 	{/if}
