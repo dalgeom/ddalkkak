@@ -44,6 +44,12 @@ const C = {
  *   id     src/lib/problems.ts의 문제 id — 나중에 대조할 수 있게 남긴다
  */
 const CARDS = {
+	'2026-08-11': {
+		id: 'num-mult-flip',
+		chip: '이상한 연산',
+		물음: '◇는 무슨 계산일까요?',
+		줄: ['2 ◇ 8 = 61', '7 ◇ 6 = 24', '7 ◇ 7 = 94', '6 ◇ 9 = ?']
+	},
 	'2026-08-10': {
 		id: 'cal-clock-wrap',
 		chip: '이상한 연산',
