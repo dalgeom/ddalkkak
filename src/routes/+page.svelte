@@ -1202,6 +1202,9 @@
 		<span class="wmore">전체<br />기록<span class="arr" aria-hidden="true">→</span></span>
 	</a>
 
+	<!-- GN 피드백(8/11): 완주하고 나면 오늘 문제를 다시 볼 길이 없었다 -->
+	<a class="review-link" href="/today">오늘 문제 다시 보기 <span aria-hidden="true">→</span></a>
+
 	<p class="share-label">결과 공유</p>
 	<div class="share-btns">
 		<button class="sh-btn primary" onclick={shareNative}>
@@ -2408,6 +2411,25 @@
 		font-size: 12px;
 	}
 	.week:hover .wmore {
+		background: var(--panel-2);
+	}
+
+	.review-link {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 6px;
+		margin-top: 8px;
+		min-height: 46px;
+		border-radius: 12px;
+		background: var(--panel);
+		border: 1px solid var(--border-strong);
+		font-size: 14px;
+		font-weight: 700;
+		color: var(--text);
+		text-decoration: none;
+	}
+	.review-link:hover {
 		background: var(--panel-2);
 	}
 
