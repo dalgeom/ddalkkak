@@ -378,6 +378,178 @@ export function buildDailySet<D, T>(
 	return out;
 }
 
+/* ─────────────── 안정 뽑기 v2 — 은행이 자라도 재출제 간격이 깨지지 않는다 ─────────────── */
+
+/**
+ * v1(pickAtCursor)의 순열은 은행 크기 n으로 섞여서, 문제를 추가할 때마다 미래 배정이
+ * 통째로 재편된다. bankHistory가 "그날의 세트"는 고정해 주지만 날짜 사이의 간격은 못
+ * 지켜서, 같은 문제가 닷새에 세 번 나가는 일이 실제로 있었다(cal-month-letters, 8월).
+ *
+ * v2는 이날부터: 레인(분야/카테고리)별로 배열 순서 그대로 포인터를 전진시키며 뽑는다.
+ *   - 배열은 append-only, 하루의 은행 크기는 bankHistory로 고정 → 언제 계산해도 같은 세트
+ *   - 은행이 자라면 새 문제는 레인 끝에 붙을 뿐 포인터는 제 갈 길을 간다 → 간격 유지
+ * 이전 날짜는 영원히 v1으로 계산한다(아카이브 불변).
+ */
+export const PICK_V2_START_DAY = 20680; // 2026-08-15(KST)부터
+
+export type BankSizesAt = (day: number) => { discover: number; trivia: number };
+
+/** v1 cursorOf와 동일한 값 — 그날 시작 시점까지 그 유형이 쓴 슬롯 수 */
+function cursorAt(kind: DailyKind, d: number): number {
+	const bonusUsed: Record<string, number> = { discover: 0, trivia: 0, match: 0, cube: 0 };
+	for (let e = 0; e < d; e++) {
+		const ks = dailyKinds(e);
+		bonusUsed[ks[e % ks.length]] += 1;
+	}
+	const legacyDays = Math.min(d, CUBE_START_DAY);
+	const newDays = Math.max(0, d - CUBE_START_DAY);
+	const legacyPer = (DAILY_COUNTS_LEGACY as Record<string, number>)[kind] ?? 0;
+	return legacyPer * legacyDays + DAILY_COUNTS[kind] * newDays + bonusUsed[kind];
+}
+
+/** 그날 이 유형이 쓰는 슬롯 수(보너스 포함) */
+function takeAt(kind: DailyKind, d: number): number {
+	const kinds = dailyKinds(d);
+	const counts: Record<DailyKind, number> =
+		d >= CUBE_START_DAY ? { ...DAILY_COUNTS } : { ...DAILY_COUNTS_LEGACY, cube: 0 };
+	return counts[kind] + (kinds[d % kinds.length] === kind ? 1 : 0);
+}
+
+/**
+ * v2 뽑기: V2 시작일부터 targetDay까지 포인터를 하루씩 전진시켜 그날의 인덱스를 얻는다.
+ * items는 전체 배열(최신), 하루치 은행은 sizeAt(day)로 앞에서 자른다.
+ */
+function pickStable<T>(
+	items: T[],
+	sizeAt: (day: number) => number,
+	keyOf: (item: T) => string,
+	seed: number,
+	kind: DailyKind,
+	targetDay: number
+): number[] {
+	const ptr = new Map<string, number>();
+	let cursor = cursorAt(kind, PICK_V2_START_DAY);
+	let initialized = false;
+	let result: number[] = [];
+	// 컷오버 직전 3주간 v1이 실제로 낸 문제들 — 전환 초기 2주 동안은 이들을 피해서 뽑는다
+	const recent = new Set<number>();
+
+	for (let d = PICK_V2_START_DAY; d <= targetDay; d++) {
+		const n = Math.min(sizeAt(d), items.length);
+		// 레인: 그날의 프리픽스를 키별로, 배열 순서 그대로
+		const lanes = new Map<string, number[]>();
+		for (let i = 0; i < n; i++) {
+			const k = keyOf(items[i]);
+			const lane = lanes.get(k);
+			if (lane) lane.push(i);
+			else lanes.set(k, [i]);
+		}
+		const keys = [...lanes.keys()].sort();
+		const laneOrder = seededOrder(keys.length, seed ^ 0x5bf03635).map((i) => keys[i]);
+		const G = laneOrder.length;
+
+		if (!initialized) {
+			// 1회성 컷오버 완화: v1이 방금 냈던 문제를 피해 포인터를 놓는다
+			for (let e = Math.max(0, PICK_V2_START_DAY - 21); e < PICK_V2_START_DAY; e++) {
+				const ne = Math.min(sizeAt(e), items.length);
+				for (const idx of pickAtCursor(items.slice(0, ne), cursorAt(kind, e), takeAt(kind, e), keyOf, seed))
+					recent.add(idx);
+			}
+			for (const k of keys) {
+				const lane = lanes.get(k)!;
+				let pos = Math.floor(cursor / G) % lane.length;
+				let guard = 0;
+				while (recent.has(lane[pos]) && guard++ < lane.length) pos = (pos + 1) % lane.length;
+				ptr.set(k, pos);
+			}
+			initialized = true;
+		}
+
+		const take = takeAt(kind, d);
+		const picked: number[] = [];
+		const today = new Set<number>();
+		// 전환 초기 2주 동안은 일일 선택도 recent를 피한다 — 이후엔 v2 자체가 간격을 보장
+		const avoidRecent = d < PICK_V2_START_DAY + 14;
+		for (let i = 0; i < take; i++) {
+			const key = laneOrder[(cursor + i) % G];
+			const lane = lanes.get(key)!;
+			let pos = (ptr.get(key) ?? 0) % lane.length;
+			let guard = 0;
+			while (
+				(today.has(lane[pos]) || (avoidRecent && recent.has(lane[pos]))) &&
+				guard++ < lane.length
+			)
+				pos = (pos + 1) % lane.length;
+			today.add(lane[pos]);
+			picked.push(lane[pos]);
+			ptr.set(key, (pos + 1) % lane.length);
+		}
+		cursor += take;
+		if (d === targetDay) result = picked;
+	}
+	return result;
+}
+
+/**
+ * 그날의 10문제 — 안정 뽑기 버전. 모든 호출처는 이 함수를 쓴다.
+ * v2 시작일 전(과거·아카이브)은 기존 buildDailySet(v1)에 그대로 위임하고,
+ * 그 후는 발견형·상식만 v2로 뽑는다(성냥·전개도는 은행이 고정이라 v1 공식이 이미 안정).
+ */
+export function buildDailySetStable<D, T>(
+	discoverAll: D[],
+	triviaAll: T[],
+	matchTotal: number,
+	dayNum: number,
+	fieldOf: (d: D) => string,
+	catOf: (t: T) => string,
+	sizesAt: BankSizesAt
+): DailyPick[] {
+	const sizes = sizesAt(dayNum);
+	if (dayNum < PICK_V2_START_DAY) {
+		return buildDailySet(
+			discoverAll.slice(0, sizes.discover),
+			triviaAll.slice(0, sizes.trivia),
+			matchTotal,
+			dayNum,
+			fieldOf,
+			catOf
+		);
+	}
+
+	const d = Math.max(0, dayNum);
+	const kinds = dailyKinds(d);
+	const counts: Record<DailyKind, number> =
+		d >= CUBE_START_DAY ? { ...DAILY_COUNTS } : { ...DAILY_COUNTS_LEGACY, cube: 0 };
+	const bonusKind = kinds[d % kinds.length];
+
+	const dAll = pickStable(discoverAll, (e) => sizesAt(e).discover, fieldOf, 20260101, 'discover', d);
+	const tAll = pickStable(triviaAll, (e) => sizesAt(e).trivia, catOf, 20260202, 'trivia', d);
+	const mAll = pickAtCursor(
+		Array.from({ length: matchTotal }, (_, i) => i),
+		cursorAt('match', d),
+		takeAt('match', d),
+		undefined,
+		20260303
+	);
+	const cStart = cursorAt('cube', d);
+	const cAll = Array.from({ length: takeAt('cube', d) }, (_, i) => (cStart + i) % CUBE_TOTAL);
+
+	const picked: Record<DailyKind, number[]> = { discover: dAll, trivia: tAll, match: mAll, cube: cAll };
+	const extra = picked[bonusKind][counts[bonusKind]];
+	const bonus: DailyPick | null =
+		extra === undefined ? null : { kind: bonusKind, index: extra, bonus: true };
+
+	const lanes: DailyPick[][] = kinds.map((kind) =>
+		picked[kind].slice(0, counts[kind]).map((index) => ({ kind, index }))
+	);
+	const out: DailyPick[] = [];
+	for (let r = 0; r < Math.max(...lanes.map((l) => l.length)); r++) {
+		for (const lane of lanes) if (lane[r]) out.push(lane[r]);
+	}
+	if (bonus) out.push(bonus);
+	return out;
+}
+
 /** 아카이브에 노출하는 지난 날짜 수. 발견형 재순환 주기(104÷3≈35일)보다 짧게 둬 반복을 피한다. */
 export const ARCHIVE_DAYS = 30;
 

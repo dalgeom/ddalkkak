@@ -1,7 +1,8 @@
 import { PROBLEMS, fieldOfChip, type Problem } from '$lib/problems';
 import { TRIVIA } from '$lib/trivia';
 import { TRIVIA_CATEGORIES } from '$lib/triviaCategories';
-import { kstDayNumber, buildDailySet, dailySample, displayChoices, MATCH_TOTAL } from '$lib/game';
+import { kstDayNumber, buildDailySetStable, dailySample, displayChoices, MATCH_TOTAL } from '$lib/game';
+import { bankSizesAt } from '$lib/bankHistory';
 
 /** 분야별 문제 모음으로 가는 입구. 홈에서 한 번에 닿아야 사람도 크롤러도 찾아간다. */
 const CATEGORY_LINKS = TRIVIA_CATEGORIES.map((c) => ({
@@ -22,13 +23,15 @@ export function load() {
 	const dayNum = kstDayNumber(Date.now());
 
 	// 오늘의 10문제에 든 발견형은 맛보기에서 제외한다(미리 답을 알게 되면 안 된다)
-	const todaysDiscover = buildDailySet(
+	// 은행 이력(bankSizesAt)까지 맞춰야 낮 배포로 문제가 추가돼도 제외 목록이 흔들리지 않는다
+	const todaysDiscover = buildDailySetStable(
 		PROBLEMS,
 		TRIVIA,
 		MATCH_TOTAL,
 		dayNum,
 		(p) => fieldOfChip(p.chip),
-		(t) => t.category ?? '기타'
+		(t) => t.category ?? '기타',
+		bankSizesAt
 	)
 		.filter((p) => p.kind === 'discover')
 		.map((p) => p.index);

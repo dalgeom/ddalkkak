@@ -5,7 +5,7 @@
 	import {
 		kstDayNumber,
 		puzzleNumber,
-		buildDailySet,
+		buildDailySetStable,
 		DAILY_SIZE,
 		MATCH_TOTAL,
 		isCorrectText,
@@ -271,15 +271,15 @@
 			import('$lib/cubenet')
 		]);
 		const eqs = (m.default ?? m) as { displayed: string; solution: string }[];
-		// 그날 자정 시점의 은행 크기로 잘라야 문제 추가 배포에도 오늘 세트가 안 바뀐다
-		const sizes = bankSizesAt(dayNum);
-		const picks = buildDailySet(
-			p.PROBLEMS.slice(0, sizes.discover),
-			t.TRIVIA.slice(0, sizes.trivia),
+		// 날짜별 은행 크기 이력째로 — 안정 뽑기(v2)가 과거 하루하루의 크기로 세트를 고정한다
+		const picks = buildDailySetStable(
+			p.PROBLEMS,
+			t.TRIVIA,
 			MATCH_TOTAL,
 			dayNum,
 			(x) => p.fieldOfChip(x.chip),
-			(x) => x.category ?? '기타'
+			(x) => x.category ?? '기타',
+			bankSizesAt
 		);
 		queue = picks.map((pick) => ({
 			kind: pick.kind,

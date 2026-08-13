@@ -7,7 +7,7 @@
  */
 import { PROBLEMS, fieldOfChip, type Problem } from './problems';
 import { TRIVIA } from './trivia';
-import { buildDailySet, MATCH_TOTAL } from './game';
+import { buildDailySetStable, MATCH_TOTAL } from './game';
 import { bankSizesAt } from './bankHistory';
 import { problemAt, type CubeNetProblem } from './cubenet';
 import matchData from './data/matchstick-problems.json';
@@ -28,15 +28,15 @@ export type DayView = {
 
 export function assembleDayView(day: number): DayView {
 	const eqs = matchData as Eq[];
-	// 그날 자정 시점의 은행 크기 — 나중에 계산해도 그날의 세트가 그대로 나온다
-	const sizes = bankSizesAt(day);
-	const picks = buildDailySet(
-		PROBLEMS.slice(0, sizes.discover),
-		TRIVIA.slice(0, sizes.trivia),
+	// 날짜별 은행 크기 이력을 통째로 넘긴다 — v2(안정 뽑기)는 과거 하루하루의 크기가 필요하다
+	const picks = buildDailySetStable(
+		PROBLEMS,
+		TRIVIA,
 		MATCH_TOTAL,
 		day,
 		(x) => fieldOfChip(x.chip),
-		(x) => x.category ?? '기타'
+		(x) => x.category ?? '기타',
+		bankSizesAt
 	);
 
 	const discover: Problem[] = [];
