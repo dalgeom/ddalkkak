@@ -18,7 +18,7 @@ import { spawn, spawnSync } from 'node:child_process';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
-const OUT = 'promo/video/쇼츠-발견형-숨은숫자.mp4';
+const OUT = 'promo/video/쇼츠-발견형-겹치기.mp4';
 const FRAMES = join(tmpdir(), 'ddal-scene-frames');
 const W = 1080, H = 1920, FPS = 30;
 
@@ -41,12 +41,12 @@ const C = {
 
 /* ── 문제: src/lib/problems.ts 의 실제 문제와 같아야 한다 ── */
 const 문제 = {
-	chip: '숨은 숫자',
-	제목: '규칙이 보이나요?',
-	줄: ['오이 → 52', '이사 → 24', '사이 → 42'],
-	물음좌: '구이 →',
-	답: '92',
-	규칙: '글자가 <b>숫자를 읽는 소리</b>입니다.<br>오=5, 이=2라서 오이는 52 — 구이는 <b>92</b>.'
+	chip: '세그먼트',
+	제목: '산수가 아닙니다',
+	줄: ['1 ⊕ 5 = 9', '5 ⊕ 6 = 6', '0 ⊕ 7 = 0'],
+	물음좌: '3 ⊕ 4 =',
+	답: '9',
+	규칙: '전광판에서 두 숫자를 <b>같은 자리에 겹쳐 켠</b> 것입니다.<br>1과 5를 겹치면 9 — 3과 4를 겹치면 <b>9</b>.'
 };
 
 const bulb = (s) => `
