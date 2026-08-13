@@ -79,6 +79,8 @@
 	type Item = {
 		kind: DailyKind;
 		bonus: boolean;
+		/** 은행에서의 인덱스 — 계측에서 id 없는 유형(성냥·전개도)을 특정한다 */
+		index: number;
 		problem?: Problem;
 		eq?: { displayed: string; solution: string };
 		cube?: CubeNetProblem;
@@ -282,6 +284,7 @@
 		queue = picks.map((pick) => ({
 			kind: pick.kind,
 			bonus: !!pick.bonus,
+			index: pick.index,
 			problem:
 				pick.kind === 'discover'
 					? p.PROBLEMS[pick.index]
@@ -363,6 +366,19 @@
 		judged = true;
 		marks = [...marks.slice(0, pos), mark, ...marks.slice(pos + 1)];
 		feedback = { msg, ok };
+		// 문제 단위 계측 — 어떤 문제에서 틀리고 힌트를 쓰는지가 은행 품질 관리의 실측 근거
+		const it = queue[pos];
+		if (it) {
+			track('problem_result', {
+				kind: it.kind,
+				id: it.problem?.id ?? `${it.kind}-${it.index}`,
+				correct: ok,
+				hints: hintsUsed,
+				wrong: wrongAttempts,
+				bonus: it.bonus,
+				day: dayNum
+			});
+		}
 		recordSolve(ok, hintsUsed);
 		persist();
 	}
