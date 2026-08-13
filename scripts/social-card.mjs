@@ -44,6 +44,12 @@ const C = {
  *   id     src/lib/problems.ts의 문제 id — 나중에 대조할 수 있게 남긴다
  */
 const CARDS = {
+	'2026-08-13': {
+		id: 'cal-hands-overlap',
+		chip: '시계',
+		물음: '몇 번 겹칠까요?',
+		줄: ['시계의 시침과 분침이', '하루(24시간) 동안', '겹치는 횟수는?']
+	},
 	'2026-08-11': {
 		id: 'num-mult-flip',
 		chip: '이상한 연산',
