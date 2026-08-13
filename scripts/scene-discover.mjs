@@ -18,13 +18,13 @@ import { spawn, spawnSync } from 'node:child_process';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
-const OUT = 'promo/video/쇼츠-발견형-연출.mp4';
+const OUT = 'promo/video/쇼츠-발견형-숨은숫자.mp4';
 const FRAMES = join(tmpdir(), 'ddal-scene-frames');
 const W = 1080, H = 1920, FPS = 30;
 
 /* ── 타임라인(초). 소리와 맞춰야 한다 ── */
 const T = {
-	rows: [0.55, 0.8, 1.05, 1.3],   // 예시 줄이 하나씩 떨어지는 시점
+	rows: [0.55, 0.85, 1.15],   // 예시 줄이 하나씩 떨어지는 시점 (숨은 숫자는 3줄)
 	quest: 1.7,                      // 물음표 줄
 	tickFrom: 2.0,                   // 카운트다운 시작
 	reveal: 5.5,                     // 정답 공개
@@ -41,12 +41,12 @@ const C = {
 
 /* ── 문제: src/lib/problems.ts 의 실제 문제와 같아야 한다 ── */
 const 문제 = {
-	chip: '순서 규칙',
+	chip: '숨은 숫자',
 	제목: '규칙이 보이나요?',
-	줄: ['4 + 6 = 46', '3 + 5 = 35', '3 + 4 = 43', '6 + 2 = 62'],
-	물음좌: '5 + 8 =',
-	답: '85',
-	규칙: '두 수의 합이 <b>짝수면 그대로</b>, <b>홀수면 뒤집어</b> 이어붙입니다.<br>5+8=13은 홀수라 <b>85</b>.'
+	줄: ['오이 → 52', '이사 → 24', '사이 → 42'],
+	물음좌: '구이 →',
+	답: '92',
+	규칙: '글자가 <b>숫자를 읽는 소리</b>입니다.<br>오=5, 이=2라서 오이는 52 — 구이는 <b>92</b>.'
 };
 
 const bulb = (s) => `
