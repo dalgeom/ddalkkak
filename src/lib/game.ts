@@ -692,6 +692,36 @@ export function dailySample(
 export type Mark = 'clean' | 'hinted' | 'miss';
 export const MARK_EMOJI: Record<Mark, string> = { clean: '🟩', hinted: '🟨', miss: '⬜' };
 
+/**
+ * 공유용 이모지 줄 — 워들 그리드의 딸깍판.
+ *
+ * 점수("8/10")만으로는 받는 사람이 잘한 건지조차 모른다. 이 줄은 스포일러 없이
+ * "어디서 막혔는지"의 궤적을 보여주고, 텍스트라서 대화방에 그대로 녹는다.
+ * 4·8번째 뒤에 옅은 칸 구분을 두지 않는 건 열 칸이 한 덩이로 읽혀야 하기 때문이다.
+ */
+export function shareGrid(marks: Mark[]): string {
+	return marks.map((m) => MARK_EMOJI[m] ?? '').join('');
+}
+
+/** 공유 문구 전체 — 회차·그리드·점수·시간·링크. 회차가 "같은 문제를 풀었다"는 공통 화폐가 된다. */
+export function shareMessage(o: {
+	puzzleNo: number;
+	marks: Mark[];
+	correct: number;
+	total: number;
+	elapsedMs?: number;
+	streak?: number;
+	origin?: string;
+}): string {
+	const time = o.elapsedMs && o.elapsedMs > 0 ? ` · ${formatDuration(o.elapsedMs)}` : '';
+	const streak = o.streak && o.streak > 1 ? ` · 🔥${o.streak}일째` : '';
+	return [
+		`딸깍 #${o.puzzleNo} — ${o.correct}/${o.total}${time}${streak}`,
+		shareGrid(o.marks),
+		`${o.origin ?? ''}/?ref=daily`
+	].join('\n');
+}
+
 /** elapsedMs는 화면을 보고 있던 시간의 누적치. 이 기능 이전에 푼 날에는 없다(undefined). */
 export type DailyProgress = { pos: number; marks: Mark[]; done: boolean; elapsedMs?: number };
 
