@@ -1,0 +1,22 @@
+name: test
+
+# 테스트 게이트. 한때 package.json의 build에 물려 뒀는데, 그러면 테스트가 아니라
+# 배포가 멈춘다(8/14에 실제로 8분간 배포가 막혔다). 검증은 여기서, 배포는 배포대로.
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  vitest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      # 빌드까지 통과해야 머지 가능 — 배포 실패를 PR 단계에서 잡는다
+      - run: npm run build
