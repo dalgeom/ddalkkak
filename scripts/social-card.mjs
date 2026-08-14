@@ -44,6 +44,12 @@ const C = {
  *   id     src/lib/problems.ts의 문제 id — 나중에 대조할 수 있게 남긴다
  */
 const CARDS = {
+	'2026-08-14': {
+		id: 'rc-brick-weight',
+		chip: '함정',
+		물음: '벽돌 하나는 몇 kg?',
+		줄: ['벽돌 한 장의 무게는', '1kg에 벽돌 반 장의 무게를', '더한 것과 같다.', '벽돌 한 장 = ? kg']
+	},
 	'2026-08-13': {
 		id: 'cal-hands-overlap',
 		chip: '시계',
