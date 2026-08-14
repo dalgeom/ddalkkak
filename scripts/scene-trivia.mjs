@@ -14,7 +14,7 @@ import { spawn, spawnSync } from 'node:child_process';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
-const OUT = 'promo/video/쇼츠-상식-연출.mp4';
+const OUT = 'promo/video/쇼츠-상식-데드라인.mp4';
 const FRAMES = join(tmpdir(), 'ddal-tscene-frames');
 const W = 1080, H = 1920, FPS = 30;
 
@@ -34,13 +34,13 @@ const C = {
 	gold: '#f6d34e', chipBg: '#e7f3ec', chipText: '#2f8f5b', warn: '#c0632e'
 };
 
-/* ── 문제: src/lib/trivia.ts 의 tv-437. 보기 순서만 영상용으로 섞었다(정답 C) ── */
+/* ── 문제: src/lib/trivia.ts 의 tv-453. 보기 순서만 영상용으로 섞었다(정답 C) ── */
 const 문제 = {
-	chip: '상식 퀴즈 · 음악',
-	제목: `비틀즈 'Yesterday'의<br>원래 가제는?`,
-	보기: ['옐로 서브마린', '블루 먼데이', '스크램블드 에그', '롱 웨이 홈'],
+	chip: '상식 퀴즈 · 유래',
+	제목: `'데드라인(deadline)'은<br>원래 무엇을 뜻했을까?`,
+	보기: ['신문 인쇄가 멈추는 시각', '경마의 결승선', '넘으면 총살당하던 경계선', '전신 요금이 바뀌는 시각'],
 	정답: 2,
-	해설: '폴 매카트니가 꿈에서 멜로디만 듣고 깨서,<br>임시 가사가 <b>"스크램블드 에그"</b>였습니다.'
+	해설: '남북전쟁 포로수용소 울타리 안에 그어진 선으로,<br>넘으면 사살됐습니다. 말 그대로 <b>죽음의 선</b>.'
 };
 const LETTERS = ['A', 'B', 'C', 'D'];
 
