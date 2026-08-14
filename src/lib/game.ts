@@ -10,12 +10,85 @@ export const ROUND_SIZE = 3;
 export function normalize(s: string): string {
 	return String(s)
 		.toLowerCase()
-		.replace(/[\s.,·×*=+-]/g, '');
+		.replace(/[\s.,:·×*=+-]/g, '');
+}
+
+/** ①②③… 를 ' 1 ' ' 2 ' 로 풀어준다 — 보기 번호로 답하는 입력을 살리기 위해 */
+function expandCircled(s: string): string {
+	const CIRCLED = '①②③④⑤⑥⑦⑧⑨⑩';
+	return String(s).replace(/[①②③④⑤⑥⑦⑧⑨⑩]/g, (m) => ` ${CIRCLED.indexOf(m) + 1} `);
+}
+
+/** 복수 답("FLY, TRY")을 순서 무관 집합 키로 — 토큰이 2개 이상일 때만 */
+function tokenSetKey(s: string): string | null {
+	const parts = expandCircled(s)
+		.split(/[,\s·/]+/)
+		.map(normalize)
+		.filter(Boolean);
+	if (parts.length < 2) return null;
+	return parts.sort().join('|');
+}
+
+/**
+ * 지문에 "① 456  ② 468 …"처럼 보기 번호가 적힌 문제의 번호 → 값 매핑.
+ * 이런 문제들은 type이 text라 번호로 답하면 오답이 됐다("①③", "1, 3").
+ * 보기가 없으면 null.
+ */
+function labelValues(p: Problem): string[] | null {
+	const text = p.blocks
+		.map((b) =>
+			b.kind === 'pre' ? b.text : b.kind === 'text' ? b.html.replace(/<[^>]+>/g, '') : ''
+		)
+		.join('\n');
+	if (!/[①②③④⑤⑥⑦⑧⑨⑩]/.test(text)) return null;
+	const CIRCLED = '①②③④⑤⑥⑦⑧⑨⑩';
+	const out: string[] = [];
+	for (const chunk of text.split(/(?=[①②③④⑤⑥⑦⑧⑨⑩])/)) {
+		const idx = CIRCLED.indexOf(chunk[0]);
+		if (idx < 0) continue;
+		const value = chunk.slice(1).split('\n')[0].trim();
+		if (!value) continue;
+		out[idx] = value;
+	}
+	return out.length ? out : null;
+}
+
+/** 번호로 쓴 답("①③", "1, 3")을 보기 값으로 옮긴다. 못 옮기면 null. */
+function resolveByLabel(p: Problem, value: string): string | null {
+	const labels = labelValues(p);
+	if (!labels) return null;
+	const tokens = expandCircled(value)
+		.split(/[,\s·/]+/)
+		.filter(Boolean);
+	if (!tokens.length) return null;
+	const picked: string[] = [];
+	for (const t of tokens) {
+		const i = Number(t);
+		if (!Number.isInteger(i) || i < 1 || !labels[i - 1]) return null;
+		picked.push(labels[i - 1]);
+	}
+	return picked.join(', ');
 }
 
 export function isCorrectText(p: Problem, value: string): boolean {
-	const n = normalize(value);
+	const n = normalize(expandCircled(value));
 	if (!n || !p.answers) return false;
+	// 복수 정답은 어떤 순서·구분자로 써도 집합이 같으면 인정한다
+	// (기존엔 나열된 순열 변형만 통과해, 세 단어 답을 다른 순서로 쓰면 억울하게 틀렸다)
+	const vKey = tokenSetKey(value);
+	if (vKey && p.answers.some((a) => a.includes(',') && tokenSetKey(a) === vKey)) return true;
+	// 보기 번호로 답한 경우 값으로 옮겨 다시 본다 — 직접 비교가 실패했을 때만이라 오인정이 없다
+	const byLabel = resolveByLabel(p, value);
+	if (byLabel && byLabel !== value) {
+		const lKey = tokenSetKey(byLabel);
+		const lNorm = normalize(byLabel);
+		if (
+			p.answers.some(
+				(a) => normalize(a) === lNorm || (lKey && a.includes(',') && tokenSetKey(a) === lKey)
+			)
+		)
+			return true;
+	}
 	const inputNeg = /^\s*-/.test(value);
 	return p.answers.some((a) => {
 		if (normalize(a) !== n) return false;

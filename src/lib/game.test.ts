@@ -251,6 +251,32 @@ describe('신규 배치 정답 판정', () => {
 		expect(isCorrectText(c, '15시 45분')).toBe(true);
 	});
 
+	/* 아래 셋은 외부 리뷰(8/14)가 찾아낸 "맞았는데 틀렸다고 나오는" 경로들이다 */
+
+	it('콜론 시각: 힌트가 가르친 표기(4:10)를 오답 처리하지 않는다', () => {
+		const c = byId('hidden-clock-add');
+		expect(isCorrectText(c, '410')).toBe(true);
+		expect(isCorrectText(c, '4:10')).toBe(true);
+		expect(isCorrectText(c, '4시 10분')).toBe(true);
+	});
+
+	it('복수 정답: 나열 순서가 달라도 인정된다(집합 비교)', () => {
+		const c = byId('rc-club-nocurve'); // 정답 3개 — 순열 6가지 중 1가지만 적혀 있었다
+		expect(isCorrectText(c, 'TEXT, FILM, NAME')).toBe(true);
+		expect(isCorrectText(c, 'FILM, TEXT, NAME')).toBe(true);
+		expect(isCorrectText(c, 'name film text')).toBe(true);
+		expect(isCorrectText(c, 'TEXT, FILM')).toBe(false); // 빠뜨리면 오답
+		expect(isCorrectText(c, 'TEXT, FILM, NAME, ROAD')).toBe(false); // 더 쓰면 오답
+	});
+
+	it('보기 번호(①③)로 답해도 인정된다', () => {
+		const c = byId('rc-club-consec'); // ① 456 ② 468 ③ 678 ④ 987 → 정답 456, 678
+		expect(isCorrectText(c, '456, 678')).toBe(true);
+		expect(isCorrectText(c, '①③')).toBe(true);
+		expect(isCorrectText(c, '1, 3')).toBe(true);
+		expect(isCorrectText(c, '①②')).toBe(false);
+	});
+
 	it('신규 4문제 모두 힌트 3단과 정답을 갖는다', () => {
 		const added = ['subway-board', 'fold-sum', 'club-double-letter', 'club-case-twin'];
 		for (const id of added) {
