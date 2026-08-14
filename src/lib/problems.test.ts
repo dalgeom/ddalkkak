@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
-import { PROBLEMS, DISCOVER_FIELDS, fieldOfChip } from './problems';
+import { PROBLEMS, DISCOVER_FIELDS, fieldOfChip, isKnownChip } from './problems';
 import { TRIVIA } from './trivia';
+import { isCorrectText } from './game';
 
 describe('문제 은행 무결성', () => {
 	it('id가 중복되지 않는다', () => {
@@ -30,6 +31,17 @@ describe('문제 은행 무결성', () => {
 					p.answerIndex !== undefined && p.answerIndex >= 0 && p.answerIndex < p.choices!.length,
 					p.id
 				).toBe(true);
+			}
+		}
+	});
+
+	// 정답 문자열을 그대로 입력해도 오답이 나오면 그 문제는 아무도 맞힐 수 없다.
+	// (실제로 콜론 시각·복수정답 순열에서 이 사고가 있었다)
+	it('text형 문제는 자기 정답을 그대로 써도 정답 처리된다', () => {
+		for (const p of PROBLEMS) {
+			if (p.type !== 'text' || !p.answers) continue;
+			for (const a of p.answers) {
+				expect(isCorrectText(p, a), `${p.id}: "${a}"가 오답 처리된다`).toBe(true);
 			}
 		}
 	});
@@ -68,6 +80,13 @@ describe('문제 은행 무결성', () => {
 	});
 });
 describe('발견형 분야 태깅', () => {
+	// fieldOfChip은 모르는 chip을 조용히 '관찰·추리'로 떨어뜨리므로,
+	// "6개 분야 중 하나냐"는 검사만으로는 오타를 절대 못 잡는다(항상 참).
+	it('모든 chip이 CHIP_FIELD에 실제로 등록돼 있다 — 오타는 폴백으로 숨는다', () => {
+		for (const p of PROBLEMS) {
+			expect(isKnownChip(p.chip), `등록되지 않은 chip: ${p.chip} (${p.id})`).toBe(true);
+		}
+	});
 	it('모든 발견형 chip이 정의된 6개 분야 중 하나로 매핑된다', () => {
 		for (const p of PROBLEMS) {
 			expect(DISCOVER_FIELDS, p.chip).toContain(fieldOfChip(p.chip));
