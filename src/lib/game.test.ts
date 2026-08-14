@@ -17,6 +17,8 @@ import {
 	editDistance,
 	isCloseAnswer,
 	wanderBonus,
+	shareGrid,
+	shareMessage,
 	displayChoices,
 	advanceStreakIfComplete,
 	recordSolve,
@@ -220,6 +222,30 @@ describe('힌트 게이팅 · 근접 피드백', () => {
 		expect(isCloseAnswer(n, '105')).toBe(true);
 		expect(isCloseAnswer(n, '500')).toBe(false);
 	});
+	it('shareGrid: 결과가 이모지 궤적이 된다', () => {
+		expect(shareGrid(['clean', 'hinted', 'miss', 'clean'])).toBe('🟩🟨⬜🟩');
+		expect(shareGrid([])).toBe('');
+	});
+
+	it('shareMessage: 회차·그리드·점수·시간·연속이 한 덩이로', () => {
+		const msg = shareMessage({
+			puzzleNo: 31,
+			marks: ['clean', 'clean', 'miss'],
+			correct: 2,
+			total: 3,
+			elapsedMs: 72_000,
+			streak: 4,
+			origin: 'https://ddalkkak.app'
+		});
+		expect(msg.split('\n')[0]).toContain('딸깍 #31');
+		expect(msg.split('\n')[0]).toContain('2/3');
+		expect(msg.split('\n')[0]).toContain('🔥4일째');
+		expect(msg.split('\n')[1]).toBe('🟩🟩⬜');
+		expect(msg).toContain('https://ddalkkak.app/?ref=daily');
+		// 연속 1일이면 굳이 자랑하지 않는다
+		expect(shareMessage({ puzzleNo: 1, marks: [], correct: 0, total: 10, streak: 1 })).not.toContain('🔥');
+	});
+
 	it('wanderBonus: 힌트 없이 헤맨 뒤 정답이면 +10', () => {
 		expect(wanderBonus(0, 0)).toBe(0);
 		expect(wanderBonus(0, 2)).toBe(10);

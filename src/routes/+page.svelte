@@ -18,6 +18,8 @@
 		hasPlayedBefore,
 		completeDailySession,
 		formatDuration,
+		shareGrid,
+		shareMessage,
 		bestDailyTime,
 		dailyKindOrder,
 		CUBE_TOTAL,
@@ -542,9 +544,18 @@
 
 	/* ───────── 공유 ───────── */
 
-	// 같은 점수라도 시간으로 겨룰 수 있게 — 시간이 없는 예전 기록은 그 줄만 빠진다
+	// 워들 문법: 회차 + 이모지 궤적 + 점수. 점수만 보내면 받는 사람에게 비교 기준이 없다.
+	let gridRow = $derived(shareGrid(marks));
 	let shareText = $derived(
-		`딸깍 — 오늘 ${correctCount}/${DAILY_SIZE} 맞혔어요${sessionMs > 0 ? ` (${formatDuration(sessionMs)})` : ''}\n오늘의 10문제, 당신은 몇 개 맞힐까요?\n${browser ? location.origin : ''}/?ref=daily`
+		shareMessage({
+			puzzleNo,
+			marks,
+			correct: correctCount,
+			total: DAILY_SIZE,
+			elapsedMs: sessionMs,
+			streak: doneStats.streak,
+			origin: browser ? location.origin : ''
+		})
 	);
 
 	async function copyLink() {
@@ -576,7 +587,7 @@
 			{
 				title: `딸깍 #${puzzleNo}`,
 				scoreLabel: `${correctCount} / ${DAILY_SIZE}`,
-				emojiRow: '',
+				emojiRow: gridRow,
 				subLine: sessionMs > 0 ? `${todayLabel} · ${formatDuration(sessionMs)}` : `${todayLabel}의 10문제`,
 				cta: '너도 오늘 문제 풀어볼래?'
 			},
