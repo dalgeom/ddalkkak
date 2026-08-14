@@ -402,10 +402,17 @@
 		if (ok) settle(wrongAttempts === 0 ? 'clean' : 'hinted', '정답이에요', true);
 		else {
 			wrongAttempts += 1;
-			// 한 번 더 고를 기회를 주고, 두 번째도 틀리면 정답을 공개한다
-			if (wrongAttempts >= 2) settle('miss', '정답을 확인했어요', false);
+			// 한 번 더 고를 기회를 주되, 남은 보기가 정답 하나뿐이면 주지 않는다.
+			// O/X 문제(보기 2개)에서 재시도를 주면 소거법으로 반드시 맞아 절대 틀릴 수 없었다.
+			if (wrongAttempts >= maxWrong(current.problem.choices?.length))
+				settle('miss', '정답을 확인했어요', false);
 			else feedback = { msg: '아쉬워요 — 한 번 더 골라볼까요?', ok: false };
 		}
+	}
+
+	/** 객관식 오답 허용 횟수 — 소거법으로 정답이 확정되기 전까지만 (보기 2개면 재시도 없음) */
+	function maxWrong(choiceCount: number | undefined): number {
+		return Math.max(1, Math.min(2, (choiceCount ?? 4) - 1));
 	}
 
 	/* ───────── 전개도 해설용 접기 ───────── */
@@ -434,7 +441,8 @@
 		if (i === current.cube.answer) settle(wrongAttempts === 0 ? 'clean' : 'hinted', '정답이에요', true);
 		else {
 			wrongAttempts += 1;
-			if (wrongAttempts >= 2) settle('miss', '정답을 확인했어요', false);
+			if (wrongAttempts >= maxWrong(current.cube.options?.length))
+				settle('miss', '정답을 확인했어요', false);
 			else feedback = { msg: '아쉬워요 — 한 번 더 골라볼까요?', ok: false };
 		}
 	}
