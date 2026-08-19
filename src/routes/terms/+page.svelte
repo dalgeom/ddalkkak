@@ -47,13 +47,13 @@
 </script>
 
 <svelte:head>
-	<title>이용약관 — 딸깍</title>
+	<title>이용약관 — 딸깍 퍼즐</title>
 	<meta
 		name="description"
 		content="딸깍 이용약관. 회원가입 없이 무료로 이용할 수 있는 두뇌 퍼즐 서비스의 이용 조건입니다."
 	/>
 	<link rel="canonical" href="https://ddalkkak.app/terms" />
-	<meta property="og:title" content="이용약관 — 딸깍" />
+	<meta property="og:title" content="이용약관 — 딸깍 퍼즐" />
 	<meta property="og:url" content="https://ddalkkak.app/terms" />
 </svelte:head>
 

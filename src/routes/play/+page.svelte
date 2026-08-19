@@ -206,7 +206,7 @@
 
 	function submitText() {
 		if (judged || !shown || !answerValue.trim()) return;
-		if (isCorrectText(shown, answerValue)) settle(true, '정답이에요');
+		if (isCorrectText(shown, answerValue)) settle(true, '딸깍! 맞혔어요');
 		else {
 			wrongAttempts += 1;
 			feedback = isCloseAnswer(shown, answerValue)
@@ -218,7 +218,7 @@
 	function submitChoice(i: number) {
 		if (judged || !shown) return;
 		picked = i;
-		if (i === shown.answerIndex) settle(true, '정답이에요');
+		if (i === shown.answerIndex) settle(true, '딸깍! 맞혔어요');
 		else {
 			wrongAttempts += 1;
 			if (wrongAttempts >= 2) settle(false, '정답을 확인했어요');
@@ -230,7 +230,7 @@
 	function submitCube(i: number) {
 		if (judged || !current?.cube) return;
 		picked = i;
-		if (i === current.cube.answer) settle(true, '정답이에요');
+		if (i === current.cube.answer) settle(true, '딸깍! 맞혔어요');
 		else {
 			wrongAttempts += 1;
 			if (wrongAttempts >= 2) settle(false, '정답을 확인했어요');
@@ -297,7 +297,7 @@
 		if (lit) return;
 		applyStick(loc, true);
 		mPicked = null;
-		if (isSolved(mOrig, mCur)) settle(true, '정답이에요');
+		if (isSolved(mOrig, mCur)) settle(true, '딸깍! 맞혔어요');
 		else {
 			mMisses += 1;
 			feedback = { msg: '식이 맞지 않아요 — 성냥을 원래 자리로 되돌렸어요', ok: false };
@@ -344,13 +344,13 @@
 </script>
 
 <svelte:head>
-	<title>무한 연습 — 딸깍</title>
+	<title>무한 연습 — 딸깍 퍼즐</title>
 	<meta
 		name="description"
 		content="발견형 퍼즐·상식 퀴즈·성냥개비·전개도를 원하는 만큼. 유형을 골라 계속 풀어보세요."
 	/>
 	<link rel="canonical" href="https://ddalkkak.app/play" />
-	<meta property="og:title" content="무한 연습 — 딸깍" />
+	<meta property="og:title" content="무한 연습 — 딸깍 퍼즐" />
 	<meta
 		property="og:description"
 		content="발견형 퍼즐·상식 퀴즈·성냥개비·전개도를 원하는 만큼. 유형을 골라 계속 풀어보세요."

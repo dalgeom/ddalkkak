@@ -6,13 +6,13 @@
 </script>
 
 <svelte:head>
-	<title>발견형 퍼즐 — 숨은 규칙 찾기 문제 {data.total}제 | 딸깍</title>
+	<title>발견형 퍼즐 — 숨은 규칙 찾기 문제 {data.total}제 | 딸깍 퍼즐</title>
 	<meta
 		name="description"
 		content="규칙을 알려주지 않는 발견형 퍼즐 {data.total}문제. 예시를 보고 숨은 규칙을 스스로 발견하는 두뇌 문제 — 문제적 남자 스타일 문제를 좋아한다면 매일 새 문제를 풀어보세요."
 	/>
 	<link rel="canonical" href="https://ddalkkak.app/discover" />
-	<meta property="og:title" content="발견형 퍼즐 — 숨은 규칙 찾기 문제 {data.total}제 | 딸깍" />
+	<meta property="og:title" content="발견형 퍼즐 — 숨은 규칙 찾기 문제 {data.total}제 | 딸깍 퍼즐" />
 	<meta
 		property="og:description"
 		content="규칙을 알려주지 않는 발견형 퍼즐. 예시 속 숨은 규칙을 발견하는 순간, 딸깍."

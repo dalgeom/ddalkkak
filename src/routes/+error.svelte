@@ -5,7 +5,7 @@
 </script>
 
 <svelte:head>
-	<title>{page.status} — 딸깍</title>
+	<title>{page.status} — 딸깍 퍼즐</title>
 	<meta name="robots" content="noindex" />
 	<meta name="description" content="찾는 페이지가 없어요. 오늘의 딸깍은 매일 자정에 새로 열립니다." />
 </svelte:head>

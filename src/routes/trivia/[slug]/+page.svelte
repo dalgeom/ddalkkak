@@ -12,10 +12,10 @@
 </script>
 
 <svelte:head>
-	<title>{heading} — 정답·해설 포함 | 딸깍</title>
+	<title>{heading} — 정답·해설 포함 | 딸깍 퍼즐</title>
 	<meta name="description" content={desc} />
 	<link rel="canonical" href={url} />
-	<meta property="og:title" content="{heading} — 정답·해설 포함 | 딸깍" />
+	<meta property="og:title" content="{heading} — 정답·해설 포함 | 딸깍 퍼즐" />
 	<meta property="og:description" content={data.category.intro} />
 	<meta property="og:url" content={url} />
 </svelte:head>

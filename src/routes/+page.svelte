@@ -388,7 +388,11 @@
 	function submitText() {
 		if (judged || !current?.problem || !answerValue.trim()) return;
 		if (isCorrectText(current.problem, answerValue)) {
-			settle(hintsUsed === 0 && wrongAttempts === 0 ? 'clean' : 'hinted', '정답이에요', true);
+			settle(
+				hintsUsed === 0 && wrongAttempts === 0 ? 'clean' : 'hinted',
+				hintsUsed === 0 && wrongAttempts === 0 ? '딸깍! 맞혔어요' : '맞혔어요',
+				true
+			);
 		} else {
 			wrongAttempts += 1;
 			feedback = isCloseAnswer(current.problem, answerValue)
@@ -401,7 +405,12 @@
 		if (judged || !current?.problem) return;
 		picked = i;
 		const ok = i === current.problem.answerIndex;
-		if (ok) settle(wrongAttempts === 0 ? 'clean' : 'hinted', '정답이에요', true);
+		if (ok)
+			settle(
+				wrongAttempts === 0 ? 'clean' : 'hinted',
+				wrongAttempts === 0 ? '딸깍! 맞혔어요' : '맞혔어요',
+				true
+			);
 		else {
 			wrongAttempts += 1;
 			// 한 번 더 고를 기회를 주되, 남은 보기가 정답 하나뿐이면 주지 않는다.
@@ -440,7 +449,12 @@
 	function submitCube(i: number) {
 		if (judged || !current?.cube) return;
 		picked = i;
-		if (i === current.cube.answer) settle(wrongAttempts === 0 ? 'clean' : 'hinted', '정답이에요', true);
+		if (i === current.cube.answer)
+			settle(
+				wrongAttempts === 0 ? 'clean' : 'hinted',
+				wrongAttempts === 0 ? '딸깍! 맞혔어요' : '맞혔어요',
+				true
+			);
 		else {
 			wrongAttempts += 1;
 			if (wrongAttempts >= maxWrong(current.cube.options?.length))
@@ -486,7 +500,12 @@
 		if (lit) return;
 		applyStick(loc, true);
 		mPicked = null;
-		if (isSolved(mOrig, mCur)) settle(mMisses === 0 ? 'clean' : 'hinted', '정답이에요', true);
+		if (isSolved(mOrig, mCur))
+			settle(
+				mMisses === 0 ? 'clean' : 'hinted',
+				mMisses === 0 ? '딸깍! 맞혔어요' : '맞혔어요',
+				true
+			);
 		else {
 			mMisses += 1;
 			feedback = { msg: '식이 맞지 않아요 — 성냥을 원래 자리로 되돌렸어요', ok: false };
@@ -816,14 +835,14 @@
 </script>
 
 <svelte:head>
-	<title>딸깍 — 매일 새로 열리는 두뇌 퍼즐 10문제</title>
+	<title>딸깍 퍼즐 — 매일 새로 열리는 두뇌 퍼즐 10문제</title>
 	<meta
 		name="description"
 		content="하루 10문제. {compositionLong}. 매일 자정에 새로 열리고, 그날은 모두 같은 문제를 풉니다."
 	/>
 	<link rel="canonical" href="https://ddalkkak.app/" />
 	<meta property="og:url" content="https://ddalkkak.app/" />
-	<meta property="og:title" content="딸깍 — 매일 새로 열리는 두뇌 퍼즐 10문제" />
+	<meta property="og:title" content="딸깍 퍼즐 — 매일 새로 열리는 두뇌 퍼즐 10문제" />
 	<meta
 		property="og:description"
 		content="하루 10문제. {compositionLong}."

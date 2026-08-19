@@ -5,13 +5,13 @@
 </script>
 
 <svelte:head>
-	<title>읽을거리 — 퍼즐 해설과 만드는 이야기 | 딸깍</title>
+	<title>읽을거리 — 퍼즐 해설과 만드는 이야기 | 딸깍 퍼즐</title>
 	<meta
 		name="description"
 		content="성냥개비 문제 푸는 법, 전개도 접는 요령, 발견형 퍼즐을 만들고 버리는 기준 — 딸깍이 퍼즐을 만들며 정리한 글들입니다."
 	/>
 	<link rel="canonical" href="https://ddalkkak.app/read" />
-	<meta property="og:title" content="읽을거리 — 퍼즐 해설과 만드는 이야기 | 딸깍" />
+	<meta property="og:title" content="읽을거리 — 퍼즐 해설과 만드는 이야기 | 딸깍 퍼즐" />
 	<meta property="og:url" content="https://ddalkkak.app/read" />
 </svelte:head>
 

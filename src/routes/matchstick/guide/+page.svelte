@@ -68,13 +68,13 @@
 </script>
 
 <svelte:head>
-	<title>성냥개비 문제 푸는 법 — 한 획 차이 숫자표와 4단계 풀이 | 딸깍</title>
+	<title>성냥개비 문제 푸는 법 — 한 획 차이 숫자표와 4단계 풀이 | 딸깍 퍼즐</title>
 	<meta
 		name="description"
 		content="성냥개비 퍼즐, 성냥 하나만 옮겨 식을 참으로 만드는 법. 한 획 차이 숫자표(0↔8, 6↔5, 9↔3…)와 4단계 풀이법, 연산자를 이용하는 기술을 실제 예제로 설명합니다."
 	/>
 	<link rel="canonical" href="https://ddalkkak.app/matchstick/guide" />
-	<meta property="og:title" content="성냥개비 문제 푸는 법 — 한 획 차이 숫자표와 4단계 풀이 | 딸깍" />
+	<meta property="og:title" content="성냥개비 문제 푸는 법 — 한 획 차이 숫자표와 4단계 풀이 | 딸깍 퍼즐" />
 	<meta
 		property="og:description"
 		content="한 획 차이 숫자표와 4단계 풀이법. 연산자를 이용하는 기술까지 실제 예제로."

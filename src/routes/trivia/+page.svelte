@@ -5,13 +5,13 @@
 </script>
 
 <svelte:head>
-	<title>상식 퀴즈 {data.total}문제 — 분야별·난이도별 무료 퀴즈 | 딸깍</title>
+	<title>상식 퀴즈 {data.total}문제 — 분야별·난이도별 무료 퀴즈 | 딸깍 퍼즐</title>
 	<meta
 		name="description"
 		content="지리·역사·과학·속담·스포츠 등 {data.categories.length}개 분야, 초등부터 어른까지 난이도 4단계 상식 퀴즈 {data.total}문제. 가입 없이 무료로, 해설과 함께 풀어보세요."
 	/>
 	<link rel="canonical" href="https://ddalkkak.app/trivia" />
-	<meta property="og:title" content="상식 퀴즈 {data.total}문제 — 분야별·난이도별 무료 퀴즈 | 딸깍" />
+	<meta property="og:title" content="상식 퀴즈 {data.total}문제 — 분야별·난이도별 무료 퀴즈 | 딸깍 퍼즐" />
 	<meta
 		property="og:description"
 		content="{data.categories.length}개 분야 × 난이도 4단계. 해설이 함께 나오는 무료 상식 퀴즈."
