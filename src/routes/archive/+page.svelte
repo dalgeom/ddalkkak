@@ -78,6 +78,8 @@
 						<span class="meta">
 							{#if solvedOf[d.day] !== undefined}
 								<b>{solvedOf[d.day]} / {DAILY_SIZE}</b> 정답
+							{:else if d.chips.length}
+								<span class="chips">{d.chips.join(' · ')}</span>
 							{:else}
 								매일 10문제 · 보너스 1
 							{/if}
@@ -216,6 +218,11 @@
 		gap: 8px;
 		font-size: 12.5px;
 		color: var(--muted);
+	}
+	/* 날짜별 발견형 chip — 목록이 서른 줄 똑같아 보이던 문제를 푼다 */
+	.chips {
+		color: var(--accent-2);
+		font-weight: 600;
 	}
 	.meta b {
 		color: var(--accent);
