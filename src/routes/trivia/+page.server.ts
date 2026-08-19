@@ -1,4 +1,5 @@
 import { TRIVIA } from '$lib/trivia';
+import { displayChoices } from '$lib/game';
 import { categoryByName } from '$lib/triviaCategories';
 
 // 상식 퀴즈 소개 랜딩 — 분야·난이도 집계와 맛보기 문제를 SSR로 내린다.
@@ -21,15 +22,18 @@ export function load() {
 	// 난이도별 맛보기 1문제씩 — 고정 표본(객관식만)
 	const samples = GRADE_ORDER.map((g) => TRIVIA.find((t) => t.grade === g && t.type === 'choice'))
 		.filter((t) => !!t)
-		.map((t) => ({
-			id: t!.id,
-			category: t!.category ?? '',
-			grade: t!.grade ?? '',
-			question: t!.blocks[0]?.kind === 'text' ? t!.blocks[0].html : '',
-			choices: t!.choices ?? [],
-			answer: t!.choices?.[t!.answerIndex ?? 0] ?? '',
-			explain: t!.explain
-		}));
+		.map((raw) => {
+			const t = displayChoices(raw!); // 게임 화면과 같은 시드 셔플 — 정답이 첫 보기에 몰려 보이지 않게
+			return {
+				id: t.id,
+				category: t.category ?? '',
+				grade: t.grade ?? '',
+				question: t.blocks[0]?.kind === 'text' ? t.blocks[0].html : '',
+				choices: t.choices ?? [],
+				answer: t.choices?.[t.answerIndex ?? 0] ?? '',
+				explain: t.explain
+			};
+		});
 
 	return { total: TRIVIA.length, categories, grades, samples };
 }
