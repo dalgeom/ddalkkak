@@ -609,6 +609,9 @@
 	let savedProgress = $state<DailyProgress>({ pos: 0, marks: [], done: false });
 	// pos는 '다음'을 눌러야 오르므로 1번만 풀고 나간 경우 pos=0, marks만 1개다 — marks 기준이 맞다
 	let resumable = $derived(savedProgress.marks.length > 0 && !savedProgress.done);
+	/** 오늘 아직 아무것도 안 한 사람 — 이들에겐 설명보다 문제를 먼저 보여준다.
+	 *  진행 상황(카운트다운·진행 틱)은 아직 아무 의미가 없어 첫 화면만 높이고 있었다. */
+	let untouched = $derived(!resumable && !savedProgress.done);
 
 	/* 헤더 로고 클릭 → 랜딩 화면으로(진행은 저장). 이미 /에 있으면 링크가 죽은 버튼이라 신호로 받는다. */
 	let logoSeen = -1;
@@ -763,18 +766,23 @@
 		<h1 class="slogan">매일 두뇌를 깨우는<br /><b>10분의 딸깍</b></h1>
 		<p class="tagline">규칙을 발견하는 순간, 머릿속에서 딸깍 소리가 납니다.</p>
 
-		<div class="date">{todayLabel}</div>
-		<div class="countdown">다음 문제까지 {countdown || '--:--:--'}</div>
+		<div class="date" class:solo={untouched}>{todayLabel}</div>
 
-		<div class="ticks home-ticks" aria-label="오늘 {DAILY_SIZE}문제 중 {savedProgress.marks.length}문제 완료">
-			{#each Array(DAILY_SIZE) as _, i (i)}
-				<span
-					class="tick"
-					class:done={i < savedProgress.marks.length}
-					class:current={resumable && i === savedProgress.pos}
-				></span>
-			{/each}
-		</div>
+		<!-- 아직 시작 안 한 사람에게 "다음 문제까지 07:23"과 빈 점 열 개는 혼란일 뿐이다.
+		     이 둘을 접어 첫 화면을 낮추면 아래 맛보기 문제가 스크롤 없이 보인다. -->
+		{#if !untouched}
+			<div class="countdown">다음 문제까지 {countdown || '--:--:--'}</div>
+
+			<div class="ticks home-ticks" aria-label="오늘 {DAILY_SIZE}문제 중 {savedProgress.marks.length}문제 완료">
+				{#each Array(DAILY_SIZE) as _, i (i)}
+					<span
+						class="tick"
+						class:done={i < savedProgress.marks.length}
+						class:current={resumable && i === savedProgress.pos}
+					></span>
+				{/each}
+			</div>
+		{/if}
 
 		<button class="cta" onclick={startOrResume} disabled={loading}>
 			{#if loading}
@@ -855,6 +863,14 @@
 						<div class="answer-line">정답은 <b>{data.sample.answers[0]}</b></div>
 					{/if}
 					<div class="explain"><b>해설</b> {@html data.sample.explain}</div>
+
+					<!-- 몰입이 끝난 바로 이 순간이 전환 지점이다. 위로 스크롤해 CTA를 찾게 두지 않는다. -->
+					{#if untouched}
+						<button class="sample-go" onclick={startOrResume} disabled={loading}>
+							{sampleOk ? '딸깍! 이런 문제가 오늘 10개' : '오늘의 10문제 풀어보기'}
+							<span class="arr" aria-hidden="true">→</span>
+						</button>
+					{/if}
 				{:else if data.sample.type !== 'choice'}
 					<div class="dual">
 						<button class="ghost" onclick={sampleReveal}>정답 보기</button>
@@ -1437,6 +1453,43 @@
 		.arr {
 			animation: none;
 		}
+	}
+	/* 맛보기 카드 안에서 쓰는 전환 버튼 — .cta와 같은 색·눌림감, 크기만 카드에 맞춘다 */
+	.sample-go {
+		margin-top: 14px;
+		width: 100%;
+		min-height: 52px;
+		border-radius: 14px;
+		background: var(--accent);
+		color: #fff;
+		font-size: 16px;
+		font-weight: 800;
+		border: none;
+		box-shadow: 0 5px 0 var(--accent-press);
+		cursor: pointer;
+		font-family: inherit;
+		padding: 10px 12px;
+		word-break: keep-all;
+		transition:
+			transform var(--dur-tap) var(--ease-out),
+			box-shadow var(--dur-tap) var(--ease-out);
+	}
+	.sample-go:active {
+		transform: translateY(3px);
+		box-shadow: 0 2px 0 var(--accent-press);
+	}
+	.sample-go:hover {
+		filter: brightness(1.03);
+	}
+	.sample-go:disabled {
+		background: var(--border-strong);
+		color: var(--muted-2);
+		box-shadow: none;
+		cursor: default;
+	}
+	/* 카운트다운을 접은 첫 화면에서는 날짜 아래 여백을 CTA가 대신 받는다 */
+	.date.solo {
+		margin-bottom: 18px;
 	}
 	.cta-sub {
 		display: block;
