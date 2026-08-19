@@ -7,10 +7,10 @@
 </script>
 
 <svelte:head>
-	<title>{data.article.title} | 딸깍</title>
+	<title>{data.article.title} | 딸깍 퍼즐</title>
 	<meta name="description" content={data.article.description} />
 	<link rel="canonical" href={url} />
-	<meta property="og:title" content="{data.article.title} | 딸깍" />
+	<meta property="og:title" content="{data.article.title} | 딸깍 퍼즐" />
 	<meta property="og:description" content={data.article.description} />
 	<meta property="og:url" content={url} />
 	<meta property="og:type" content="article" />

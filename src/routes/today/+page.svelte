@@ -30,7 +30,7 @@
 </script>
 
 <svelte:head>
-	<title>오늘 문제 다시 보기 | 딸깍</title>
+	<title>오늘 문제 다시 보기 | 딸깍 퍼즐</title>
 	<!-- 완주자 개인용 화면 — 검색에 실을 내용이 없다 -->
 	<meta name="robots" content="noindex" />
 </svelte:head>

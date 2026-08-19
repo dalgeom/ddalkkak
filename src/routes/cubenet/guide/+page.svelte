@@ -48,13 +48,13 @@
 </script>
 
 <svelte:head>
-	<title>전개도 문제 푸는 법 — 마주 보는 면과 거울상 가리기 | 딸깍</title>
+	<title>전개도 문제 푸는 법 — 마주 보는 면과 거울상 가리기 | 딸깍 퍼즐</title>
 	<meta
 		name="description"
 		content="정육면체 전개도를 접으면 어떤 주사위가 되는지 알아내는 법. 한 칸 건너뛰면 마주 본다는 규칙부터 거울상을 가려내는 방법까지, 전개도 64종에서 검증한 요령을 정리했습니다."
 	/>
 	<link rel="canonical" href="https://ddalkkak.app/cubenet/guide" />
-	<meta property="og:title" content="전개도 문제 푸는 법 | 딸깍" />
+	<meta property="og:title" content="전개도 문제 푸는 법 | 딸깍 퍼즐" />
 	<meta
 		property="og:description"
 		content="마주 보는 면 찾는 법과 거울상 가려내는 법. 직접 접어볼 수 있습니다."

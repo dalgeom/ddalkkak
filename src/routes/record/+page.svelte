@@ -111,7 +111,7 @@
 </script>
 
 <svelte:head>
-	<title>내 기록 | 딸깍</title>
+	<title>내 기록 | 딸깍 퍼즐</title>
 	<!-- 방문자 개인의 localStorage 기록뿐인 페이지 — 검색에 실을 내용이 없다 -->
 	<meta name="robots" content="noindex" />
 </svelte:head>

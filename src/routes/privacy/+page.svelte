@@ -4,13 +4,13 @@
 </script>
 
 <svelte:head>
-	<title>개인정보처리방침 — 딸깍</title>
+	<title>개인정보처리방침 — 딸깍 퍼즐</title>
 	<meta
 		name="description"
 		content="딸깍은 회원가입 없이 이용하는 서비스로 개인 식별 정보를 수집하지 않습니다. 게임 기록은 브라우저에만 저장됩니다."
 	/>
 	<link rel="canonical" href="https://ddalkkak.app/privacy" />
-	<meta property="og:title" content="개인정보처리방침 — 딸깍" />
+	<meta property="og:title" content="개인정보처리방침 — 딸깍 퍼즐" />
 	<meta property="og:url" content="https://ddalkkak.app/privacy" />
 </svelte:head>
 
