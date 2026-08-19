@@ -44,6 +44,12 @@ const C = {
  *   id     src/lib/problems.ts의 문제 id — 나중에 대조할 수 있게 남긴다
  */
 const CARDS = {
+	'2026-08-19': {
+		id: 'kr-vowel-contract',
+		chip: '한글',
+		물음: '오이는 무엇이 될까요?',
+		줄: ['아이 → 애', '사이 → 새', '보이다 → 뵈다', '오이 → ?']
+	},
 	'blog-규칙찾기-예시': {
 		id: 'diamond-op',
 		chip: '이상한 연산',
