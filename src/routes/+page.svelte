@@ -524,6 +524,7 @@
 			phase = 'done';
 			persist(true);
 			completeDailySession(dayNum);
+			loadTomorrowTeaser();
 			// 완주 퍼널의 끝 — 점수와 걸린 시간을 함께 보내 분포를 본다
 			track('daily_complete', {
 				score: correctCount,
@@ -540,6 +541,73 @@
 		phase = 'home';
 		savedProgress = readDailyProgress(dayNum);
 		if (browser) window.scrollTo({ top: 0, behavior: 'smooth' });
+	}
+
+	/* ───────── 내일의 갈고리 ─────────
+	   완주 화면이 카운트다운 한 줄로 끝나면 다시 올 이유가 남지 않는다.
+	   세트는 날짜로 결정되니 내일 것을 지금 계산할 수 있다 — 답이 아니라 '결'만 흘린다. */
+
+	let tomorrowChips = $state<string[]>([]);
+
+	async function loadTomorrowTeaser() {
+		try {
+			const [p, t] = await Promise.all([import('$lib/problems'), import('$lib/trivia')]);
+			const picks = buildDailySetStable(
+				p.PROBLEMS,
+				t.TRIVIA,
+				MATCH_TOTAL,
+				dayNum + 1,
+				(x) => p.fieldOfChip(x.chip),
+				(x) => x.category ?? '기타',
+				bankSizesAt
+			);
+			tomorrowChips = picks
+				.filter((q) => q.kind === 'discover')
+				.map((q) => p.PROBLEMS[q.index].chip)
+				.slice(0, 3);
+		} catch {
+			/* 예고는 있으면 좋은 것 — 실패해도 결과 화면은 그대로 */
+		}
+	}
+
+	/** 매일 아침 9시 반복 일정. 백엔드 없이 만들 수 있는 유일한 재방문 알림이다. */
+	const CRLF = String.fromCharCode(13, 10); // ics는 CRLF 줄바꿈을 요구한다
+
+	function downloadReminder() {
+		track('reminder_download', { streak: doneStats.streak });
+		// dayNum+1 자정(KST)에서 9시간 뒤 = 내일 오전 9시 KST
+		const start = new Date((dayNum + 1) * 86400000 - 9 * 3600 * 1000 + 9 * 3600 * 1000);
+		const z = (n: number) => String(n).padStart(2, '0');
+		const stamp = (d: Date) =>
+			`${d.getUTCFullYear()}${z(d.getUTCMonth() + 1)}${z(d.getUTCDate())}T${z(d.getUTCHours())}${z(d.getUTCMinutes())}00Z`;
+		const ics = [
+			'BEGIN:VCALENDAR',
+			'VERSION:2.0',
+			'PRODID:-//ddalkkak//daily//KO',
+			'BEGIN:VEVENT',
+			'UID:daily-puzzle@ddalkkak.app',
+			`DTSTAMP:${stamp(new Date())}`,
+			`DTSTART:${stamp(start)}`,
+			'DURATION:PT10M',
+			'RRULE:FREQ=DAILY',
+			'SUMMARY:딸깍 — 오늘의 두뇌 퍼즐 10문제',
+			'DESCRIPTION:매일 자정에 새 문제가 열립니다. https://ddalkkak.app',
+			'URL:https://ddalkkak.app',
+			'BEGIN:VALARM',
+			'TRIGGER:PT0M',
+			'ACTION:DISPLAY',
+			'DESCRIPTION:딸깍 — 오늘의 10문제',
+			'END:VALARM',
+			'END:VEVENT',
+			'END:VCALENDAR'
+		].join(CRLF);
+		const url = URL.createObjectURL(new Blob([ics], { type: 'text/calendar;charset=utf-8' }));
+		const a = document.createElement('a');
+		a.href = url;
+		a.download = 'ddalkkak-daily.ics';
+		a.click();
+		URL.revokeObjectURL(url);
+		toast('캘린더 앱에서 열면 매일 아침 알려줘요');
 	}
 
 	/* ───────── 공유 ───────── */
@@ -691,7 +759,10 @@
 		pos = savedProgress.pos;
 		// 결과 화면을 새로고침해도 걸린 시간이 0으로 사라지지 않게
 		sessionMs = savedProgress.elapsedMs ?? 0;
-		if (savedProgress.done) phase = 'done';
+		if (savedProgress.done) {
+			phase = 'done';
+			loadTomorrowTeaser(); // 결과 화면을 새로고침해도 예고가 남아 있게
+		}
 
 		// 설치 안내 노출 조건 — 완주하지 않고 나간 사람도 재방문자로 잡는다
 		returningVisitor = hasPlayedBefore(dayNum);
@@ -1315,7 +1386,22 @@
 		{/if}
 	</div>
 
-	<p class="next-day">내일 10문제까지 {countdown || '--:--:--'}</p>
+	<!-- 내일의 갈고리: 예고 + 알림. 카운트다운만으로는 아무도 돌아오지 않는다. -->
+	<div class="tomorrow">
+		<p class="next-day">내일 10문제까지 {countdown || '--:--:--'}</p>
+		{#if tomorrowChips.length}
+			<p class="teaser">
+				내일 예고 — {#each tomorrowChips as c, i (i)}<b>{c}</b>{#if i < tomorrowChips.length - 1}<span class="dot">·</span>{/if}{/each}
+			</p>
+		{/if}
+		<button class="remind" onclick={downloadReminder}>
+			<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+				<rect x="3" y="5" width="18" height="16" rx="2" />
+				<path d="M8 3v4M16 3v4M3 10h18" />
+			</svg>
+			매일 아침 알림 받기
+		</button>
+	</div>
 {/if}
 
 {#if toastMsg}
@@ -1455,6 +1541,50 @@
 		}
 	}
 	/* 맛보기 카드 안에서 쓰는 전환 버튼 — .cta와 같은 색·눌림감, 크기만 카드에 맞춘다 */
+	.tomorrow {
+		margin-top: 22px;
+		padding-top: 18px;
+		border-top: 1px solid var(--border);
+		text-align: center;
+	}
+	.teaser {
+		margin: 8px 0 0;
+		font-size: 13.5px;
+		color: var(--muted);
+		word-break: keep-all;
+	}
+	.teaser b {
+		color: var(--accent-2);
+		font-weight: 700;
+	}
+	.teaser .dot {
+		margin: 0 6px;
+		color: var(--muted-2);
+	}
+	.remind {
+		display: inline-flex;
+		align-items: center;
+		gap: 8px;
+		margin-top: 14px;
+		min-height: 44px;
+		padding: 10px 18px;
+		border-radius: 12px;
+		border: 1px solid var(--border-strong);
+		background: var(--panel);
+		color: var(--text);
+		font-size: 14px;
+		font-weight: 700;
+		font-family: inherit;
+		cursor: pointer;
+	}
+	.remind svg {
+		width: 17px;
+		height: 17px;
+		color: var(--accent);
+	}
+	.remind:hover {
+		background: var(--panel-2);
+	}
 	.sample-go {
 		margin-top: 14px;
 		width: 100%;
