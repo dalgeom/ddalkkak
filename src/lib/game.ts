@@ -492,6 +492,39 @@ function takeAt(kind: DailyKind, d: number): number {
  * v2 뽑기: V2 시작일부터 targetDay까지 포인터를 하루씩 전진시켜 그날의 인덱스를 얻는다.
  * items는 전체 배열(최신), 하루치 은행은 sizeAt(day)로 앞에서 자른다.
  */
+/**
+ * 시뮬레이션 진행 상태. 하루씩 앞으로만 가므로 중간에 멈췄다가 이어서 갈 수 있다.
+ *
+ * 이게 없으면 매 호출이 전환일부터 다시 걸어온다 — 오늘은 3ms지만 6개월 뒤 21ms,
+ * 아카이브 목록처럼 여러 날을 묻는 화면에서는 수백 ms가 된다(Cloudflare CPU 예산 초과).
+ * 결과는 날짜로 결정되니 캐시해도 안전하고, 골든 스냅샷이 그 동일성을 지킨다.
+ */
+type SimState = {
+	day: number; // 이 날까지 처리한 뒤의 상태
+	ptr: Map<string, number>;
+	cursor: number;
+	recent: Set<number>;
+};
+type SimEntry = { state: SimState | null; results: Map<number, number[]> };
+
+/** items 배열의 정체로 캐시를 가른다 — 합성 데이터로 도는 테스트끼리 섞이지 않는다 */
+const simCache = new WeakMap<object, Map<string, SimEntry>>();
+
+function simEntry<T>(items: T[], kind: DailyKind, seed: number): SimEntry {
+	let byKind = simCache.get(items as unknown as object);
+	if (!byKind) {
+		byKind = new Map();
+		simCache.set(items as unknown as object, byKind);
+	}
+	const key = `${kind}:${seed}`;
+	let e = byKind.get(key);
+	if (!e) {
+		e = { state: null, results: new Map() };
+		byKind.set(key, e);
+	}
+	return e;
+}
+
 function pickStable<T>(
 	items: T[],
 	sizeAt: (day: number) => number,
@@ -500,14 +533,21 @@ function pickStable<T>(
 	kind: DailyKind,
 	targetDay: number
 ): number[] {
-	const ptr = new Map<string, number>();
-	let cursor = cursorAt(kind, PICK_V2_START_DAY);
-	let initialized = false;
+	const entry = simEntry(items, kind, seed);
+	const cached = entry.results.get(targetDay);
+	if (cached) return cached.slice();
+
+	// 앞서 계산해 둔 날이 있으면 거기서 이어 간다(앞으로만 간다)
+	const resume = entry.state && entry.state.day < targetDay ? entry.state : null;
+	const ptr = new Map<string, number>(resume ? resume.ptr : undefined);
+	let cursor = resume ? resume.cursor : cursorAt(kind, PICK_V2_START_DAY);
+	let initialized = !!resume;
 	let result: number[] = [];
 	// 컷오버 직전 3주간 v1이 실제로 낸 문제들 — 전환 초기 2주 동안은 이들을 피해서 뽑는다
-	const recent = new Set<number>();
+	const recent = new Set<number>(resume ? resume.recent : undefined);
+	const from = resume ? resume.day + 1 : PICK_V2_START_DAY;
 
-	for (let d = PICK_V2_START_DAY; d <= targetDay; d++) {
+	for (let d = from; d <= targetDay; d++) {
 		const n = Math.min(sizeAt(d), items.length);
 		// 레인: 그날의 프리픽스를 키별로, 배열 순서 그대로
 		const lanes = new Map<string, number[]>();
@@ -558,9 +598,14 @@ function pickStable<T>(
 			ptr.set(key, (pos + 1) % lane.length);
 		}
 		cursor += take;
+		entry.results.set(d, picked);
 		if (d === targetDay) result = picked;
 	}
-	return result;
+	// 가장 멀리 간 상태만 남긴다 — 과거 날짜 조회가 진행을 되돌리지 않게
+	if (!entry.state || entry.state.day < targetDay) {
+		entry.state = { day: targetDay, ptr: new Map(ptr), cursor, recent: new Set(recent) };
+	}
+	return result.slice();
 }
 
 /**
