@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount, tick } from 'svelte';
 	import { browser } from '$app/environment';
+	import { accuracyLabel } from '$lib/stats';
 	import type { Problem } from '$lib/problems';
 	import {
 		kstDayNumber,
@@ -324,6 +325,7 @@
 	}
 
 	function resetProblem() {
+		accuracy = null;
 		hintsUsed = 0;
 		wrongAttempts = 0;
 		startedAt = Date.now();
@@ -383,6 +385,29 @@
 		}
 		recordSolve(ok, hintsUsed);
 		persist();
+		if (it) reportResult(it.problem?.id ?? `${it.kind}-${it.index}`, ok);
+	}
+
+	/* ───────── 정답률 ─────────
+	   내 8점이 잘한 건지 알 수 없으면 어려운 문제를 맞힌 것도 자랑이 못 된다.
+	   숫자만 보내고 숫자만 받는다 — 누가 풀었는지는 보내지 않는다.
+	   실패하면 그냥 안 보여준다. 정답률은 곁가지지 본 기능이 아니다. */
+	let accuracy = $state<number | null>(null);
+
+	async function reportResult(id: string, ok: boolean) {
+		accuracy = null;
+		try {
+			const res = await fetch('/api/stat', {
+				method: 'POST',
+				headers: { 'content-type': 'application/json' },
+				body: JSON.stringify({ id, correct: ok })
+			});
+			if (!res.ok) return;
+			const data = await res.json();
+			if (typeof data?.accuracy === 'number') accuracy = data.accuracy;
+		} catch {
+			/* 오프라인이거나 KV가 흔들릴 때 — 조용히 넘어간다 */
+		}
 	}
 
 	function submitText() {
@@ -1214,6 +1239,13 @@
 				</div>
 			{/if}
 
+			<!-- 정답률: 표본이 모인 문제에만 뜬다. 어려운 문제를 맞힌 것이 자랑이 되게. -->
+			{#if judged && accuracy !== null}
+				<p class="accuracy" class:hard={accuracy <= 40}>
+					{accuracyLabel(accuracy)}
+				</p>
+			{/if}
+
 			{#if judged}
 				{#if current.problem && current.problem.type !== 'choice' && feedback && !feedback.ok}
 					<div class="answer-line">정답은 <b>{current.problem.answers?.[0]}</b></div>
@@ -1603,6 +1635,17 @@
 	}
 	.remind:hover {
 		background: var(--panel-2);
+	}
+	.accuracy {
+		margin: 12px 0 0;
+		text-align: center;
+		font-size: 13px;
+		font-weight: 600;
+		color: var(--muted);
+		word-break: keep-all;
+	}
+	.accuracy.hard {
+		color: var(--accent-2);
 	}
 	.sample-go {
 		margin-top: 14px;

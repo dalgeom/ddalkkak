@@ -1,6 +1,6 @@
 <script lang="ts">
 	const CONTACT = 'hyun7219@gmail.com';
-	const UPDATED = '2026년 7월 28일';
+	const UPDATED = '2026년 8월 19일';
 </script>
 
 <svelte:head>
@@ -19,8 +19,8 @@
 		<span class="kicker">개인정보처리방침</span>
 		<h1>딸깍은 개인정보를<br /><b>수집하지 않습니다</b></h1>
 		<p class="lead">
-			회원가입도, 로그인도 없습니다. 푼 기록은 이용자의 브라우저 안에만 남고 서버로 전송되지
-			않습니다.
+			회원가입도, 로그인도 없습니다. 푼 기록은 이용자의 브라우저 안에만 남습니다. 서버로는
+			문제별 정답률을 내기 위한 익명 숫자만 오갑니다.
 		</p>
 		<p class="updated">최종 수정 · {UPDATED}</p>
 	</header>
@@ -30,6 +30,7 @@
 		<div class="summary">
 			<div class="srow ok"><span class="mark">✓</span><b>수집하지 않는 것</b><span class="d">이름 · 이메일 · 전화번호 · 계정 정보</span></div>
 			<div class="srow"><span class="mark">·</span><b>브라우저에만 저장</b><span class="d">푼 문제, 진행 상태, 연속 일수</span></div>
+			<div class="srow"><span class="mark">·</span><b>서버로 가는 것</b><span class="d">문제 번호와 정답 여부 (익명 집계용)</span></div>
 			<div class="srow"><span class="mark">·</span><b>제3자 쿠키</b><span class="d">광고 게재 시 Google 등이 사용할 수 있음</span></div>
 		</div>
 	</section>
@@ -45,6 +46,12 @@
 				게임 진행 상태(푼 문제 목록, 진행 위치, 연속 일수)는 이용자의 브라우저
 				<b>로컬 저장소(localStorage)</b>에만 저장되며 서버로 전송되지 않습니다. 브라우저 데이터를
 				삭제하면 이 기록도 함께 사라집니다.
+			</p>
+			<p>
+				다만 <b>문제별 정답률</b>을 보여주기 위해, 문제를 풀 때마다 <b>그 문제의 번호와 맞았는지
+				여부</b>만 서버로 보냅니다. 서버에는 문제마다 "몇 명이 시도했고 몇 명이 맞았는가"라는
+				숫자만 누적되며, 누가 풀었는지는 보내지도 저장하지도 않습니다. 이용자를 식별하거나
+				여러 기록을 한 사람으로 이어 붙이는 값(계정·쿠키 식별자 등)은 포함되지 않습니다.
 			</p>
 		</div>
 	</section>
