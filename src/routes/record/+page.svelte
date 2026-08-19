@@ -7,6 +7,45 @@
 		readDayRecord, dayNumToDate, monthGrid, summarize,
 		type DayRecord, type RecordSummary, type MonthCell
 	} from '$lib/record';
+	import { buildBackup, parseBackup, mergeBackup } from '$lib/backup';
+
+	/* ───────── 기록 백업 ─────────
+	   연속 기록은 잃을 게 쌓여야 작동하는 장치인데, 지금 모든 기록이 이 브라우저에만 있다.
+	   기기를 바꾸거나 iOS가 미방문 데이터를 지우면 그대로 증발한다. 백엔드가 없으니
+	   파일 한 장으로 옮긴다. */
+	let backupMsg = $state('');
+	let fileInput = $state<HTMLInputElement | null>(null);
+
+	function say(m: string) {
+		backupMsg = m;
+		setTimeout(() => (backupMsg = ''), 3200);
+	}
+
+	function exportRecord() {
+		const b = buildBackup(localStorage, new Date().toISOString());
+		const n = Object.keys(b.data).length;
+		if (!n) return say('아직 내보낼 기록이 없어요.');
+		const url = URL.createObjectURL(
+			new Blob([JSON.stringify(b)], { type: 'application/json' })
+		);
+		const a = document.createElement('a');
+		a.href = url;
+		a.download = `ddalkkak-기록-${new Date().toISOString().slice(0, 10)}.json`;
+		a.click();
+		URL.revokeObjectURL(url);
+		say('기록 파일을 내려받았어요. 새 기기에서 가져오기로 올리면 됩니다.');
+	}
+
+	async function importRecord(e: Event) {
+		const f = (e.target as HTMLInputElement).files?.[0];
+		if (!f) return;
+		const parsed = parseBackup(await f.text());
+		if (!parsed) return say('딸깍 기록 파일이 아니에요.');
+		const n = mergeBackup(localStorage, parsed);
+		say(n ? `${n}건을 불러왔어요. 새로고침하면 반영됩니다.` : '이미 최신 기록이에요.');
+		if (fileInput) fileInput.value = '';
+		if (n) setTimeout(() => location.reload(), 1200);
+	}
 
 	const WEEKDAYS = ['월', '화', '수', '목', '금', '토', '일'];
 
@@ -166,9 +205,76 @@
 			<a class="cta" href="/">오늘의 10문제 풀러 가기 <span aria-hidden="true">→</span></a>
 		</section>
 	{/if}
+
+	<!-- 기록은 이 브라우저에만 있다 — 기기를 옮길 수 있게 파일로 내보낸다 -->
+	<section class="sec backup">
+		<h2 class="bh">기록 옮기기</h2>
+		<p class="bs">
+			연속 기록과 잔디는 이 브라우저에만 저장돼요. 기기를 바꾸기 전에 파일로 내보내
+			두면 새 기기에서 그대로 이어갈 수 있습니다.
+		</p>
+		<div class="brow">
+			<button class="bbtn" onclick={exportRecord}>기록 내보내기</button>
+			<button class="bbtn" onclick={() => fileInput?.click()}>기록 가져오기</button>
+		</div>
+		<input
+			bind:this={fileInput}
+			type="file"
+			accept="application/json,.json"
+			onchange={importRecord}
+			hidden
+		/>
+		{#if backupMsg}<p class="bmsg">{backupMsg}</p>{/if}
+	</section>
 </article>
 
 <style>
+	.backup {
+		background: var(--panel);
+		border: 1px solid var(--border);
+		border-radius: 16px;
+		padding: 20px;
+	}
+	.bh {
+		margin: 0;
+		font-size: 16px;
+		font-weight: 800;
+	}
+	.bs {
+		margin: 8px 0 14px;
+		font-size: 13px;
+		line-height: 1.6;
+		color: var(--muted);
+		word-break: keep-all;
+	}
+	.brow {
+		display: flex;
+		gap: 10px;
+		flex-wrap: wrap;
+	}
+	.bbtn {
+		flex: 1 1 140px;
+		min-height: 46px;
+		padding: 10px 14px;
+		border-radius: 12px;
+		border: 1px solid var(--border-strong);
+		background: var(--panel-2);
+		color: var(--text);
+		font-size: 14px;
+		font-weight: 700;
+		font-family: inherit;
+		cursor: pointer;
+	}
+	.bbtn:hover {
+		background: var(--panel);
+	}
+	.bmsg {
+		margin: 12px 0 0;
+		font-size: 13px;
+		font-weight: 600;
+		color: var(--accent);
+		word-break: keep-all;
+	}
 	.cover {
 		background: var(--panel);
 		border: 1px solid var(--border-strong);
