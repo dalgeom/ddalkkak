@@ -4,7 +4,8 @@
  *   node scripts/shorts-gen.mjs                     네 유형 기본 문제로
  *   node scripts/shorts-gen.mjs match               성냥개비만
  *   node scripts/shorts-gen.mjs match 137           성냥개비 137번 문제로
- *   node scripts/shorts-gen.mjs discover 20665:1    8/1 아카이브 두 번째 발견형으로
+ *   node scripts/shorts-gen.mjs discover 20665:1
+  node scripts/shorts-gen.mjs cube 128    8/1 아카이브 두 번째 발견형으로
  *
  * 합성 화면이 아니라 실제 딸깍을 헤드리스 브라우저로 찍는다. 문제가 매번 달라지면
  * 다시 만들 수 없으므로 주소로 문제를 못 박는다 — 성냥개비는 ?p=번호, 발견형과
@@ -52,21 +53,20 @@ const FONT_R = 'C:/Windows/Fonts/malgun.ttf';
  *
  *   성냥개비        번호 하나. 741개 중 아무거나 (?p=번호)
  *   발견형·상식     아카이브 날짜와 그날 몇 번째 카드인지 (날짜:순번)
- *   전개도          가이드의 고정 예제 하나뿐이라 못 고른다
+ *   전개도          번호 하나. 700종 중 아무거나 (?p=번호)
  *
  * 안 주면 아래 기본값을 쓴다. 파일 이름에 고른 값이 붙어 덮어쓰지 않는다.
  */
-const DEFAULT_PICK = { match: '42', discover: '20668:0', trivia: '20668:0' };
+const DEFAULT_PICK = { match: '42', discover: '20668:0', trivia: '20668:0', cube: '3' };
 
 const TYPES = {
 	cube: {
 		이름: '전개도',
-		파일: '쇼츠-전개도.mp4',
+		파일: (p) => `쇼츠-전개도-${p}.mp4`,
 		자막: ['이 전개도를 접으면', '어떤 주사위가 될까?'],
 		방식: 'fold',
-		url: () => 'https://ddalkkak.app/cubenet/guide',
+		url: (p) => `https://ddalkkak.app/cubenet/guide?p=${p}`,
 		대상: () => '.stage',
-		고를수있나: false,
 		// 무대 테두리를 잘라내고 큐브를 가운데 둔다 (촬영된 이미지 픽셀 기준 — 이미 SCALE 배)
 		crop: [530, 640, 487, 12]
 	},
@@ -601,10 +601,11 @@ for (const k of keys) {
 		process.exit(1);
 	}
 }
-if (pickArg && (!want || TYPES[want].고를수있나 === false)) {
-	console.error('문제 지정은 유형 하나를 고른 뒤에만 되고, 전개도는 예제가 하나뿐이라 못 고른다.');
+if (pickArg && !want) {
+	console.error('문제 지정은 유형 하나를 고른 뒤에만 된다.');
 	console.error('  node scripts/shorts-gen.mjs match 137');
 	console.error('  node scripts/shorts-gen.mjs discover 20665:1');
+	console.error('  node scripts/shorts-gen.mjs cube 128');
 	process.exit(1);
 }
 /** 고른 값. 안 주면 기본값. */

@@ -1,16 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import {
-	parseNet,
-	foldNet,
-	allRotations,
-	achievableViews,
-	oppositePairs,
-	viewOf,
-	NETS,
-	FACES,
-	makeProblem,
-	problemAt
-} from './cubenet';
+import { parseNet, foldNet, allRotations, achievableViews, oppositePairs, viewOf, NETS, FACES, makeProblem, problemAt, objectParticle } from './cubenet';
 
 describe('접기 수학', () => {
 	it('십자 전개도는 접힌다', () => {
@@ -284,5 +273,20 @@ describe('전개도 읽는 요령', () => {
 				}
 		});
 		expect(n).toBeGreaterThan(20);
+	});
+});
+
+describe('면 이름 조사', () => {
+	it('여섯 면 이름 모두에 맞는 조사가 붙는다', () => {
+		const got = FACES.map((f) => {
+			const short = f.name.split(' ')[1];
+			return short + objectParticle(short);
+		});
+		expect(got).toEqual(['원을', '고리를', '사각을', '테두리를', '십자를', '네점을']);
+	});
+
+	it('받침 없는 이름에 을이 붙으면 잡힌다', () => {
+		expect(objectParticle('십자')).not.toBe('을');
+		expect(objectParticle('사각')).not.toBe('를');
 	});
 });
