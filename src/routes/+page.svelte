@@ -47,6 +47,8 @@
 	import AdSlot from '$lib/components/AdSlot.svelte';
 	import Bulb from '$lib/components/Bulb.svelte';
 	import InstallPrompt from '$lib/components/InstallPrompt.svelte';
+	import PushPrompt from '$lib/components/PushPrompt.svelte';
+	import { shouldOfferPush } from '$lib/push';
 	import InstallHint from '$lib/components/InstallHint.svelte';
 
 	type Sample = {
@@ -393,6 +395,10 @@
 	   숫자만 보내고 숫자만 받는다 — 누가 풀었는지는 보내지 않는다.
 	   실패하면 그냥 안 보여준다. 정답률은 곁가지지 본 기능이 아니다. */
 	let accuracy = $state<number | null>(null);
+
+	/* 알림을 권할 수 있는 브라우저인지는 화면이 뜬 뒤에야 알 수 있다(권한 상태·standalone 여부). */
+	let offerPush = $state(false);
+
 
 	async function reportResult(id: string, ok: boolean) {
 		accuracy = null;
@@ -810,6 +816,9 @@
 
 		// 설치 안내 노출 조건 — 완주하지 않고 나간 사람도 재방문자로 잡는다
 		returningVisitor = hasPlayedBefore(dayNum);
+
+		// 알림을 권할 자리인지 — 권한 상태와 아이폰 홈 화면 여부를 여기서야 볼 수 있다
+		offerPush = shouldOfferPush(dayNum);
 
 		/* 탭을 떠나면 타이머를 멈춘다. 이게 없으면 앱을 닫아둔 시간까지 다 세어져
 		   '오늘 11시간 걸림' 같은 기록이 남는다. pagehide는 모바일에서 탭이
@@ -1416,9 +1425,16 @@
 		</button>
 	</div>
 
-	<!-- 설치가 사실상 유일한 재방문 경로다. 기록을 막 만든 지금이 가장 설득력 있는 순간이라
-	     연습 유도보다 위에 둔다. -->
-	<InstallPrompt {dayNum} streak={doneStats.streak} />
+	<!-- 돌아올 이유를 만드는 자리. 기록을 막 만든 지금이 가장 설득력 있는 순간이라
+	     연습 유도보다 위에 둔다. 알림과 설치를 한 화면에서 둘 다 조르면 둘 다 무시당하므로
+	     하나만 세운다 — 알림이 가능하면 알림이 먼저다(설치 없이도 되고, 우리가 먼저
+	     말을 걸 수 있는 유일한 수단이다). 아이폰은 홈 화면에 추가해야 알림이 되므로
+	     그때만 설치 권유가 선다. -->
+	{#if offerPush}
+		<PushPrompt {dayNum} streak={doneStats.streak} />
+	{:else}
+		<InstallPrompt {dayNum} streak={doneStats.streak} />
+	{/if}
 
 	<!-- 다음 행동: 가장 약했던 유형의 연습으로 이어준다 -->
 	<div class="nudge">
