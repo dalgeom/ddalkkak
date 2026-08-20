@@ -1,5 +1,8 @@
 <script lang="ts">
-	import { NETS, parseNet, problemAt, FACES } from '$lib/cubenet';
+	import { NETS, parseNet, problemAt, FACES, objectParticle } from '$lib/cubenet';
+	import { CUBE_TOTAL } from '$lib/game';
+	import { page } from '$app/state';
+	import { browser } from '$app/environment';
 	import CubeNetFigure from '$lib/components/CubeNetFigure.svelte';
 	import CubeDie from '$lib/components/CubeDie.svelte';
 	import CubeFold from '$lib/components/CubeFold.svelte';
@@ -12,8 +15,17 @@
 	const straightCells = parseNet(['###', '.#.', '.#.']);
 	const elbowCells = parseNet(['##..', '.###']);
 
-	// 직접 접어보는 예제
-	const demo = problemAt(3);
+	// 직접 접어보는 예제. ?p=번호로 다른 전개도를 세울 수 있다 — 홍보용 촬영이 예제 하나에 묶이지 않게.
+	// 이 페이지는 prerender라 빌드 때는 쿼리를 읽을 수 없다. 기본 예제로 굽고 브라우저에서만 갈아 끼운다.
+	const DEMO_DEFAULT = 3;
+	const demo = $derived(
+		problemAt(
+			browser ?
+				(((Number(page.url.searchParams.get('p')) || DEMO_DEFAULT) % CUBE_TOTAL) + CUBE_TOTAL) %
+					CUBE_TOTAL
+			:	DEMO_DEFAULT
+		)
+	);
 	let fold = $state(0);
 	let rotX = $state(-22);
 	let rotY = $state(-38);
@@ -33,18 +45,18 @@
 	}
 
 	const short = (i: number) => FACES[i].name.split(' ')[1];
-	const oppOf = (() => {
+	const oppOf = $derived.by(() => {
 		const m = new Map<number, number>();
 		for (const [a, b] of demo.opposites) {
 			m.set(a, b);
 			m.set(b, a);
 		}
 		return m;
-	})();
-	const demoRing = (() => {
+	});
+	const demoRing = $derived.by(() => {
 		const [, left, right] = demo.options[demo.answer];
 		return [left, right, oppOf.get(left)!, oppOf.get(right)!];
-	})();
+	});
 </script>
 
 <svelte:head>
@@ -141,7 +153,9 @@
 		</p>
 		<div class="ringbox">
 			<p class="ringlead">
-				아래 예제에서 <b>{short(demo.options[demo.answer][0])}</b>을 위로 두면, 옆면 넷은 항상 이
+				아래 예제에서 <b>{short(demo.options[demo.answer][0])}</b>{objectParticle(
+					short(demo.options[demo.answer][0])
+				)} 위로 두면, 옆면 넷은 항상 이
 				순서로만 돕니다.
 			</p>
 			<div class="ringrow">

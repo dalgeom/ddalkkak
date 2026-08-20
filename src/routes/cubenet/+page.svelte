@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { problemAt, FACES, NETS, type CubeNetProblem } from '$lib/cubenet';
+	import { problemAt, FACES, NETS, objectParticle, type CubeNetProblem } from '$lib/cubenet';
 	import { CUBE_TOTAL } from '$lib/game';
 	import CubeNetFigure from '$lib/components/CubeNetFigure.svelte';
 	import CubeDie from '$lib/components/CubeDie.svelte';
@@ -138,7 +138,7 @@
 							>{k < p.opposites.length - 1 ? ',' : ''}{/each}
 					</p>
 					<p class="ringline">
-						<b>{short(p.options[p.answer][0])}</b>을 위로 두면 옆면은 항상
+						<b>{short(p.options[p.answer][0])}</b>{objectParticle(short(p.options[p.answer][0]))} 위로 두면 옆면은 항상
 						<b>{short(ring[0])} → {short(ring[1])} → {short(ring[2])} → {short(ring[3])}</b>
 						순서로 돕니다. 이 순서를 거꾸로 그린 그림은 아무리 돌려도 안 나와요.
 					</p>

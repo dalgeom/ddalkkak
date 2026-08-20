@@ -291,6 +291,17 @@ export const FACES: Face[] = [
 	{ shape: 'dots', color: '#6b6258', name: '회색 네점' }
 ];
 
+/**
+ * 받침 유무에 따라 을/를을 고른다.
+ * 면 이름이 700문제를 돌며 바뀌는데 "십자을 위로 두면"처럼 굳은 조사가 나오면
+ * 설명이 매번 어색해진다. 여섯 이름 중 셋(원·사각·네점)만 받침이 있다.
+ */
+export function objectParticle(word: string): '을' | '를' {
+	const last = word.charCodeAt(word.length - 1);
+	const hangul = last >= 0xac00 && last <= 0xd7a3;
+	return hangul && (last - 0xac00) % 28 !== 0 ? '을' : '를';
+}
+
 /* ───────────── 문제 만들기 ───────────── */
 
 /** 같은 씨앗이면 언제 어디서 돌려도 같은 문제가 나온다 (mulberry32). */
