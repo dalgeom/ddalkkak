@@ -830,6 +830,23 @@ export function bestDailyTime(todayNum: number): number | null {
  * 연속 일수(dayStreak)는 10문제를 완주해야 올라가서, 며칠째 들어와 몇 문제만 풀고
  * 나가는 사람을 재방문자로 못 잡는다. 그런 사람에게야말로 홈 화면 추가가 필요하다.
  */
+/**
+ * 지금까지 하루라도 푼 적이 있는가 — 오늘 것도 센다.
+ * hasPlayedBefore는 '어제까지'를 보지만, 지킬 기록이 있느냐를 물을 때는 오늘 푼 것도
+ * 똑같이 지킬 기록이다.
+ */
+export function hasAnyRecord(): boolean {
+	if (typeof localStorage === 'undefined') return false;
+	try {
+		for (let i = 0; i < localStorage.length; i++) {
+			if (localStorage.key(i)?.startsWith('ddal.day.')) return true;
+		}
+	} catch {
+		/* 저장소 접근이 막히면 알 수 없다 */
+	}
+	return false;
+}
+
 export function hasPlayedBefore(todayNum: number): boolean {
 	if (typeof localStorage === 'undefined') return false;
 	const prefix = 'ddal.day.';
