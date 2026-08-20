@@ -100,8 +100,10 @@ for (const key of keys) {
 			await kvDelete(key);
 			gone++;
 		} else {
+			// 상태 코드가 없는 실패는 푸시 서버까지 닿지도 못한 것이다(주소가 엉뚱하거나 망 문제).
+			// 사유를 남겨야 다음 날 아침에 원인을 짚을 수 있다.
 			failed++;
-			console.error(`실패(${e.statusCode ?? '?'}) ${key}`);
+			console.error(`실패(${e.statusCode ?? '응답없음'}) ${key} — ${e.message ?? e}`);
 		}
 	}
 }
