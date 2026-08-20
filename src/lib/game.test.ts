@@ -24,6 +24,7 @@ import {
 	recordSolve,
 	readSolveStats,
 	hasPlayedBefore,
+	hasAnyRecord,
 	archiveDays,
 	ARCHIVE_DAYS,
 	SITE_START_DAY,
@@ -62,6 +63,43 @@ describe('isCorrectText', () => {
 	it('오답과 빈 입력을 거부한다', () => {
 		expect(isCorrectText(p, '814')).toBe(false);
 		expect(isCorrectText(p, '   ')).toBe(false);
+	});
+});
+
+describe('hasAnyRecord', () => {
+	/* 인앱 게이트가 이걸로 갈린다. 지킬 기록이 없는 사람에게 "기록이 남지 않아요"를
+	   띄웠더니 네이버 검색 유입(/matchstick)의 이탈률이 64%까지 올라갔다 — 홈은 35%였다.
+	   그래서 오늘 푼 것까지 포함해 '기록이 하나라도 있는가'를 본다(hasPlayedBefore는 어제까지). */
+	function mockLS() {
+		const store = new Map<string, string>();
+		return {
+			getItem: (k: string) => (store.has(k) ? store.get(k)! : null),
+			setItem: (k: string, v: string) => void store.set(k, String(v)),
+			removeItem: (k: string) => void store.delete(k),
+			clear: () => store.clear(),
+			key: (i: number) => [...store.keys()][i] ?? null,
+			get length() {
+				return store.size;
+			}
+		};
+	}
+	beforeEach(() => vi.stubGlobal('localStorage', mockLS()));
+	afterEach(() => vi.unstubAllGlobals());
+
+	it('아무것도 안 푼 사람은 false — 게이트가 뜨지 않는다', () => {
+		expect(hasAnyRecord()).toBe(false);
+	});
+
+	it('오늘 푼 것도 지킬 기록이다 — hasPlayedBefore와 갈리는 지점', () => {
+		localStorage.setItem('ddal.day.20700', JSON.stringify({ pos: 3, marks: [], done: false }));
+		expect(hasAnyRecord()).toBe(true);
+		expect(hasPlayedBefore(20700)).toBe(false);
+	});
+
+	it('딸깍 기록이 아닌 키에는 반응하지 않는다', () => {
+		localStorage.setItem('ddal.install.dismiss', '{"n":1,"at":0}');
+		localStorage.setItem('theme', 'dark');
+		expect(hasAnyRecord()).toBe(false);
 	});
 });
 

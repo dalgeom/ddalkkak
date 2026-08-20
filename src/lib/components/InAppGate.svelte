@@ -10,6 +10,7 @@
 		type OpenWay
 	} from '$lib/inapp';
 	import { isStandalone } from '$lib/pwa';
+	import { hasAnyRecord } from '$lib/game';
 	import { track } from '$lib/analytics';
 
 	/**
@@ -30,6 +31,13 @@
 		// 홈 화면에 설치한 PWA는 iOS에서 인앱 WebView와 UA가 구별되지 않는다.
 		// 잘 설치해서 쓰는 사람에게 "브라우저로 여세요"가 뜨는 게 최악이라 여기서 먼저 뺀다.
 		if (isStandalone()) return;
+
+		// 아직 아무것도 안 푼 사람에게 "기록이 남지 않아요"는 뜻이 통하지 않는다. 지킬 기록이
+		// 없기 때문이다. 실제로 네이버 검색으로 /matchstick에 들어온 23명 중 21명이 첫
+		// 방문이었고, 그 랜딩의 이탈률이 64%(홈은 35%)였다. 게이트를 본 40명 중 12명은
+		// 아무 버튼도 누르지 않고 그대로 나갔다.
+		// 그래서 첫 방문자는 그냥 풀게 두고, 기록이 생긴 다음 방문부터 안내한다.
+		if (!hasAnyRecord()) return;
 
 		const ua = navigator.userAgent;
 		const found = detectInApp(ua);
