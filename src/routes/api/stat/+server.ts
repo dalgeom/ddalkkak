@@ -1,5 +1,5 @@
 import { json } from '@sveltejs/kit';
-import { tallyKey, parseTally, applyResult, accuracyOf } from '$lib/stats';
+import { tallyKey, parseTally, applyResult, accuracyOf, type Tally } from '$lib/stats';
 import type { RequestHandler } from './$types';
 
 /**
@@ -31,4 +31,30 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 		// KV가 흔들려도 사용자는 아무것도 못 느껴야 한다
 		return json({ accuracy: null });
 	}
+};
+
+/**
+ * 쌓인 집계를 통째로 돌려준다 — 은행 품질을 실측으로 보기 위한 조회용이다.
+ *
+ * 여기서 나오는 건 문제 번호와 시도/정답 수뿐이고, 정답이나 사람에 대한 것은 없다.
+ * 쓰지 않고 읽기만 하므로 몇 번을 호출해도 집계가 오염되지 않는다 — POST로는
+ * 현황을 볼 수 없어서(보려면 한 건을 더 쌓아야 한다) 따로 열었다.
+ */
+export const GET: RequestHandler = async ({ platform, setHeaders }) => {
+	const kv = platform?.env?.STATS;
+	setHeaders({ 'cache-control': 'no-store' });
+	if (!kv) return json({ items: {}, total: 0 });
+
+	const items: Record<string, Tally> = {};
+	try {
+		let cursor: string | undefined;
+		do {
+			const page = await kv.list({ prefix: 'p:', limit: 1000, cursor });
+			for (const k of page.keys) items[k.name.slice(2)] = parseTally(await kv.get(k.name));
+			cursor = page.list_complete ? undefined : page.cursor;
+		} while (cursor);
+	} catch {
+		return json({ items, total: Object.keys(items).length, partial: true });
+	}
+	return json({ items, total: Object.keys(items).length });
 };

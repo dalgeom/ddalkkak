@@ -22,8 +22,10 @@ declare global {
 	interface KVNamespace {
 		get(key: string, type?: 'text'): Promise<string | null>;
 		put(key: string, value: string, options?: { expirationTtl?: number }): Promise<void>;
-		list(options?: { prefix?: string; limit?: number }): Promise<{
+		list(options?: { prefix?: string; limit?: number; cursor?: string }): Promise<{
 			keys: { name: string }[];
+			list_complete: boolean;
+			cursor?: string;
 		}>;
 	}
 }
