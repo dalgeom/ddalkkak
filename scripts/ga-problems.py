@@ -13,8 +13,11 @@ hints·wrong을 등록했으므로 그 이전 이벤트는 (not set)으로만 �
 읽는 법 — 문제설계명세의 목표 밴드는 노힌트 정답률 30~60%다.
   90% 이상  너무 쉽다(3초 룰 의심)     10% 미만  너무 어렵거나 문제가 고장났다
 """
-import os, sys
+import os, sys, io
 from collections import defaultdict
+
+# 윈도우 콘솔이 cp949라 한글이 깨진다
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
 
 if not os.environ.get("GOOGLE_APPLICATION_CREDENTIALS"):
     sys.exit("GOOGLE_APPLICATION_CREDENTIALS 환경변수에 서비스 계정 키 경로를 넣어라.")
