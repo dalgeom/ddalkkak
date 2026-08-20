@@ -19,7 +19,7 @@ import { spawn, spawnSync } from 'node:child_process';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
-const OUT = 'promo/video/쇼츠-전개도-연출.mp4';
+const OUT = 'promo/video/쇼츠-전개도-10.mp4';
 const FRAMES = join(tmpdir(), 'ddal-cscene-frames');
 const W = 1080, H = 1920, FPS = 30;
 
@@ -40,15 +40,15 @@ const C = {
 	gold: '#f6d34e', chipBg: '#e7f3ec', chipText: '#2f8f5b', warn: '#c0632e'
 };
 
-/* ── 문제: src/lib/cubenet.ts problemAt(42) 덤프 (dump-cubenet.test.ts로 재생성) ──
-   오답 구조: A·D는 마주 보는 면이 함께 보이고(빨강십자↔보라테두리, 파랑사각↔회색네점),
-   B는 정답 C의 왼·오가 뒤바뀐 거울상이다. */
+/* ── 문제: src/lib/cubenet.ts problemAt(10) 덤프 (dump-cubenet.mjs로 재생성) ──
+   오답 구조: A·C는 마주 보는 면이 함께 보이고(원↔테두리, 고리↔네점, 사각↔십자),
+   B는 정답 D의 왼·오가 뒤바뀐 거울상이다. */
 const 문제 = {
-	cells: [[0, 0], [0, 1], [1, 1], [1, 2], [1, 3], [2, 2]],
-	faceOf: [4, 0, 2, 3, 5, 1],
-	options: [[0, 3, 4], [0, 4, 5], [0, 5, 4], [2, 5, 4]],
-	answer: 2,
-	해설: '<b>A와 D</b>는 마주 보는 면이 함께 보여서, <b>B</b>는<br>정답의 왼쪽·오른쪽이 뒤바뀐 <b>거울상</b>이라 안 됩니다.'
+	cells: [[0,1],[1,1],[2,0],[2,1],[2,2],[3,0]],
+	faceOf: [2,0,1,4,5,3],
+	options: [[5,4,2],[5,2,3],[0,3,2],[5,3,2]],
+	answer: 3,
+	해설: '<b>A와 C</b>는 마주 보는 면이 함께 보여서, <b>B</b>는<br>정답의 왼쪽·오른쪽이 뒤바뀐 <b>거울상</b>이라 안 됩니다.'
 };
 const LETTERS = ['A', 'B', 'C', 'D'];
 
