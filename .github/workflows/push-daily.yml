@@ -1,0 +1,26 @@
+name: 매일 알림
+
+# 한국 아침 8시. GitHub 크론은 UTC라 23:00이 그 시각이다.
+# 습관은 하루의 고정된 시각에 붙기 때문에 방문이 가장 많은 오후가 아니라 아침으로 잡았다.
+# (크론은 몇 분 늦게 도는 일이 흔하다 — 정각을 보장하지 않는다.)
+on:
+  schedule:
+    - cron: '0 23 * * *'
+  workflow_dispatch: # 손으로도 한 번 돌려볼 수 있게
+
+jobs:
+  send:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm ci
+      - run: node scripts/send-push.mjs
+        env:
+          VAPID_PRIVATE_KEY: ${{ secrets.VAPID_PRIVATE_KEY }}
+          VAPID_SUBJECT: ${{ secrets.VAPID_SUBJECT }}
+          CF_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
+          CF_KV_NAMESPACE_ID: ${{ secrets.CF_KV_NAMESPACE_ID }}
+          CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}

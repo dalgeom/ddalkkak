@@ -31,6 +31,43 @@ sw.addEventListener('activate', (event) => {
 	);
 });
 
+/* ───────── 알림 ─────────
+ * 매일 아침 "오늘 문제가 나왔다"를 알린다. 본문은 발송 쪽에서 만들어 보내고,
+ * 못 읽었을 때를 대비해 기본 문구를 둔다. tag를 고정해 두면 며칠 못 본 알림이
+ * 쌓이지 않고 마지막 것 하나로 갈린다.
+ */
+sw.addEventListener('push', (event) => {
+	let data: { title?: string; body?: string; url?: string } = {};
+	try {
+		data = event.data?.json() ?? {};
+	} catch {
+		/* 형식이 어긋나면 기본 문구로 */
+	}
+	event.waitUntil(
+		sw.registration.showNotification(data.title ?? '딸깍', {
+			body: data.body ?? '오늘의 10문제가 나왔어요.',
+			icon: '/icon-192.png',
+			badge: '/icon-192.png',
+			tag: 'ddal-daily',
+			data: { url: data.url ?? '/' }
+		})
+	);
+});
+
+sw.addEventListener('notificationclick', (event) => {
+	event.notification.close();
+	const url = new URL(event.notification.data?.url ?? '/', location.origin).href;
+	event.waitUntil(
+		sw.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((list) => {
+			// 이미 열어둔 탭이 있으면 새 창을 띄우지 않고 그걸 앞으로 가져온다
+			for (const c of list) {
+				if (c.url.startsWith(location.origin) && 'focus' in c) return c.focus();
+			}
+			return sw.clients.openWindow(url);
+		})
+	);
+});
+
 sw.addEventListener('fetch', (event) => {
 	const req = event.request;
 	if (req.method !== 'GET') return;
