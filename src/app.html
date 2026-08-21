@@ -57,7 +57,17 @@
 			src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2389523583052577"
 			crossorigin="anonymous"
 		></script>
-		<!-- Google Analytics (GA4) -->
+		<!-- Google Analytics (GA4)
+		     자동화 브라우저는 세지 않는다. 배포한 기능을 프로덕션에서 확인할 때마다 헤드리스
+		     브라우저가 실제 방문으로 잡혀 세션 수와 이탈률을 왜곡했다 — 2026-08-20에 /matchstick
+		     세션이 평소 1~4에서 11로 튄 것이 전부 검증 접속이었다. GA4 공식 옵트아웃 플래그라
+		     스크립트를 지우지 않고도 전송만 멈춘다. -->
+		<script>
+			// webdriver 플래그는 CDP로 직접 붙으면 false라 못 믿는다. 헤드리스는 UA에 남는다.
+			if (/HeadlessChrome|Headless/i.test(navigator.userAgent) || location.search.includes('noga=1')) {
+				window['ga-disable-G-J30M6XGVJ6'] = true;
+			}
+		</script>
 		<script async src="https://www.googletagmanager.com/gtag/js?id=G-J30M6XGVJ6"></script>
 		<script>
 			window.dataLayer = window.dataLayer || [];
