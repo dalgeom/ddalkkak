@@ -5,6 +5,7 @@
 	import InAppGate from '$lib/components/InAppGate.svelte';
 	import { logoClicks } from '$lib/nav';
 	import { captureInstallPrompt } from '$lib/pwa';
+	import { page } from '$app/state';
 
 	let { children, data } = $props();
 	const year = new Date().getFullYear();
@@ -32,11 +33,21 @@
 			<span class="bulb" aria-hidden="true"></span>
 			<span class="name">딸깍</span>
 		</a>
-		<!-- "연습"만으로는 뭘 하는 곳인지 안 읽힌다. 원하는 만큼 계속 풀 수 있다는 걸 이름으로 알린다 -->
+		<!-- "연습"만으로는 뭘 하는 곳인지 안 읽힌다. 원하는 만큼 계속 풀 수 있다는 걸 이름으로 알린다.
+		     검색으로 들어온 사람은 상식·성냥개비 같은 낱개 페이지에 떨어진다(3주차 유입의 20%).
+		     그 화면에는 데일리로 가는 길이 맨 아래 CTA뿐이라 대부분 읽고 나갔다 — 방문 대비
+		     시작이 60%에서 26%로 떨어진 게 이것 때문이다. 그래서 홈이 아닐 때는 데일리를
+		     맨 앞에 세운다. 폭이 늘지 않게 가이드는 그때 접는다(푸터에 그대로 있다). -->
 		<nav>
+			{#if page.url.pathname !== '/'}
+				<a class="daily" href="/">오늘 문제</a>
+				<span class="sep" aria-hidden="true"></span>
+			{/if}
 			<a href="/play">무한 연습</a>
-			<span class="sep" aria-hidden="true"></span>
-			<a href="/guide">가이드</a>
+			{#if page.url.pathname === '/'}
+				<span class="sep" aria-hidden="true"></span>
+				<a href="/guide">가이드</a>
+			{/if}
 		</nav>
 	</header>
 
@@ -254,6 +265,11 @@
 	}
 	header nav a:hover {
 		color: var(--text);
+	}
+	/* 데일리는 이 사이트의 본체다. 다른 메뉴와 같은 무게로 두면 검색으로 온 사람이 지나친다 */
+	header nav a.daily {
+		color: var(--accent);
+		font-weight: 800;
 	}
 
 	.page {

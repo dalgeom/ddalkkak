@@ -34,11 +34,18 @@
 		</div>
 	</header>
 
+	<!-- 검색으로 이 페이지에 떨어진 사람은 찾던 답만 읽고 나간다. 26문제와 해설을 다 지나야
+	     데일리로 가는 길이 나오면 늦다 — 목록에 들어가기 전에 한 줄로 알린다. -->
+	<a class="daily-band" href="/">
+		<span class="t">이 문제들, 매일 <b>10문제</b>씩 새로 나와요</span>
+		<span class="go">오늘 문제 풀기 →</span>
+	</a>
+
 	<section class="sec">
 		<h2 class="sh">{data.category.title} 전체 문제와 해설</h2>
 		<p class="sub">
 			정답과 해설을 함께 적어 두었습니다. 직접 풀어보고 싶다면 아래 무한 연습에서 {data.category.name}만
-			골라 풀 수 있어요.
+			골라 풀 수도 있어요.
 		</p>
 		<ol class="list">
 			{#each data.items as q, i (q.id)}
@@ -65,8 +72,8 @@
 	</section>
 
 	<section class="sec ctas">
-		<a class="cta" href="/play?filter=trivia">상식 퀴즈 무한으로 풀기 <span aria-hidden="true">→</span></a>
-		<a class="cta ghost" href="/">오늘의 10문제 풀러 가기</a>
+		<a class="cta" href="/">오늘의 10문제 풀러 가기 <span aria-hidden="true">→</span></a>
+		<a class="cta ghost" href="/play?filter=trivia">상식 퀴즈 무한으로 풀기</a>
 	</section>
 
 	<section class="sec">
@@ -289,6 +296,36 @@
 	.cat b {
 		color: var(--accent);
 		font-variant-numeric: tabular-nums;
+	}
+
+	/* 목록 앞에 서는 한 줄. 광고처럼 보이면 안 되므로 배너가 아니라 안내 톤으로 둔다 */
+	.daily-band {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 12px;
+		margin-top: 18px;
+		padding: 14px 16px;
+		background: var(--correct-bg);
+		border: 1px solid var(--accent);
+		border-radius: 14px;
+		text-decoration: none;
+		color: var(--text);
+	}
+	.daily-band .t {
+		font-size: 14px;
+		font-weight: 700;
+		line-height: 1.5;
+		word-break: keep-all;
+	}
+	.daily-band .t b {
+		color: var(--accent);
+	}
+	.daily-band .go {
+		flex: none;
+		font-size: 13px;
+		font-weight: 800;
+		color: var(--accent);
 	}
 
 	.ctas {
