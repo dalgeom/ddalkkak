@@ -34,6 +34,14 @@
 		</div>
 	</header>
 
+	<!-- 문제 목록만 늘어놓으면 어디서나 볼 수 있는 상식 퀴즈와 구분이 안 된다.
+	     그 분야에서 무엇을 자주 틀리는지를 먼저 짚어 둔다 — 이건 은행을 실제로 훑어보고
+	     쓴 글이라 다른 데서 옮겨올 수 없는 내용이다. -->
+	<section class="sec">
+		<h2 class="sh">{data.category.name}, 어디서 갈리나</h2>
+		<p class="deep">{data.category.deepDive}</p>
+	</section>
+
 	<!-- 검색으로 이 페이지에 떨어진 사람은 찾던 답만 읽고 나간다. 26문제와 해설을 다 지나야
 	     데일리로 가는 길이 나오면 늦다 — 목록에 들어가기 전에 한 줄로 알린다. -->
 	<a class="daily-band" href="/">
@@ -299,6 +307,19 @@
 	}
 
 	/* 목록 앞에 서는 한 줄. 광고처럼 보이면 안 되므로 배너가 아니라 안내 톤으로 둔다 */
+	/* 분야별 편집 산문 — 문제 목록보다 먼저 읽히도록 본문 리듬으로 */
+	.deep {
+		margin-top: 10px;
+		font-size: 14px;
+		line-height: 1.85;
+		color: var(--muted);
+		word-break: keep-all;
+		background: var(--panel);
+		border: 1px solid var(--border-strong);
+		border-radius: 14px;
+		padding: 15px 16px;
+	}
+
 	.daily-band {
 		display: flex;
 		align-items: center;
