@@ -6,9 +6,9 @@
 	let { data }: { data: PageData } = $props();
 
 	const url = $derived(`https://ddalkkak.app/matchstick/${data.meta.slug}`);
-	const heading = $derived(`${data.meta.title} ${data.items.length}개`);
+	const heading = $derived(`${data.meta.title} ${data.count}개`);
 	const desc = $derived(
-		`${data.meta.title} ${data.items.length}개를 정답까지 한 페이지에 모았습니다. 푸는 요령을 먼저 읽고, 무한 연습에서 바로 풀어볼 수 있습니다.`
+		`${data.meta.title} ${data.count}개. 이 유형이 어떻게 갈리는지 대표 문제로 짚고, 왜 그 획을 옮기는지까지 설명합니다.`
 	);
 
 	// 대표 예시 — 문제와 정답을 나란히 놓는다
@@ -30,7 +30,7 @@
 		<nav class="crumb" aria-label="위치">
 			<a href="/matchstick">성냥개비</a><span aria-hidden="true">›</span><span>{data.meta.short}</span>
 		</nav>
-		<h1>{data.meta.title}<br /><b>{data.items.length}개</b></h1>
+		<h1>{data.meta.title}<br /><b>{data.count}개</b></h1>
 		<p class="lead">{data.meta.intro}</p>
 	</header>
 
@@ -68,20 +68,38 @@
 		</p>
 	</section>
 
+	<!-- 전에는 이 자리에 이 유형의 문제 수백 개를 식만 한 줄씩 늘어놓았다. 읽을 것이 없는
+	     기계 출력이라 애드센스가 '가치가 별로 없는 콘텐츠'로 두 번 반려하는 근거가 됐고,
+	     사실 정보량도 없었다 — self 유형은 293개가 열 가지 변환의 반복일 뿐이다.
+	     그래서 변환이 겹치지 않게 고른 대표만 싣고 왜 그 획이 그리로 가는지를 붙인다.
+	     나머지는 무한 연습에서 만난다. -->
 	<section class="sec">
-		<h2 class="sh">{data.meta.title} 전체와 정답</h2>
+		<h2 class="sh">{data.meta.title}, 이렇게 갈립니다</h2>
 		<p class="sub">
-			왼쪽이 문제, 오른쪽이 성냥 하나를 옮긴 뒤의 식입니다. 먼저 풀어보고 맞춰 보세요.
+			{data.meta.short === '한 숫자 안'
+				? '이 유형에서 일어날 수 있는 변환은 아래 열 가지가 전부입니다. 이것만 외워 두면 나머지는 어느 자리에 쓸지 고르는 문제입니다.'
+				: '서로 다른 변환을 하나씩 골랐습니다. 먼저 풀어보고 설명을 확인해 보세요.'}
 		</p>
-		<ol class="list">
-			{#each data.items as p (p.displayed)}
-				<li class="row">
-					<code class="q">{p.displayed}</code>
-					<span class="to" aria-hidden="true">→</span>
-					<code class="a">{p.solution}</code>
+		<ol class="picks">
+			{#each data.meta.featured as f, i (f.displayed)}
+				<li class="pick">
+					<div class="phead">
+						<span class="no">{i + 1}</span>
+						<span class="chg">{f.change}</span>
+					</div>
+					<div class="peq">
+						<code class="q">{f.displayed}</code>
+						<span class="to" aria-hidden="true">→</span>
+						<code class="a">{f.solution}</code>
+					</div>
+					<p class="pwhy">{f.why}</p>
 				</li>
 			{/each}
 		</ol>
+		<p class="note">
+			이 유형에 {data.count}개가 있습니다. 나머지는
+			<a href="/play?filter=match">무한 연습</a>에서 이어서 풀 수 있어요.
+		</p>
 	</section>
 
 	<section class="sec ctas">
@@ -265,6 +283,70 @@
 	.cat b {
 		color: var(--accent);
 		font-variant-numeric: tabular-nums;
+	}
+
+	.picks {
+		list-style: none;
+		margin: 14px 0 0;
+		padding: 0;
+		display: flex;
+		flex-direction: column;
+		gap: 10px;
+	}
+	.pick {
+		background: var(--panel);
+		border: 1px solid var(--border-strong);
+		border-radius: 14px;
+		padding: 14px 16px;
+	}
+	.phead {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+	}
+	.phead .no {
+		width: 22px;
+		height: 22px;
+		flex: none;
+		border-radius: 50%;
+		background: var(--accent);
+		color: #fff;
+		font-size: 12px;
+		font-weight: 800;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+	.phead .chg {
+		font-size: 13px;
+		font-weight: 700;
+		color: var(--muted);
+	}
+	.peq {
+		display: flex;
+		align-items: center;
+		gap: 10px;
+		margin-top: 10px;
+		flex-wrap: wrap;
+	}
+	.peq .q,
+	.peq .a {
+		font-size: 17px;
+		font-weight: 800;
+		letter-spacing: 0.5px;
+	}
+	.peq .a {
+		color: var(--accent);
+	}
+	.peq .to {
+		color: var(--muted-2);
+	}
+	.pwhy {
+		margin-top: 8px;
+		font-size: 13.5px;
+		line-height: 1.75;
+		color: var(--muted);
+		word-break: keep-all;
 	}
 
 	.ctas {
