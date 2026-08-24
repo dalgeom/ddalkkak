@@ -1097,6 +1097,71 @@
 			<a href="/archive">지난 문제</a>
 		</div>
 	</section>
+
+	<!-- ⑥ 읽는 자리. 여기까지 내려온 사람은 게임보다 '이게 뭐 하는 곳인가'가 궁금한 쪽이다.
+	     홈이 시작 버튼과 문제 카드뿐이면 사이트가 아니라 앱 실행 화면으로 읽힌다 —
+	     애드센스가 '가치가 별로 없는 콘텐츠'로 두 번 반려했을 때(8/11·8/21) 홈 본문이
+	     936자였다. 매일 바뀌는 문제 아래에, 바뀌지 않는 이야기를 둔다. -->
+	<section class="sec reveal d3 about">
+		<h2 class="sec-h">딸깍은 이런 곳입니다</h2>
+
+		<h3>매일 자정에 열 문제가 바뀝니다</h3>
+		<p>
+			발견형 세 문제, 상식 두 문제, 성냥개비 두 문제, 전개도 두 문제, 그리고 그날의 보너스
+			한 문제. 순서와 조합은 날짜에서 계산되기 때문에 <b>누가 언제 들어와도 같은 열 문제</b>를
+			만납니다. 어제 푼 사람과 오늘 푼 사람이 같은 이야기를 할 수 있어야 한다고 생각해서
+			그렇게 만들었습니다.
+		</p>
+		<p>
+			10분이면 끝납니다. 매일 하는 일이 15분을 넘기면 사흘째에 그만두게 된다는 걸
+			만들면서 여러 번 확인했습니다. 그래서 스무 문제도 다섯 문제도 아닌 열 문제입니다.
+		</p>
+
+		<h3>답을 아는 문제가 아니라, 규칙을 찾는 문제</h3>
+		<p>
+			딸깍의 중심은 <a href="/discover">발견형</a>입니다. 규칙은 어디에도 적혀 있지 않고
+			예시 몇 개와 물음표만 놓여 있습니다. <b>“2, 4, 8, 16” 다음은 뭘까요?</b> 같은 것이
+			아니라, 첫 번째 가설이 한 번은 죽어야 풀리는 문제들입니다.
+		</p>
+		<p>
+			문제를 고를 때 기준이 셋 있습니다. 모국어 화자에게 3초 안에 규칙이 보이면 뺍니다.
+			검색해서 알 수 있는 지식이면 뺍니다. 규칙을 알아챈 순간 “아” 소리가 안 나오면 뺍니다.
+			이 기준으로 <b>발견형 324문제 중 52개를 갈아엎은 적이 있습니다.</b> 지금 나오는 문제들은
+			그 뒤에 남거나 새로 들어온 것입니다.
+		</p>
+		<p>
+			막히면 힌트가 세 단계로 열립니다. 첫 힌트는 어디를 보라고만 하고, 두 번째는 무엇을
+			해보라고 하고, 세 번째에 규칙의 절반이 나옵니다. <b>정답은 마지막까지 알려주지 않습니다</b> —
+			힌트를 여는 순간이 포기하는 순간이 되면 발견이 사라지기 때문입니다.
+		</p>
+
+		<h3>기록은 이 브라우저에만 남습니다</h3>
+		<p>
+			회원가입도 로그인도 없습니다. 며칠 연속으로 풀었는지, 어떤 유형에 강한지는 전부
+			<a href="/record">이 브라우저 안</a>에 저장됩니다. 서버로 가는 것은 문제별 정답률을
+			내기 위한 익명 숫자뿐입니다. 자세한 것은 <a href="/privacy">개인정보처리방침</a>에
+			적어 두었습니다.
+		</p>
+
+		<h3>혼자 만들고 있습니다</h3>
+		<p>
+			딸깍은 한 사람이 만들고 매일 손보는 사이트입니다. 문제를 만들고, 버리고, 고치는
+			과정을 <a href="/read">읽을거리</a>에 적고 있습니다. 어떤 문제가 왜 탈락했는지,
+			성냥개비 741문제를 어떻게 프로그램으로 검증했는지 같은 이야기들입니다.
+		</p>
+
+		{#if data.latest?.length}
+			<div class="reads">
+				{#each data.latest as a (a.slug)}
+					<a class="read" href="/read/{a.slug}">
+						<span class="r-tag">{a.tag}</span>
+						<span class="r-t">{a.title}</span>
+						<span class="r-d">{a.description}</span>
+					</a>
+				{/each}
+			</div>
+		{/if}
+	</section>
 {:else if phase === 'play' && current}
 	<div class="topbar">
 		<button class="exit" onclick={quit}><span class="ar" aria-hidden="true">←</span>나가기</button>
@@ -1939,6 +2004,72 @@
 	.mall:active {
 		transform: translateY(2px);
 		box-shadow: 0 2px 0 var(--accent-press);
+	}
+
+	/* 읽는 자리 — 문제 카드와 달리 글의 리듬으로 읽히게 여백과 줄간격을 크게 잡는다 */
+	.about h3 {
+		margin: 22px 0 8px;
+		font-size: 16px;
+		font-weight: 800;
+		line-height: 1.5;
+		word-break: keep-all;
+	}
+	.about h3:first-of-type {
+		margin-top: 14px;
+	}
+	.about p {
+		font-size: 14px;
+		line-height: 1.85;
+		color: var(--muted);
+		word-break: keep-all;
+	}
+	.about p + p {
+		margin-top: 10px;
+	}
+	.about b {
+		color: var(--text);
+	}
+	.about a {
+		color: var(--accent);
+		font-weight: 700;
+	}
+	.reads {
+		margin-top: 20px;
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
+	}
+	.read {
+		display: flex;
+		flex-direction: column;
+		gap: 4px;
+		background: var(--panel);
+		border: 1px solid var(--border-strong);
+		border-radius: 14px;
+		padding: 13px 15px;
+		text-decoration: none;
+	}
+	.read .r-tag {
+		font-size: 11.5px;
+		font-weight: 800;
+		color: var(--accent);
+		background: var(--correct-bg);
+		border-radius: 7px;
+		padding: 3px 9px;
+		align-self: flex-start;
+	}
+	.read .r-t {
+		font-size: 14.5px;
+		font-weight: 800;
+		color: var(--text);
+		line-height: 1.5;
+		word-break: keep-all;
+	}
+	.read .r-d {
+		font-size: 12.5px;
+		color: var(--muted);
+		line-height: 1.65;
+		word-break: keep-all;
 	}
 
 	.catgrid {
