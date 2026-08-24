@@ -1296,7 +1296,7 @@ export const PROBLEMS: Problem[] = [
 		id: 'reverse-word-club',
 		chip: '클럽',
 		blocks: [
-			{ kind: 'pre', text: '되읽기 클럽\n\n회원: WARD, SNUB, REGAL, LIVED\n거절: HOUSE, TABLE, CHAIR\n\n다음 후보 중, 이 클럽에 가입할 수 있는 단어를 모두 고르시오.\n① EMIT  ② SPOON  ③ DENIM  ④ STONE' }
+			{ kind: 'pre', text: '되읽기 클럽\n\n회원: WARD, SNUB, REGAL, LIVED\n거절: HOUSE, TABLE, CHAIR\n\n다음 후보 중, 이 클럽에 가입할 수 있는 단어를 모두 고르시오.\n① EMIT       ② SPOON\n③ DENIM   ④ STONE' }
 		],
 		type: 'text',
 		answers: ['EMIT, DENIM', 'DENIM, EMIT', 'emit,denim'],
@@ -1311,7 +1311,7 @@ export const PROBLEMS: Problem[] = [
 		id: 'consonant-asc-club',
 		chip: '클럽',
 		blocks: [
-			{ kind: 'pre', text: '차례차례 클럽\n\n회원: BEGIN, COST, CHIMP\n거절: WORLD, STONE, GARDEN\n\n다음 후보 중, 이 클럽에 가입할 수 있는 단어를 모두 고르시오.\n① FLOW  ② SMART  ③ ABLE  ④ DEPTH' }
+			{ kind: 'pre', text: '차례차례 클럽\n\n회원: BEGIN, COST, CHIMP\n거절: WORLD, STONE, GARDEN\n\n다음 후보 중, 이 클럽에 가입할 수 있는 단어를 모두 고르시오.\n① FLOW   ② SMART\n③ ABLE     ④ DEPTH' }
 		],
 		type: 'text',
 		answers: ['FLOW, ABLE', 'ABLE, FLOW', 'flow,able'],
@@ -1759,7 +1759,7 @@ export const PROBLEMS: Problem[] = [
 			{ kind: 'text', html: '<b>겹친 글자 클럽</b>의 가입 기준을 찾아라.' },
 			{
 				kind: 'pre',
-				text: '회원 : THREE   SEVEN   NINE   TWELVE\n거절 : ONE     FOUR    FIVE   SIX\n\n후보 : EIGHT   ELEVEN  TEN    FIFTEEN'
+				text: '회원 :   THREE   SEVEN\n             NINE      TWELVE\n거절 :   ONE        FOUR\n             FIVE       SIX\n\n후보 :   EIGHT    ELEVEN\n             TEN       FIFTEEN'
 			},
 			{ kind: 'text', html: '후보 중 가입할 수 있는 단어를 <b>모두</b> 쓰세요.' }
 		],
@@ -1862,7 +1862,7 @@ export const PROBLEMS: Problem[] = [
 	{
 		id: 'disc-6',
 		chip: '수열',
-		blocks: [{ kind: 'text', html: '물음표에 들어갈 수는?' }, { kind: 'pre', text: '1001  2004  3009  4016  5025  ?' }],
+		blocks: [{ kind: 'text', html: '물음표에 들어갈 수는?' }, { kind: 'pre', text: '1001 2004 3009 4016 5025 ?' }],
 		type: 'text',
 		answers: ['6036'],
 		hints: [
@@ -3217,7 +3217,7 @@ export const PROBLEMS: Problem[] = [
 			{ kind: 'text', html: '<b>변신 클럽</b>의 가입 기준을 찾아라.' },
 			{
 				kind: 'pre',
-				text: '회원 : FOOT   TOOTH   GOOSE   MAN\n거절 : BOOK   MOON   DOG   PEN\n\n후보 : MOUSE   SPOON   WOMAN   SON'
+				text: '회원 :   FOOT         TOOTH\n             GOOSE     MAN\n거절 :   BOOK        MOON\n             DOG          PEN\n\n후보 :   MOUSE     SPOON\n             WOMAN   SON'
 			},
 			{ kind: 'text', html: '후보 중 가입할 수 있는 단어를 <b>모두</b> 쓰세요.' }
 		],
@@ -3297,7 +3297,7 @@ export const PROBLEMS: Problem[] = [
 			{ kind: 'text', html: '<b>비밀 파트너 클럽</b>의 가입 기준을 찾아라.' },
 			{
 				kind: 'pre',
-				text: '회원 : FLOWER   SHINE   RISE   GLASSES\n거절 : TABLE   HAPPY   WATER   MUSIC\n\n후보 : SET   LIGHT   MOON   BOOK'
+				text: '회원 :   FLOWER   SHINE\n             RISE          GLASSES\n거절 :   TABLE       HAPPY\n             WATER     MUSIC\n\n후보 :   SET            LIGHT\n             MOON      BOOK'
 			},
 			{ kind: 'text', html: '후보 중 가입할 수 있는 단어를 <b>모두</b> 쓰세요.' }
 		],
@@ -3317,7 +3317,7 @@ export const PROBLEMS: Problem[] = [
 			{ kind: 'text', html: '<b>일꾼 클럽</b>의 가입 기준을 찾아라.' },
 			{
 				kind: 'pre',
-				text: '회원 : TEACHER   SINGER   DRIVER   BAKER\n거절 : WATER   PAPER   RIVER   SUMMER\n\n후보 : DANCER   FINGER   PLAYER   UNDER'
+				text: '회원 :   TEACHER   SINGER\n             DRIVER       BAKER\n거절 :   WATER        PAPER\n             RIVER          SUMMER\n\n후보 :   DANCER      FINGER\n             PLAYER      UNDER'
 			},
 			{ kind: 'text', html: '후보 중 가입할 수 있는 단어를 <b>모두</b> 쓰세요.' }
 		],
@@ -3945,7 +3945,7 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'pre',
-				text: '합체 클럽\n\n회원: 물 + 개, 손 + 등, 밤 + 낮\n거절: 산 + 강, 별 + 꽃, 해 + 달\n\n다음 후보 중, 이 클럽에 가입할 수 있는 짝을 모두 고르시오.\n① 눈 + 물  ② 하늘 + 땅  ③ 발 + 등  ④ 봄 + 가을'
+				text: '합체 클럽\n\n회원: 물 + 개, 손 + 등, 밤 + 낮\n거절: 산 + 강, 별 + 꽃, 해 + 달\n\n다음 후보 중, 이 클럽에 가입할 수 있는 짝을 모두 고르시오.\n① 눈 + 물   ② 하늘 + 땅\n③ 발 + 등   ④ 봄 + 가을'
 			}
 		],
 		type: 'text',
@@ -4021,7 +4021,7 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'pre',
-				text: '양끝 클럽\n\n회원: KAYAK, ENGINE, WINDOW\n거절: APPLE, TIGER, HOUSE\n\n다음 후보 중, 이 클럽에 가입할 수 있는 단어를 모두 고르시오.\n① COMIC  ② ORANGE  ③ LEVEL  ④ SEVEN'
+				text: '양끝 클럽\n\n회원: KAYAK, ENGINE, WINDOW\n거절: APPLE, TIGER, HOUSE\n\n다음 후보 중, 이 클럽에 가입할 수 있는 단어를 모두 고르시오.\n① COMIC   ② ORANGE\n③ LEVEL     ④ SEVEN'
 			}
 		],
 		type: 'text',
@@ -5768,7 +5768,7 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'pre',
-				text: '형제 클럽\n\n회원: 사과–배, 참새–까치, 장미–튤립\n거절: 사과–나무, 참새–둥지, 장미–가시\n\n다음 후보 중, 이 클럽에 가입할 수 있는 짝을 모두 고르시오.\n① 개–고양이  ② 책–책상  ③ 봄–여름  ④ 손–손톱'
+				text: '형제 클럽\n\n회원: 사과–배, 참새–까치, 장미–튤립\n거절: 사과–나무, 참새–둥지, 장미–가시\n\n다음 후보 중, 이 클럽에 가입할 수 있는 짝을 모두 고르시오.\n① 개–고양이   ② 책–책상\n③ 봄–여름       ④ 손–손톱'
 			}
 		],
 		type: 'text',
