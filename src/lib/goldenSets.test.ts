@@ -3,7 +3,7 @@ import { join } from 'node:path';
 import { describe, it, expect } from 'vitest';
 import { PROBLEMS, fieldOfChip } from './problems';
 import { TRIVIA } from './trivia';
-import { buildDailySetStable, MATCH_TOTAL, SITE_START_DAY, PICK_V2_START_DAY } from './game';
+import { buildDailySetStable, MATCH_TOTAL, SITE_START_DAY, kstDayNumber } from './game';
 import { bankSizesAt } from './bankHistory';
 
 /**
@@ -21,7 +21,15 @@ import { bankSizesAt } from './bankHistory';
  * — 기존 날짜는 절대 덮어쓰지 않고 뒤에만 붙는다.
  */
 const FIXTURE = join(__dirname, 'golden-sets.json');
-const END_DAY = PICK_V2_START_DAY + 90;
+/**
+ * 어제까지만 박제한다.
+ *
+ * 처음에는 석 달 앞까지 미리 계산해 넣었는데, 그러면 은행에 문제를 더하는 순간
+ * 반드시 깨진다 — 아직 오지 않은 날의 세트가 바뀌는 것은 고장이 아니라 설계다.
+ * 안정 뽑기가 지키기로 한 것은 "이미 나간 날은 그대로"이지 "미래도 그대로"가 아니다.
+ * 오늘 것도 넣지 않는다. 자정 직전에 스냅샷을 뜨면 다음 날 아침 것과 엇갈린다.
+ */
+const END_DAY = kstDayNumber(Date.now()) - 1;
 
 type Golden = Record<string, { d: number[]; t: number[] }>;
 
@@ -53,7 +61,8 @@ describe('골든 스냅샷 — 출제 이력은 절대 바뀌지 않는다', () 
 			writeFileSync(FIXTURE, JSON.stringify(golden));
 		}
 		const golden: Golden = JSON.parse(readFileSync(FIXTURE, 'utf-8'));
-		const days = Object.keys(golden);
+		// 미래 날짜가 남아 있으면 지운다 — 은행이 자라면 어차피 달라진다
+		const days = Object.keys(golden).filter((d) => Number(d) <= END_DAY);
 		expect(days.length).toBeGreaterThanOrEqual(END_DAY - SITE_START_DAY);
 		for (const day of days) {
 			expect(computeDay(Number(day)), `day ${day} 세트가 픽스처와 다르다`).toEqual(golden[day]);
