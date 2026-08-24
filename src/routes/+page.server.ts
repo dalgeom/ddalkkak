@@ -1,6 +1,7 @@
 import { PROBLEMS, fieldOfChip, type Problem } from '$lib/problems';
 import { TRIVIA } from '$lib/trivia';
 import { TRIVIA_CATEGORIES } from '$lib/triviaCategories';
+import { ARTICLES } from '$lib/articles';
 import { kstDayNumber, buildDailySetStable, dailySample, displayChoices, MATCH_TOTAL } from '$lib/game';
 import { bankSizesAt } from '$lib/bankHistory';
 
@@ -41,9 +42,17 @@ export function load() {
 	const raw: Problem | undefined = PROBLEMS[idx];
 	const p = raw ? displayChoices(raw) : undefined;
 
+	// 홈에 최신 글 셋을 실어 둔다. 읽을거리가 푸터 링크 하나로만 닿아 있으면 사람도
+	// 크롤러도 사이트에 글이 있다는 걸 모른다.
+	const latest = [...ARTICLES]
+		.sort((a, b) => b.date.localeCompare(a.date))
+		.slice(0, 3)
+		.map((a) => ({ slug: a.slug, title: a.title, description: a.description, date: a.date, tag: a.tag }));
+
 	return {
 		dayNum,
 		categories: CATEGORY_LINKS,
+		latest,
 		// 필요한 필드만 골라 보낸다
 		sample: p
 			? {
