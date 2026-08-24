@@ -6,7 +6,10 @@
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<meta name="theme-color" content="#efe7d8" />
-		<link rel="icon" href="%sveltekit.assets%/favicon.svg" />
+		<!-- /favicon.ico는 링크가 없어도 브라우저와 크롤러가 무조건 찾아간다.
+		     없으면 404가 쌓여 Search Console에 잡히므로 파일을 두고 함께 건다. -->
+		<link rel="icon" href="%sveltekit.assets%/favicon.svg" type="image/svg+xml" />
+		<link rel="alternate icon" href="%sveltekit.assets%/favicon.ico" sizes="any" />
 		<link rel="manifest" href="%sveltekit.assets%/manifest.json" />
 		<!-- iOS 홈 화면 추가(서비스워커 없이도 동작) -->
 		<link rel="apple-touch-icon" href="%sveltekit.assets%/icon-192.png" />
