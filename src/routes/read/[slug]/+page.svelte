@@ -4,6 +4,32 @@
 	let { data }: { data: PageData } = $props();
 
 	const url = $derived(`https://ddalkkak.app/read/${data.article.slug}`);
+
+	/** 글쓴이. 1인이 만들고 쓰는 사이트라 사이트 이름을 그대로 쓴다. */
+	const AUTHOR = '딸깍';
+
+	/* 누가 언제 쓴 글인지를 검색엔진이 읽을 수 있게 남긴다. 사람 눈에는 제목 아래 한 줄로
+	   보이고, 여기서는 같은 사실을 구조화해서 한 번 더 적는다 — 게시자가 실재하고 글이
+	   관리되고 있다는 신호다. */
+	const articleLd = $derived(
+		JSON.stringify({
+			'@context': 'https://schema.org',
+			'@type': 'Article',
+			headline: data.article.title,
+			description: data.article.description,
+			datePublished: data.article.date,
+			dateModified: data.article.date,
+			articleSection: data.article.tag,
+			inLanguage: 'ko',
+			author: { '@type': 'Person', name: AUTHOR },
+			publisher: {
+				'@type': 'Organization',
+				name: '딸깍',
+				url: 'https://ddalkkak.app'
+			},
+			mainEntityOfPage: { '@type': 'WebPage', '@id': url }
+		})
+	);
 </script>
 
 <svelte:head>
@@ -14,6 +40,9 @@
 	<meta property="og:description" content={data.article.description} />
 	<meta property="og:url" content={url} />
 	<meta property="og:type" content="article" />
+	<meta property="article:published_time" content={data.article.date} />
+	<meta property="article:author" content={AUTHOR} />
+	{@html `<script type="application/ld+json">${articleLd}</` + `script>`}
 </svelte:head>
 
 <article>
@@ -22,7 +51,11 @@
 			<a href="/read">읽을거리</a><span aria-hidden="true">›</span><span>{data.article.tag}</span>
 		</nav>
 		<h1>{data.article.title}</h1>
-		<time datetime={data.article.date}>{data.article.date.replaceAll('-', '.')}</time>
+		<p class="byline">
+			<span class="who">{AUTHOR}</span>
+			<span class="sep" aria-hidden="true">·</span>
+			<time datetime={data.article.date}>{data.article.date.replaceAll('-', '.')}</time>
+		</p>
 	</header>
 
 	<div class="body">
@@ -73,6 +106,17 @@
 		line-height: 1.4;
 		letter-spacing: -0.4px;
 		word-break: keep-all;
+	}
+	.byline {
+		display: flex;
+		align-items: center;
+		gap: 6px;
+		font-size: 12.5px;
+		color: var(--muted-2);
+	}
+	.byline .who {
+		font-weight: 700;
+		color: var(--muted);
 	}
 	time {
 		font-size: 12.5px;
