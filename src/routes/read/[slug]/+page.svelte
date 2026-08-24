@@ -180,6 +180,37 @@
 		text-align: center;
 		word-break: keep-all;
 	}
+	/* 전개도 모양을 여러 장 늘어놓는 자리 — 좁은 화면에서도 두 장은 들어가게 */
+	.body :global(.netgrid) {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
+		gap: 14px 10px;
+		margin: 16px 0;
+		padding: 16px 12px;
+		background: var(--panel-2);
+		border-radius: 14px;
+	}
+	.body :global(.netcell) {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: flex-end;
+		gap: 7px;
+	}
+	/* 모양마다 칸 수와 비율이 달라서, 너비를 100%로 늘리면 한 줄짜리는 납작해지고
+	   계단형은 커진다. 원래 크기를 지키고 가운데로만 모은다 — 그래야 칸 크기가 같아
+	   서로 비교가 된다. */
+	.body :global(.netcell svg) {
+		max-width: 100%;
+		height: auto;
+	}
+	.body :global(.netcell span) {
+		font-size: 11.5px;
+		font-weight: 700;
+		color: var(--muted-2);
+		text-align: center;
+	}
+
 	.body :global(.mfig) {
 		display: flex;
 		flex-direction: column;
