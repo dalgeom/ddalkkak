@@ -5,8 +5,8 @@
  *
  * scene-discover.mjs와 같은 방식. 보드는 MatchstickBoard.svelte의 좌표·색을
  * 그대로 옮겼다 — 검은 보드, 켜진 성냥은 네온 초록, 집으면 주황.
- * 정답 공개에서 +의 세로 성냥이 주황으로 집혔다가 0의 가운데로 날아가
- * 초록으로 안착한다. 사이트에서 정답 볼 때 나오는 그 연출이다.
+ * 정답 공개에서 옮길 성냥이 주황으로 집혔다가 목적지로 날아가 초록으로
+ * 안착한다. 사이트에서 정답 볼 때 나오는 그 연출이다.
  *
  * CSS 애니메이션을 전부 멈춰 두고 Web Animations API로 currentTime을 직접
  * 밀어 한 프레임씩 찍는다. 몇 번을 돌려도 같은 영상이 나온다.
@@ -16,18 +16,17 @@ import { spawn, spawnSync } from 'node:child_process';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
-const OUT = 'promo/video/쇼츠-성냥개비-연출.mp4';
 const FRAMES = join(tmpdir(), 'ddal-mscene-frames');
 const W = 1080, H = 1920, FPS = 30;
 
 /* ── 타임라인(초). 소리와 맞춰야 한다 ── */
 const T = {
-	glyphs: [0.55, 0.75, 0.95, 1.15, 1.35], // 0, +, 2, =, 6 이 차례로 켜진다
+	glyphs: [0.55, 0.75, 0.95, 1.15, 1.35], // 식의 다섯 글자가 차례로 켜진다
 	quest: 1.75,                             // "지금은 틀린 식입니다"
 	tickFrom: 2.1,                           // 카운트다운 시작
-	pick: 5.6,                               // 세로 성냥이 주황으로 집힌다
+	pick: 5.6,                               // 옮길 성냥이 주황으로 집힌다
 	fly: 6.1,                                // 날아간다 (0.9초)
-	land: 7.0,                               // 안착 — 8 - 2 = 6
+	land: 7.0,                               // 안착 — solution이 완성된다
 	rule: 7.35,                              // 규칙 설명
 	brand: 8.2,                              // 주소
 	total: 11.9
@@ -39,7 +38,51 @@ const C = {
 	gold: '#f6d34e', chipBg: '#e7f3ec', chipText: '#2f8f5b', warn: '#c0632e'
 };
 
-/* ── 문제: matchstick-problems.json의 '0 + 2 = 6' -> '8 - 2 = 6' ── */
+/* ── 문제 ──
+   matchstick-problems.json의 한 줄을 그대로 옮긴다. 어느 성냥이 어디로 가는지는
+   dump-matchstick.mjs가 두 식의 세그먼트 차이로 계산해 준다 — 손으로 좌표를 잡던
+   것을 자동화한 것이라, 문제를 바꾸려면 이 블록만 갈아 끼우면 된다.
+   지원하는 모양은 '한 자리 X (+|-) 한 자리 Y = 한 자리 Z' 하나뿐이다. */
+const 문제 = {
+	displayed: '1 - 6 = 7',
+	solution: '7 - 6 = 1',
+	from: [4, 'a'], // 결과 7의 윗획을 집어
+	to: [0, 'a']    // 맨 앞 1의 윗획으로 옮기면 1과 7이 자리를 바꾼 것처럼 보인다
+};
+/* ── 해설 문구는 문제에서 뽑는다 ──
+   손으로 적어 두면 문제만 갈고 문구는 그대로 남는다. 2026-08-24에 실제로 그렇게
+   나갔다 — 화면은 1-6=7인데 해설은 앞 문제의 「8 − 2 = 6」이 붙은 영상을 만들었다.
+   from/to의 자리와 획을 우리말로 옮겨 문장을 만들면 어긋날 수가 없다. */
+const 획이름 = {
+	a: '윗획', b: '오른쪽 위', c: '오른쪽 아래', d: '아랫획',
+	e: '왼쪽 아래', f: '왼쪽 위', g: '가운뎃획'
+};
+/** 숫자를 읽은 소리의 받침 — 조사가 갈린다. 일·칠은 「은」, 이·사는 「는」 */
+const 받침있음 = [true, true, false, true, false, false, true, true, true, false];
+const 을를 = (w) => (/[가-힣]$/.test(w) && (w.charCodeAt(w.length - 1) - 0xac00) % 28 ? '을' : '를');
+
+function 해설() {
+	const 식글자 = [...문제.displayed.replace(/ /g, '')];
+	const 답글자 = [...문제.solution.replace(/ /g, '')];
+	/** 식에서 i번째 글자를 뭐라 부를지 — 1은 연산자, 3은 등호, 나머지는 숫자 */
+	const 자리 = (i) => (i === 1 ? `연산자 ${식글자[i]}` : i === 3 ? '등호' : 식글자[i]);
+	const 집 = `${자리(문제.from[0])}의 ${획이름[문제.from[1]]}`;
+	const 놓 = `${자리(문제.to[0])}의 ${획이름[문제.to[1]]}`;
+	const 바뀐 = 식글자
+		.map((c, i) => {
+			if (c === 답글자[i]) return null;
+			const 은는 = /\d/.test(c) && 받침있음[Number(c)] ? '은' : '는';
+			return `${c}${은는} ${답글자[i]}로`;
+		})
+		.filter(Boolean);
+	return { 집, 놓, 집조사: 을를(집), 결과: 바뀐.length ? `${바뀐.join(', ')} 바뀝니다.` : '식이 성립합니다.' };
+}
+const 설명 = 해설();
+
+const OUT = `promo/video/쇼츠-성냥개비-${문제.displayed.replace(/ /g, '')}.mp4`;
+const 식 = 문제.displayed.replace(/ /g, '');
+const [D0, OPCH, D1, , D2] = [...식].map((c, i) => (i === 1 || i === 3 ? c : Number(c)));
+
 
 /* MatchstickBoard.svelte와 같은 좌표계 */
 const SEG_RECT = {
@@ -57,13 +100,25 @@ const EQX = X1 + GW + GAP;               // 192
 const X2 = EQX + EQW + GAP;              // 242
 const BW = X2 + GW;                      // 296
 
-/* 날아가는 성냥: + 세로(OPX+17, 30, 8x35) -> 0의 g(X0+10, 43.5, 34x8) */
-const FLY_FROM = { x: OPX + 17, y: 30, w: 8, h: 35 };
-const FLY_TO = { x: X0 + 10, y: 43.5, w: 34, h: 8 };
+/* 자리 번호(식의 글자 위치) → 화면 x. 연산자·등호는 폭이 달라 따로 잡는다 */
+const SLOT_X = { 0: X0, 1: OPX, 2: X1, 3: EQX, 4: X2 };
+/* 연산자 획도 세그먼트처럼 다룬다 — h는 가로, v는 세로(+에만 있다) */
+const OP_RECT = { h: [4, 43.5, 34, 8], v: [17, 30, 8, 35] };
+
+/** 자리와 세그먼트 이름으로 화면 사각형을 만든다 */
+function rectOf([slot, seg]) {
+	const box = OP_RECT[seg] ?? SEG_RECT[seg];
+	if (!box) throw new Error(`모르는 세그먼트: ${seg}`);
+	const [rx, ry, rw, rh] = box;
+	return { x: SLOT_X[slot] + rx, y: ry, w: rw, h: rh };
+}
+
+const FLY_FROM = rectOf(문제.from);
+const FLY_TO = rectOf(문제.to);
 
 /** 숫자 하나의 세그먼트들. 켜진 것은 lit, 꺼진 것은 ghost 슬롯. */
-function digit(x, d, cls) {
-	const on = DIGIT_SEGS[d];
+function digit(x, d, cls, skip = '') {
+	const on = DIGIT_SEGS[d].replace(skip, '');
 	// 바깥 g는 위치만 잡는다. CSS transform 애니메이션을 바깥에 걸면
 	// transform:none이 translate 속성을 덮어써 글리프가 전부 원점에 쌓인다.
 	return `<g transform="translate(${x} 0)"><g class="${cls}">` +
@@ -73,20 +128,34 @@ function digit(x, d, cls) {
 		`</g></g>`;
 }
 
+/** 그 자리에서 날아갈 성냥은 보드에서 빼 둔다 — flyer가 대신 그린다 */
+const skipAt = (slot) => (문제.from[0] === slot ? 문제.from[1] : '');
+
+/** 연산자 — 날아갈 획은 빼고 그린다 */
+function opGlyph() {
+	const parts = OPCH === '+' ? ['h', 'v'] : ['h'];
+	const skip = skipAt(1);
+	return parts
+		.filter((k) => k !== skip)
+		.map((k) => {
+			const [rx, ry, rw, rh] = OP_RECT[k];
+			return `<rect x="${rx}" y="${ry}" width="${rw}" height="${rh}" rx="3" class="fixed"/>`;
+		})
+		.join('');
+}
+
 const board = `
 <svg class="fit" viewBox="-4 -4 ${BW + 8} ${GH + 8}">
-  ${digit(X0, 0, 'gl g0')}
-  <g transform="translate(${OPX} 0)"><g class="gl g1">
-    <rect x="4" y="43.5" width="34" height="8" rx="3" class="fixed"/>
-  </g></g>
-  ${digit(X1, 2, 'gl g2')}
+  ${digit(X0, D0, 'gl g0', skipAt(0))}
+  <g transform="translate(${OPX} 0)"><g class="gl g1">${opGlyph()}</g></g>
+  ${digit(X1, D1, 'gl g2', skipAt(2))}
   <g transform="translate(${EQX} 0)"><g class="gl g3">
     <rect x="1" y="37" width="30" height="7" rx="3" class="fixed"/>
     <rect x="1" y="51" width="30" height="7" rx="3" class="fixed"/>
   </g></g>
-  ${digit(X2, 6, 'gl g4')}
-  <!-- 0의 g 자리는 빈 슬롯 — 날아온 성냥이 여기 안착한다. 슬롯은 digit(0)이 이미 ghost로 그렸다 -->
-  <!-- 날아가는 성냥: 처음엔 +의 세로획으로 초록, 집히면 주황, 안착하면 다시 초록 -->
+  ${digit(X2, D2, 'gl g4', skipAt(4))}
+  <!-- 도착 자리는 digit()이 이미 ghost 슬롯으로 그려 두었다 -->
+  <!-- 날아가는 성냥: 처음엔 원래 자리에서 초록, 집히면 주황, 안착하면 다시 초록 -->
   <rect class="flyer" rx="3"/>
 </svg>`;
 
@@ -226,10 +295,10 @@ ${[0, 1, 2, 3].map((i) => `.timer .num span:nth-child(${i + 1}){animation-delay:
   <div class="mboard">${board}</div>
   <div class="quest">
     <span class="before">지금은 틀린 식입니다</span>
-    <span class="after">8 − 2 = 6 &nbsp;딸깍!</span>
+    <span class="after">${문제.solution.replace(/-/g, '−')} &nbsp;딸깍!</span>
   </div>
-  <div class="rule"><b>+의 세로 성냥</b>을 뽑아 <b>0의 가운데</b>에 놓으면<br>
-    +는 −가 되고 0은 8이 됩니다.</div>
+  <div class="rule"><b>${설명.집}</b>${설명.집조사} 뽑아 <b>${설명.놓}</b>에 놓으면<br>
+    ${설명.결과}</div>
 </div>
 
 <div class="timer">
@@ -406,3 +475,29 @@ if (r.status !== 0) {
 console.log(`\n${OUT} (${T.total}초, ${W}x${H})`);
 rmSync(work, { recursive: true, force: true });
 rmSync(FRAMES, { recursive: true, force: true });
+
+/* ── 올릴 때 쓸 제목·설명 ──
+   promo/쇼츠-올리기.md의 성냥개비 예시 설명은 「0 + 8 = 3」에 박혀 있다. 문제를
+   갈아도 그 문서는 안 따라오니 매번 손으로 고쳐야 하고, 그러다 자막이 어긋난 것과
+   같은 사고가 난다. 문제를 아는 건 이 스크립트뿐이니 여기서 같이 찍는다.
+   틀은 쇼츠-올리기.md의 「제목·태그 표준(2026-08-12 고정)」 그대로다. */
+console.log(`
+─────────── 올릴 때 쓸 것 ───────────
+[제목]
+성냥 하나만 옮겨서 참으로 만들 수 있나요? #shorts
+
+[설명]
+${문제.displayed}
+
+성냥 하나를 집어서 다른 자리에 놓으면 참이 됩니다.
+부러뜨리거나 빼면 안 돼요.
+
+이런 문제가 741개 있습니다. 전부 프로그램이 만들고 프로그램이 검증했어요.
+답이 하나뿐이라는 것도 코드가 보증합니다.
+
+ddalkkak.app/matchstick
+
+#딸깍 #두뇌퍼즐 #퍼즐 #성냥개비 #성냥개비퀴즈
+
+[정답] ${문제.solution} — ${설명.집}${설명.집조사} 뽑아 ${설명.놓}에 놓는다
+─────────────────────────────────────`);
