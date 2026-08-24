@@ -42,6 +42,40 @@ describe('성냥개비 유형 페이지', () => {
 		}
 	});
 
+	it('대표 문제가 전부 데이터에 있고 그 유형이다', () => {
+		// 741개 나열 대신 이것만 싣는다. 손으로 적은 데이터라 은행이 바뀌면 여기서 걸려야 한다.
+		for (const k of MATCH_KINDS) {
+			for (const f of k.featured) {
+				const found = PROBLEMS.find((p) => p.displayed === f.displayed);
+				expect(found, `${k.slug}: ${f.displayed}`).toBeDefined();
+				expect(found!.solution, `${k.slug}: ${f.displayed}`).toBe(f.solution);
+				expect(kindOf(f.displayed, f.solution), `${k.slug}: ${f.displayed}`).toBe(k.kind);
+			}
+		}
+	});
+
+	it('대표 문제가 유형마다 충분하고 서로 겹치지 않는다', () => {
+		for (const k of MATCH_KINDS) {
+			expect(k.featured.length, k.slug).toBeGreaterThanOrEqual(8);
+			const eqs = k.featured.map((f) => f.displayed);
+			expect(new Set(eqs).size, `${k.slug} 중복`).toBe(eqs.length);
+			// 같은 변환만 반복하면 대표로 싣는 뜻이 없다
+			const changes = k.featured.map((f) => f.change);
+			expect(new Set(changes).size, `${k.slug} 변환 중복`).toBeGreaterThanOrEqual(
+				Math.ceil(k.featured.length * 0.7)
+			);
+		}
+	});
+
+	it('설명이 비어 있지 않다', () => {
+		for (const k of MATCH_KINDS) {
+			for (const f of k.featured) {
+				expect(f.why.length, `${k.slug}: ${f.displayed}`).toBeGreaterThan(20);
+				expect(f.change.length, `${k.slug}: ${f.displayed}`).toBeGreaterThan(2);
+			}
+		}
+	});
+
 	it('슬러그가 중복되지 않고 guide와 겹치지 않는다', () => {
 		const slugs = MATCH_KINDS.map((k) => k.slug);
 		expect(new Set(slugs).size).toBe(slugs.length);
