@@ -1,7 +1,8 @@
+import { execSync } from 'node:child_process';
 import { describe, it, expect } from 'vitest';
 import { PROBLEMS } from './problems';
 import { TRIVIA } from './trivia';
-import { BANK_HISTORY_ALL, BANK_HISTORY_LAST } from './bankHistory';
+import { BANK_HISTORY_ALL, BANK_HISTORY_LAST, bankSizesAt } from './bankHistory';
 import { kstDayNumber } from './game';
 
 /**
@@ -18,17 +19,45 @@ describe('은행 무결성 — 사람 규율을 기계로', () => {
 		});
 	});
 
-	it('bankHistory의 fromDay는 오늘보다 미래거나, 이미 지나간 이력이다', () => {
-		// 새 엔트리를 "오늘"로 적으면 낮에 세트가 바뀐다. 미래(내일 이후)로 적어야 한다.
-		// 이미 배포돼 지나간 엔트리는 당연히 과거이므로, 마지막 엔트리만 본다.
+	/**
+	 * 지키려는 것은 "낮에 오늘 세트가 바뀌지 않는다"이다.
+	 *
+	 * 원래는 마지막 엔트리의 fromDay가 오늘이면 실패시켰는데, 그러면 **문제를 추가한
+	 * 다음 날 하루 종일 CI가 빨개진다.** 어제 fromDay를 내일(20690)로 올바르게 적어도
+	 * 오늘이 20690이 되는 순간 "오늘로 적었다"로 잡히기 때문이다(2026-08-25에 발생).
+	 * 날짜가 흐른 것과 규율을 어긴 것을 구별하지 못하는 검사였다.
+	 *
+	 * 그래서 날짜 대신 **결과**를 본다 — origin/main이 오늘 쓰는 은행 크기와 지금
+	 * 작업본이 오늘 쓰는 크기가 같으면 낮에 세트가 바뀔 일이 없다. 미래 엔트리를 아무리
+	 * 더해도 통과하고, 오늘 자리를 건드리면 날짜를 어떻게 적었든 걸린다.
+	 */
+	it('오늘 쓰는 은행 크기가 origin/main과 같다 — 낮에 세트가 바뀌지 않는다', () => {
+		let raw: string;
+		try {
+			raw = execSync('git show origin/main:src/lib/bankHistory.ts', {
+				encoding: 'utf-8',
+				stdio: ['ignore', 'pipe', 'ignore']
+			});
+		} catch {
+			return; // 기준선을 못 읽는 환경 — 검증 못 하는 것과 위반은 다르다
+		}
+		const rows = [...raw.matchAll(/fromDay:\s*(\d+),\s*discover:\s*(\d+),\s*trivia:\s*(\d+)/g)].map(
+			(m) => ({ fromDay: +m[1], discover: +m[2], trivia: +m[3] })
+		);
+		expect(rows.length, 'origin/main의 bankHistory를 파싱하지 못했다 — 파싱 규칙 확인').toBeGreaterThan(0);
+
 		const today = kstDayNumber(Date.now());
-		const last = BANK_HISTORY_ALL[BANK_HISTORY_ALL.length - 1];
-		const isPast = last.fromDay < today;
-		const isFuture = last.fromDay > today;
-		expect(
-			isPast || isFuture,
-			`마지막 bankHistory 엔트리(fromDay ${last.fromDay})가 오늘이다 — 내일(${today + 1}) 이후로 적어라`
-		).toBe(true);
+		const at = (list: typeof rows) => {
+			let cur = list[0];
+			for (const h of list) {
+				if (h.fromDay > today) break;
+				cur = h;
+			}
+			return { discover: cur.discover, trivia: cur.trivia };
+		};
+		expect(at(rows), `오늘(${today}) 쓰는 은행 크기가 바뀌었다 — 새 엔트리는 내일 이후로 적어라`).toEqual(
+			bankSizesAt(today)
+		);
 	});
 
 	it('은행은 줄어들지 않는다 — 삭제는 프리픽스 불변식을 깬다', () => {

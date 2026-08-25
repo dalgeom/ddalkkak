@@ -495,7 +495,7 @@ ${문제.displayed}
 이런 문제가 741개 있습니다. 전부 프로그램이 만들고 프로그램이 검증했어요.
 답이 하나뿐이라는 것도 코드가 보증합니다.
 
-ddalkkak.app/matchstick
+ddalkkak.app/matchstick?utm_source=youtube
 
 #딸깍 #두뇌퍼즐 #퍼즐 #성냥개비 #성냥개비퀴즈
 
