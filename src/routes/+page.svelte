@@ -241,10 +241,28 @@
 	let sampleDone = $state(false);
 	let sampleOk = $state(false);
 
+	/**
+	 * 맛보기는 GA에 아무 흔적도 남기지 않고 있었다.
+	 *
+	 * 홈에 와서 맛보기를 푼 사람은 daily_start를 찍지 않으니 "방문했지만 아무것도 안 한
+	 * 사람"으로 잡힌다. 그래서 8/24의 시작률 21%가 진짜 이탈인지, 맛보기만 풀고 만족해서
+	 * 간 것인지 구분할 수가 없었다. 랜딩을 고치기 전에 이것부터 보이게 한다.
+	 *
+	 * try는 시도 자체를, go는 맛보기에서 데일리로 넘어간 것을 센다 — 이 둘의 비율이
+	 * 맛보기가 데일리를 잡아먹는지 데려오는지를 알려준다.
+	 */
+	let sampleTried = $state(false);
+
+	function noteSampleTry(ok: boolean) {
+		track('sample_try', { ok, first: !sampleTried, chip: data.sample?.chip ?? '' });
+		sampleTried = true;
+	}
+
 	function sampleSubmitText() {
 		if (sampleDone || !data.sample || !sampleValue.trim()) return;
 		// 본 게임과 같은 판정(isCorrectText) — 랜딩에서만 더 엄격하면 같은 답이 오답이 된다
 		sampleOk = isCorrectText({ answers: data.sample.answers } as Problem, sampleValue);
+		noteSampleTry(sampleOk);
 		if (sampleOk) sampleDone = true;
 		else sampleShake = true;
 		setTimeout(() => (sampleShake = false), 420);
@@ -253,11 +271,18 @@
 		if (sampleDone || !data.sample) return;
 		samplePicked = i;
 		sampleOk = i === data.sample.answerIndex;
+		noteSampleTry(sampleOk);
 		sampleDone = true;
 	}
 	function sampleReveal() {
+		track('sample_reveal', { tried: sampleTried, chip: data.sample?.chip ?? '' });
 		sampleOk = false;
 		sampleDone = true;
+	}
+	/** 맛보기를 풀고 나서 데일리로 넘어간 사람 — 맛보기가 데려온 것인지 여기서 갈린다 */
+	function sampleGo() {
+		track('sample_go', { ok: sampleOk });
+		startOrResume();
 	}
 	let sampleShake = $state(false);
 
@@ -990,7 +1015,7 @@
 
 					<!-- 몰입이 끝난 바로 이 순간이 전환 지점이다. 위로 스크롤해 CTA를 찾게 두지 않는다. -->
 					{#if untouched}
-						<button class="sample-go" onclick={startOrResume} disabled={loading}>
+						<button class="sample-go" onclick={sampleGo} disabled={loading}>
 							{sampleOk ? '딸깍! 이런 문제가 오늘 10개' : '오늘의 10문제 풀어보기'}
 							<span class="arr" aria-hidden="true">→</span>
 						</button>
@@ -1048,56 +1073,10 @@
 
 	<div class="adwrap reveal d3"><AdSlot label="랜딩 하단" /></div>
 
-	<!-- ④ 10문제로 부족한 사람 — 유형별로 바로 들어가게 -->
-	<section class="sec reveal d3">
-		<div class="more">
-			<p class="more-h">더 풀고 싶다면?</p>
-			<p class="more-s">
-				딸깍이 준비한 <b>{TOTAL_PROBLEMS.toLocaleString()}</b>문제! 유형별로 계속 풀어봐요
-			</p>
-			<div class="more-grid">
-				<a class="mbtn" href="/play?filter=puzzle">
-					<span class="mb-t">발견형</span>
-					<span class="mb-n">{KIND_COUNT.discover}</span>
-				</a>
-				<a class="mbtn" href="/play?filter=trivia">
-					<span class="mb-t">상식</span>
-					<span class="mb-n">{KIND_COUNT.trivia}</span>
-				</a>
-				<a class="mbtn" href="/play?filter=match">
-					<span class="mb-t">성냥개비</span>
-					<span class="mb-n">{KIND_COUNT.match}</span>
-				</a>
-				<a class="mbtn" href="/play?filter=cube">
-					<span class="mb-t">전개도</span>
-					<span class="mb-n">{KIND_COUNT.cube}</span>
-				</a>
-			</div>
-			<a class="mall" href="/play?filter=all">
-				전부 섞어서 풀기 <span class="arr" aria-hidden="true">→</span>
-			</a>
-		</div>
-	</section>
-
-	<!-- ⑤ 문제를 눈으로 훑고 싶은 사람 — 푸는 게 아니라 읽는 입구.
-	     분야별 페이지가 푸터 링크 하나로만 닿아 있어서 사람도 크롤러도 못 찾았다. -->
-	<section class="sec reveal d3">
-		<h2 class="sec-h">분야별로 골라 보기<span>정답·해설 포함</span></h2>
-		<div class="catgrid">
-			{#each data.categories as c (c.slug)}
-				<a class="catlink" href="/trivia/{c.slug}">{c.name}<b>{c.count}</b></a>
-			{/each}
-		</div>
-		<div class="deeplinks">
-			<a href="/read">읽을거리</a>
-			<a href="/discover">발견형 퍼즐이란</a>
-			<a href="/matchstick/guide">성냥개비 푸는 법</a>
-			<a href="/cubenet/guide">전개도 푸는 법</a>
-			<a href="/guide">발견형 푸는 법</a>
-			<a href="/archive">지난 문제</a>
-		</div>
-	</section>
-
+	<!-- 순서를 바꾼 이유: 오늘 것을 아직 안 푼 사람에게 전체 문제 카탈로그를 먼저
+	     들이밀고 있었다. 8/24에 /matchstick 9PV·/cubenet 6PV로 실제로 그쪽으로 샜다.
+	     「여기가 뭐 하는 곳인가」를 먼저 읽히고, 더 풀고 싶은 사람만 카탈로그로 보낸다.
+	     크롤러도 소개 본문을 더 일찍 만난다. -->
 	<!-- ⑥ 읽는 자리. 여기까지 내려온 사람은 게임보다 '이게 뭐 하는 곳인가'가 궁금한 쪽이다.
 	     홈이 시작 버튼과 문제 카드뿐이면 사이트가 아니라 앱 실행 화면으로 읽힌다 —
 	     애드센스가 '가치가 별로 없는 콘텐츠'로 두 번 반려했을 때(8/11·8/21) 홈 본문이
@@ -1161,6 +1140,56 @@
 				{/each}
 			</div>
 		{/if}
+	</section>
+
+	<!-- ④ 10문제로 부족한 사람 — 유형별로 바로 들어가게 -->
+	<section class="sec reveal d3">
+		<div class="more">
+			<p class="more-h">더 풀고 싶다면?</p>
+			<p class="more-s">
+				딸깍이 준비한 <b>{TOTAL_PROBLEMS.toLocaleString()}</b>문제! 유형별로 계속 풀어봐요
+			</p>
+			<div class="more-grid">
+				<a class="mbtn" href="/play?filter=puzzle">
+					<span class="mb-t">발견형</span>
+					<span class="mb-n">{KIND_COUNT.discover}</span>
+				</a>
+				<a class="mbtn" href="/play?filter=trivia">
+					<span class="mb-t">상식</span>
+					<span class="mb-n">{KIND_COUNT.trivia}</span>
+				</a>
+				<a class="mbtn" href="/play?filter=match">
+					<span class="mb-t">성냥개비</span>
+					<span class="mb-n">{KIND_COUNT.match}</span>
+				</a>
+				<a class="mbtn" href="/play?filter=cube">
+					<span class="mb-t">전개도</span>
+					<span class="mb-n">{KIND_COUNT.cube}</span>
+				</a>
+			</div>
+			<a class="mall" href="/play?filter=all">
+				전부 섞어서 풀기 <span class="arr" aria-hidden="true">→</span>
+			</a>
+		</div>
+	</section>
+
+	<!-- ⑤ 문제를 눈으로 훑고 싶은 사람 — 푸는 게 아니라 읽는 입구.
+	     분야별 페이지가 푸터 링크 하나로만 닿아 있어서 사람도 크롤러도 못 찾았다. -->
+	<section class="sec reveal d3">
+		<h2 class="sec-h">분야별로 골라 보기<span>정답·해설 포함</span></h2>
+		<div class="catgrid">
+			{#each data.categories as c (c.slug)}
+				<a class="catlink" href="/trivia/{c.slug}">{c.name}<b>{c.count}</b></a>
+			{/each}
+		</div>
+		<div class="deeplinks">
+			<a href="/read">읽을거리</a>
+			<a href="/discover">발견형 퍼즐이란</a>
+			<a href="/matchstick/guide">성냥개비 푸는 법</a>
+			<a href="/cubenet/guide">전개도 푸는 법</a>
+			<a href="/guide">발견형 푸는 법</a>
+			<a href="/archive">지난 문제</a>
+		</div>
 	</section>
 {:else if phase === 'play' && current}
 	<div class="topbar">
