@@ -44,6 +44,12 @@ const C = {
  *   id     src/lib/problems.ts의 문제 id — 나중에 대조할 수 있게 남긴다
  */
 const CARDS = {
+	'2026-08-25': {
+		id: 'nm-square-reverse',
+		chip: '수열',
+		물음: '물음표에 들어갈 수는?',
+		줄: ['1    4    9    61    52    ?']
+	},
 	'2026-08-24': {
 		id: 'korean-name-len',
 		chip: '한글',
@@ -140,8 +146,14 @@ function page(card) {
 	const n = card.줄.length;
 	const fs = n <= 4 ? 56 : n <= 5 ? 52 : n <= 6 ? 46 : 40;
 	const gap = n <= 5 ? 20 : 15;
+	// 한 줄짜리(수열)는 줄 전체를 물들이면 대비가 사라지고, 이어진 수열이 두 덩어리로
+	// 보이기까지 한다. 그럴 땐 물음표만 물들인다.
 	const rows = card.줄
-		.map((r, i) => `<div class="row${i === n - 1 ? ' q' : ''}">${r}</div>`)
+		.map((r, i) =>
+			n === 1
+				? `<div class="row">${r.replace(/\?/g, '<span class="qm">?</span>')}</div>`
+				: `<div class="row${i === n - 1 ? ' q' : ''}">${r}</div>`
+		)
 		.join('');
 
 	return `<!doctype html><html lang="ko"><head><meta charset="utf-8">
@@ -162,6 +174,7 @@ function page(card) {
    display:flex;flex-direction:column;align-items:center;gap:${gap}px}
  .row{font-size:${fs}px;font-weight:600;color:${C.text};letter-spacing:.02em;white-space:pre}
  .row.q{color:${C.warn};font-weight:800}
+ .qm{color:${C.warn};font-weight:800}
  .foot{display:flex;align-items:center;gap:14px}
  .foot b{font-size:36px;font-weight:800;color:${C.text};letter-spacing:-.02em}
  .foot span{font-size:29px;color:${C.muted};letter-spacing:-.01em}
