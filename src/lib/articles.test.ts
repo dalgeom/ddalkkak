@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { ARTICLES, articleBySlug } from './articles';
+import { DISCOVER_FIELD_META } from './discoverFields';
 
 describe('읽을거리', () => {
 	it('슬러그가 중복되지 않고 URL에 그대로 쓸 수 있다', () => {
@@ -32,7 +33,17 @@ describe('읽을거리', () => {
 	});
 
 	it('cta 링크가 실제 경로다', () => {
-		const valid = ['/', '/matchstick', '/cubenet', '/discover', '/play', '/trivia'];
+		// 분야 페이지(/discover/calendar 등)는 discoverFields가 정하는 실제 라우트다.
+		// 손으로 적은 목록에 두면 분야가 늘 때마다 멀쩡한 링크가 오답으로 잡힌다.
+		const valid = [
+			'/',
+			'/matchstick',
+			'/cubenet',
+			'/discover',
+			'/play',
+			'/trivia',
+			...DISCOVER_FIELD_META.map((f) => `/discover/${f.slug}`)
+		];
 		for (const a of ARTICLES) expect(valid, a.slug).toContain(a.cta.href);
 	});
 
