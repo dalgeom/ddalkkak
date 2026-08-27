@@ -1484,6 +1484,23 @@
 	<!-- GN 피드백(8/11): 완주하고 나면 오늘 문제를 다시 볼 길이 없었다 -->
 	<a class="review-link" href="/today">오늘 문제 다시 보기 <span aria-hidden="true">→</span></a>
 
+	<!-- 돌아올 이유를 만드는 자리. 기록을 막 만든 지금이 가장 설득력 있는 순간이라
+	     연습 유도보다 위에 둔다. 알림과 설치를 한 화면에서 둘 다 조르면 둘 다 무시당하므로
+	     하나만 세운다 — 알림이 가능하면 알림이 먼저다(설치 없이도 되고, 우리가 먼저
+	     말을 걸 수 있는 유일한 수단이다). 아이폰은 홈 화면에 추가해야 알림이 되므로
+	     그때만 설치 권유가 선다.
+
+	     공유보다 위에 둔다. 아래에 두었을 때 390x844에서 카드가 y=716에 걸려 「알림 받기」
+	     버튼이 52px 중 18px만 보였다 — 제목과 설명은 읽히는데 정작 누를 것이 화면 밖이었다.
+	     8/26에 다섯 명에게 떴는데 켜기도 닫기도 0이었던 이유다(push_offer는 화면에 그려질 때
+	     찍히므로 "봤다"가 아니라 "렌더됐다"는 뜻이다). 공유는 스크롤해서라도 누르지만,
+	     알림은 눈에 안 띄면 그걸로 끝이다. -->
+	{#if offerPush}
+		<PushPrompt {dayNum} streak={doneStats.streak} />
+	{:else}
+		<InstallPrompt {dayNum} streak={doneStats.streak} />
+	{/if}
+
 	<p class="share-label">결과 공유</p>
 	<div class="share-btns">
 		<button class="sh-btn primary" onclick={shareNative}>
@@ -1518,17 +1535,6 @@
 			링크 복사
 		</button>
 	</div>
-
-	<!-- 돌아올 이유를 만드는 자리. 기록을 막 만든 지금이 가장 설득력 있는 순간이라
-	     연습 유도보다 위에 둔다. 알림과 설치를 한 화면에서 둘 다 조르면 둘 다 무시당하므로
-	     하나만 세운다 — 알림이 가능하면 알림이 먼저다(설치 없이도 되고, 우리가 먼저
-	     말을 걸 수 있는 유일한 수단이다). 아이폰은 홈 화면에 추가해야 알림이 되므로
-	     그때만 설치 권유가 선다. -->
-	{#if offerPush}
-		<PushPrompt {dayNum} streak={doneStats.streak} />
-	{:else}
-		<InstallPrompt {dayNum} streak={doneStats.streak} />
-	{/if}
 
 	<!-- 다음 행동: 가장 약했던 유형의 연습으로 이어준다 -->
 	<div class="nudge">
