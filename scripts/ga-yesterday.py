@@ -80,15 +80,33 @@ LABEL = [
     ("share_click", "공유 누름"),
     ("share_result", "결과 공유"),
 ]
+# 첫 화면 맛보기 — 10문제를 시작하기 전 단계라 위 목록과 섞으면 깔때기가 어긋난다.
+SAMPLE = [
+    ("sample_try", "맛보기 답 넣어봄"),
+    ("sample_reveal", "맛보기 정답 열어봄"),
+    ("sample_go", "맛보기에서 10문제로"),
+]
+# push_offer / install_offer는 컴포넌트가 "그려질 때" 찍힌다. 화면에 렌더됐다는 뜻이지
+# 사람이 봤다는 뜻이 아니다 — 8/26에 다섯 명에게 찍혔는데 버튼이 접힘 아래라 아무도
+# 못 눌렀다(#279에서 공유 위로 올렸다). 그래서 "봄"이 아니라 "떴음"으로 적는다.
 ALERT = [
-    ("push_offer", "알림 제안을 봄"),
+    ("push_offer", "알림 제안이 떴음(렌더)"),
     ("push_click", "알림 켜기 누름"),
     ("push_result", "알림 설정 완료"),
     ("push_dismiss", "알림 거절"),
     ("reminder_download", "캘린더 알림 받음"),
-    ("install_offer", "앱 설치 제안을 봄"),
+    ("install_offer", "앱 설치 제안이 떴음(렌더)"),
     ("install_click", "설치 누름"),
     ("install_result", "설치 완료"),
+    ("install_dismiss", "설치 거절"),
+    ("install_hint_click", "설치 방법 열어봄"),
+]
+# 인앱 브라우저(스레드·카톡 등)에서 들어온 사람에게만 뜬다. 여기서 새면 홍보 유입이
+# 통째로 사라지므로 따로 센다.
+INAPP = [
+    ("inapp_gate", "인앱 안내가 떴음"),
+    ("inapp_open_external", "브라우저로 열기 누름"),
+    ("inapp_skip", "그냥 인앱에서 계속"),
 ]
 ev = defaultdict(lambda: (0, 0))
 for r in rep(["eventName"], ["eventCount", "activeUsers"], limit=80):
@@ -108,7 +126,9 @@ def block(title, items):
 
 
 block("무엇을 했나", LABEL)
+block("맛보기(첫 화면)", SAMPLE)
 block("알림·설치", ALERT)
+block("인앱 브라우저", INAPP)
 
 # ── 깔때기 ──
 start, comp = ev["daily_start"][1], ev["daily_complete"][1]
