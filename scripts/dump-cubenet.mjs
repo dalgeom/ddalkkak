@@ -24,11 +24,14 @@ const LETTER = 'ABCD';
 /** 오답 셋이 어떤 사유로 갈리는지 */
 function analyze(p) {
 	const ans = p.options[p.answer];
+	// foldNet은 면에 '셀 번호'를 채워 준다. options는 '기호 번호'라서 faceOf로
+	// 옮기지 않고 그대로 비교하면 둘 다 0~5라 조용히 틀린 답이 나온다.
 	const cube = foldNet(p.net.cells);
 	const opp = new Map();
 	for (const [a, b] of oppositePairs(cube)) {
-		opp.set(a, b);
-		opp.set(b, a);
+		const [fa, fb] = [p.net.faceOf[a], p.net.faceOf[b]];
+		opp.set(fa, fb);
+		opp.set(fb, fa);
 	}
 	const mirror = p.options.findIndex(
 		(o, j) => j !== p.answer && o[0] === ans[0] && o[1] === ans[2] && o[2] === ans[1]
@@ -81,7 +84,7 @@ console.log(
 	`   오답 구조: ${pairs.map((j) => LETTER[j]).join('·')}는 마주 보는 면이 함께 보이고(${oppositePairs(
 		foldNet(p.net.cells)
 	)
-		.map(([a, b]) => `${NAME(a)}↔${NAME(b)}`)
+		.map(([a, b]) => `${NAME(p.net.faceOf[a])}↔${NAME(p.net.faceOf[b])}`)
 		.join(', ')}),`
 );
 console.log(`   ${LETTER[mirror]}는 정답 ${LETTER[p.answer]}의 왼·오가 뒤바뀐 거울상이다. */`);

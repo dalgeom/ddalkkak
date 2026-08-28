@@ -19,7 +19,6 @@ import { spawn, spawnSync } from 'node:child_process';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
-const OUT = 'promo/video/쇼츠-전개도-10.mp4';
 const FRAMES = join(tmpdir(), 'ddal-cscene-frames');
 const W = 1080, H = 1920, FPS = 30;
 
@@ -43,13 +42,18 @@ const C = {
 /* ── 문제: src/lib/cubenet.ts problemAt(10) 덤프 (dump-cubenet.mjs로 재생성) ──
    오답 구조: A·C는 마주 보는 면이 함께 보이고(원↔테두리, 고리↔네점, 사각↔십자),
    B는 정답 D의 왼·오가 뒤바뀐 거울상이다. */
+/* ── 문제: src/lib/cubenet.ts problemAt(38) 덤프 (dump-cubenet.mjs로 재생성) ──
+   오답 구조: C·D는 마주 보는 면이 함께 보이고(고리↔원, 네점↔사각, 십자↔테두리),
+   A는 정답 B의 왼·오가 뒤바뀐 거울상이다. */
 const 문제 = {
-	cells: [[0,1],[1,1],[2,0],[2,1],[2,2],[3,0]],
-	faceOf: [2,0,1,4,5,3],
-	options: [[5,4,2],[5,2,3],[0,3,2],[5,3,2]],
-	answer: 3,
-	해설: '<b>A와 C</b>는 마주 보는 면이 함께 보여서, <b>B</b>는<br>정답의 왼쪽·오른쪽이 뒤바뀐 <b>거울상</b>이라 안 됩니다.'
+	번호: 38,
+	cells: [[0,1],[1,0],[1,1],[1,2],[1,3],[2,2]],
+	faceOf: [1,4,5,3,2,0],
+	options: [[3,0,5],[3,5,0],[3,1,0],[2,5,0]],
+	answer: 1,
+	해설: '<b>C와 D</b>는 마주 보는 면이 함께 보여서, <b>A</b>는<br>정답의 왼쪽·오른쪽이 뒤바뀐 <b>거울상</b>이라 안 됩니다.'
 };
+const OUT = `promo/video/쇼츠-전개도-${문제.번호}.mp4`;
 const LETTERS = ['A', 'B', 'C', 'D'];
 
 /* ── FaceMark.svelte 이식: 면 기호를 0~1 상자에 그린다 ── */
@@ -405,5 +409,38 @@ if (r.status !== 0) {
 	process.exit(1);
 }
 console.log(`\n${OUT} (${T.total}초, ${W}x${H})`);
+
+/* ── 올릴 때 쓸 제목·설명 ──
+   promo/쇼츠-올리기.md의 전개도 예시는 옛 문제에 박혀 있다. 문제를 갈아도 그 문서는
+   안 따라오니 여기서 같이 찍는다. 9호가 앞 문제 자막을 달고 나간 사고가 그래서 났다.
+   링크에 utm은 붙이지 않는다 — 쇼츠는 설명 링크가 클릭조차 되지 않는다(스팸 방지). */
+const 기호이름 = ['원', '고리', '사각', '테두리', '십자', '네점'];
+const 보기글 = (o) => o.map((f) => 기호이름[f]).join('/');
+const 벗기기 = (h) => h.replace(/<br>/g, ' ').replace(/<[^>]+>/g, '');
+console.log(
+	[
+		'',
+		'─────────── 올릴 때 쓸 것 ───────────',
+		'[제목]',
+		'이 전개도를 접으면 어떤 주사위가 될까요? #shorts',
+		'',
+		'[설명]',
+		'전개도를 접었을 때 나오는 주사위를 고르는 문제입니다.',
+		'',
+		...문제.options.map((o, i) => `${LETTERS[i]}. ${보기글(o)}`),
+		'',
+		벗기기(문제.해설),
+		'',
+		'마주 보는 면은 한 번에 볼 수 없다 — 이것만 알면 보기 둘이 바로 지워집니다.',
+		'남은 둘 중 하나는 거울상이라 여기서부터가 진짜 승부예요.',
+		'',
+		'ddalkkak.app/cubenet',
+		'',
+		'#딸깍 #두뇌퍼즐 #퍼즐 #전개도 #공간지각',
+		'',
+		`[정답] ${LETTERS[문제.answer]}. ${보기글(문제.options[문제.answer])}`,
+		'─────────────────────────────────────'
+	].join('\n')
+);
 rmSync(work, { recursive: true, force: true });
 rmSync(FRAMES, { recursive: true, force: true });
