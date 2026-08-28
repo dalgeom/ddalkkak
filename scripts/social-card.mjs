@@ -44,6 +44,12 @@ const C = {
  *   id     src/lib/problems.ts의 문제 id — 나중에 대조할 수 있게 남긴다
  */
 const CARDS = {
+	'2026-08-27': {
+		id: 'rc-ottffss',
+		chip: '사슬',
+		물음: '물음표에 들어갈 글자는?',
+		줄: ['O   T   T   F   F   S   S   ?']
+	},
 	'2026-08-26': {
 		id: 'kr-silent-ieung',
 		chip: '한글',
