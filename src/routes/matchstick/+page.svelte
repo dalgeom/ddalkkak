@@ -8,6 +8,7 @@
 	import { shareResult as shareCardResult, outcomeMessage } from '$lib/shareCard';
 	import MatchstickBoard, { type PickLoc } from '$lib/components/MatchstickBoard.svelte';
 	import AdSlot from '$lib/components/AdSlot.svelte';
+	import DailyBand from '$lib/components/DailyBand.svelte';
 	import Icon from '$lib/components/Icon.svelte';
 
 	type Mode =
@@ -324,6 +325,8 @@
 			</span>
 			<span class="gb-go" aria-hidden="true">→</span>
 		</a>
+
+		<DailyBand>성냥개비 말고도, 매일 <b>10문제</b>씩 새로 나와요</DailyBand>
 
 		<section class="msec">
 			<h2 class="mh">무한 연습</h2>

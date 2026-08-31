@@ -51,21 +51,11 @@
 	import { shouldOfferPush } from '$lib/push';
 	import InstallHint from '$lib/components/InstallHint.svelte';
 
-	type Sample = {
-		chip: string;
-		blocks: Problem['blocks'];
-		type: 'text' | 'choice';
-		answers: string[];
-		choices: string[];
-		answerIndex: number;
-		explain: string;
-	};
 	let {
 		data
 	}: {
 		data: {
 			dayNum: number;
-			sample: Sample | null;
 			categories: { slug: string; name: string; count: number }[];
 			// 레이아웃 서버 로드가 합쳐 내려주는 실제 문제 수
 			counts: { discover: number; trivia: number; match: number; cube: number };
@@ -233,58 +223,6 @@
 		const w = ['일', '월', '화', '수', '목', '금', '토'][d.getUTCDay()];
 		return `${d.getUTCMonth() + 1}월 ${d.getUTCDate()}일 ${w}요일`;
 	});
-
-	/* ───────── 오늘의 맛보기(랜딩) ───────── */
-	// 오늘의 10문제와 겹치지 않는 문제를 서버가 하나 골라 내려준다. 세션과 별개라 점수도 없다.
-	let sampleValue = $state('');
-	let samplePicked = $state<number | null>(null);
-	let sampleDone = $state(false);
-	let sampleOk = $state(false);
-
-	/**
-	 * 맛보기는 GA에 아무 흔적도 남기지 않고 있었다.
-	 *
-	 * 홈에 와서 맛보기를 푼 사람은 daily_start를 찍지 않으니 "방문했지만 아무것도 안 한
-	 * 사람"으로 잡힌다. 그래서 8/24의 시작률 21%가 진짜 이탈인지, 맛보기만 풀고 만족해서
-	 * 간 것인지 구분할 수가 없었다. 랜딩을 고치기 전에 이것부터 보이게 한다.
-	 *
-	 * try는 시도 자체를, go는 맛보기에서 데일리로 넘어간 것을 센다 — 이 둘의 비율이
-	 * 맛보기가 데일리를 잡아먹는지 데려오는지를 알려준다.
-	 */
-	let sampleTried = $state(false);
-
-	function noteSampleTry(ok: boolean) {
-		track('sample_try', { ok, first: !sampleTried, chip: data.sample?.chip ?? '' });
-		sampleTried = true;
-	}
-
-	function sampleSubmitText() {
-		if (sampleDone || !data.sample || !sampleValue.trim()) return;
-		// 본 게임과 같은 판정(isCorrectText) — 랜딩에서만 더 엄격하면 같은 답이 오답이 된다
-		sampleOk = isCorrectText({ answers: data.sample.answers } as Problem, sampleValue);
-		noteSampleTry(sampleOk);
-		if (sampleOk) sampleDone = true;
-		else sampleShake = true;
-		setTimeout(() => (sampleShake = false), 420);
-	}
-	function sampleSubmitChoice(i: number) {
-		if (sampleDone || !data.sample) return;
-		samplePicked = i;
-		sampleOk = i === data.sample.answerIndex;
-		noteSampleTry(sampleOk);
-		sampleDone = true;
-	}
-	function sampleReveal() {
-		track('sample_reveal', { tried: sampleTried, chip: data.sample?.chip ?? '' });
-		sampleOk = false;
-		sampleDone = true;
-	}
-	/** 맛보기를 풀고 나서 데일리로 넘어간 사람 — 맛보기가 데려온 것인지 여기서 갈린다 */
-	function sampleGo() {
-		track('sample_go', { ok: sampleOk });
-		startOrResume();
-	}
-	let sampleShake = $state(false);
 
 	/* ───────── 진행 저장·복원 ───────── */
 
@@ -952,90 +890,10 @@
 		<InstallHint {dayNum} returning={returningVisitor} />
 	</section>
 
-	<!-- ② 오늘의 맛보기 — 시작 전에 한 문제 그냥 풀어볼 수 있다(오늘의 10문제와 겹치지 않음) -->
-	{#if data.sample}
-		<section class="sec reveal d1">
-			<h2 class="sec-h">오늘의 맛보기<span>10문제와 별개예요</span></h2>
-			<div class="card sample" class:shake={sampleShake}>
-				<span class="cat-chip">{data.sample.chip}</span>
-				<div class="q">
-					{#each data.sample.blocks as b, i (i)}
-						{#if b.kind === 'text'}
-							<div class="qtext">{@html b.html}</div>
-						{:else if b.kind === 'pre'}
-							<ExampleList text={b.text} />
-						{:else if b.kind === 'lcd'}
-							<SevenSeg lines={b.lines} frags={b.frags} />
-						{:else if b.kind === 'colors'}
-							<ColorBlocks rows={b.rows} />
-						{:else if b.kind === 'glyph'}
-							<Glyph lines={b.lines} axis={b.axis} />
-						{:else if b.kind === 'figure'}
-							<Figure svg={b.svg} caption={b.caption} />
-						{/if}
-					{/each}
-				</div>
+	<div class="adwrap reveal d1"><AdSlot label="랜딩 중단" /></div>
 
-				{#if data.sample.type === 'choice'}
-					<div class="choices">
-						{#each data.sample.choices as c, i (i)}
-							<button
-								class="choice"
-								class:ok={sampleDone && i === data.sample.answerIndex}
-								class:bad={samplePicked === i && i !== data.sample.answerIndex}
-								disabled={sampleDone}
-								onclick={() => sampleSubmitChoice(i)}
-							>
-								<span class="badge">{['A', 'B', 'C', 'D', 'E'][i]}</span>
-								<span class="ctext">{c}</span>
-							</button>
-						{/each}
-					</div>
-				{:else}
-					<input
-						type="text"
-						bind:value={sampleValue}
-						placeholder="답을 입력해보세요"
-						aria-label="맛보기 정답 입력"
-						autocomplete="off"
-						disabled={sampleDone}
-						onkeydown={(e) => e.key === 'Enter' && sampleSubmitText()}
-					/>
-				{/if}
-
-				{#if sampleDone}
-					<div class="feedback" class:ok={sampleOk}>
-						<span class="fmark">{sampleOk ? '✓' : '✕'}</span>
-						<span>{sampleOk ? '딸깍! 맞혔어요' : '정답을 확인했어요'}</span>
-					</div>
-					{#if !sampleOk && data.sample.type !== 'choice'}
-						<div class="answer-line">정답은 <b>{data.sample.answers[0]}</b></div>
-					{/if}
-					<div class="explain"><b>해설</b> {@html data.sample.explain}</div>
-
-					<!-- 몰입이 끝난 바로 이 순간이 전환 지점이다. 위로 스크롤해 CTA를 찾게 두지 않는다. -->
-					{#if untouched}
-						<button class="sample-go" onclick={sampleGo} disabled={loading}>
-							{sampleOk ? '딸깍! 이런 문제가 오늘 10개' : '오늘의 10문제 풀어보기'}
-							<span class="arr" aria-hidden="true">→</span>
-						</button>
-					{/if}
-				{:else if data.sample.type !== 'choice'}
-					<div class="dual">
-						<button class="ghost" onclick={sampleReveal}>정답 보기</button>
-						<button class="submit inline" onclick={sampleSubmitText}>확인</button>
-					</div>
-				{:else}
-					<button class="ghost wide" onclick={sampleReveal}>정답 보기</button>
-				{/if}
-			</div>
-		</section>
-	{/if}
-
-	<div class="adwrap reveal d2"><AdSlot label="랜딩 중단" /></div>
-
-	<!-- ③ 어떤 문제가 나오나 — 설명이 아니라 실제 생김새로 -->
-	<section class="sec reveal d2">
+	<!-- ② 어떤 문제가 나오나 — 설명이 아니라 실제 생김새로 -->
+	<section class="sec reveal d1">
 		<h2 class="sec-h">네 가지가 매일 섞여 나와요</h2>
 		<div class="kinds">
 			<div class="kind">
@@ -1071,7 +929,7 @@
 		</div>
 	</section>
 
-	<div class="adwrap reveal d3"><AdSlot label="랜딩 하단" /></div>
+	<div class="adwrap reveal d2"><AdSlot label="랜딩 하단" /></div>
 
 	<!-- 순서를 바꾼 이유: 오늘 것을 아직 안 푼 사람에게 전체 문제 카탈로그를 먼저
 	     들이밀고 있었다. 8/24에 /matchstick 9PV·/cubenet 6PV로 실제로 그쪽으로 샜다.
@@ -1081,7 +939,7 @@
 	     홈이 시작 버튼과 문제 카드뿐이면 사이트가 아니라 앱 실행 화면으로 읽힌다 —
 	     애드센스가 '가치가 별로 없는 콘텐츠'로 두 번 반려했을 때(8/11·8/21) 홈 본문이
 	     936자였다. 매일 바뀌는 문제 아래에, 바뀌지 않는 이야기를 둔다. -->
-	<section class="sec reveal d3 about">
+	<section class="sec reveal d2 about">
 		<h2 class="sec-h">딸깍은 이런 곳입니다</h2>
 
 		<h3>매일 자정에 열 문제가 바뀝니다</h3>
@@ -1142,8 +1000,8 @@
 		{/if}
 	</section>
 
-	<!-- ④ 10문제로 부족한 사람 — 유형별로 바로 들어가게 -->
-	<section class="sec reveal d3">
+	<!-- ③ 10문제로 부족한 사람 — 유형별로 바로 들어가게 -->
+	<section class="sec reveal d2">
 		<div class="more">
 			<p class="more-h">더 풀고 싶다면?</p>
 			<p class="more-s">
@@ -1175,7 +1033,7 @@
 
 	<!-- ⑤ 문제를 눈으로 훑고 싶은 사람 — 푸는 게 아니라 읽는 입구.
 	     분야별 페이지가 푸터 링크 하나로만 닿아 있어서 사람도 크롤러도 못 찾았다. -->
-	<section class="sec reveal d3">
+	<section class="sec reveal d2">
 		<h2 class="sec-h">분야별로 골라 보기<span>정답·해설 포함</span></h2>
 		<div class="catgrid">
 			{#each data.categories as c (c.slug)}
@@ -1587,9 +1445,6 @@
 	.reveal.d2 {
 		animation-delay: 160ms;
 	}
-	.reveal.d3 {
-		animation-delay: 230ms;
-	}
 	@keyframes rise {
 		from {
 			opacity: 0;
@@ -1763,38 +1618,6 @@
 	.accuracy.hard {
 		color: var(--accent-2);
 	}
-	.sample-go {
-		margin-top: 14px;
-		width: 100%;
-		min-height: 52px;
-		border-radius: 14px;
-		background: var(--accent);
-		color: #fff;
-		font-size: 16px;
-		font-weight: 800;
-		border: none;
-		box-shadow: 0 5px 0 var(--accent-press);
-		cursor: pointer;
-		font-family: inherit;
-		padding: 10px 12px;
-		word-break: keep-all;
-		transition:
-			transform var(--dur-tap) var(--ease-out),
-			box-shadow var(--dur-tap) var(--ease-out);
-	}
-	.sample-go:active {
-		transform: translateY(3px);
-		box-shadow: 0 2px 0 var(--accent-press);
-	}
-	.sample-go:hover {
-		filter: brightness(1.03);
-	}
-	.sample-go:disabled {
-		background: var(--border-strong);
-		color: var(--muted-2);
-		box-shadow: none;
-		cursor: default;
-	}
 	/* 카운트다운을 접은 첫 화면에서는 날짜 아래 여백을 CTA가 대신 받는다 */
 	.date.solo {
 		margin-bottom: 18px;
@@ -1827,25 +1650,6 @@
 	/* 여백은 AdSlot 내부(.ad-slot, dev 전용)가 갖는다 — 프로덕션 빈 공백 방지 */
 	.adwrap {
 		margin: 0;
-	}
-
-	.card.sample {
-		min-height: 0;
-	}
-	.card.sample.shake {
-		animation: shake 0.4s ease;
-	}
-	@keyframes shake {
-		0%,
-		100% {
-			transform: translateX(0);
-		}
-		25% {
-			transform: translateX(-6px);
-		}
-		75% {
-			transform: translateX(6px);
-		}
 	}
 
 	/* ── 유형 소개 ── */

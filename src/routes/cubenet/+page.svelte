@@ -5,6 +5,7 @@
 	import CubeDie from '$lib/components/CubeDie.svelte';
 	import CubeFold from '$lib/components/CubeFold.svelte';
 	import AdSlot from '$lib/components/AdSlot.svelte';
+	import DailyBand from '$lib/components/DailyBand.svelte';
 	import { track } from '$lib/analytics';
 
 	/* 전개도 연습. 다른 유형과 같은 규모(CUBE_TOTAL)로 끊어 돌린다. */
@@ -175,6 +176,8 @@
 
 	<div class="adwrap"><AdSlot label="전개도 연습" /></div>
 
+	<DailyBand>전개도 말고도, 매일 <b>10문제</b>씩 새로 나와요</DailyBand>
+
 	<section class="sec">
 		<h2>전개도 문제란</h2>
 		<p>
@@ -215,7 +218,7 @@
 	</section>
 
 	<section class="sec ctas">
-		<a class="cta ghost" href="/">오늘의 딸깍 풀러 가기</a>
+		<a class="cta" href="/">오늘의 딸깍 풀러 가기</a>
 		<a class="cta ghost" href="/matchstick">성냥개비 퍼즐도 풀기</a>
 	</section>
 </article>
