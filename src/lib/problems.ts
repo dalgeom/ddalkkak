@@ -885,7 +885,15 @@ export const PROBLEMS: Problem[] = [
 	{
 		id: 'alpha-order-nums',
 		chip: '수열',
-		blocks: [{ kind: 'pre', text: '8, 5, 4, 9, 1, 7, ?, 3, 2, 0' }],
+		blocks: [
+			// 「0부터 9까지 한 번씩」이 없으면 규칙은 유일한데 답이 여럿이 된다.
+			// seven과 three 사이에는 six 말고도 ten·thirteen·sixteen·seventeen·
+			// thirty…·sixty…·seventy…가 전부 들어간다. 2026-08-31 카드로 나갔을 때
+			// 스레드에서 지적을 받았다. 해설에만 「0~9를」이라고 적어 두고 지문에는
+			// 안 적은 것이 화근이었다 — 8/26 옹알이와 같은 종류의 헐거움이다.
+			{ kind: 'text', html: '<b>0부터 9까지 한 번씩</b> 쓴 줄이다. 물음표에 들어갈 수는?' },
+			{ kind: 'pre', text: '8, 5, 4, 9, 1, 7, ?, 3, 2, 0' }
+		],
 		type: 'text',
 		answers: ['6', 'six'],
 		hints: [
