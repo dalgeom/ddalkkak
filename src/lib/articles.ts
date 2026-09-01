@@ -116,7 +116,105 @@ const netSvg = `
 		<text x="${Number(x) + 30}" y="${Number(y) + 36}" text-anchor="middle" font-size="16" font-weight="700" fill="#2c2822">${t}</text>`).join('')}
 </svg>`;
 
+
+/* ── 시계 SVG — 두 바늘과 사잇각. 각도는 인자에서 계산해 그린다 ── */
+function clockSvg(h: number, m: number, cap: string): string {
+	const C = 120, R = 96;
+	/** 12시 방향에서 시계 방향으로 deg만큼 돈 점 */
+	const pt = (deg: number, r: number) => {
+		const t = ((deg - 90) * Math.PI) / 180;
+		return [C + r * Math.cos(t), C + r * Math.sin(t)];
+	};
+	const hDeg = (h % 12) * 30 + m * 0.5; // 시침은 분당 0.5도
+	const mDeg = m * 6; // 분침은 분당 6도
+	let gap = Math.abs(hDeg - mDeg);
+	if (gap > 180) gap = 360 - gap;
+
+	const ticks = Array.from({ length: 12 }, (_, i) => {
+		const [x1, y1] = pt(i * 30, R - 10);
+		const [x2, y2] = pt(i * 30, R);
+		return `<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="#ddd0ba" stroke-width="${i % 3 === 0 ? 4 : 2}" stroke-linecap="round"/>`;
+	}).join('');
+	const nums = [[12, 0], [3, 90], [6, 180], [9, 270]]
+		.map(([n, d]) => {
+			const [x, y] = pt(d, R - 26);
+			return `<text x="${x.toFixed(1)}" y="${(y + 6).toFixed(1)}" text-anchor="middle" font-size="17" font-weight="700" fill="#6b6258">${n}</text>`;
+		})
+		.join('');
+	const [hx, hy] = pt(hDeg, R - 38);
+	const [mx, my] = pt(mDeg, R - 16);
+	const [ax, ay] = pt(hDeg, 44);
+	const [bx, by] = pt(mDeg, 44);
+	const arc = `<path d="M ${ax.toFixed(1)} ${ay.toFixed(1)} A 44 44 0 0 ${hDeg > mDeg ? 0 : 1} ${bx.toFixed(1)} ${by.toFixed(1)}" fill="none" stroke="#c0632e" stroke-width="3"/>`;
+	// 사잇각이 좁으면(6시 30분은 15도) 두 바늘 사이에 라벨을 놓을 자리가 없다.
+	// 좁을수록 밖으로 밀어내고, 바탕 알약을 깔고, 바늘보다 나중에 그린다.
+	const label = `${gap % 1 === 0 ? gap : gap.toFixed(1)}도`;
+	const [lx, ly] = pt((hDeg + mDeg) / 2, gap < 40 ? 86 : 62);
+	const pillW = label.length * 9 + 12;
+
+	return `<svg viewBox="0 0 240 240" role="img" aria-label="${cap}">
+	<circle cx="${C}" cy="${C}" r="${R + 8}" fill="#fdfbf6" stroke="#ddd0ba" stroke-width="2"/>
+	${ticks}${nums}${arc}
+	<line x1="${C}" y1="${C}" x2="${hx.toFixed(1)}" y2="${hy.toFixed(1)}" stroke="#2c2822" stroke-width="8" stroke-linecap="round"/>
+	<line x1="${C}" y1="${C}" x2="${mx.toFixed(1)}" y2="${my.toFixed(1)}" stroke="#2f8f5b" stroke-width="5" stroke-linecap="round"/>
+	<circle cx="${C}" cy="${C}" r="7" fill="#2c2822"/>
+	<rect x="${(lx - pillW / 2).toFixed(1)}" y="${(ly - 12).toFixed(1)}" width="${pillW}" height="24" rx="12" fill="#fdfbf6" stroke="#c0632e" stroke-width="1.5"/>
+	<text x="${lx.toFixed(1)}" y="${(ly + 5).toFixed(1)}" text-anchor="middle" font-size="15" font-weight="800" fill="#c0632e">${label}</text>
+</svg>`;
+}
+
 export const ARTICLES: Article[] = [
+	{
+		slug: 'clock-angle',
+		title: '시침과 분침의 각도 구하는 법 — 6시 30분이 15도인 이유',
+		description:
+			'6시 정각은 180도인데 6시 30분은 15도입니다. 분침만 움직인다고 생각하면 절대 안 맞습니다. 두 바늘이 각각 1분에 몇 도씩 도는지부터 세어 보면 시계 문제가 한꺼번에 풀립니다.',
+		date: '2026-09-01',
+		tag: '달력·시간',
+		cta: { href: '/discover/calendar', label: '시계·달력 문제 풀어보기' },
+		body: `
+<p>딸깍에 이런 문제가 있습니다. <b>6시 정각의 각도가 180도라면, 6시 30분에는 몇 도일까요?</b></p>
+<div class="ex"><pre>6시 정각  → 180도
+6시 30분 → ?</pre></div>
+<p>많은 분이 <b>180도</b>라고 답합니다. 시침은 6에 그대로 있고 분침만 12에서 6으로 갔으니 겹치는 것 아니냐, 그러면 0도인가, 아니 180도인가 — 이 지점에서 헷갈립니다.</p>
+<p>답은 <b>15도</b>입니다. 왜 그런지는 바늘 두 개가 <b>각각 다른 속도로 동시에</b> 움직인다는 것만 인정하면 바로 풀립니다.</p>
+
+<h2>바늘의 속도부터 센다</h2>
+<p>시계 한 바퀴는 360도입니다. 두 바늘이 그 한 바퀴를 도는 데 걸리는 시간이 다르죠.</p>
+<div class="ex"><pre>분침  360 ÷ 60 = 분당 6도
+시침  360 ÷ 720 = 분당 0.5도</pre></div>
+<p>여기서 대부분의 오답이 갈립니다. <b>시침은 정각에만 딱딱 움직이는 것이 아닙니다.</b> 분침이 도는 동안 시침도 쉬지 않고 조금씩 갑니다. 30분이 지나면 시침은 숫자와 숫자 사이의 정확히 한가운데에 와 있습니다.</p>
+<p>딸깍에는 이 사실만으로 풀리는 문제도 있습니다 — 분침이 떨어져 나간 시계에서 시침이 6과 7의 한가운데를 가리키고 있다면, 지금은 6시 30분입니다.</p>
+
+<h2>6시 30분을 그려 보면</h2>
+<p>분침은 30분이니 6도 × 30 = <b>180도</b> 자리, 즉 숫자 6입니다. 시침은 6시에서 출발해 30분치를 더 갔으니 180 + 0.5 × 30 = <b>195도</b>입니다.</p>
+<figure class="nfig">${clockSvg(6, 30, '6시 30분 시계 — 시침과 분침 사이 15도')}<figcaption>초록이 분침, 검정이 시침. 시침은 6을 지나 7 쪽으로 절반만큼 가 있다.</figcaption></figure>
+<p>둘의 차이는 195 − 180 = <b>15도</b>. 두 바늘이 거의 같은 곳에 있는데도 딱 붙지 않은 이유는, 분침은 6에 정확히 멈춰 있고 시침은 그 6을 이미 지나쳤기 때문입니다.</p>
+
+<h2>공식 하나로 정리하면</h2>
+<p>H시 M분일 때 각 바늘의 각도는 이렇습니다.</p>
+<div class="ex"><pre>분침 = 6M
+시침 = 30H + 0.5M
+
+사잇각 = |30H - 5.5M|
+(180을 넘으면 360에서 뺀다)</pre></div>
+<p>30H는 정각의 시침 위치이고, 5.5M은 <b>분침이 시침보다 1분에 5.5도씩 앞서 나간다</b>는 뜻입니다. 이 5.5라는 수가 시계 문제의 거의 전부예요.</p>
+<p>검산해 봅시다. 3시 30분이라면 |30 × 3 − 5.5 × 30| = |90 − 165| = <b>75도</b>입니다. 90도라고 답하기 쉬운 자리인데, 시침이 3을 지나 절반 갔으므로 15도가 더 벌어집니다.</p>
+<figure class="nfig">${clockSvg(3, 30, '3시 30분 시계 — 시침과 분침 사이 75도')}<figcaption>3시 30분은 90도가 아니라 75도. 시침이 3에서 15도 더 내려와 있다.</figcaption></figure>
+
+<h2>같은 5.5도가 풀어 주는 다른 문제들</h2>
+<p>분침이 시침보다 분당 5.5도 빠르다는 것만 알면, 시계 문제 여러 개가 한꺼번에 풀립니다.</p>
+<p><b>두 바늘은 하루에 몇 번 겹칠까요?</b> 겹친 상태에서 다시 겹치려면 분침이 시침을 정확히 한 바퀴 따라잡아야 합니다. 360 ÷ 5.5 = 약 65.45분, 그러니까 <b>65분 27초마다</b> 한 번씩이죠. 12시간은 720분이니 720 ÷ 65.45 = <b>11번</b>, 하루면 <b>22번</b>입니다.</p>
+<p>12시간에 12번이 아니라 11번이라는 게 이 문제의 함정입니다. 11시대에는 겹침이 없거든요 — 11시에서 12시 사이에 따라잡으려던 참에 이미 12시가 되어 버립니다.</p>
+<p><b>두 바늘이 정확히 반대 방향을 가리키는 정각은 하루에 몇 번일까요?</b> 정각이면 M = 0이니 사잇각은 30H입니다. 30H = 180이 되는 H는 6뿐이에요. 오전 6시와 오후 6시, <b>하루에 두 번</b>입니다.</p>
+
+<h2>왜 시침을 잊게 될까</h2>
+<p>이 유형에서 사람들이 틀리는 지점은 계산이 아닙니다. 곱하기 두 번이면 끝나는 산수예요. 틀리는 이유는 <b>머릿속 시계에서 시침이 정각마다 점프한다</b>고 그려지기 때문입니다.</p>
+<p>디지털 시계를 오래 보다 보면 시간은 "6시"라는 하나의 상태로 느껴집니다. 6시 29분도 6시고 6시 59분도 6시죠. 그런데 아날로그 시계에서 6시 59분의 시침은 거의 7에 닿아 있습니다. 표기가 계단이라고 해서 바늘까지 계단인 것은 아닙니다.</p>
+<p>딸깍의 시계 문제들이 노리는 것이 정확히 이 틈입니다. 6시 정각 180도라는 첫 줄이 "시침은 6에 고정"이라는 가설을 심어 두고, 30분을 더하는 순간 그 가설이 무너지죠. 무너진 자리에서 <b>시침도 움직인다</b>는 사실을 다시 발견하게 하는 것이 문제의 목적입니다.</p>
+<p>공식을 외우지 않아도 됩니다. 바늘 두 개가 각각 분당 6도와 0.5도로 <b>동시에</b> 돈다는 그림 하나만 있으면, 나머지는 그 자리에서 계산이 됩니다.</p>
+`
+	},
 	{
 		slug: 'eleven-nets',
 		title: '정육면체 전개도는 왜 11가지뿐일까 — 세어 보면 알게 되는 것',
