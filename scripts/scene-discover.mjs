@@ -43,15 +43,15 @@ const C = {
    성냥개비 쪽에서 문제만 갈고 자막은 앞 문제 것을 그대로 둔 영상이 한 번 나갔다
    (2026-08-24). 같은 실수를 여기서 되풀이하지 않는다. */
 const 문제 = {
-	id: 'num-carry-count',
+	id: 'squares-between',
 	chip: '이상한 연산',
-	제목: '더한 게 아닙니다',
-	줄: ['47 ★ 38 = 1', '25 ★ 13 = 0', '99 ★ 11 = 2'],
-	물음좌: '68 ★ 57 =',
-	답: '2',
-	규칙: '덧셈에서 <b>받아올림이 일어난 횟수</b>입니다.<br>47+38은 7+8에서 한 번 — 68+57은 두 번이라 <b>2</b>.',
+	제목: '차이가 아닙니다',
+	줄: ['50 ★ 65 = 1', '5 ★ 26 = 3', '26 ★ 50 = 2'],
+	물음좌: '10 ★ 50 =',
+	답: '4',
+	규칙: '두 수 <b>사이에 있는 제곱수의 개수</b>입니다.<br>50과 65 사이엔 64 하나 — 10과 50 사이엔 16·25·36·49 넷이라 <b>4</b>.',
 	/** 파일 이름에 쓸 짧은 말 */
-	슬러그: '받아올림'
+	슬러그: '제곱수사이'
 };
 const OUT = `promo/video/쇼츠-발견형-${문제.슬러그}.mp4`;
 
@@ -275,10 +275,14 @@ writeFileSync(htmlPath, html, 'utf-8');
 const PORT = 9416;
 const proc = spawn(BIN, ['--headless=new', `--remote-debugging-port=${PORT}`,
 	`--user-data-dir=${join(work, 'prof')}`, '--no-first-run', '--disable-gpu',
-	'--hide-scrollbars', 'about:blank'], { stdio: 'ignore' });
+	'--hide-scrollbars',
+	// 보이지 않는 창이라고 렌더러를 재우면 캡처가 계속 늦는다
+	'--disable-background-timer-throttling', '--disable-renderer-backgrounding',
+	'--disable-backgrounding-occluded-windows',
+	'about:blank'], { stdio: 'ignore' });
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
-let ws;
+let ws, ff, errBuf = '';
 try {
 	let target = null;
 	for (let i = 0; i < 40; i++) {
@@ -296,9 +300,9 @@ try {
 		w.on('open', () => res(w)); w.on('error', rej);
 	});
 	let id = 0;
-	const send = (m, p = {}) => new Promise((res, rej) => {
+	const send = (m, p = {}, ms = 30000) => new Promise((res, rej) => {
 		const mid = ++id;
-		const to = setTimeout(() => rej(new Error('timeout ' + m)), 30000);
+		const to = setTimeout(() => rej(new Error('timeout ' + m)), ms);
 		const h = (raw) => { const x = JSON.parse(raw);
 			if (x.id === mid) { clearTimeout(to); ws.off('message', h); x.error ? rej(new Error(JSON.stringify(x.error))) : res(x.result); } };
 		ws.on('message', h);
@@ -319,28 +323,60 @@ try {
 	console.log(`애니메이션 ${count}개를 시간으로 민다`);
 	if (!count) throw new Error('애니메이션이 하나도 없다 — CSS가 안 먹었다');
 
+	// PNG 대신 JPEG로 뜬다 — 어차피 H.264로 다시 인코딩하니 q=95면 눈으로 구분이
+	// 안 되고, 크롬이 프레임마다 하던 1080x1920 PNG 압축이 통째로 사라진다.
+	const SHOT = { format: 'jpeg', quality: 95 };
+	// 프레임을 디스크에 쓰지 않고 ffmpeg에 바로 민다. 357장을 %TEMP%에 쓰면
+	// Defender가 장마다 검사해서 렌더가 갈수록 느려졌다.
+	ff = spawn('ffmpeg', [
+		'-y', '-f', 'image2pipe', '-c:v', 'mjpeg', '-framerate', String(FPS), '-i', 'pipe:0',
+		'-i', join(work, 'sfx.wav'),
+		'-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-r', String(FPS), '-crf', '19',
+		'-c:a', 'aac', '-b:a', '160k', '-shortest', OUT
+	], { stdio: ['pipe', 'ignore', 'pipe'] });
+	ff.stderr.on('data', (d) => { errBuf += d; if (errBuf.length > 20000) errBuf = errBuf.slice(-8000); });
+	ff.stdin.on('error', (e) => {
+		console.error(`\nffmpeg 파이프 끊김: ${e.code}`);
+		console.error(errBuf.split('\n').slice(-15).join('\n'));
+		process.exit(1);
+	});
 	const N = Math.round(T.total * FPS);
+	let 지연 = 0; // 캡처가 멈춰서 버린 시간(초). 끝에 찍어 회귀를 눈으로 본다.
+	const t0 = Date.now();
 	for (let i = 0; i < N; i++) {
 		const ms = (i / FPS) * 1000;
 		await evalJs(`for(const a of document.getAnimations()){a.pause();a.currentTime=${ms.toFixed(1)}}`);
+		/**
+		 * captureScreenshot이 간헐적으로 멈춘다 — 애니메이션을 전부 pause()해 두면
+		 * 컴포지터가 새 프레임을 안 올리는데 캡처는 그걸 기다리기 때문이다.
+		 * 예전에는 이 타임아웃이 30초였고 재시도가 에러를 삼켜서, 멈출 때마다 30초씩
+		 * 까먹으면서도 「그냥 느린 렌더」로 보였다. 멈추면 짧게 끊고 다시 부른다.
+		 * (fromSurface:false도 시도했다가 버렸다 — 프레임 30부터 아예 죽는다)
+		 */
 		let data;
-		try { ({ data } = await send('Page.captureScreenshot', { format: 'png' })); }
-		catch { await sleep(400); ({ data } = await send('Page.captureScreenshot', { format: 'png' })); }
-		writeFileSync(join(FRAMES, `f${String(i).padStart(4, '0')}.png`), Buffer.from(data, 'base64'));
+		for (let 시도 = 1; ; 시도++) {
+			try { ({ data } = await send('Page.captureScreenshot', SHOT, 1500)); break; }
+			catch (e) {
+				if (시도 >= 8) throw new Error(`프레임 ${i} 캡처 8번 실패: ${e.message}`);
+				지연 += 1.5;
+				await sleep(60);
+			}
+		}
+		if (!ff.stdin.write(Buffer.from(data, 'base64'))) {
+			await new Promise((r) => ff.stdin.once('drain', r));
+		}
+		if (i % 30 === 0) process.stdout.write(`\r  ${i}/${N}`);
 	}
-	console.log(`프레임 ${N}장 (${T.total}초)`);
+	ff.stdin.end();
+	const 걸린 = (Date.now() - t0) / 1000;
+	console.log(`\r프레임 ${N}장 ${걸린.toFixed(0)}초 (${(걸린 / N).toFixed(2)}초/장, 캡처 멈춤으로 버린 시간 ${지연.toFixed(0)}초) — 인코딩 대기`);
 } finally {
 	ws?.close(); proc.kill();
 }
 
-const r = spawnSync('ffmpeg', [
-	'-y', '-framerate', String(FPS), '-i', join(FRAMES, 'f%04d.png'),
-	'-i', join(work, 'sfx.wav'),
-	'-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-r', String(FPS), '-crf', '19',
-	'-c:a', 'aac', '-b:a', '160k', '-shortest', OUT
-], { stdio: ['ignore', 'ignore', 'pipe'] });
-if (r.status !== 0) {
-	console.error(String(r.stderr).split('\n').slice(-12).join('\n'));
+const code = await new Promise((res) => ff.on('close', res));
+if (code !== 0) {
+	console.error(errBuf.split('\n').slice(-12).join('\n'));
 	process.exit(1);
 }
 console.log(`\n${OUT} (${T.total}초, ${W}x${H})`);
