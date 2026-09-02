@@ -7,7 +7,7 @@
 	const url = $derived(`https://ddalkkak.app/discover/${data.field.slug}`);
 	const heading = $derived(`${data.field.title} ${data.items.length}개`);
 	const desc = $derived(
-		`${data.field.title} ${data.items.length}개를 정답과 해설까지 한 페이지에 모았습니다. 가입도 결제도 없이 무료로 보고, 무한 연습에서 바로 풀어볼 수 있습니다.`
+		`${data.field.title} ${data.items.length}개. ${data.field.desc}`
 	);
 </script>
 
