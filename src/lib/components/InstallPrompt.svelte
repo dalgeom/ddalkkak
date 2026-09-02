@@ -6,6 +6,7 @@
 		platformOf,
 		iosBrowser,
 		installSteps,
+		installSkipReason,
 		shouldOfferInstall,
 		noteInstallDismissed,
 		stopOfferingInstall,
@@ -13,6 +14,7 @@
 		type Platform
 	} from '$lib/pwa';
 	import InstallSteps from './InstallSteps.svelte';
+	import { pushSkipReason } from '$lib/push';
 	import { track } from '$lib/analytics';
 
 	/**
@@ -26,10 +28,25 @@
 	let platform = $state<Platform>('desktop');
 	let closed = $state(false);
 
+	/**
+	 * 완주했는데 알림도 설치도 못 본 사람이 왜 그랬는지를 남긴다.
+	 *
+	 * 이 컴포넌트는 알림을 못 걸 때 대신 서는 자리다. 그런데 여기서도 조용히
+	 * 아무것도 안 뜨는 길이 셋 있었고, 기록이 없어서 구분이 안 됐다 —
+	 * 8/19~9/1 완주 35명 중 제안이 뜬 사람은 23명뿐이었다.
+	 *
+	 * 인앱이라 못 거는 것(InAppGate가 대신 뜬다)과 데스크톱에서 설치 이벤트가
+	 * 끝내 안 와서 못 거는 것은 뜻이 다르다. 앞은 설계대로고 뒤는 구멍이다.
+	 */
+	function skip(reason: string) {
+		track('prompt_skip', { reason, platform, push: pushSkipReason(dayNum) ?? 'ok' });
+	}
+
 	onMount(() => {
-		if (!shouldOfferInstall(dayNum)) return;
+		const why = installSkipReason(dayNum);
+		if (why) return skip(why);
 		const ua = navigator.userAgent;
-		if (isInAppUA(ua)) return; // 인앱은 홈 화면 추가 자체가 안 된다
+		if (isInAppUA(ua)) return skip('inapp'); // 인앱은 홈 화면 추가 자체가 안 된다
 		platform = platformOf(ua, navigator.maxTouchPoints ?? 0);
 		const s = installSteps(platform, iosBrowser(ua));
 
@@ -43,13 +60,22 @@
 		// 끝내 오지 않으면(파이어폭스 등) 수동 경로라도 안내한다 — 아무것도 안 뜨는 게 최악이다.
 		if (platform === 'android') {
 			setTimeout(() => {
-				if (mode === 'none' && !closed && s.length) {
+				if (mode !== 'none' || closed) return;
+				if (s.length) {
 					steps = s;
 					mode = 'steps';
 					track('install_offer', { mode: 'steps', platform: 'android' });
+				} else {
+					skip('no-steps');
 				}
 			}, 1500);
+			return;
 		}
+		// 데스크톱은 기다리는 것 말고 할 수 있는 게 없다. 끝내 안 오면 그대로 빈 화면이라
+		// 그 사실을 남긴다 — 안드로이드와 달리 수동 경로 대비가 없다.
+		setTimeout(() => {
+			if (mode === 'none' && !closed) skip('no-install-event');
+		}, 3000);
 	});
 
 	// 설치 버튼을 쓸 수 있으면 언제든 그쪽이 낫다.

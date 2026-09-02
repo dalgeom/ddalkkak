@@ -70,17 +70,40 @@ function readDismiss(): Dismiss {
  * iOS는 홈 화면에 추가하지 않으면 푸시 자체가 불가능하다. 그 경우 여기서는 물러나고
  * 설치 권유가 대신 뜬다 — 한 화면에서 둘 다 조르면 둘 다 무시당한다.
  */
-export function shouldOfferPush(dayNum: number, ua = '', touch = 0): boolean {
-	if (!pushSupported()) return false;
+/** 알림 권유를 못 거는 이유. 걸 수 있으면 null. */
+export type PushSkip =
+	| null
+	| 'unsupported'
+	| 'granted'
+	| 'denied'
+	| 'ios-browser'
+	| 'max-shows'
+	| 'gap';
+
+/**
+ * 왜 안 뜨는지를 낸다. shouldOfferPush는 이걸 감싼 것이라 둘이 갈라질 수 없다.
+ *
+ * 이유를 따로 내는 까닭: 완주자의 34%가 알림도 설치도 못 보고 지나가는데
+ * (8/19~9/1 완주 35명 중 제안 노출 23명) 어느 조건에서 걸렸는지 기록이 없었다.
+ * iOS 브라우저라 못 거는 것과, 이미 거부해서 안 거는 것은 뜻이 전혀 다르다.
+ */
+export function pushSkipReason(dayNum: number, ua = '', touch = 0): PushSkip {
+	if (!pushSupported()) return 'unsupported';
 	const state = pushState();
-	if (state === 'granted' || state === 'denied') return false;
+	if (state === 'granted') return 'granted';
+	if (state === 'denied') return 'denied';
 
 	const platform = platformOf(ua || navigator.userAgent, touch || navigator.maxTouchPoints || 0);
-	if ((platform === 'iphone' || platform === 'ipad') && !isStandalone()) return false;
+	if ((platform === 'iphone' || platform === 'ipad') && !isStandalone()) return 'ios-browser';
 
 	const d = readDismiss();
-	if (d.n >= MAX_SHOWS) return false;
-	return dayNum - d.at >= GAP_DAYS;
+	if (d.n >= MAX_SHOWS) return 'max-shows';
+	if (dayNum - d.at < GAP_DAYS) return 'gap';
+	return null;
+}
+
+export function shouldOfferPush(dayNum: number, ua = '', touch = 0): boolean {
+	return pushSkipReason(dayNum, ua, touch) === null;
 }
 
 export function notePushDismissed(dayNum: number): void {

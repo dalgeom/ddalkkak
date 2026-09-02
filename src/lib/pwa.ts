@@ -122,11 +122,20 @@ function readDismiss(): Dismiss {
 }
 
 /** 오늘(dayNum) 기준으로 설치 권유를 보여줄 때인가 */
-export function shouldOfferInstall(dayNum: number): boolean {
-	if (isStandalone()) return false;
+/** 설치 권유를 못 거는 이유. 걸 수 있으면 null. */
+export type InstallSkip = null | 'standalone' | 'max-shows' | 'gap';
+
+/** 왜 안 뜨는지를 낸다. shouldOfferInstall은 이걸 감싼 것이라 둘이 갈라질 수 없다. */
+export function installSkipReason(dayNum: number): InstallSkip {
+	if (isStandalone()) return 'standalone';
 	const d = readDismiss();
-	if (d.n >= MAX_SHOWS) return false;
-	return dayNum - d.at >= GAP_DAYS;
+	if (d.n >= MAX_SHOWS) return 'max-shows';
+	if (dayNum - d.at < GAP_DAYS) return 'gap';
+	return null;
+}
+
+export function shouldOfferInstall(dayNum: number): boolean {
+	return installSkipReason(dayNum) === null;
 }
 
 export function noteInstallDismissed(dayNum: number): void {
