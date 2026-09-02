@@ -44,6 +44,12 @@ const C = {
  *   id     src/lib/problems.ts의 문제 id — 나중에 대조할 수 있게 남긴다
  */
 const CARDS = {
+	'2026-09-02': {
+		id: 'vertical-vowel-club',
+		chip: '한글',
+		물음: '어떤 클럽의 가입 심사 결과다',
+		줄: ['합격 : 노  구  흐', '불합격 : 나  거  히', '다음 중 합격할 글자는?', '배   보   지   레']
+	},
 	'2026-09-01': {
 		id: 'chain-alpha',
 		chip: '사슬',
