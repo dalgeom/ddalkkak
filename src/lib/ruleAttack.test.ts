@@ -19,20 +19,24 @@ import { attackOps, attackSeqs, attackClubs, 적발된_id } from './ruleAttack';
  * 이 라이브러리로 못 깼다는 뜻이다.
  */
 const 알려진_적발 = [
-	// 답이 갈린다 — 사람이 실제로 세울 가설이고 답이 다르다
-	'palindrome-branch', // 「a > b면 더하고 아니면 뺀다」가 예시 셋을 다 통과해 154
-	'digitwise-add', // 34⊕21=55가 통째 덧셈과 같아 홀짝 갈림이 성립 → 83
-	'consecutive-sum-club', // 회원 9·12·15·21이 전부 3의 배수 → {24,45}
-	// 성립하지만 억지스러운 대안
-	'num-carry-count',
-	'num-hundred-gap',
-	'odd-even-branch',
-	'size-branch',
-	'square-diff',
-	'clock-add',
-	'nm-digit-chain',
-	// 「이상한 연산」인데 자명한 연산이다 — 해설이 주장하는 발견이 없다
-	'num-place-add' // 네 줄 전부 그냥 a+b인데 해설은 「올림이 없다는 게 드러난다」
+	// 남은 것은 전부 「이상한 연산」이고, 대안이 조건 갈림형인데 조건이 억지스럽다.
+	// 예시 두 가지를 다 밟기는 하므로 형식상 성립하지만, 사람이 「a가 소수이면
+	// a²-b², 아니면 a+b」 같은 가설을 세우지는 않는다. 그래도 남겨 둔다 —
+	// 8/26·8/31·9/2 지적 세 건이 전부 「설마 그렇게 읽겠나」 싶던 자리에서 나왔다.
+	'square-diff', // 28 ↔ 14  「a가 소수이면 a²-b², 아니면 a+b」
+	'clock-add', // 5 ↔ 0  「a가 소수이면 (a+b) mod 12, 아니면 사이 짝수 개수」
+	'odd-even-branch', // 7 ↔ 2  「a가 홀수이면 a+b, 아니면 a와 b 자릿수합의 차」
+	'size-branch', // 21 ↔ 111  「a가 대칭수이면 자리별 덧셈, 아니면 a-b」
+	'num-hundred-gap', // 40 ↔ 5  「a가 홀수이면 사이 짝수 개수, 아니면 100에서 남은 거리」
+	'num-carry-count' // 2 ↔ 5  「a+b가 짝수이면 올림 횟수, 아니면 (a+b) mod 12」
+	//
+	// 9/3에 고쳐서 뺀 것 — 답은 그대로 두고 대안을 죽이는 예시를 넣었다.
+	// palindrome-branch      74♥21=53 (비대칭인데 a>b라 크기 가설이 죽는다)
+	// digitwise-add          58⊕34=812, 27⊕14=311 (앞 수·합의 홀짝으로 안 갈린다)
+	// consecutive-sum-club   회원에 14 (3의 배수가 아닌 회원)
+	// num-place-add          60⊗34=94 → 58⊗34=812 (비로소 올림 없음이 드러난다)
+	// nm-digit-chain         검사기 쪽 결함이었다 — 규칙마다 필요한 앞 항 수가 다른데
+	//                        i=3부터 일괄로 검사해 마지막 한 자리만 보고 통과시켰다
 ].sort();
 
 describe('발견형 규칙 유일성', () => {

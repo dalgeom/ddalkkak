@@ -307,21 +307,31 @@ export function attackSeqs(): Report {
 		const 공식 = Number(p.answers?.[0]);
 		const fit: { name: string; v: number }[] = [];
 		for (const [name, f] of SEQ) {
+			/**
+			 * 규칙마다 필요한 앞 항 수가 다르다. 「계차의 등차」는 셋이 필요하지만
+			 * 「앞항÷2」는 하나면 된다. 예전에는 i=3부터 일괄로 검사해서, 항이 넷인
+			 * 수열에서는 마지막 한 자리만 보고 통과시켰다 — nm-digit-chain(77→49→36→18)이
+			 * 「앞항÷2」로 새는 것처럼 보였는데 77÷2=38.5라 첫 자리에서 죽는 규칙이었다.
+			 * 그래서 계산이 되는 가장 이른 자리부터 끝까지 전부 맞아야 하고,
+			 * 확인한 자리가 둘 미만이면 한 점에 맞춘 것이라 세지 않는다.
+			 */
 			let ok = true;
-			for (let i = 3; i < known.length; i++) {
+			let 확인 = 0;
+			for (let i = 1; i < known.length; i++) {
 				let v: number;
 				try {
 					v = f(known.slice(0, i));
 				} catch {
-					ok = false;
-					break;
+					continue; // 이 자리에서는 아직 계산이 안 된다
 				}
-				if (!Number.isFinite(v) || v !== known[i]) {
+				if (!Number.isFinite(v)) continue;
+				확인++;
+				if (v !== known[i]) {
 					ok = false;
 					break;
 				}
 			}
-			if (!ok) continue;
+			if (!ok || 확인 < 2) continue;
 			let v: number;
 			try {
 				v = f(known);
