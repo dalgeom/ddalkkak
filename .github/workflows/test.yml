@@ -11,7 +11,12 @@ jobs:
   vitest:
     runs-on: ubuntu-latest
     steps:
+      # todaySafety·bankIntegrity는 `git show origin/main:…`으로 기준선을 읽고, 못 읽으면
+      # 「검증 불가」로 조용히 통과한다. 기본 얕은 체크아웃(depth 1)에서는 그 ref가 없어
+      # 두 가드가 CI에서 한 번도 작동한 적이 없었다 — 8/11 완주율 15% 사고를 막는 가드다.
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: 20

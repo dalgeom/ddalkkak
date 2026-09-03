@@ -72,6 +72,25 @@ if (DRY) {
 }
 if (!keys.length) process.exit(0);
 
+/**
+ * 08:00 KST에 맞춘다.
+ *
+ * 크론(22:30 UTC)이 밀려서 도착하는 것이 정상이라 여기서 남은 시간을 메운다.
+ * 이미 08:00을 넘겼으면 기다리지 않는다 — 늦은 알림이 안 보내는 것보다 낫다.
+ * 45분 넘게 남았으면 손으로 돌린 것으로 보고 그대로 보낸다.
+ */
+const kstNow = new Date(Date.now() + 9 * 3600e3);
+const kstEight = new Date(kstNow);
+kstEight.setUTCHours(8, 0, 0, 0); // KST만큼 옮겨 놨으니 UTC 게터가 곧 KST 시각이다
+const waitMs = kstEight - kstNow;
+const hhmm = (d) => `${String(d.getUTCHours()).padStart(2, '0')}:${String(d.getUTCMinutes()).padStart(2, '0')}`;
+if (waitMs > 0 && waitMs <= 45 * 60e3) {
+	console.log(`지금 ${hhmm(kstNow)} KST — 08:00까지 ${Math.round(waitMs / 1000)}초 기다린다`);
+	await new Promise((r) => setTimeout(r, waitMs));
+} else {
+	console.log(`지금 ${hhmm(kstNow)} KST — 기다리지 않고 보낸다`);
+}
+
 webpush.setVapidDetails(process.env.VAPID_SUBJECT, PUBLIC_KEY, process.env.VAPID_PRIVATE_KEY);
 
 // 본문은 짧게. 알림은 읽히는 게 아니라 눈에 띄는 것이고, 무엇이 기다리는지만 전하면 된다.
