@@ -117,7 +117,7 @@
 		text-decoration: none;
 	}
 	.crumb a:hover {
-		color: var(--accent);
+		color: var(--accent-text);
 	}
 	h1 {
 		font-size: var(--fs-xl);
@@ -143,6 +143,6 @@
 		color: #1f6b41;
 	}
 	.today-cta:hover {
-		border-color: var(--accent);
+		border-color: var(--accent-text);
 	}
 </style>

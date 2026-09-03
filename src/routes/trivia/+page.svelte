@@ -109,7 +109,7 @@
 		font-size: 11.5px;
 		font-weight: 800;
 		letter-spacing: 0.4px;
-		color: var(--accent);
+		color: var(--accent-text);
 		background: var(--correct-bg);
 		border-radius: 7px;
 		padding: 4px 11px;
@@ -123,7 +123,7 @@
 		word-break: keep-all;
 	}
 	h1 b {
-		color: var(--accent);
+		color: var(--accent-text);
 	}
 	.lead {
 		font-size: 14.5px;
@@ -148,7 +148,7 @@
 		display: block;
 		font-size: 18px;
 		font-weight: 800;
-		color: var(--accent);
+		color: var(--accent-text);
 		font-variant-numeric: tabular-nums;
 	}
 	.fact span {
@@ -258,7 +258,7 @@
 		font-weight: 700;
 	}
 	.ans b {
-		color: var(--accent);
+		color: var(--accent-text);
 	}
 	.exp {
 		font-size: 13px;
@@ -286,7 +286,7 @@
 		background: var(--panel-2);
 	}
 	.cat b {
-		color: var(--accent);
+		color: var(--accent-text);
 		font-variant-numeric: tabular-nums;
 	}
 
@@ -307,7 +307,7 @@
 	}
 	.grade-row b {
 		font-size: 14px;
-		color: var(--accent);
+		color: var(--accent-text);
 		flex: none;
 	}
 	.cnt {

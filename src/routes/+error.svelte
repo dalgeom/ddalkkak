@@ -38,7 +38,7 @@
 		font-size: clamp(56px, 18vw, 96px);
 		font-weight: 800;
 		font-variant-numeric: tabular-nums;
-		color: var(--accent);
+		color: var(--accent-text);
 		letter-spacing: -1px;
 		line-height: 1;
 	}

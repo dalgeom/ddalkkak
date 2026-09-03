@@ -267,7 +267,7 @@
 		color: var(--muted-2);
 	}
 	.crumb a {
-		color: var(--accent);
+		color: var(--accent-text);
 		text-decoration: none;
 	}
 	h1 {
@@ -279,7 +279,7 @@
 		word-break: keep-all;
 	}
 	h1 b {
-		color: var(--accent);
+		color: var(--accent-text);
 	}
 	.lead {
 		margin: 0;
@@ -421,7 +421,7 @@
 	}
 	.ctrl input {
 		flex: 1;
-		accent-color: var(--accent);
+		accent-color: var(--accent-text);
 	}
 	.mini {
 		flex: none;

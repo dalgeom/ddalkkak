@@ -181,7 +181,7 @@
 	}
 	.mv-reveal:hover {
 		color: var(--text);
-		border-color: var(--accent);
+		border-color: var(--accent-text);
 	}
 	.mv-reveal:active {
 		border-bottom-width: 1px;

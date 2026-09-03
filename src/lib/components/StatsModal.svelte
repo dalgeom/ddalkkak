@@ -109,7 +109,7 @@
 	}
 	.m-close:hover {
 		color: var(--text);
-		border-color: var(--accent);
+		border-color: var(--accent-text);
 	}
 	.m-nums {
 		display: grid;

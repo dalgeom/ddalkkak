@@ -272,7 +272,7 @@
 		margin: 12px 0 0;
 		font-size: 13px;
 		font-weight: 600;
-		color: var(--accent);
+		color: var(--accent-text);
 		word-break: keep-all;
 	}
 	.cover {
@@ -284,7 +284,7 @@
 	.kicker {
 		font-size: 12px;
 		font-weight: 800;
-		color: var(--accent);
+		color: var(--accent-text);
 		letter-spacing: 0.06em;
 	}
 	h1 {
@@ -296,7 +296,7 @@
 		word-break: keep-all;
 	}
 	h1 b {
-		color: var(--accent);
+		color: var(--accent-text);
 	}
 	.lead {
 		margin: 0;
@@ -323,7 +323,7 @@
 		display: block;
 		font-size: 16px;
 		font-weight: 800;
-		color: var(--accent);
+		color: var(--accent-text);
 		font-variant-numeric: tabular-nums;
 		white-space: nowrap;
 	}
@@ -422,7 +422,7 @@
 	}
 	.cell.lv4 {
 		background: var(--accent);
-		border-color: var(--accent);
+		border-color: var(--accent-text);
 	}
 	.cell.lv3 .d, .cell.lv4 .d {
 		color: rgba(255, 255, 255, 0.75);
@@ -487,7 +487,7 @@
 	.dlink {
 		font-size: 13px;
 		font-weight: 700;
-		color: var(--accent);
+		color: var(--accent-text);
 		text-decoration: none;
 	}
 	.dlink:hover {

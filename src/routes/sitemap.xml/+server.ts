@@ -18,8 +18,15 @@ const PAGES: { path: string; freq: string; priority: string }[] = [
      차지했다. 내용도 /discover·/trivia에 이미 실린 문제의 재조합이다. 페이지 자체는 남기고
      robots noindex만 걸었다(사람은 지난 문제 링크로 온다 — 3주간 검색 랜딩 0건).
    · /play, /matchstick, /cubenet — 게임 화면. /play는 본문이 200자뿐이고 나머지는 자바스크립트가
-     그린다. 크롤러에게는 빈 페이지로 보인다. 각 유형의 읽을거리는 /matchstick/guide,
-     /cubenet/guide, /discover가 따로 맡는다.
+     그린다. 각 유형의 읽을거리는 /matchstick/guide, /cubenet/guide, /discover가 따로 맡는다.
+
+     주의: /matchstick·/cubenet을 「크롤러에게 빈 페이지」라고 적어 뒀는데 사실이 아니다.
+     /matchstick은 SSR HTML이 18KB이고, 네이버 통합검색에서 「성냥개비 문제」 1위,
+     /cubenet은 「전개도 문제」 1위 착지다(2026-09-03 확인). 14일 착지 69·21세션으로
+     홈 다음가는 입구다. sitemap에서 뺀 진짜 이유는 얄팍함이 아니라 애드센스 정리
+     방향(게임 화면은 색인 자산이 아니다)이었다. 이미 1위라 도로 넣어도 달라질 것이
+     없으므로 뺀 상태를 유지한다 — 다만 「빈 페이지라서」라는 근거로 다른 판단을
+     하지 마라.
    애드센스가 가치 없는 콘텐츠로 두 번 반려한 뒤(8/11·8/21) 정리한 것이다. */
 	{ path: '/', freq: 'daily', priority: '1.0' },
 	{ path: '/discover', freq: 'monthly', priority: '0.8' },

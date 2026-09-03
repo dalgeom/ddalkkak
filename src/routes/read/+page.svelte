@@ -53,7 +53,7 @@
 	.kicker {
 		font-size: 12px;
 		font-weight: 800;
-		color: var(--accent);
+		color: var(--accent-text);
 		letter-spacing: 0.06em;
 	}
 	h1 {
@@ -65,7 +65,7 @@
 		word-break: keep-all;
 	}
 	h1 b {
-		color: var(--accent);
+		color: var(--accent-text);
 	}
 	.lead {
 		margin: 0;
@@ -107,7 +107,7 @@
 	.chip {
 		font-size: 12px;
 		font-weight: 700;
-		color: var(--accent);
+		color: var(--accent-text);
 		background: var(--accent-soft);
 		padding: 3px 9px;
 		border-radius: 7px;

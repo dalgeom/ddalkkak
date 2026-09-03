@@ -102,7 +102,7 @@
 		font-size: 11.5px;
 		font-weight: 800;
 		letter-spacing: 0.4px;
-		color: var(--accent);
+		color: var(--accent-text);
 		background: var(--correct-bg);
 		border-radius: 7px;
 		padding: 4px 11px;
@@ -116,7 +116,7 @@
 		word-break: keep-all;
 	}
 	h1 b {
-		color: var(--accent);
+		color: var(--accent-text);
 	}
 	.lead {
 		font-size: 14px;
@@ -180,7 +180,7 @@
 		margin-top: 10px;
 		font-size: 13px;
 		font-weight: 700;
-		color: var(--accent);
+		color: var(--accent-text);
 		text-decoration: none;
 	}
 	.ilink:hover {
@@ -208,7 +208,7 @@
 		display: inline-block;
 		font-size: 16px;
 		font-weight: 800;
-		color: var(--accent);
+		color: var(--accent-text);
 		text-decoration: none;
 		word-break: break-all;
 	}

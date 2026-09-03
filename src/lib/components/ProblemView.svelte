@@ -78,7 +78,7 @@
 		align-self: flex-start;
 		font-size: var(--fs-2xs);
 		font-weight: var(--fw-emphasis);
-		color: var(--accent);
+		color: var(--accent-text);
 		background: var(--accent-soft);
 		border-radius: 7px;
 		padding: 4px 11px;
@@ -118,7 +118,7 @@
 		font-weight: var(--fw-label);
 	}
 	.pv-choices li.answer {
-		border-color: var(--accent);
+		border-color: var(--accent-text);
 		background: var(--accent-soft);
 		color: #1f6b41;
 	}
@@ -153,7 +153,7 @@
 	}
 	.pv-reveal:hover {
 		color: var(--text);
-		border-color: var(--accent);
+		border-color: var(--accent-text);
 	}
 	.pv-reveal:active {
 		border-bottom-width: 1px;
@@ -188,7 +188,7 @@
 		word-break: keep-all;
 	}
 	.pv-explain :global(b) {
-		color: var(--accent);
+		color: var(--accent-text);
 		font-weight: var(--fw-emphasis);
 	}
 	@keyframes pv-fade {

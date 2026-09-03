@@ -93,7 +93,7 @@
 		color: var(--muted-2);
 	}
 	.crumb a {
-		color: var(--accent);
+		color: var(--accent-text);
 		text-decoration: none;
 	}
 	.crumb a:hover {
@@ -236,7 +236,7 @@
 	.body :global(.mtag.ok) {
 		color: #1f6b41;
 		background: var(--accent-soft);
-		border-color: var(--accent);
+		border-color: var(--accent-text);
 	}
 	.body :global(.mboard) {
 		flex: 1;
@@ -294,7 +294,7 @@
 		background: var(--panel-2);
 	}
 	.cat b {
-		color: var(--accent);
+		color: var(--accent-text);
 		margin-right: 4px;
 	}
 

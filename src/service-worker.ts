@@ -10,7 +10,20 @@ import { build, files, prerendered, version } from '$service-worker';
 const sw = self as unknown as ServiceWorkerGlobalScope;
 
 const CACHE = `ddalkkak-${version}`;
-const PRECACHE = [...build, ...files, ...prerendered];
+/**
+ * 프리캐시는 해시 자산(build)만.
+ *
+ * 예전에는 [...build, ...files, ...prerendered]였다 — 첫 방문마다 192파일 1.50MB를
+ * 받고, 배포가 있을 때마다(14일에 50번) 캐시 이름이 바뀌어 통째로 다시 받았다.
+ * addAll은 원자적이라 그중 하나만 실패해도 설치가 통째로 무산되고, 그러면 알림
+ * 구독도 못 만든다.
+ *
+ * prerendered·files를 빼도 오프라인은 그대로 된다 — 아래 fetch 핸들러가
+ * network-first로 방문한 페이지를 런타임 캐시에 넣기 때문이다. 안 가 본 페이지가
+ * 오프라인에서 안 열리는 것은 원래도 마찬가지였다(캐시에 있어도 network-first라
+ * 새 내용을 받으러 가고, 실패해야 캐시를 쓴다).
+ */
+const PRECACHE = [...build];
 const HASHED = new Set(build); // content-hash가 붙어 불변인 자산만
 
 sw.addEventListener('install', (event) => {

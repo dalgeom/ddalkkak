@@ -106,7 +106,7 @@
 		font-size: 11.5px;
 		font-weight: 800;
 		letter-spacing: 0.4px;
-		color: var(--accent);
+		color: var(--accent-text);
 		background: var(--correct-bg);
 		border-radius: 7px;
 		padding: 4px 11px;
@@ -120,7 +120,7 @@
 		word-break: keep-all;
 	}
 	h1 b {
-		color: var(--accent);
+		color: var(--accent-text);
 	}
 	.lead {
 		font-size: 14px;
@@ -152,7 +152,7 @@
 		color: var(--muted);
 	}
 	.pt b {
-		color: var(--accent);
+		color: var(--accent-text);
 	}
 
 	.sec {
@@ -182,7 +182,7 @@
 	}
 	.days a:hover {
 		transform: translateY(-2px);
-		border-color: var(--accent);
+		border-color: var(--accent-text);
 	}
 	.days a.done {
 		background: var(--correct-bg);
@@ -225,7 +225,7 @@
 		font-weight: 600;
 	}
 	.meta b {
-		color: var(--accent);
+		color: var(--accent-text);
 		font-variant-numeric: tabular-nums;
 	}
 	.go {

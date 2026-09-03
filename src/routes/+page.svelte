@@ -267,6 +267,16 @@
 	async function startOrResume() {
 		if (loading) return;
 		loading = true;
+		/**
+		 * 누른 순간을 먼저 찍는다.
+		 *
+		 * 예전에는 문제은행(gz 174KB)을 다 받은 뒤에야 daily_start가 찍혔다. 그래서
+		 * 「눌렀는데 안 기다리고 나간 사람」이 퍼널에서 통째로 사라졌다 — 방문→시작
+		 * 전환이 낮은 이유 중 하나가 여기 있을 수 있는데 잴 수가 없었다.
+		 * 누른 것은 daily_press, 실제로 화면이 뜬 것은 daily_start로 나눠 찍는다.
+		 */
+		const 처음 = !queue.length;
+		track('daily_press', { 로드필요: 처음 ? 1 : 0 });
 		try {
 			if (!queue.length) await loadBank();
 			if (!queue.length) throw new Error('empty bank');
@@ -1481,7 +1491,7 @@
 		word-break: keep-all;
 	}
 	.slogan b {
-		color: var(--accent);
+		color: var(--accent-text);
 	}
 	.tagline {
 		margin: 10px 0 22px;
@@ -1609,7 +1619,7 @@
 	.remind svg {
 		width: 17px;
 		height: 17px;
-		color: var(--accent);
+		color: var(--accent-text);
 	}
 	.remind:hover {
 		background: var(--panel-2);
@@ -1749,7 +1759,7 @@
 	}
 	.mini-badge.on {
 		background: var(--accent);
-		border-color: var(--accent);
+		border-color: var(--accent-text);
 		color: #fff;
 	}
 	.mini-line {
@@ -1794,7 +1804,7 @@
 		color: var(--muted);
 	}
 	.more-s b {
-		color: var(--accent);
+		color: var(--accent-text);
 		font-size: 15px;
 		font-variant-numeric: tabular-nums;
 	}
@@ -1820,7 +1830,7 @@
 	}
 	.mbtn:hover {
 		transform: translateY(-2px);
-		border-color: var(--accent);
+		border-color: var(--accent-text);
 	}
 	.mb-t {
 		font-size: 13px;
@@ -1829,7 +1839,7 @@
 	.mb-n {
 		font-size: 17px;
 		font-weight: 800;
-		color: var(--accent);
+		color: var(--accent-text);
 		font-variant-numeric: tabular-nums;
 	}
 	.mall {
@@ -1876,7 +1886,7 @@
 		color: var(--text);
 	}
 	.about a {
-		color: var(--accent);
+		color: var(--accent-text);
 		font-weight: 700;
 	}
 	.reads {
@@ -1898,7 +1908,7 @@
 	.read .r-tag {
 		font-size: 11.5px;
 		font-weight: 800;
-		color: var(--accent);
+		color: var(--accent-text);
 		background: var(--correct-bg);
 		border-radius: 7px;
 		padding: 3px 9px;
@@ -1941,7 +1951,7 @@
 	}
 	.catlink b {
 		font-size: 12px;
-		color: var(--accent);
+		color: var(--accent-text);
 		font-variant-numeric: tabular-nums;
 	}
 	.deeplinks {
@@ -1959,7 +1969,7 @@
 		text-decoration: none;
 	}
 	.deeplinks a:hover {
-		color: var(--accent);
+		color: var(--accent-text);
 		text-decoration: underline;
 	}
 
@@ -2186,13 +2196,13 @@
 	}
 	.choice .mark {
 		font-weight: 800;
-		color: var(--accent);
+		color: var(--accent-text);
 	}
 	.choice .mark.bad {
 		color: var(--danger);
 	}
 	.choice.ok {
-		border-color: var(--accent);
+		border-color: var(--accent-text);
 		background: var(--correct-bg);
 	}
 	.choice.bad {
@@ -2258,7 +2268,7 @@
 	}
 
 	.card.hit {
-		border-color: var(--accent);
+		border-color: var(--accent-text);
 		animation: pop 420ms var(--ease-out);
 	}
 	.card.miss {
@@ -2297,9 +2307,9 @@
 		font-weight: 700;
 	}
 	.feedback.ok {
-		border-color: var(--accent);
+		border-color: var(--accent-text);
 		background: var(--correct-bg);
-		color: var(--accent);
+		color: var(--accent-text);
 	}
 	@keyframes fb-in {
 		from {
@@ -2340,7 +2350,7 @@
 		animation: fb-in 320ms var(--ease-out) both;
 	}
 	.answer-line b {
-		color: var(--accent);
+		color: var(--accent-text);
 		font-weight: 800;
 	}
 
@@ -2381,11 +2391,11 @@
 		color: var(--muted-2);
 	}
 	.cubeopt.ok {
-		border-color: var(--accent);
+		border-color: var(--accent-text);
 		background: var(--correct-bg, var(--panel-2));
 	}
 	.cubeopt.ok .badge {
-		color: var(--accent);
+		color: var(--accent-text);
 	}
 	.cubeopt.bad {
 		border-color: var(--accent-2);
@@ -2520,7 +2530,7 @@
 		font-variant-numeric: tabular-nums;
 	}
 	.score .num {
-		color: var(--accent);
+		color: var(--accent-text);
 	}
 	.score .rest {
 		color: var(--muted-2);
@@ -2555,7 +2565,7 @@
 		color: var(--muted-2);
 	}
 	.took-note.record {
-		color: var(--accent);
+		color: var(--accent-text);
 	}
 	.rows {
 		display: flex;
@@ -2582,7 +2592,7 @@
 		font-variant-numeric: tabular-nums;
 	}
 	.frac.ok {
-		color: var(--accent);
+		color: var(--accent-text);
 	}
 	.frac.bad {
 		color: var(--danger);
@@ -2609,7 +2619,7 @@
 		letter-spacing: -0.2px;
 	}
 	.stat b.up {
-		color: var(--accent);
+		color: var(--accent-text);
 	}
 	.stat b.down {
 		color: var(--accent-2);
@@ -2683,7 +2693,7 @@
 		text-align: center;
 	}
 	.wmore .arr {
-		color: var(--accent);
+		color: var(--accent-text);
 		font-size: 12px;
 	}
 	.week:hover .wmore {

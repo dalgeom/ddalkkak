@@ -134,7 +134,7 @@
 		color: var(--muted-2);
 	}
 	.crumb a {
-		color: var(--accent);
+		color: var(--accent-text);
 		text-decoration: none;
 	}
 	.crumb a:hover {
@@ -149,7 +149,7 @@
 		word-break: keep-all;
 	}
 	h1 b {
-		color: var(--accent);
+		color: var(--accent-text);
 	}
 	.lead {
 		margin: 0;
@@ -187,7 +187,7 @@
 		color: var(--muted);
 	}
 	.note a {
-		color: var(--accent);
+		color: var(--accent-text);
 		font-weight: 700;
 	}
 
@@ -255,7 +255,7 @@
 		white-space: nowrap;
 	}
 	.a {
-		color: var(--accent);
+		color: var(--accent-text);
 	}
 	.to {
 		font-size: 12px;
@@ -281,7 +281,7 @@
 		background: var(--panel-2);
 	}
 	.cat b {
-		color: var(--accent);
+		color: var(--accent-text);
 		font-variant-numeric: tabular-nums;
 	}
 
@@ -336,7 +336,7 @@
 		letter-spacing: 0.5px;
 	}
 	.peq .a {
-		color: var(--accent);
+		color: var(--accent-text);
 	}
 	.peq .to {
 		color: var(--muted-2);

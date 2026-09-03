@@ -114,7 +114,7 @@
 		color: var(--muted-2);
 	}
 	.crumb a {
-		color: var(--accent);
+		color: var(--accent-text);
 		text-decoration: none;
 	}
 	.crumb a:hover {
@@ -129,7 +129,7 @@
 		word-break: keep-all;
 	}
 	h1 b {
-		color: var(--accent);
+		color: var(--accent-text);
 	}
 	.lead {
 		margin: 0;
@@ -156,7 +156,7 @@
 		display: block;
 		font-size: 17px;
 		font-weight: 800;
-		color: var(--accent);
+		color: var(--accent-text);
 		font-variant-numeric: tabular-nums;
 	}
 	.fact span {
@@ -286,7 +286,7 @@
 		word-break: keep-all;
 	}
 	.ans b {
-		color: var(--accent);
+		color: var(--accent-text);
 	}
 	.exp {
 		margin: 0;
@@ -315,7 +315,7 @@
 		background: var(--panel-2);
 	}
 	.cat b {
-		color: var(--accent);
+		color: var(--accent-text);
 		font-variant-numeric: tabular-nums;
 	}
 
@@ -356,13 +356,13 @@
 		word-break: keep-all;
 	}
 	.daily-band .t b {
-		color: var(--accent);
+		color: var(--accent-text);
 	}
 	.daily-band .go {
 		flex: none;
 		font-size: 13px;
 		font-weight: 800;
-		color: var(--accent);
+		color: var(--accent-text);
 	}
 
 	.ctas {

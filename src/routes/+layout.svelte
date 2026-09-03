@@ -105,9 +105,14 @@
 		--border-strong: #ddd0ba;
 		--text: #2c2822;
 		--muted: #6b6258;
-		--muted-2: #a89f8f;
+		/* 2.13:1이라 WCAG AA(4.5)에 한참 못 미쳤다. 66곳에서 작은 글자에 쓰고 있었고
+		   가장 밝은 AA 통과값이 이것이다 — --muted와 가까워졌지만 읽히는 쪽을 택한다. */
+		--muted-2: #706757;
 		--accent: #2f8f5b;
 		--accent-press: #23703f;
+		/* 글자용 초록. --accent는 3.29:1이라 18px 미만 글자에 못 쓴다(41곳에서 쓰고 있었다).
+		   버튼 배경은 --accent 그대로 두고 글자만 이걸 쓴다 — 4.94:1. */
+		--accent-text: #23703f;
 		--accent-2: #c0632e;
 		--gold: #f6d34e;
 		--gold-bg: #fdf3cf;
@@ -273,7 +278,7 @@
 	}
 	/* 데일리는 이 사이트의 본체다. 다른 메뉴와 같은 무게로 두면 검색으로 온 사람이 지나친다 */
 	header nav a.daily {
-		color: var(--accent);
+		color: var(--accent-text);
 		font-weight: 800;
 	}
 

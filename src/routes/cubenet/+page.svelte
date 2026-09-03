@@ -235,7 +235,7 @@
 		font-size: 11.5px;
 		font-weight: 800;
 		letter-spacing: 0.4px;
-		color: var(--accent);
+		color: var(--accent-text);
 		background: var(--correct-bg);
 		border-radius: 7px;
 		padding: 4px 11px;
@@ -249,7 +249,7 @@
 		word-break: keep-all;
 	}
 	h1 b {
-		color: var(--accent);
+		color: var(--accent-text);
 	}
 	.lead {
 		margin: 0;
@@ -278,7 +278,7 @@
 		display: block;
 		font-size: 17px;
 		font-weight: 800;
-		color: var(--accent);
+		color: var(--accent-text);
 		font-variant-numeric: tabular-nums;
 	}
 	.fact span {
@@ -335,11 +335,11 @@
 		color: var(--muted-2);
 	}
 	.opt.right {
-		border-color: var(--accent);
+		border-color: var(--accent-text);
 		background: var(--correct-bg, var(--panel-2));
 	}
 	.opt.right .tag {
-		color: var(--accent);
+		color: var(--accent-text);
 	}
 	.opt.wrong {
 		border-color: var(--accent-2);
@@ -359,7 +359,7 @@
 		border-radius: 0 12px 12px 0;
 	}
 	.sol.ok {
-		border-left-color: var(--accent);
+		border-left-color: var(--accent-text);
 	}
 	.verdict {
 		margin: 0;
@@ -468,7 +468,7 @@
 		font-size: 14px;
 		font-weight: 800;
 		margin-bottom: 4px;
-		color: var(--accent);
+		color: var(--accent-text);
 		word-break: keep-all;
 	}
 	.rules span {
@@ -481,7 +481,7 @@
 		display: inline-block;
 		font-size: 13.5px;
 		font-weight: 700;
-		color: var(--accent);
+		color: var(--accent-text);
 		text-decoration: none;
 	}
 	.glink:hover {

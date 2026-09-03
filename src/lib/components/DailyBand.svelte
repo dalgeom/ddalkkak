@@ -40,12 +40,12 @@
 	}
 	/* 강조는 쓰는 쪽 마크업에 있어서 스코프가 다르다 */
 	.t :global(b) {
-		color: var(--accent);
+		color: var(--accent-text);
 	}
 	.go {
 		flex: none;
 		font-size: 13px;
 		font-weight: 800;
-		color: var(--accent);
+		color: var(--accent-text);
 	}
 </style>

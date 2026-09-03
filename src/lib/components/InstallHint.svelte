@@ -111,7 +111,7 @@
 		border-radius: 7px;
 		background: var(--panel);
 		border: 1px solid var(--border-strong);
-		color: var(--accent);
+		color: var(--accent-text);
 		display: flex;
 		align-items: center;
 		justify-content: center;
@@ -131,6 +131,6 @@
 		flex: none;
 		font-size: 15px;
 		font-weight: 800;
-		color: var(--accent);
+		color: var(--accent-text);
 	}
 </style>

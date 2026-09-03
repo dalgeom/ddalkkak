@@ -75,7 +75,7 @@
 		border-radius: 8px;
 		background: var(--panel);
 		border: 1px solid var(--border-strong);
-		color: var(--accent);
+		color: var(--accent-text);
 		display: flex;
 		align-items: center;
 		justify-content: center;

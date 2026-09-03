@@ -206,7 +206,7 @@
 		font-size: 11.5px;
 		font-weight: 800;
 		letter-spacing: 0.4px;
-		color: var(--accent);
+		color: var(--accent-text);
 		background: var(--correct-bg);
 		border-radius: 7px;
 		padding: 4px 11px;
@@ -220,7 +220,7 @@
 		word-break: keep-all;
 	}
 	h1 b {
-		color: var(--accent);
+		color: var(--accent-text);
 	}
 	.lead {
 		font-size: 14.5px;
@@ -386,7 +386,7 @@
 		margin: 10px 0 6px;
 		font-size: 16px;
 		font-weight: 800;
-		color: var(--accent);
+		color: var(--accent-text);
 		font-variant-numeric: tabular-nums;
 		text-align: center;
 	}
@@ -417,7 +417,7 @@
 		flex: none;
 		font-size: 17px;
 		font-weight: 800;
-		color: var(--accent);
+		color: var(--accent-text);
 		font-variant-numeric: tabular-nums;
 		min-width: 42px;
 	}
@@ -472,7 +472,7 @@
 		word-break: keep-all;
 	}
 	.xlink a {
-		color: var(--accent);
+		color: var(--accent-text);
 		font-weight: 700;
 	}
 </style>

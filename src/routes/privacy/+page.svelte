@@ -110,7 +110,7 @@
 		font-size: 11.5px;
 		font-weight: 800;
 		letter-spacing: 0.4px;
-		color: var(--accent);
+		color: var(--accent-text);
 		background: var(--correct-bg);
 		border-radius: 7px;
 		padding: 4px 11px;
@@ -124,7 +124,7 @@
 		word-break: keep-all;
 	}
 	h1 b {
-		color: var(--accent);
+		color: var(--accent-text);
 	}
 	.lead {
 		font-size: 14px;
@@ -163,7 +163,7 @@
 		line-height: 1.4;
 	}
 	.srow.ok .mark {
-		color: var(--accent);
+		color: var(--accent-text);
 	}
 	.srow b {
 		font-size: 14px;
@@ -217,7 +217,7 @@
 		color: var(--text);
 	}
 	.box a {
-		color: var(--accent);
+		color: var(--accent-text);
 		font-weight: 700;
 	}
 
@@ -237,7 +237,7 @@
 		display: inline-block;
 		font-size: 16px;
 		font-weight: 800;
-		color: var(--accent);
+		color: var(--accent-text);
 		text-decoration: none;
 		word-break: break-all;
 	}

@@ -120,7 +120,7 @@
 		color: var(--muted-2);
 	}
 	.crumb a {
-		color: var(--accent);
+		color: var(--accent-text);
 		text-decoration: none;
 	}
 	.crumb a:hover {
@@ -135,7 +135,7 @@
 		word-break: keep-all;
 	}
 	h1 b {
-		color: var(--accent);
+		color: var(--accent-text);
 	}
 	.lead {
 		margin: 0;
@@ -177,7 +177,7 @@
 		padding: 7px 11px;
 	}
 	.chipcount b {
-		color: var(--accent);
+		color: var(--accent-text);
 		font-variant-numeric: tabular-nums;
 	}
 
@@ -209,7 +209,7 @@
 		background: var(--panel-2);
 	}
 	.cat b {
-		color: var(--accent);
+		color: var(--accent-text);
 		font-variant-numeric: tabular-nums;
 	}
 

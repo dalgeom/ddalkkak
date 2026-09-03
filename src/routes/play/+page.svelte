@@ -622,7 +622,7 @@
 		background: var(--accent);
 		color: #fff;
 		font-weight: 700;
-		border-color: var(--accent);
+		border-color: var(--accent-text);
 	}
 
 	.card {
@@ -747,14 +747,14 @@
 	.mark {
 		margin-left: auto;
 		font-weight: 800;
-		color: var(--accent);
+		color: var(--accent-text);
 	}
 	.mark.bad {
 		color: var(--danger);
 	}
 	.choice.ok {
 		background: var(--correct-bg);
-		border-color: var(--accent);
+		border-color: var(--accent-text);
 	}
 	.choice.bad {
 		background: var(--danger-bg);
@@ -823,9 +823,9 @@
 		font-weight: 700;
 	}
 	.feedback.ok {
-		border-color: var(--accent);
+		border-color: var(--accent-text);
 		background: var(--correct-bg);
-		color: var(--accent);
+		color: var(--accent-text);
 	}
 	.fmark {
 		font-weight: 800;
@@ -842,7 +842,7 @@
 		color: var(--text);
 	}
 	.answer-line b {
-		color: var(--accent);
+		color: var(--accent-text);
 		font-weight: 800;
 	}
 
@@ -882,11 +882,11 @@
 		color: var(--muted-2);
 	}
 	.cubeopt.ok {
-		border-color: var(--accent);
+		border-color: var(--accent-text);
 		background: var(--correct-bg, var(--panel-2));
 	}
 	.cubeopt.ok .cbadge {
-		color: var(--accent);
+		color: var(--accent-text);
 	}
 	.cubeopt.bad {
 		border-color: var(--accent-2);

@@ -507,7 +507,7 @@
 		font-size: 11.5px;
 		font-weight: 800;
 		letter-spacing: 0.4px;
-		color: var(--accent);
+		color: var(--accent-text);
 		background: var(--correct-bg);
 		border-radius: 7px;
 		padding: 4px 11px;
@@ -521,7 +521,7 @@
 		word-break: keep-all;
 	}
 	.mcover h1 b {
-		color: var(--accent);
+		color: var(--accent-text);
 	}
 	.mlead {
 		font-size: 13.5px;
@@ -548,7 +548,7 @@
 	}
 	.gbanner:hover {
 		transform: translateY(-2px);
-		border-color: var(--accent);
+		border-color: var(--accent-text);
 	}
 	.gb-txt b {
 		display: block;
@@ -566,7 +566,7 @@
 		flex: none;
 		font-size: 17px;
 		font-weight: 800;
-		color: var(--accent);
+		color: var(--accent-text);
 	}
 	.mstats {
 		display: grid;
@@ -585,7 +585,7 @@
 		display: block;
 		font-size: 18px;
 		font-weight: 800;
-		color: var(--accent);
+		color: var(--accent-text);
 		font-variant-numeric: tabular-nums;
 	}
 	.ms span {
@@ -646,7 +646,7 @@
 		display: inline-block;
 		font-size: 13px;
 		font-weight: 700;
-		color: var(--accent);
+		color: var(--accent-text);
 		text-decoration: none;
 	}
 	.glink:hover {
@@ -730,7 +730,7 @@
 	}
 	.opt:hover {
 		transform: translateY(-2px);
-		border-color: var(--accent);
+		border-color: var(--accent-text);
 	}
 	.opt b {
 		font-size: 15px;
@@ -809,7 +809,7 @@
 	.run-score {
 		font-size: 17px;
 		font-weight: 800;
-		color: var(--accent);
+		color: var(--accent-text);
 	}
 	.emoji-mini {
 		font-size: 14px;
@@ -835,7 +835,7 @@
 	}
 	.stat-box b {
 		font-size: 16px;
-		color: var(--accent);
+		color: var(--accent-text);
 	}
 	.feedback {
 		margin-top: 14px;
@@ -844,7 +844,7 @@
 		color: var(--danger);
 	}
 	.feedback.ok {
-		color: var(--accent);
+		color: var(--accent-text);
 	}
 	.controls {
 		display: flex;
@@ -901,7 +901,7 @@
 	.big-score {
 		font-size: 56px;
 		font-weight: 900;
-		color: var(--accent);
+		color: var(--accent-text);
 		margin: 8px 0;
 	}
 	.big-score .unit {
