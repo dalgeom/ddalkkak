@@ -401,6 +401,14 @@
 				{/each}
 			</div>
 		</section>
+
+		<section class="msec">
+			<h2 class="mh">오늘의 딸깍</h2>
+			<p class="mp">
+				매일 자정에 새 10문제가 올라옵니다. 성냥개비뿐 아니라 숫자·한글·도형까지 섞여 나와요.
+			</p>
+			<a class="big" href="/">오늘 문제 풀러 가기 <span class="arr" aria-hidden="true">→</span></a>
+		</section>
 	</div>
 
 	{:else if screen === 'play'}
@@ -471,6 +479,7 @@
 		<button class="btn wide" onclick={share}>결과 공유 — 친구에게 도전장</button>
 		<button class="btn ghost wide" onclick={() => startMode(mode)}>다시 하기</button>
 		<button class="btn ghost wide" onclick={toMenu}>모드 선택으로</button>
+		<DailyBand>오늘은 성냥개비 말고 <b>10문제</b>도 나와 있어요</DailyBand>
 		<AdSlot label="모드 결과" />
 	</div>
 {/if}
@@ -648,6 +657,14 @@
 		font-size: 14.5px;
 		font-weight: 800;
 		word-break: keep-all;
+	}
+	/* .big과 .btn은 button에 맞춰 놨다. a에 그대로 입히면 폭이 안 차고 밑줄이 남는다 */
+	a.big,
+	a.btn {
+		display: block;
+		box-sizing: border-box;
+		text-align: center;
+		text-decoration: none;
 	}
 	.kinds {
 		display: flex;
