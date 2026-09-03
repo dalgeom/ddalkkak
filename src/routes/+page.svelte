@@ -232,6 +232,30 @@
 
 	/** 문제은행은 첫 화면에 필요 없다. 시작을 누른 순간에만 내려받아 홈을 가볍게 유지한다. */
 	async function loadBank() {
+		/**
+		 * 10문제만 받는다.
+		 *
+		 * 예전에는 문제은행 전체를 동적 import 했다 — gz 174KB(PROBLEMS 92 + TRIVIA 78 +
+		 * 성냥/전개도 4). 그날 세트는 날짜로 정해지므로 서버가 10개만 조립해 주면 된다.
+		 * 실측 gz 1.9KB — 99%가 준다.
+		 *
+		 * 실패하면 아래 전체 은행 경로로 떨어진다. 데일리는 이 사이트의 전부라
+		 * 길을 하나만 두지 않는다.
+		 */
+		try {
+			const r = await fetch(`/api/day/${dayNum}`);
+			if (r.ok) {
+				const q = await r.json();
+				if (Array.isArray(q) && q.length) {
+					queue = q;
+					track('daily_bank', { via: 'api', n: q.length });
+					return;
+				}
+			}
+		} catch {
+			/* 아래 전체 은행 경로로 */
+		}
+		track('daily_bank', { via: 'full' });
 		const [p, t, m, cn] = await Promise.all([
 			import('$lib/problems'),
 			import('$lib/trivia'),

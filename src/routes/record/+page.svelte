@@ -8,6 +8,30 @@
 		type DayRecord, type RecordSummary, type MonthCell
 	} from '$lib/record';
 	import { buildBackup, parseBackup, mergeBackup } from '$lib/backup';
+	import { pushState, enablePush, type PushState } from '$lib/push';
+	import { track } from '$lib/analytics';
+
+	/* ───────── 알림 상시 토글 ─────────
+	   완주 화면의 제안은 세 경로에서 구조적으로 못 뜬다 — 인앱 브라우저는 무조건 공백,
+	   아이폰 사파리는 홈 화면에 추가해야 하고, 데스크톱은 설치 이벤트가 안 오면 빈 화면이다.
+	   게다가 세 번 닫으면 다시 안 뜬다(push.ts MAX_SHOWS). 14일 구독 3명이 그 결과다.
+	   여기는 「켜고 싶어진 사람이 스스로 찾아올 수 있는 자리」다. 닫은 횟수와 무관하다. */
+	let ps = $state<PushState | null>(null);
+	let pushMsg = $state('');
+
+	async function turnOnPush() {
+		track('push_toggle_click', { from: 'record' });
+		const r = await enablePush();
+		ps = r;
+		pushMsg =
+			r === 'granted'
+				? '켰어요. 내일 아침 8시에 알려드릴게요.'
+				: r === 'denied'
+					? '브라우저에서 알림이 차단돼 있어요. 주소창 옆 자물쇠에서 허용으로 바꿔 주세요.'
+					: '이 브라우저에서는 알림을 켤 수 없어요.';
+		track('push_toggle_result', { result: r });
+		setTimeout(() => (pushMsg = ''), 6000);
+	}
 
 	/* ───────── 기록 백업 ─────────
 	   연속 기록은 잃을 게 쌓여야 작동하는 장치인데, 지금 모든 기록이 이 브라우저에만 있다.
@@ -57,6 +81,7 @@
 	let picked = $state<DayRecord | null>(null);
 
 	onMount(() => {
+		ps = pushState();
 		today = kstDayNumber(Date.now());
 		const t = dayNumToDate(today);
 		year = t.y;
@@ -137,6 +162,24 @@
 			</p>
 		{/if}
 	</header>
+
+	<!-- 완주 화면 제안이 못 닿는 사람들을 위한 상시 입구. 이미 켠 사람에게는 안 보인다. -->
+	{#if ps && ps !== 'granted'}
+		<section class="pushbar">
+			<div class="pb-t">
+				<b>매일 아침 8시 알림</b>
+				<span>하루 한 번, 새 문제가 올라왔을 때만 보냅니다.</span>
+			</div>
+			{#if ps === 'unsupported'}
+				<p class="pb-no">이 브라우저에서는 알림을 지원하지 않아요. 홈 화면에 추가하면 켤 수 있습니다.</p>
+			{:else}
+				<button class="pb-go" onclick={turnOnPush}>알림 켜기</button>
+			{/if}
+		</section>
+	{/if}
+	{#if pushMsg}
+		<p class="pb-msg" role="status">{pushMsg}</p>
+	{/if}
 
 	{#if summary && summary.days === 0}
 		<section class="sec ctas">
@@ -229,6 +272,60 @@
 </article>
 
 <style>
+	.pushbar {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 12px;
+		margin-top: 18px;
+		padding: 14px 16px;
+		background: var(--correct-bg, var(--accent-soft));
+		border: 1px solid var(--accent);
+		border-radius: 14px;
+	}
+	.pb-t {
+		display: flex;
+		flex-direction: column;
+		gap: 3px;
+		min-width: 0;
+	}
+	.pb-t b {
+		font-size: 14px;
+		font-weight: 800;
+		color: var(--text);
+	}
+	.pb-t span {
+		font-size: 12.5px;
+		line-height: 1.6;
+		color: var(--muted);
+		word-break: keep-all;
+	}
+	.pb-go {
+		flex: none;
+		padding: 10px 14px;
+		border: none;
+		border-radius: 10px;
+		background: var(--accent);
+		color: #fff;
+		font-family: inherit;
+		font-size: 13.5px;
+		font-weight: 800;
+		cursor: pointer;
+	}
+	.pb-no {
+		font-size: 12.5px;
+		line-height: 1.7;
+		color: var(--muted);
+		word-break: keep-all;
+	}
+	.pb-msg {
+		margin-top: 10px;
+		font-size: 13px;
+		line-height: 1.7;
+		color: var(--accent-text);
+		word-break: keep-all;
+	}
+
 	.backup {
 		background: var(--panel);
 		border: 1px solid var(--border);
