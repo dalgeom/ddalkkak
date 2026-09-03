@@ -10,11 +10,10 @@
  * 밀어 한 프레임씩 찍는다. 몇 번을 돌려도 같은 영상이 나온다.
  */
 import { writeFileSync, mkdirSync, rmSync, existsSync } from 'node:fs';
-import { spawn, spawnSync } from 'node:child_process';
+import { spawn } from 'node:child_process';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
-const FRAMES = join(tmpdir(), 'ddal-tscene-frames');
 const W = 1080, H = 1920, FPS = 30;
 
 /* ── 타임라인(초). 소리와 맞춰야 한다 ── */
@@ -39,14 +38,14 @@ const C = {
    성냥개비 쪽에서 문제만 갈고 자막은 앞 문제 것을 그대로 둔 영상이 한 번 나갔다
    (2026-08-24). 같은 실수를 여기서 되풀이하지 않는다. */
 const 문제 = {
-	id: 'tv-435',
+	id: 'tv-377',
 	chip: '상식 퀴즈 · 유래',
-	제목: `'시치미를 떼다'의 시치미는<br>원래 무엇이었을까?`,
-	보기: ['도장을 찍는 인주', '죄인의 얼굴을 가리던 천', '매의 주인을 적은 이름표', '상인이 쓰던 저울추'],
-	정답: 2,
-	해설: '길들인 매의 꽁지에 주인 이름을 적어 매단 표였습니다.<br>그걸 <b>떼어내면</b> 누구 매인지 알 수가 없죠.',
+	제목: `청바지 원단을 가리키는<br>'데님(denim)'은 어디서 왔을까?`,
+	보기: ['원단을 처음 만든 회사 이름', '프랑스의 도시 님(Nîmes)', '청바지 브랜드 리바이스', '이탈리아의 도시 제노바'],
+	정답: 1,
+	해설: '프랑스 님에서 짜던 천 <b>세르 드 님</b>이 줄어 데님이 됐습니다.<br>진(jeans)은 이 천을 수출하던 이탈리아 <b>제노바</b>에서 왔고요.',
 	/** 파일 이름에 쓸 짧은 말 */
-	슬러그: '시치미'
+	슬러그: '데님'
 };
 const OUT = `promo/video/쇼츠-상식-${문제.슬러그}.mp4`;
 const LETTERS = ['A', 'B', 'C', 'D'];
@@ -266,8 +265,6 @@ const BIN = [
 ].find((p) => existsSync(p));
 if (!BIN) { console.error('크롬 계열 브라우저를 못 찾았다.'); process.exit(1); }
 
-rmSync(FRAMES, { recursive: true, force: true });
-mkdirSync(FRAMES, { recursive: true });
 mkdirSync('promo/video', { recursive: true });
 
 const work = join(tmpdir(), `ddal-tscene-${process.pid}`);
@@ -279,10 +276,14 @@ writeFileSync(htmlPath, html, 'utf-8');
 const PORT = 9418;
 const proc = spawn(BIN, ['--headless=new', `--remote-debugging-port=${PORT}`,
 	`--user-data-dir=${join(work, 'prof')}`, '--no-first-run', '--disable-gpu',
-	'--hide-scrollbars', 'about:blank'], { stdio: 'ignore' });
+	'--hide-scrollbars',
+	// 보이지 않는 창이라고 렌더러를 재우면 캡처가 계속 늦는다
+	'--disable-background-timer-throttling', '--disable-renderer-backgrounding',
+	'--disable-backgrounding-occluded-windows',
+	'about:blank'], { stdio: 'ignore' });
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
-let ws;
+let ws, ff, errBuf = '';
 try {
 	let target = null;
 	for (let i = 0; i < 40; i++) {
@@ -300,9 +301,9 @@ try {
 		w.on('open', () => res(w)); w.on('error', rej);
 	});
 	let id = 0;
-	const send = (m, p = {}) => new Promise((res, rej) => {
+	const send = (m, p = {}, ms = 30000) => new Promise((res, rej) => {
 		const mid = ++id;
-		const to = setTimeout(() => rej(new Error('timeout ' + m)), 30000);
+		const to = setTimeout(() => rej(new Error('timeout ' + m)), ms);
 		const h = (raw) => { const x = JSON.parse(raw);
 			if (x.id === mid) { clearTimeout(to); ws.off('message', h); x.error ? rej(new Error(JSON.stringify(x.error))) : res(x.result); } };
 		ws.on('message', h);
@@ -323,33 +324,68 @@ try {
 	console.log(`애니메이션 ${count}개를 시간으로 민다`);
 	if (!count) throw new Error('애니메이션이 하나도 없다 — CSS가 안 먹었다');
 
+	// fromSurface:false는 성냥개비 쪽에서 프레임 30부터 무조건 타임아웃이 났다 — 다시 넣지 마라.
+	// PNG 대신 JPEG로 뜬다. 어차피 H.264로 다시 인코딩하니 q=95면 눈으로 구분이 안 되고,
+	// 크롬이 프레임마다 하던 PNG 압축(1080x1920)이 통째로 사라진다.
+	const SHOT = { format: 'jpeg', quality: 95 };
+	// 프레임을 디스크에 쓰지 않고 ffmpeg에 바로 민다.
+	ff = spawn('ffmpeg', [
+		'-y', '-f', 'image2pipe', '-c:v', 'mjpeg', '-framerate', String(FPS), '-i', 'pipe:0',
+		'-i', join(work, 'sfx.wav'),
+		'-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-r', String(FPS), '-crf', '19',
+		'-c:a', 'aac', '-b:a', '160k', '-shortest', OUT
+	], { stdio: ['pipe', 'ignore', 'pipe'] });
+	ff.stderr.on('data', (d) => { errBuf += d; if (errBuf.length > 20000) errBuf = errBuf.slice(-8000); });
+	// ffmpeg가 먼저 죽으면 파이프 쓰기가 EOF로 터진다. 조용히 죽지 말고 stderr를 보여 준다.
+	ff.stdin.on('error', (e) => {
+		console.error(`\nffmpeg 파이프 끊김: ${e.code}`);
+		console.error(errBuf.split('\n').slice(-15).join('\n'));
+		process.exit(1);
+	});
 	const N = Math.round(T.total * FPS);
+	let 지연 = 0; // 캡처가 멈춰서 버린 시간(초). 끝에 찍어 회귀를 눈으로 본다.
+	const t0 = Date.now();
 	for (let i = 0; i < N; i++) {
 		const ms = (i / FPS) * 1000;
 		await evalJs(`for(const a of document.getAnimations()){a.pause();a.currentTime=${ms.toFixed(1)}}`);
+		/**
+		 * captureScreenshot이 간헐적으로 멈춘다 — 애니메이션을 전부 pause()해 두면
+		 * 컴포지터가 새 프레임을 안 올리는데 캡처는 그걸 기다리기 때문이다.
+		 * 예전에는 이 타임아웃이 30초였고 재시도가 에러를 삼켜서, 멈출 때마다 30초씩
+		 * 까먹으면서도 「그냥 느린 렌더」로 보였다(3.4초 → 30초/프레임까지 갔다).
+		 *
+		 * 고치는 방향은 두 가지였는데 fromSurface:false는 프레임 30부터 아예 죽어서
+		 * 버렸다. 남은 것이 이것 — 멈추면 짧게 끊고 다시 부른다. 두 번째 호출은 대개
+		 * 바로 돌아온다. 30초 손해가 1.5초 손해가 된다.
+		 */
 		let data;
-		try { ({ data } = await send('Page.captureScreenshot', { format: 'png' })); }
-		catch { await sleep(400); ({ data } = await send('Page.captureScreenshot', { format: 'png' })); }
-		writeFileSync(join(FRAMES, `f${String(i).padStart(4, '0')}.png`), Buffer.from(data, 'base64'));
+		for (let 시도 = 1; ; 시도++) {
+			try { ({ data } = await send('Page.captureScreenshot', SHOT, 1500)); break; }
+			catch (e) {
+				if (시도 >= 8) throw new Error(`프레임 ${i} 캡처 8번 실패: ${e.message}`);
+				지연 += 1.5;
+				await sleep(60);
+			}
+		}
+		if (!ff.stdin.write(Buffer.from(data, 'base64'))) {
+			await new Promise((r) => ff.stdin.once('drain', r));
+		}
+		if (i % 30 === 0) process.stdout.write(`\r  ${i}/${N}`);
 	}
-	console.log(`프레임 ${N}장 (${T.total}초)`);
+	ff.stdin.end();
+	const 걸린 = (Date.now() - t0) / 1000;
+	console.log(`\r프레임 ${N}장 ${걸린.toFixed(0)}초 (${(걸린 / N).toFixed(2)}초/장, 캡처 멈춤으로 버린 시간 ${지연.toFixed(0)}초) — 인코딩 대기`);
 } finally {
 	ws?.close(); proc.kill();
 }
 
-const r = spawnSync('ffmpeg', [
-	'-y', '-framerate', String(FPS), '-i', join(FRAMES, 'f%04d.png'),
-	'-i', join(work, 'sfx.wav'),
-	'-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-r', String(FPS), '-crf', '19',
-	'-c:a', 'aac', '-b:a', '160k', '-shortest', OUT
-], { stdio: ['ignore', 'ignore', 'pipe'] });
-if (r.status !== 0) {
-	console.error(String(r.stderr).split('\n').slice(-12).join('\n'));
+const code = await new Promise((res) => ff.on('close', res));
+if (code !== 0) {
+	console.error(errBuf.split('\n').slice(-12).join('\n'));
 	process.exit(1);
 }
 console.log(`\n${OUT} (${T.total}초, ${W}x${H})`);
 rmSync(work, { recursive: true, force: true });
-rmSync(FRAMES, { recursive: true, force: true });
 
 /* ── 올릴 때 쓸 제목·설명 ──
    promo/쇼츠-올리기.md의 상식 예시는 옛 문제(애국가)에 박혀 있다. 문제를 갈아도 그
