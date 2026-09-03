@@ -5,9 +5,9 @@
 	let { data }: { data: PageData } = $props();
 
 	const url = $derived(`https://ddalkkak.app/discover/${data.field.slug}`);
-	const heading = $derived(`${data.field.title} ${data.items.length}개`);
+	const heading = $derived(`${data.field.title} ${data.count}개`);
 	const desc = $derived(
-		`${data.field.title} ${data.items.length}개. ${data.field.desc}`
+		`${data.field.title} ${data.count}개. ${data.field.desc}`
 	);
 </script>
 
@@ -25,9 +25,19 @@
 		<nav class="crumb" aria-label="위치">
 			<a href="/discover">발견형 퍼즐</a><span aria-hidden="true">›</span><span>{data.field.name}</span>
 		</nav>
-		<h1>{data.field.title}<br /><b>{data.items.length}개</b></h1>
+		<h1>{data.field.title}<br /><b>{data.count}개</b></h1>
 		<p class="lead">{data.field.intro}</p>
 	</header>
+
+	<!-- 문제 목록만 늘어놓으면 어디서나 볼 수 있는 규칙 찾기 문제와 구분이 안 된다.
+	     그 분야에서 어디가 막히는지를 먼저 짚어 둔다 — 은행을 실제로 훑어보고 쓴 글이라
+	     다른 데서 옮겨올 수 없는 내용이다. -->
+	<section class="sec">
+		<h2 class="sh">{data.field.name}, 어디서 갈리나</h2>
+		{#each data.field.deepDive.split('\n\n') as para (para)}
+			<p class="deep">{para}</p>
+		{/each}
+	</section>
 
 	<section class="sec">
 		<h2 class="sh">{data.field.name}에 들어 있는 유형</h2>
@@ -42,14 +52,17 @@
 	</section>
 
 	<section class="sec">
-		<h2 class="sh">{data.field.title} 전체와 해설</h2>
+		<h2 class="sh">{data.field.name}, 어디서 막히나</h2>
 		<p class="sub">
-			정답은 접어 두었습니다. 먼저 풀어보고 눌러서 확인하세요. 해설에는 답만이 아니라 그 규칙을 어떻게
-			알아채는지가 함께 적혀 있습니다.
+			{data.count}개 중 서로 다른 함정을 보여주는 {data.items.length}개를 골랐습니다. 정답은 접어 두었으니 먼저
+			풀어보고 눌러서 확인하세요. 문제마다 사람들이 어디서 헛짚는지를 붙여 두었습니다.
 		</p>
 		<ol class="list">
-			{#each data.items as p (p.id)}
-				<li><ProblemView problem={p} /></li>
+			{#each data.items as x (x.problem.id)}
+				<li>
+					<ProblemView problem={x.problem} />
+					<p class="why">{x.why}</p>
+				</li>
 			{/each}
 		</ol>
 	</section>
@@ -71,6 +84,27 @@
 </article>
 
 <style>
+	.deep {
+		font-size: 14.5px;
+		line-height: 1.9;
+		color: var(--text);
+		word-break: keep-all;
+	}
+	.deep + .deep {
+		margin-top: 14px;
+	}
+
+	/* 「왜 이걸 골랐나·어디서 헛짚나」 — 해설과 구분되게 왼쪽에 선을 둔다 */
+	.why {
+		margin-top: 10px;
+		padding-left: 11px;
+		border-left: 3px solid var(--accent);
+		font-size: 13.5px;
+		line-height: 1.75;
+		color: var(--text);
+		word-break: keep-all;
+	}
+
 	.cover {
 		background: var(--panel);
 		border: 1px solid var(--border-strong);

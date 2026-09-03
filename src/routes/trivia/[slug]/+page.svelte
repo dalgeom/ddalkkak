@@ -5,9 +5,9 @@
 
 	const LETTERS = ['A', 'B', 'C', 'D', 'E'];
 	const url = $derived(`https://ddalkkak.app/trivia/${data.category.slug}`);
-	const heading = $derived(`${data.category.title} ${data.items.length}문제`);
+	const heading = $derived(`${data.category.title} ${data.count}문제`);
 	const desc = $derived(
-		`${data.category.title} ${data.items.length}문제. ${data.category.desc}`
+		`${data.category.title} ${data.count}문제. ${data.category.desc}`
 	);
 </script>
 
@@ -25,7 +25,7 @@
 		<nav class="crumb" aria-label="위치">
 			<a href="/trivia">상식 퀴즈</a><span aria-hidden="true">›</span><span>{data.category.name}</span>
 		</nav>
-		<h1>{data.category.title}<br /><b>{data.items.length}문제</b></h1>
+		<h1>{data.category.title}<br /><b>{data.count}문제</b></h1>
 		<p class="lead">{data.category.intro}</p>
 		<div class="facts">
 			{#each data.byGrade as g (g.name)}
@@ -39,7 +39,9 @@
 	     쓴 글이라 다른 데서 옮겨올 수 없는 내용이다. -->
 	<section class="sec">
 		<h2 class="sh">{data.category.name}, 어디서 갈리나</h2>
-		<p class="deep">{data.category.deepDive}</p>
+		{#each data.category.deepDive.split('\n\n') as para (para)}
+			<p class="deep">{para}</p>
+		{/each}
 	</section>
 
 	<!-- 검색으로 이 페이지에 떨어진 사람은 찾던 답만 읽고 나간다. 26문제와 해설을 다 지나야
@@ -50,10 +52,10 @@
 	</a>
 
 	<section class="sec">
-		<h2 class="sh">{data.category.title} 전체 문제와 해설</h2>
+		<h2 class="sh">{data.category.name}, 이런 데서 틀립니다</h2>
 		<p class="sub">
-			정답과 해설을 함께 적어 두었습니다. 직접 풀어보고 싶다면 아래 무한 연습에서 {data.category.name}만
-			골라 풀 수도 있어요.
+			{data.count}문제 중 서로 다른 함정을 보여주는 {data.items.length}개를 골랐습니다. 문제마다 사람들이 어디서
+			헛짚는지를 붙여 두었어요. 나머지는 아래 무한 연습에서 {data.category.name}만 골라 만날 수 있습니다.
 		</p>
 		<ol class="list">
 			{#each data.items as q, i (q.id)}
@@ -74,6 +76,7 @@
 						<p class="ans">정답 <b>{q.answer}</b></p>
 						<p class="exp">{@html q.explain}</p>
 					</div>
+					<p class="why">{q.why}</p>
 				</li>
 			{/each}
 		</ol>
@@ -259,6 +262,16 @@
 		justify-content: center;
 		flex: none;
 	}
+	/* 「왜 이걸 골랐나·어디서 헛짚나」 — 해설과 구분되게 왼쪽에 선을 둔다 */
+	.why {
+		margin-top: 10px;
+		padding-left: 11px;
+		border-left: 3px solid var(--accent);
+		font-size: 13.5px;
+		line-height: 1.75;
+		color: var(--text);
+		word-break: keep-all;
+	}
 	.sol {
 		margin-top: 11px;
 		padding: 11px 13px;
@@ -308,6 +321,9 @@
 
 	/* 목록 앞에 서는 한 줄. 광고처럼 보이면 안 되므로 배너가 아니라 안내 톤으로 둔다 */
 	/* 분야별 편집 산문 — 문제 목록보다 먼저 읽히도록 본문 리듬으로 */
+	.deep + .deep {
+		margin-top: 14px;
+	}
 	.deep {
 		margin-top: 10px;
 		font-size: 14px;
