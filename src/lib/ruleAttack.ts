@@ -51,6 +51,18 @@ const digitwiseNoCarry = (a: number, b: number): number => {
 	for (let i = Math.max(A.length, B.length) - 1; i >= 0; i--) out += String((A[i] ?? 0) + (B[i] ?? 0));
 	return Number(out);
 };
+const gcd = (a: number, b: number): number => {
+	a = Math.abs(a);
+	b = Math.abs(b);
+	while (b) [a, b] = [b, a % b];
+	return a;
+};
+/** 자기 자신을 뺀 약수의 합 — 과잉수·완전수·부족수를 가른다 */
+const aliquot = (n: number): number => {
+	let s = 0;
+	for (let i = 1; i < n; i++) if (n % i === 0) s += i;
+	return s;
+};
 const countBetween = (a: number, b: number, pred: (n: number) => boolean): number => {
 	let n = 0;
 	for (let i = Math.min(a, b) + 1; i < Math.max(a, b); i++) if (pred(i)) n++;
@@ -106,7 +118,16 @@ const CORE: [string, (a: number, b: number) => number][] = [
 	['(a+b) mod 24', (a, b) => (a + b) % 24],
 	['100에서 남은 거리', (a, b) => Math.abs(100 - a - b)],
 	['a와 b 자릿수합의 차', (a, b) => Math.abs(dsum(a) - dsum(b))],
-	['자릿수합끼리 더함', (a, b) => dsum(a) + dsum(b)]
+	['자릿수합끼리 더함', (a, b) => dsum(a) + dsum(b)],
+	// nm-gcd-op가 「진짜 규칙을 모른다」로 빠졌던 자리 — 최대공약수와 그 흔한 사칭들
+	['최대공약수', gcd],
+	['최소공배수', (a, b) => (a && b ? Math.abs(a * b) / gcd(a, b) : NaN)],
+	['2a-b', (a, b) => 2 * a - b],
+	['|2a-b|', (a, b) => Math.abs(2 * a - b)],
+	['2b-a', (a, b) => 2 * b - a],
+	['(a+b)/2', (a, b) => (a + b) / 2],
+	['b를 a로 나눈 나머지', (a, b) => (a ? b % a : NaN)],
+	['a를 b로 나눈 나머지', (a, b) => (b ? a % b : NaN)]
 ];
 
 const COND: [string, (a: number, b: number) => boolean][] = [
@@ -391,8 +412,28 @@ const PRED: [string, (n: number) => boolean][] = [
 	['자릿수가 증가한다', (n) => digits(n).every((d, i, a) => i === 0 || d > a[i - 1])],
 	['자릿수가 연속이다', (n) => digits(n).every((d, i, a) => i === 0 || d === a[i - 1] + 1)],
 	['자릿수에 0이 없다', (n) => !digits(n).includes(0)],
-	['5의 배수', (n) => n % 5 === 0],
 	['4의 배수', (n) => n % 4 === 0],
+	['5의 배수', (n) => n % 5 === 0],
+	// abundant-club이 「가르는 성질 없음」으로 빠졌던 자리 —
+	// 회원 12·18·24·30이 전부 6의 배수인 것을 이 목록이 못 봤다
+	['6의 배수', (n) => n % 6 === 0],
+	['7의 배수', (n) => n % 7 === 0],
+	['8의 배수', (n) => n % 8 === 0],
+	['9의 배수', (n) => n % 9 === 0],
+	['11의 배수', (n) => n % 11 === 0],
+	['12의 배수', (n) => n % 12 === 0],
+	['과잉수(약수합 > 자기 자신)', (n) => n > 0 && aliquot(n) > n],
+	['완전수', (n) => n > 0 && aliquot(n) === n],
+	['부족수', (n) => n > 0 && aliquot(n) < n],
+	['모든 자릿수로 나누어떨어진다', (n) => digits(n).every((d) => d !== 0 && n % d === 0)],
+	['세제곱수', (n) => n >= 0 && Math.round(Math.cbrt(n)) ** 3 === n],
+	['닫힌 고리가 있는 숫자(0·6·8·9)를 포함', (n) => digits(n).some((d) => [0, 6, 8, 9].includes(d))],
+	['닫힌 고리가 없다', (n) => digits(n).every((d) => ![0, 6, 8, 9].includes(d))],
+	['자릿수가 모두 같다', (n) => new Set(digits(n)).size === 1],
+	['자릿수의 곱으로 나누어떨어진다', (n) => {
+		const g = digits(n).reduce((x, y) => x * y, 1);
+		return g !== 0 && n % g === 0;
+	}],
 	['자릿수 합이 10 이상', (n) => dsum(n) >= 10],
 	['10으로 나눈 나머지가 짝수', (n) => (n % 10) % 2 === 0]
 ];
@@ -407,15 +448,35 @@ export function attackClubs(): Report & { 낱말형: number } {
 	for (const p of targets) {
 		const txt = textOf(p);
 		const grab = (k: string) => txt.match(new RegExp(k + '[^:：]*[:：]\\s*(.+)'))?.[1] ?? '';
-		const split = (s: string) =>
-			s
+		/**
+		 * 쉼표로만 쪼개면 「회원 : 11   15   24   36」처럼 공백으로 늘어놓은 클럽이
+		 * 한 덩어리가 되어 낱말형으로 건너뛴다(club-self-divisible이 그랬다).
+		 * 쉼표·공백을 모두 쪼개 봐서 전부 수면 그걸 쓰고, 아니면 쉼표 기준으로
+		 * 돌아간다 — 낱말형은 「물 + 개, 손 + 등」처럼 항목 안에 공백이 있다.
+		 */
+		const split = (s: string) => {
+			const 쉼표 = s
 				.split(/[,、]/)
 				.map((x) => x.trim())
 				.filter(Boolean);
+			const 공백 = s
+				.split(/[,、\s]+/)
+				.map((x) => x.trim())
+				.filter(Boolean);
+			return 공백.every((x) => /^-?\d+$/.test(x)) ? 공백 : 쉼표;
+		};
 		const M = split(grab('회원'));
 		const R = split(grab('거절'));
-		const candLine = txt.split('\n').find((l) => /①/.test(l)) ?? '';
-		const C = [...candLine.matchAll(/[①②③④⑤]\s*([^\s①②③④⑤]+)/g)].map((m) => m[1]);
+		/**
+		 * 후보 줄은 두 형태다 — 「① 24  ② 40」과 「후보 : 22   48   27   50」.
+		 * 번호 표시만 찾다가 뒤 형태(club-self-divisible·club-cube)를 통째로 놓쳤다.
+		 */
+		const lines = txt.split('\n');
+		const 번호줄 = lines.find((l) => /①/.test(l));
+		const 후보줄 = lines.find((l) => /^\s*후보\s*[:：]/.test(l));
+		const C = 번호줄
+			? [...번호줄.matchAll(/[①②③④⑤]\s*([^\s①②③④⑤]+)/g)].map((m) => m[1])
+			: split((후보줄 ?? '').replace(/^\s*후보\s*[:：]\s*/, ''));
 		const all = [...M, ...R, ...C];
 		// 낱말형은 사전·언어 지식이 필요해 기계 몫이 아니다
 		if (!all.length || !all.every((x) => /^-?\d+$/.test(x))) {
