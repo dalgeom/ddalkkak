@@ -72,7 +72,11 @@ for r in src[:10]:
 
 # ── 행동 ──
 LABEL = [
-    ("daily_start", "오늘의 10문제 시작"),
+    # 9/3부터 누른 순간(press)과 화면이 뜬 순간(start)을 나눠 찍는다. 예전에는 문제은행
+    # 전체를 받은 뒤에야 daily_start가 찍혀 「눌렀는데 안 기다리고 나간 사람」이 안 보였다.
+    # press > start면 그 차이가 로딩 중 이탈이다.
+    ("daily_press", "시작 버튼 누름"),
+    ("daily_start", "오늘의 10문제 시작(화면 뜸)"),
     ("daily_resume", "이어풀기"),
     ("daily_complete", "완주"),
     ("problem_result", "문제 풀이(정답·오답 제출)"),
@@ -136,9 +140,40 @@ block("인앱 브라우저", INAPP)
 
 # ── 깔때기 ──
 start, comp = ev["daily_start"][1], ev["daily_complete"][1]
+# daily_press는 2026-09-03 오후 배포다. 그 전 날짜이거나 배포 당일이면 press가 start보다
+# 적게 잡히는데, 그건 이탈이 아니라 계측이 하루를 못 덮은 것이다 — 비율을 내면 거짓말이 된다.
+press = ev["daily_press"][1]
 print("\n[깔때기]")
 print(f"        방문 {users}  →  시작 {start} ({start / users * 100:.0f}%)" if users else "        방문 0")
+if press >= start and start:
+    샌 = press - start
+    print(f"        (버튼 누름 {press} → 화면 뜸 {start}"
+          + (f" · {샌}명이 로딩 기다리다 이탈)" if 샌 else " · 이탈 없음)"))
+elif press:
+    print(f"        (버튼 누름 {press} — 계측이 하루를 다 못 덮은 날이라 비율은 내지 않는다)")
 print(f"                  →  완주 {comp} ({comp / start * 100:.0f}% of 시작)" if start else "                  →  완주 0")
+
+# 10문제를 /api/day로 받았는지, 실패해서 문제은행 전체(gz 174KB)로 떨어졌는지.
+# 9/3에 앞의 길을 냈다 — full이 계속 잡히면 엔드포인트가 어딘가에서 막히는 것이다.
+#
+# via는 이벤트 매개변수라 GA4에서 「맞춤 측정기준」으로 등록해야 조회된다
+# (관리 > 데이터 표시 > 맞춤 정의 > 맞춤 측정기준 만들기, 범위 이벤트, 매개변수 via).
+# 등록 전에는 daily_bank 전체 건수만 보인다.
+c, u = ev["daily_bank"]
+if c:
+    print("\n[문제를 어떻게 받았나]")
+    try:
+        경로 = {}
+        for r in rep(["eventName", "customEvent:via"], ["eventCount", "totalUsers"]):
+            if r.dimension_values[0].value != "daily_bank":
+                continue
+            경로[r.dimension_values[1].value] = (int(r.metric_values[0].value), int(r.metric_values[1].value))
+        for k, (cc, uu) in sorted(경로.items(), key=lambda x: -x[1][0]):
+            이름 = "10문제만(/api/day)" if k == "api" else "문제은행 전체(174KB)" if k == "full" else k
+            print(f"        {이름:<26} {uu:>3}명 ({cc}회)")
+    except Exception:
+        print(f"        받아옴(경로 구분 없음)        {u:>3}명 ({c}회)")
+        print("        ※ 경로를 나눠 보려면 GA4에 맞춤 측정기준 via를 등록해야 한다")
 
 # ── 페이지 ──
 print("\n[많이 본 페이지]")
