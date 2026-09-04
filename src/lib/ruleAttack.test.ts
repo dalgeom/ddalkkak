@@ -59,6 +59,17 @@ const 알려진_적발 = [
 	//                          전부 표준국어대사전 표제어라 ①③만 고르는 규칙이 존재하지
 	//                          않았다. 예시로는 못 고쳐서 같은 인덱스(222)에 rc-club-echo를
 	//                          넣었다 — goldenSets가 「자리 교체는 허용된 정책」이라 적어 뒀다
+	//
+	// 9/4에 계산형 94개(달력·시계·요일·시간·수의 성질·전광판·로마 숫자·자릿수)를 같은
+	// 워크플로로 훑어 10건을 고쳤다. 이 검사기가 보는 종류가 아니라 여기 목록엔 없다 —
+	// 대안 규칙 2건(lcd-hidden-digits·num-parityorder)만 발견형과 같은 병이었고, 나머지는
+	// 계산형 고유였다. 정답 키의 산수 오류는 94개 중 0건.
+	//   경계 약속이 지문에 없다  cal-leap-birthdays 5/4 · cal-clock-overlap 22/23 ·
+	//                            num-odometer 4/3 — 셋 다 해설엔 못 박혀 있었다
+	//   답 받는 장치            cal-clock-opposite(선택지 ④가 ①과 집합 동일해 정답이 둘) ·
+	//                            cal-fifty-hours('수요일 12:00'이 정규화에서 거절)
+	//   화면·산수와 어긋난 말   lcd-flip · nm-4100-trap · cal-billion-seconds
+	// 이 다섯 종류를 앞으로 막으려고 puzzle-reviewer.md에 5h~5l을 넣었다.
 ].sort();
 
 describe('발견형 규칙 유일성', () => {
