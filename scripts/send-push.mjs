@@ -75,20 +75,28 @@ if (!keys.length) process.exit(0);
 /**
  * 08:00 KST에 맞춘다.
  *
- * 크론(22:30 UTC)이 밀려서 도착하는 것이 정상이라 여기서 남은 시간을 메운다.
+ * 크론(18:40 UTC = 03:40 KST)이 밀려서 도착하는 것이 정상이라 여기서 남은 시간을
+ * 메운다. GitHub 공용 크론의 지연은 중앙값 152분이었다(워크플로 주석에 표가 있다).
+ *
  * 이미 08:00을 넘겼으면 기다리지 않는다 — 늦은 알림이 안 보내는 것보다 낫다.
- * 45분 넘게 남았으면 손으로 돌린 것으로 보고 그대로 보낸다.
+ * 손으로 돌린 것(workflow_dispatch)도 기다리지 않는다. 예전에는 「45분 넘게 남았으면
+ * 손으로 돌린 것」으로 시각을 보고 짐작했는데, 크론을 03:40으로 당기면서 그 짐작이
+ * 무너졌다 — 이제 워크플로가 SCHEDULED로 트리거 종류를 알려 준다.
+ *
+ * 상한 5시간은 안전장치다. GitHub 작업 한도가 6시간이라 그 안에서 끝나야 하고,
+ * 시계나 환경변수가 어긋나도 러너를 하루 종일 붙잡지 않는다.
  */
 const kstNow = new Date(Date.now() + 9 * 3600e3);
 const kstEight = new Date(kstNow);
 kstEight.setUTCHours(8, 0, 0, 0); // KST만큼 옮겨 놨으니 UTC 게터가 곧 KST 시각이다
 const waitMs = kstEight - kstNow;
 const hhmm = (d) => `${String(d.getUTCHours()).padStart(2, '0')}:${String(d.getUTCMinutes()).padStart(2, '0')}`;
-if (waitMs > 0 && waitMs <= 45 * 60e3) {
-	console.log(`지금 ${hhmm(kstNow)} KST — 08:00까지 ${Math.round(waitMs / 1000)}초 기다린다`);
+const 예약됨 = process.env.SCHEDULED === 'true';
+if (예약됨 && waitMs > 0 && waitMs <= 5 * 3600e3) {
+	console.log(`지금 ${hhmm(kstNow)} KST — 08:00까지 ${Math.round(waitMs / 60e3)}분 기다린다`);
 	await new Promise((r) => setTimeout(r, waitMs));
 } else {
-	console.log(`지금 ${hhmm(kstNow)} KST — 기다리지 않고 보낸다`);
+	console.log(`지금 ${hhmm(kstNow)} KST — 기다리지 않고 보낸다 (예약 ${예약됨}, 남은 ${Math.round(waitMs / 60e3)}분)`);
 }
 
 webpush.setVapidDetails(process.env.VAPID_SUBJECT, PUBLIC_KEY, process.env.VAPID_PRIVATE_KEY);
