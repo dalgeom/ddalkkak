@@ -390,7 +390,7 @@ export const PROBLEMS: Problem[] = [
 		chip: '관찰',
 		blocks: [
 			{ kind: 'text', html: '이 동네 건물들의 엘리베이터 숫자 버튼 개수다. 물음표는?' },
-			{ kind: 'pre', text: '13층 건물 = 버튼 12개\n15층 건물 = 버튼 14개\n20층 건물 = 버튼 19개\n3층 건물 = 버튼 ?개' }
+			{ kind: 'pre', text: '13층 건물 = 버튼 12개\n15층 건물 = 버튼 14개\n20층 건물 = 버튼 19개\n2층 건물 = 버튼 2개\n3층 건물 = 버튼 ?개' }
 		],
 		type: 'text',
 		answers: ['3', '3개'],
@@ -555,18 +555,20 @@ export const PROBLEMS: Problem[] = [
 		chip: '숨은 단어',
 		blocks: [
 			{ kind: 'text', html: '물음표에 들어갈 한 글자는?' },
-			// 세 낱말 모두를 만족하는 글자는 손뿐이다 — 발수건·입수건이 없어 발·입이 여기서 죽는다
-			{ kind: 'pre', text: '눈 → 눈물, 눈사람, 눈썰미\n물 → 물감, 물구나무, 물장수\n\n? → ?수건, ?바닥, ?금' }
+			// 넷을 모두 만족하는 글자는 손뿐이다. 발수건(발手巾)·발금(發禁)이 표준국어대사전
+			// 표제어라 「발」이 셋까지는 통과한다 — 발수레가 없어서 ?수레에서 죽는다.
+			// 입은 입수건·입바닥이 없어 먼저 죽는다.
+			{ kind: 'pre', text: '눈 → 눈물, 눈사람, 눈썰미\n물 → 물감, 물구나무, 물장수\n\n? → ?수건, ?바닥, ?금, ?수레' }
 		],
 		type: 'text',
 		answers: ['손'],
 		hints: [
 			'수건·바닥·금 셋 모두의 앞에 붙어 낱말이 되는 한 글자를 찾습니다.',
 			'몸에서 찾아보세요.',
-			'"?바닥"만 보면 발도 되지만, "?수건"에서 걸립니다.'
+			'"?수건·?바닥·?금"까지는 발도 되지만, "?수레"에서 걸립니다.'
 		],
 		explain:
-			'<b>손</b>입니다 — 손수건, 손바닥, 손금. 발바닥은 있어도 "발수건"은 없고, 입금은 있어도 "입수건·입바닥"이 없어서 셋을 모두 만족하는 글자는 손뿐이죠. 하나씩 보면 여러 답이 되는데 셋을 겹치면 하나만 남습니다.'
+			'<b>손</b>입니다 — 손수건, 손바닥, 손금, 손수레. 발은 발수건·발바닥·발금까지 되지만 "발수레"가 없고, 입은 입금은 있어도 "입수건·입바닥"이 없습니다. 하나씩 보면 여러 답이 되는데 넷을 겹치면 하나만 남습니다.'
 	},
 	{
 		id: 'sh-painted-cube',
@@ -747,7 +749,7 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'text',
-				html: '수를 영어로 차례로 쓴다 — ONE, TWO, THREE, FOUR…<br>알파벳 <b>A</b>가 처음 등장하는 수는?'
+				html: '수를 영어로 차례로 쓴다 — ONE, TWO, THREE, FOUR…<br>알파벳 <b>A</b>가 처음 등장하는 수는? <b>(AND는 넣지 않고 읽는다)</b>'
 			}
 		],
 		type: 'choice',
@@ -782,7 +784,7 @@ export const PROBLEMS: Problem[] = [
 	{
 		id: 'dotted-letters',
 		chip: '영단어',
-		blocks: [{ kind: 'pre', text: 'jelly = 1\nbanana = 0\nlily = 1\n\ninjury = ?' }],
+		blocks: [{ kind: 'pre', text: 'jelly = 1\nbanana = 0\nkiwi = 2\nlily = 1\n\ninjury = ?' }],
 		type: 'text',
 		answers: ['2'],
 		hints: [
@@ -790,7 +792,7 @@ export const PROBLEMS: Problem[] = [
 			'글자 위를 보세요 — 무언가 떠 있는 글자들이 있죠.',
 			'점이 붙는 소문자를 세어 보세요.'
 		],
-		explain: '<b>점이 붙는 소문자(i, j)의 개수</b>: jelly의 j, lily의 i. injury엔 i와 j → <b>2</b>.'
+		explain: '<b>점이 붙는 소문자(i, j)의 개수</b>: jelly의 j, kiwi의 i 둘, lily의 i. injury엔 i와 j → <b>2</b>. kiwi에 y가 없는데 2인 것이 「y를 센다」는 가설을 죽입니다.'
 	},
 	{
 		id: 'anagram-eq',
@@ -2214,7 +2216,7 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'pre',
-				text: '토박이 클럽\n\n회원: 하늘, 바람, 구름\n거절: 학교, 지구, 산수\n\n다음 후보 중, 이 클럽에 가입할 수 있는 낱말을 모두 고르시오.\n① 바다  ② 강  ③ 노을  ④ 호수'
+				text: '토박이 클럽\n\n회원: 하늘, 바람, 구름, 나무\n거절: 학교, 지구, 산수, 태양\n\n다음 후보 중, 이 클럽에 가입할 수 있는 낱말을 모두 고르시오.\n① 바다  ② 강  ③ 노을  ④ 호수'
 			}
 		],
 		type: 'text',
@@ -2335,7 +2337,7 @@ export const PROBLEMS: Problem[] = [
 		chip: '시소',
 		blocks: [
 			{ kind: 'text', html: '물음표 시소는 어느 쪽으로 기울까? (왼쪽 · 오른쪽 · 균형)' },
-			{ kind: 'figure', svg: '<svg viewBox=\'0 0 470 100\' role=\'img\' aria-label=\'시소가 어느 쪽으로 기우나\'><line x1=\'9\' y1=\'44\' x2=\'109\' y2=\'60\' style=\'stroke:#2c2822;stroke-width:3;fill:none\'/><path d=\'M50 66 L68 66 L59 52 Z\' style=\'stroke:#2c2822;stroke-width:2;fill:#c9a24a\'/><circle cx=\'35\' cy=\'35\' r=\'6\' fill=\'#2c2822\'/><circle cx=\'71\' cy=\'51\' r=\'6\' fill=\'#2c2822\'/><text x=\'59\' y=\'90\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:19px;font-weight:800;fill:#2c2822\'>왼쪽</text><line x1=\'125\' y1=\'60\' x2=\'225\' y2=\'44\' style=\'stroke:#2c2822;stroke-width:3;fill:none\'/><path d=\'M166 66 L184 66 L175 52 Z\' style=\'stroke:#2c2822;stroke-width:2;fill:#c9a24a\'/><circle cx=\'163\' cy=\'51\' r=\'6\' fill=\'#2c2822\'/><circle cx=\'163\' cy=\'38\' r=\'6\' fill=\'#2c2822\'/><circle cx=\'163\' cy=\'25\' r=\'6\' fill=\'#2c2822\'/><circle cx=\'223\' cy=\'35\' r=\'6\' fill=\'#2c2822\'/><text x=\'175\' y=\'90\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:19px;font-weight:800;fill:#2c2822\'>오른쪽</text><line x1=\'241\' y1=\'52\' x2=\'341\' y2=\'52\' style=\'stroke:#2c2822;stroke-width:3;fill:none\'/><path d=\'M282 66 L300 66 L291 52 Z\' style=\'stroke:#2c2822;stroke-width:2;fill:#c9a24a\'/><circle cx=\'255\' cy=\'43\' r=\'6\' fill=\'#2c2822\'/><circle cx=\'255\' cy=\'30\' r=\'6\' fill=\'#2c2822\'/><circle cx=\'315\' cy=\'43\' r=\'6\' fill=\'#2c2822\'/><circle cx=\'315\' cy=\'30\' r=\'6\' fill=\'#2c2822\'/><circle cx=\'315\' cy=\'17\' r=\'6\' fill=\'#2c2822\'/><text x=\'291\' y=\'90\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:19px;font-weight:800;fill:#2c2822\'>균형</text><line x1=\'357\' y1=\'52\' x2=\'457\' y2=\'52\' style=\'stroke:#2c2822;stroke-width:3;fill:none\'/><path d=\'M398 66 L416 66 L407 52 Z\' style=\'stroke:#2c2822;stroke-width:2;fill:#c9a24a\'/><circle cx=\'395\' cy=\'43\' r=\'6\' fill=\'#2c2822\'/><circle cx=\'395\' cy=\'30\' r=\'6\' fill=\'#2c2822\'/><circle cx=\'443\' cy=\'43\' r=\'6\' fill=\'#2c2822\'/><text x=\'407\' y=\'90\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:22px;font-weight:800;fill:#c0392b\'>?</text></svg>', caption: '추 하나의 무게는 모두 같음' }
+			{ kind: 'figure', svg: '<svg viewBox=\'0 0 470 100\' role=\'img\' aria-label=\'시소가 어느 쪽으로 기우나\'><line x1=\'9\' y1=\'60\' x2=\'109\' y2=\'44\' style=\'stroke:#2c2822;stroke-width:3;fill:none\'/><path d=\'M50 66 L68 66 L59 52 Z\' style=\'stroke:#2c2822;stroke-width:2;fill:#c9a24a\'/><circle cx=\'35\' cy=\'47\' r=\'6\' fill=\'#2c2822\'/><circle cx=\'71\' cy=\'41\' r=\'6\' fill=\'#2c2822\'/><text x=\'59\' y=\'90\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:19px;font-weight:800;fill:#2c2822\'>왼쪽</text><line x1=\'125\' y1=\'44\' x2=\'225\' y2=\'60\' style=\'stroke:#2c2822;stroke-width:3;fill:none\'/><path d=\'M166 66 L184 66 L175 52 Z\' style=\'stroke:#2c2822;stroke-width:2;fill:#c9a24a\'/><circle cx=\'163\' cy=\'41\' r=\'6\' fill=\'#2c2822\'/><circle cx=\'163\' cy=\'28\' r=\'6\' fill=\'#2c2822\'/><circle cx=\'163\' cy=\'15\' r=\'6\' fill=\'#2c2822\'/><circle cx=\'223\' cy=\'51\' r=\'6\' fill=\'#2c2822\'/><text x=\'175\' y=\'90\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:19px;font-weight:800;fill:#2c2822\'>오른쪽</text><line x1=\'241\' y1=\'52\' x2=\'341\' y2=\'52\' style=\'stroke:#2c2822;stroke-width:3;fill:none\'/><path d=\'M282 66 L300 66 L291 52 Z\' style=\'stroke:#2c2822;stroke-width:2;fill:#c9a24a\'/><circle cx=\'255\' cy=\'43\' r=\'6\' fill=\'#2c2822\'/><circle cx=\'255\' cy=\'30\' r=\'6\' fill=\'#2c2822\'/><circle cx=\'315\' cy=\'43\' r=\'6\' fill=\'#2c2822\'/><circle cx=\'315\' cy=\'30\' r=\'6\' fill=\'#2c2822\'/><circle cx=\'315\' cy=\'17\' r=\'6\' fill=\'#2c2822\'/><text x=\'291\' y=\'90\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:19px;font-weight:800;fill:#2c2822\'>균형</text><line x1=\'357\' y1=\'52\' x2=\'457\' y2=\'52\' style=\'stroke:#2c2822;stroke-width:3;fill:none\'/><path d=\'M398 66 L416 66 L407 52 Z\' style=\'stroke:#2c2822;stroke-width:2;fill:#c9a24a\'/><circle cx=\'395\' cy=\'43\' r=\'6\' fill=\'#2c2822\'/><circle cx=\'395\' cy=\'30\' r=\'6\' fill=\'#2c2822\'/><circle cx=\'443\' cy=\'43\' r=\'6\' fill=\'#2c2822\'/><text x=\'407\' y=\'90\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:22px;font-weight:800;fill:#c0392b\'>?</text></svg>', caption: '추 하나의 무게는 모두 같음' }
 		],
 		type: 'text',
 		answers: ['오른쪽', '오른', '우', '오른쪽으로'],
@@ -2383,7 +2385,7 @@ export const PROBLEMS: Problem[] = [
 		chip: '손잡이 방향',
 		blocks: [
 			{ kind: 'text', html: '오른쪽 그림은 왼쪽을 <b>돌린 것</b>(회전)일까, <b>뒤집은 것</b>(거울)일까?' },
-			{ kind: 'figure', svg: '<svg viewBox=\'0 0 470 84\' role=\'img\' aria-label=\'돌린 것인가 뒤집은 것인가\'><g transform=\'translate(6 12)\'><path d=\'M0 0 L26 0 L38 12 L38 38 L0 38 Z\' style=\'stroke:#2c2822;stroke-width:3;fill:none\'/><circle cx=\'9\' cy=\'30\' r=\'4\' style=\'fill:#2c2822;stroke:none\'/></g><g transform=\'translate(58 12)\'><g transform=\'translate(19 19) rotate(90) translate(-19 -19)\'><path d=\'M0 0 L26 0 L38 12 L38 38 L0 38 Z\' style=\'stroke:#2c2822;stroke-width:3;fill:none\'/><circle cx=\'9\' cy=\'30\' r=\'4\' style=\'fill:#2c2822;stroke:none\'/></g></g><text x=\'51\' y=\'72\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:19px;font-weight:800;fill:#2c2822\'>회전</text><g transform=\'translate(98 12)\'><path d=\'M0 0 L26 0 L38 12 L38 38 L0 38 Z\' style=\'stroke:#2c2822;stroke-width:3;fill:none\'/><circle cx=\'9\' cy=\'30\' r=\'4\' style=\'fill:#2c2822;stroke:none\'/></g><g transform=\'translate(150 12)\'><g transform=\'translate(19 19) scale(-1 1) translate(-19 -19)\'><path d=\'M0 0 L26 0 L38 12 L38 38 L0 38 Z\' style=\'stroke:#2c2822;stroke-width:3;fill:none\'/><circle cx=\'9\' cy=\'30\' r=\'4\' style=\'fill:#2c2822;stroke:none\'/></g></g><text x=\'143\' y=\'72\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:19px;font-weight:800;fill:#2c2822\'>거울</text><g transform=\'translate(190 12)\'><path d=\'M0 0 L26 0 L38 12 L38 38 L0 38 Z\' style=\'stroke:#2c2822;stroke-width:3;fill:none\'/><circle cx=\'9\' cy=\'30\' r=\'4\' style=\'fill:#2c2822;stroke:none\'/></g><g transform=\'translate(242 12)\'><g transform=\'translate(19 19) rotate(180) translate(-19 -19)\'><path d=\'M0 0 L26 0 L38 12 L38 38 L0 38 Z\' style=\'stroke:#2c2822;stroke-width:3;fill:none\'/><circle cx=\'9\' cy=\'30\' r=\'4\' style=\'fill:#2c2822;stroke:none\'/></g></g><text x=\'235\' y=\'72\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:19px;font-weight:800;fill:#2c2822\'>회전</text><g transform=\'translate(282 12)\'><path d=\'M0 0 L26 0 L38 12 L38 38 L0 38 Z\' style=\'stroke:#2c2822;stroke-width:3;fill:none\'/><circle cx=\'9\' cy=\'30\' r=\'4\' style=\'fill:#2c2822;stroke:none\'/></g><g transform=\'translate(334 12)\'><g transform=\'translate(19 19) scale(-1 1) rotate(90) translate(-19 -19)\'><path d=\'M0 0 L26 0 L38 12 L38 38 L0 38 Z\' style=\'stroke:#2c2822;stroke-width:3;fill:none\'/><circle cx=\'9\' cy=\'30\' r=\'4\' style=\'fill:#2c2822;stroke:none\'/></g></g><text x=\'327\' y=\'72\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:19px;font-weight:800;fill:#2c2822\'>거울</text><g transform=\'translate(374 12)\'><path d=\'M0 0 L26 0 L38 12 L38 38 L0 38 Z\' style=\'stroke:#2c2822;stroke-width:3;fill:none\'/><circle cx=\'9\' cy=\'30\' r=\'4\' style=\'fill:#2c2822;stroke:none\'/></g><g transform=\'translate(426 12)\'><g transform=\'translate(19 19) rotate(-90) translate(-19 -19)\'><path d=\'M0 0 L26 0 L38 12 L38 38 L0 38 Z\' style=\'stroke:#2c2822;stroke-width:3;fill:none\'/><circle cx=\'9\' cy=\'30\' r=\'4\' style=\'fill:#2c2822;stroke:none\'/></g></g><text x=\'419\' y=\'72\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:22px;font-weight:800;fill:#c0392b\'>?</text></svg>', caption: '점과 잘린 모서리의 관계를 보라' }
+			{ kind: 'figure', svg: '<svg viewBox=\'0 0 470 84\' role=\'img\' aria-label=\'돌린 것인가 뒤집은 것인가\'><g transform=\'translate(6 12)\'><path d=\'M0 0 L26 0 L38 12 L38 38 L0 38 Z\' style=\'stroke:#2c2822;stroke-width:3;fill:none\'/><circle cx=\'9\' cy=\'9\' r=\'4\' style=\'fill:#2c2822;stroke:none\'/></g><g transform=\'translate(58 12)\'><g transform=\'translate(19 19) rotate(90) translate(-19 -19)\'><path d=\'M0 0 L26 0 L38 12 L38 38 L0 38 Z\' style=\'stroke:#2c2822;stroke-width:3;fill:none\'/><circle cx=\'9\' cy=\'9\' r=\'4\' style=\'fill:#2c2822;stroke:none\'/></g></g><text x=\'51\' y=\'72\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:19px;font-weight:800;fill:#2c2822\'>회전</text><g transform=\'translate(98 12)\'><path d=\'M0 0 L26 0 L38 12 L38 38 L0 38 Z\' style=\'stroke:#2c2822;stroke-width:3;fill:none\'/><circle cx=\'9\' cy=\'9\' r=\'4\' style=\'fill:#2c2822;stroke:none\'/></g><g transform=\'translate(150 12)\'><g transform=\'translate(19 19) scale(-1 1) translate(-19 -19)\'><path d=\'M0 0 L26 0 L38 12 L38 38 L0 38 Z\' style=\'stroke:#2c2822;stroke-width:3;fill:none\'/><circle cx=\'9\' cy=\'9\' r=\'4\' style=\'fill:#2c2822;stroke:none\'/></g></g><text x=\'143\' y=\'72\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:19px;font-weight:800;fill:#2c2822\'>거울</text><g transform=\'translate(190 12)\'><path d=\'M0 0 L26 0 L38 12 L38 38 L0 38 Z\' style=\'stroke:#2c2822;stroke-width:3;fill:none\'/><circle cx=\'9\' cy=\'9\' r=\'4\' style=\'fill:#2c2822;stroke:none\'/></g><g transform=\'translate(242 12)\'><g transform=\'translate(19 19) rotate(180) translate(-19 -19)\'><path d=\'M0 0 L26 0 L38 12 L38 38 L0 38 Z\' style=\'stroke:#2c2822;stroke-width:3;fill:none\'/><circle cx=\'9\' cy=\'9\' r=\'4\' style=\'fill:#2c2822;stroke:none\'/></g></g><text x=\'235\' y=\'72\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:19px;font-weight:800;fill:#2c2822\'>회전</text><g transform=\'translate(282 12)\'><path d=\'M0 0 L26 0 L38 12 L38 38 L0 38 Z\' style=\'stroke:#2c2822;stroke-width:3;fill:none\'/><circle cx=\'9\' cy=\'9\' r=\'4\' style=\'fill:#2c2822;stroke:none\'/></g><g transform=\'translate(334 12)\'><g transform=\'translate(19 19) scale(-1 1) rotate(90) translate(-19 -19)\'><path d=\'M0 0 L26 0 L38 12 L38 38 L0 38 Z\' style=\'stroke:#2c2822;stroke-width:3;fill:none\'/><circle cx=\'9\' cy=\'9\' r=\'4\' style=\'fill:#2c2822;stroke:none\'/></g></g><text x=\'327\' y=\'72\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:19px;font-weight:800;fill:#2c2822\'>거울</text><g transform=\'translate(374 12)\'><path d=\'M0 0 L26 0 L38 12 L38 38 L0 38 Z\' style=\'stroke:#2c2822;stroke-width:3;fill:none\'/><circle cx=\'9\' cy=\'9\' r=\'4\' style=\'fill:#2c2822;stroke:none\'/></g><g transform=\'translate(426 12)\'><g transform=\'translate(19 19) rotate(-90) translate(-19 -19)\'><path d=\'M0 0 L26 0 L38 12 L38 38 L0 38 Z\' style=\'stroke:#2c2822;stroke-width:3;fill:none\'/><circle cx=\'9\' cy=\'9\' r=\'4\' style=\'fill:#2c2822;stroke:none\'/></g></g><text x=\'419\' y=\'72\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:22px;font-weight:800;fill:#c0392b\'>?</text></svg>', caption: '점과 잘린 모서리의 관계를 보라' }
 		],
 		type: 'text',
 		answers: ['회전', '돌린것', '돌린 것', '돌리기'],
@@ -2415,7 +2417,7 @@ export const PROBLEMS: Problem[] = [
 		chip: '물길',
 		blocks: [
 			{ kind: 'text', html: '물은 어느 출구로 도착할까? (A · B · C)' },
-			{ kind: 'figure', svg: '<svg viewBox=\'0 0 470 112\' role=\'img\' aria-label=\'물이 도착하는 곳\'><g transform=\'translate(4 0)\'><line x1=\'50\' y1=\'16\' x2=\'50\' y2=\'92\' style=\'stroke:#8a8f94;stroke-width:5;fill:none;stroke-linecap:round\'/><rect x=\'46\' y=\'49\' width=\'8\' height=\'10\' fill=\'#fdf6e9\'/><line x1=\'10\' y1=\'54\' x2=\'84\' y2=\'54\' style=\'stroke:#8a8f94;stroke-width:5;fill:none;stroke-linecap:round\'/><text x=\'10\' y=\'45\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:13px;font-weight:700;fill:#5f6368\'>시작</text><circle cx=\'10\' cy=\'54\' r=\'4\' fill=\'#c0392b\'/><circle cx=\'50\' cy=\'12\' r=\'7\' style=\'fill:#fff;stroke:#2c2822;stroke-width:1.2\'/><text x=\'50\' y=\'17\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:13px;font-weight:700;fill:#5f6368\'>A</text><circle cx=\'50\' cy=\'96\' r=\'7\' style=\'fill:#fff;stroke:#2c2822;stroke-width:1.2\'/><text x=\'50\' y=\'101\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:13px;font-weight:700;fill:#5f6368\'>B</text><circle cx=\'90\' cy=\'54\' r=\'7\' style=\'fill:#fff;stroke:#2c2822;stroke-width:1.2\'/><text x=\'90\' y=\'59\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:13px;font-weight:700;fill:#5f6368\'>C</text></g><g transform=\'translate(120 0)\'><line x1=\'10\' y1=\'54\' x2=\'52\' y2=\'54\' style=\'stroke:#8a8f94;stroke-width:5;fill:none;stroke-linecap:round\'/><line x1=\'52\' y1=\'16\' x2=\'52\' y2=\'92\' style=\'stroke:#8a8f94;stroke-width:5;fill:none;stroke-linecap:round\'/><circle cx=\'52\' cy=\'54\' r=\'4\' fill=\'#2c2822\'/><text x=\'10\' y=\'45\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:13px;font-weight:700;fill:#5f6368\'>시작</text><circle cx=\'10\' cy=\'54\' r=\'4\' fill=\'#c0392b\'/><circle cx=\'52\' cy=\'12\' r=\'7\' style=\'fill:#fff;stroke:#2c2822;stroke-width:1.2\'/><text x=\'52\' y=\'17\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:13px;font-weight:700;fill:#5f6368\'>A</text><circle cx=\'52\' cy=\'96\' r=\'7\' style=\'fill:#fff;stroke:#2c2822;stroke-width:1.2\'/><text x=\'52\' y=\'101\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:13px;font-weight:700;fill:#5f6368\'>B</text><circle cx=\'90\' cy=\'54\' r=\'7\' style=\'fill:#fff;stroke:#2c2822;stroke-width:1.2\'/><text x=\'90\' y=\'59\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:13px;font-weight:700;fill:#5f6368\'>C</text></g><g transform=\'translate(236 0)\'><line x1=\'66\' y1=\'16\' x2=\'66\' y2=\'92\' style=\'stroke:#8a8f94;stroke-width:5;fill:none;stroke-linecap:round\'/><rect x=\'62\' y=\'25\' width=\'8\' height=\'10\' fill=\'#fdf6e9\'/><polyline points=\'10 54 32 54 32 30 88 30\' style=\'stroke:#8a8f94;stroke-width:5;fill:none;stroke-linecap:round\'/><text x=\'10\' y=\'45\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:13px;font-weight:700;fill:#5f6368\'>시작</text><circle cx=\'10\' cy=\'54\' r=\'4\' fill=\'#c0392b\'/><circle cx=\'90\' cy=\'30\' r=\'7\' style=\'fill:#fff;stroke:#2c2822;stroke-width:1.2\'/><text x=\'90\' y=\'35\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:13px;font-weight:700;fill:#5f6368\'>A</text><circle cx=\'66\' cy=\'96\' r=\'7\' style=\'fill:#fff;stroke:#2c2822;stroke-width:1.2\'/><text x=\'66\' y=\'101\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:13px;font-weight:700;fill:#5f6368\'>B</text><circle cx=\'90\' cy=\'78\' r=\'7\' style=\'fill:#fff;stroke:#2c2822;stroke-width:1.2\'/><text x=\'90\' y=\'83\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:13px;font-weight:700;fill:#5f6368\'>C</text></g><g transform=\'translate(352 0)\'><line x1=\'34\' y1=\'16\' x2=\'34\' y2=\'92\' style=\'stroke:#8a8f94;stroke-width:5;fill:none;stroke-linecap:round\'/><line x1=\'78\' y1=\'16\' x2=\'78\' y2=\'60\' style=\'stroke:#8a8f94;stroke-width:5;fill:none;stroke-linecap:round\'/><polyline points=\'10 40 56 40 56 84 88 84\' style=\'stroke:#8a8f94;stroke-width:5;fill:none;stroke-linecap:round\'/><rect x=\'30\' y=\'35\' width=\'8\' height=\'10\' fill=\'#fdf6e9\'/><rect x=\'74\' y=\'35\' width=\'8\' height=\'10\' fill=\'#fdf6e9\'/><circle cx=\'56\' cy=\'40\' r=\'4\' fill=\'#2c2822\'/><text x=\'10\' y=\'31\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:13px;font-weight:700;fill:#5f6368\'>시작</text><circle cx=\'10\' cy=\'40\' r=\'4\' fill=\'#c0392b\'/><circle cx=\'34\' cy=\'12\' r=\'7\' style=\'fill:#fff;stroke:#2c2822;stroke-width:1.2\'/><text x=\'34\' y=\'17\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:13px;font-weight:700;fill:#5f6368\'>A</text><circle cx=\'90\' cy=\'84\' r=\'7\' style=\'fill:#fff;stroke:#2c2822;stroke-width:1.2\'/><text x=\'90\' y=\'89\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:13px;font-weight:700;fill:#5f6368\'>B</text><circle cx=\'78\' cy=\'12\' r=\'7\' style=\'fill:#fff;stroke:#2c2822;stroke-width:1.2\'/><text x=\'78\' y=\'17\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:13px;font-weight:700;fill:#5f6368\'>C</text><text x=\'20\' y=\'104\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:22px;font-weight:800;fill:#c0392b\'>?</text></g></svg>', caption: '검은 점(●)은 진짜 연결, 그냥 겹쳐 지나가면 다리' }
+			{ kind: 'figure', svg: '<svg viewBox=\'0 0 470 112\' role=\'img\' aria-label=\'물이 도착하는 곳\'><g transform=\'translate(4 0)\'><line x1=\'50\' y1=\'16\' x2=\'50\' y2=\'92\' style=\'stroke:#8a8f94;stroke-width:5;fill:none;stroke-linecap:round\'/><rect x=\'46\' y=\'49\' width=\'8\' height=\'10\' fill=\'#fdf6e9\'/><line x1=\'10\' y1=\'54\' x2=\'84\' y2=\'54\' style=\'stroke:#8a8f94;stroke-width:5;fill:none;stroke-linecap:round\'/><text x=\'10\' y=\'45\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:13px;font-weight:700;fill:#5f6368\'>시작</text><circle cx=\'10\' cy=\'54\' r=\'4\' fill=\'#c0392b\'/><circle cx=\'50\' cy=\'12\' r=\'7\' style=\'fill:#fff;stroke:#2c2822;stroke-width:1.2\'/><text x=\'50\' y=\'17\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:13px;font-weight:700;fill:#5f6368\'>A</text><circle cx=\'50\' cy=\'96\' r=\'7\' style=\'fill:#fff;stroke:#2c2822;stroke-width:1.2\'/><text x=\'50\' y=\'101\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:13px;font-weight:700;fill:#5f6368\'>B</text><circle cx=\'90\' cy=\'54\' r=\'7\' style=\'fill:#fff;stroke:#2c2822;stroke-width:1.2\'/><text x=\'90\' y=\'59\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:13px;font-weight:700;fill:#5f6368\'>C</text></g><g transform=\'translate(120 0)\'><line x1=\'10\' y1=\'54\' x2=\'52\' y2=\'54\' style=\'stroke:#8a8f94;stroke-width:5;fill:none;stroke-linecap:round\'/><line x1=\'52\' y1=\'16\' x2=\'52\' y2=\'92\' style=\'stroke:#8a8f94;stroke-width:5;fill:none;stroke-linecap:round\'/><circle cx=\'52\' cy=\'54\' r=\'4\' fill=\'#2c2822\'/><text x=\'10\' y=\'45\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:13px;font-weight:700;fill:#5f6368\'>시작</text><circle cx=\'10\' cy=\'54\' r=\'4\' fill=\'#c0392b\'/><circle cx=\'52\' cy=\'12\' r=\'7\' style=\'fill:#fff;stroke:#2c2822;stroke-width:1.2\'/><text x=\'52\' y=\'17\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:13px;font-weight:700;fill:#5f6368\'>A</text><circle cx=\'52\' cy=\'96\' r=\'7\' style=\'fill:#fff;stroke:#2c2822;stroke-width:1.2\'/><text x=\'52\' y=\'101\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:13px;font-weight:700;fill:#5f6368\'>B</text><circle cx=\'90\' cy=\'54\' r=\'7\' style=\'fill:#fff;stroke:#2c2822;stroke-width:1.2\'/><text x=\'90\' y=\'59\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:13px;font-weight:700;fill:#5f6368\'>C</text></g><g transform=\'translate(236 0)\'><line x1=\'66\' y1=\'16\' x2=\'66\' y2=\'92\' style=\'stroke:#8a8f94;stroke-width:5;fill:none;stroke-linecap:round\'/><rect x=\'62\' y=\'25\' width=\'8\' height=\'10\' fill=\'#fdf6e9\'/><polyline points=\'10 54 32 54 32 30 88 30\' style=\'stroke:#8a8f94;stroke-width:5;fill:none;stroke-linecap:round\'/><text x=\'10\' y=\'45\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:13px;font-weight:700;fill:#5f6368\'>시작</text><circle cx=\'10\' cy=\'54\' r=\'4\' fill=\'#c0392b\'/><circle cx=\'90\' cy=\'30\' r=\'7\' style=\'fill:#fff;stroke:#2c2822;stroke-width:1.2\'/><text x=\'90\' y=\'35\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:13px;font-weight:700;fill:#5f6368\'>A</text><circle cx=\'66\' cy=\'96\' r=\'7\' style=\'fill:#fff;stroke:#2c2822;stroke-width:1.2\'/><text x=\'66\' y=\'101\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:13px;font-weight:700;fill:#5f6368\'>B</text><circle cx=\'90\' cy=\'78\' r=\'7\' style=\'fill:#fff;stroke:#2c2822;stroke-width:1.2\'/><text x=\'90\' y=\'83\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:13px;font-weight:700;fill:#5f6368\'>C</text></g><g transform=\'translate(352 0)\'><line x1=\'34\' y1=\'16\' x2=\'34\' y2=\'92\' style=\'stroke:#8a8f94;stroke-width:5;fill:none;stroke-linecap:round\'/><line x1=\'78\' y1=\'16\' x2=\'78\' y2=\'60\' style=\'stroke:#8a8f94;stroke-width:5;fill:none;stroke-linecap:round\'/><rect x=\'30\' y=\'35\' width=\'8\' height=\'10\' fill=\'#fdf6e9\'/><polyline points=\'10 40 56 40 56 84 88 84\' style=\'stroke:#8a8f94;stroke-width:5;fill:none;stroke-linecap:round\'/><circle cx=\'56\' cy=\'40\' r=\'4\' fill=\'#2c2822\'/><text x=\'10\' y=\'31\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:13px;font-weight:700;fill:#5f6368\'>시작</text><circle cx=\'10\' cy=\'40\' r=\'4\' fill=\'#c0392b\'/><circle cx=\'34\' cy=\'12\' r=\'7\' style=\'fill:#fff;stroke:#2c2822;stroke-width:1.2\'/><text x=\'34\' y=\'17\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:13px;font-weight:700;fill:#5f6368\'>A</text><circle cx=\'90\' cy=\'84\' r=\'7\' style=\'fill:#fff;stroke:#2c2822;stroke-width:1.2\'/><text x=\'90\' y=\'89\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:13px;font-weight:700;fill:#5f6368\'>B</text><circle cx=\'78\' cy=\'12\' r=\'7\' style=\'fill:#fff;stroke:#2c2822;stroke-width:1.2\'/><text x=\'78\' y=\'17\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:13px;font-weight:700;fill:#5f6368\'>C</text><text x=\'20\' y=\'104\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:22px;font-weight:800;fill:#c0392b\'>?</text></g></svg>', caption: '검은 점(●)은 진짜 연결, 그냥 겹쳐 지나가면 다리' }
 		],
 		type: 'text',
 		answers: ['B', 'b', '비'],
@@ -2478,7 +2480,7 @@ export const PROBLEMS: Problem[] = [
 		id: 'kr-vertical-read',
 		chip: '숨은 단어',
 		blocks: [
-			{ kind: 'text', html: '물음표에 들어갈 글자는?' },
+			{ kind: 'text', html: '물음표에 들어갈 글자는? <b>물음표가 든 낱말은 마실 것</b>' },
 			{ kind: 'pre', text: '사 새 우\n과 콤 ?' }
 		],
 		type: 'text',
@@ -2495,7 +2497,7 @@ export const PROBLEMS: Problem[] = [
 		id: 'txt-ssbatchim',
 		chip: '겹받침',
 		blocks: [
-			{ kind: 'text', html: '받침 안을 자세히 들여다보고 규칙을 찾아보자.<br><b>산</b> → 0<br><b>닭발</b> → 1<br><b>몫</b> → 1<br><b>닭값</b> → ?' }
+			{ kind: 'text', html: '받침 안을 자세히 들여다보고 규칙을 찾아보자.<br><b>산</b> → 0<br><b>닭발</b> → 1<br><b>몫</b> → 1<br><b>여덟</b> → 1<br><b>닭값</b> → ?' }
 		],
 		type: 'text',
 		answers: ['2', '2개', '두 개', '두개'],
@@ -3469,7 +3471,7 @@ export const PROBLEMS: Problem[] = [
 		chip: '영단어',
 		blocks: [
 			{ kind: 'text', html: '물음표에 들어갈 수는?' },
-			{ kind: 'pre', text: '3 → 1\n7 → 2\n11 → 3\n20 → 2\n77 → ?' }
+			{ kind: 'pre', text: '3 → 1\n7 → 2\n11 → 3\n12 → 1\n20 → 2\n77 → ?' }
 		],
 		type: 'text',
 		answers: ['5'],
@@ -3478,7 +3480,7 @@ export const PROBLEMS: Problem[] = [
 			'수를 영어로 소리 내어 읽어 보세요. THREE, SEVEN…',
 			'박수를 치며 끊어 읽으면? SE-VEN은 두 번. SEVENTY-SEVEN은?'
 		],
-		explain: '영어로 읽을 때의 <b>음절 수</b>: THREE(1), SE-VEN(2), E-LE-VEN(3), TWEN-TY(2). 77은 SE-VEN-TY-SE-VEN → <b>5</b>.'
+		explain: '영어로 읽을 때의 <b>음절 수</b>: THREE(1), SE-VEN(2), E-LE-VEN(3), TWELVE(1), TWEN-TY(2). 77은 SE-VEN-TY-SE-VEN → <b>5</b>. 12가 1인 것이 우리말 「열둘」로 세는 가설을 죽입니다.'
 	},
 	{
 		id: 'kr-club-vowel-words',
@@ -3486,7 +3488,7 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'pre',
-				text: '고요한 클럽\n\n회원: 아이, 오이, 여우, 우유\n거절: 바다, 나무, 소리\n\n다음 후보 중, 이 클럽에 가입할 수 있는 낱말을 모두 고르시오.\n① 아우  ② 어른  ③ 이유  ④ 오리'
+				text: '고요한 클럽\n\n회원: 아이, 오이, 여우, 우유\n거절: 바다, 나무, 소리, 우리\n\n다음 후보 중, 이 클럽에 가입할 수 있는 낱말을 모두 고르시오.\n① 아우  ② 어른  ③ 이유  ④ 오리'
 			}
 		],
 		type: 'text',
@@ -4758,7 +4760,7 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'text',
-				html: '모자가 <b>빨강 2개, 파랑 1개</b>다. 세 사람이 한 줄로 서서 <b>앞사람만</b> 볼 수 있게 모자를 썼다.<br>맨 뒤 사람이 앞의 두 모자를 보고 "<b>내 모자 색을 모르겠다</b>"고 했다면, 앞의 두 모자는?'
+				html: '모자가 <b>빨강 2개, 파랑 2개</b>다. 세 사람이 한 줄로 서서 <b>앞사람만</b> 볼 수 있게 모자를 썼다.<br>맨 뒤 사람이 앞의 두 모자를 보고 "<b>내 모자 색을 모르겠다</b>"고 했다면, 앞의 두 모자는?'
 			}
 		],
 		type: 'choice',
@@ -4770,7 +4772,7 @@ export const PROBLEMS: Problem[] = [
 			'"모르겠다"는 말 자체가 정보입니다.'
 		],
 		explain:
-			'앞이 빨강·빨강이면 남은 건 파랑뿐이라 <b>알 수 있었을 것</b>입니다. 모르겠다고 했으니 앞에 파랑이 하나 있다는 뜻 → <b>빨강·파랑</b>.'
+			'앞이 빨강·빨강이면 남은 건 파랑 둘뿐이라 <b>알 수 있었을 것</b>이고, 파랑·파랑이면 남은 건 빨강 둘뿐이라 역시 알 수 있었을 겁니다. 모르겠다고 했으니 앞이 섞여 있다는 뜻 → <b>빨강·파랑</b>. (모자가 사람 수보다 많아야 「모르겠다」가 나옵니다.)'
 	},
 	{
 		id: 'ob-chess-square',
@@ -5389,7 +5391,7 @@ export const PROBLEMS: Problem[] = [
 		chip: '모음 종류',
 		blocks: [
 			{ kind: 'text', html: '물음표에 들어갈 수는?' },
-			{ kind: 'pre', text: 'BOOK → 1\nQUEUE → 2\nRHYTHM → 0\nBEAUTY → ?' }
+			{ kind: 'pre', text: 'BOOK → 1\nQUEUE → 2\nCOOKIE → 3\nRHYTHM → 0\nBEAUTY → ?' }
 		],
 		type: 'text',
 		answers: ['3'],
@@ -5406,7 +5408,7 @@ export const PROBLEMS: Problem[] = [
 		chip: '영단어',
 		blocks: [
 			{ kind: 'text', html: '영어 낱말을 반으로 쪼개 그대로 직역했다. 물음표는?' },
-			{ kind: 'pre', text: 'RAINBOW = 비 + 활\nSEAHORSE = 바다 + 말\nHOTDOG = 뜨거운 + 개\n\nBUTTERFLY = ?' }
+			{ kind: 'pre', text: 'RAINBOW = 비 + 활\nSEAHORSE = 바다 + 말\nSAWDUST = 톱 + 먼지\nHOTDOG = 뜨거운 + 개\n\nBUTTERFLY = ?' }
 		],
 		type: 'text',
 		answers: ['버터 + 파리', '버터+파리', '버터와 파리', '버터 파리', '버터파리'],
@@ -5442,8 +5444,8 @@ export const PROBLEMS: Problem[] = [
 		chip: '좌우대칭',
 		blocks: [
 			{ kind: 'text', html: '물음표에 들어갈 것은? (O 또는 X)' },
-			{ kind: 'lcd', lines: ['0 8 1 2'] },
-			{ kind: 'text', html: '0 → O<br>8 → O<br>1 → X<br>2 → ?' }
+			{ kind: 'lcd', lines: ['0 8 1 5 2'] },
+			{ kind: 'text', html: '0 → O<br>8 → O<br>1 → X<br>5 → X<br>2 → ?' }
 		],
 		type: 'choice',
 		choices: ['O', 'X'],
@@ -5454,7 +5456,7 @@ export const PROBLEMS: Problem[] = [
 			'1은 오른쪽에만 붙어 있어서 뒤집으면 왼쪽으로 갑니다.'
 		],
 		explain:
-			'전광판에서 <b>좌우로 뒤집어도 같은</b> 숫자는 0과 8뿐입니다. 1은 오른쪽 두 획이라 뒤집으면 왼쪽으로 옮겨가고, 2는 5 모양이 되므로 <b>X</b>.'
+			'전광판에서 <b>좌우로 뒤집어도 같은</b> 숫자는 0과 8뿐입니다. 1은 오른쪽 두 획이라 뒤집으면 왼쪽으로 옮겨가고, 2는 5 모양이 되므로 <b>X</b>. 5가 X인 것이 「180도 돌려도 같은가」라는 가설을 죽입니다 — 5는 돌리면 2가 되지만 거울로는 2가 되어 자기 자신이 아닙니다.'
 	},
 	{
 		id: 'nm-percent-updown',
@@ -5804,7 +5806,7 @@ export const PROBLEMS: Problem[] = [
 			/* 고고학이 두 규칙을 죽인다: 반복 글자 규칙(고고학은 반복인데 X)과
 			   3글자 규칙(고고학은 3글자인데 X). 이게 없으면 바나나(나x2)가
 			   반복 규칙으로는 O가 되어 답이 갈린다 — sh-sym-vertical의 교훈. */
-			{ kind: 'pre', text: '기러기 → O\n고고학 → X\n토마토 → O\n스위스 → O\n\n바나나 → ?' }
+			{ kind: 'pre', text: '기러기 → O\n고고학 → X\n토마토 → O\n도토리 → X\n스위스 → O\n\n바나나 → ?' }
 		],
 		type: 'choice',
 		choices: ['O', 'X'],
