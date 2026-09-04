@@ -44,6 +44,12 @@ const C = {
  *   id     src/lib/problems.ts의 문제 id — 나중에 대조할 수 있게 남긴다
  */
 const CARDS = {
+	'2026-09-04': {
+		id: 'rc-chain-sqsum',
+		chip: '사슬',
+		물음: '물음표에 들어갈 수는?',
+		줄: ['7  →  49  →  97  →  130  →  ?']
+	},
 	'2026-09-02': {
 		id: 'vertical-vowel-club',
 		chip: '한글',
