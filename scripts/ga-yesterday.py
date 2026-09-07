@@ -9,6 +9,15 @@ ga-daily.py는 14일을 뭉뚱그려 본다. 그건 추세를 보는 물건이�
 "어제 몇 명이 왔고, 누가 문제를 풀었고, 누가 알림을 켰나"다. 그래서 하루만 본다.
 
 날짜 인사(「8월 25일 화요일이야」)를 받으면 이 스크립트부터 돌린다.
+
+**숫자는 한국만 센다.** 2026-09-07에 전 국가 합계를 보고 「7일 활성 137~197, 3주째
+정체」라고 진단했다가 뒤집었다 — 미국에서 오는 봇이 8월 말 67명까지 부풀었다가 9월에
+3명으로 사라져서 평평해 보인 것이었다. 한국만 보면 같은 기간 28 → 137이다.
+
+  전 기간(7/14~9/06)  한국 693세션 참여 63% 체류 172초 / 미국 143세션 참여 6% 체류 3.2초
+
+거른 것은 [걸러낸 것] 줄에 그대로 찍는다. 조용히 빼면 같은 착각을 또 한다 — 참여율이
+40%를 넘거나 체류가 30초를 넘으면 봇이 아니라 진짜 사람이니 필터를 다시 생각해야 한다.
 """
 
 import os, sys, io, datetime
@@ -20,7 +29,14 @@ if not os.environ.get("GOOGLE_APPLICATION_CREDENTIALS"):
     sys.exit("GOOGLE_APPLICATION_CREDENTIALS 환경변수에 서비스 계정 키 경로를 넣어라.")
 
 from google.analytics.data_v1beta import BetaAnalyticsDataClient
-from google.analytics.data_v1beta.types import DateRange, Dimension, Metric, RunReportRequest
+from google.analytics.data_v1beta.types import (
+    DateRange,
+    Dimension,
+    Filter,
+    FilterExpression,
+    Metric,
+    RunReportRequest,
+)
 
 PROPERTY = "properties/547486275"
 BACK = int(sys.argv[1]) if len(sys.argv) > 1 else 1
@@ -31,13 +47,20 @@ DATE = DAY.isoformat()
 WD = "월화수목금토일"[DAY.weekday()]
 
 
-def rep(dims, mets, limit=50):
+KR = FilterExpression(
+    filter=Filter(field_name="country", string_filter=Filter.StringFilter(value="South Korea"))
+)
+NOT_KR = FilterExpression(not_expression=KR)
+
+
+def rep(dims, mets, limit=50, flt=KR):
     return client.run_report(
         RunReportRequest(
             property=PROPERTY,
             date_ranges=[DateRange(start_date=DATE, end_date=DATE)],
             dimensions=[Dimension(name=d) for d in dims],
             metrics=[Metric(name=m) for m in mets],
+            dimension_filter=flt,
             limit=limit,
         )
     ).rows
@@ -57,6 +80,15 @@ mmss = f"{eng // users // 60}:{eng // users % 60:02d}" if users else "0:00"
 print(f"\n{'=' * 52}")
 print(f"  {DAY.month}월 {DAY.day}일 ({WD}) 하루")
 print(f"{'=' * 52}")
+# 무엇을 걸렀는지 반드시 보여 준다 — 조용히 빼면 같은 착각을 또 한다
+밖 = rep([], ["activeUsers", "sessions", "engagementRate", "userEngagementDuration"], flt=NOT_KR)
+if 밖 and num(밖, 0):
+    밖명, 밖세션 = num(밖, 0), num(밖, 1)
+    밖참여 = float(밖[0].metric_values[2].value) * 100
+    밖체류 = num(밖, 3) / 밖세션 if 밖세션 else 0
+    경고 = "  <- 참여·체류가 높다. 봇이 아니라 사람일 수 있다" if (밖참여 > 40 or 밖체류 > 30) else ""
+    print(f"\n[걸러낸 것]  한국 밖 {밖명}명 · {밖세션}세션 · 참여 {밖참여:.0f}% · 체류 {밖체류:.0f}초{경고}")
+
 print(f"\n[사람]  방문자 {users}명 — 처음 온 사람 {new}, 다시 온 사람 {back}")
 print(f"        세션 {sess} · 페이지뷰 {pv} · 1인 평균 체류 {mmss}")
 

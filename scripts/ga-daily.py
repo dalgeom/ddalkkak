@@ -9,6 +9,11 @@
 
 문제별 정답률은 ga-problems.py가 따로 본다. 여기서는 "몇 명이 왔고, 어디서 왔고,
 얼마나 풀다 갔는가"만 본다. 매일 같은 잣대로 보려고 지표를 고정해 두었다.
+
+**숫자는 한국만 센다.** 2026-09-07에 전 국가 합계로 「7일 활성 3주째 정체」라고
+진단했다가 뒤집었다 — 미국 봇이 8월 말 67명까지 부풀었다가 9월에 3명으로 사라져
+평평해 보인 것이었다. 한국만 보면 같은 기간 28 → 137이다. 거른 것은 [걸러낸 것]
+줄에 찍는다. ga-yesterday.py 머리에 같은 설명이 있다.
 """
 
 import os, sys, io
@@ -24,6 +29,8 @@ from google.analytics.data_v1beta import BetaAnalyticsDataClient
 from google.analytics.data_v1beta.types import (
     DateRange,
     Dimension,
+    Filter,
+    FilterExpression,
     Metric,
     RunReportRequest,
     OrderBy,
@@ -34,7 +41,13 @@ DAYS = int(sys.argv[1]) if len(sys.argv) > 1 else 14
 client = BetaAnalyticsDataClient()
 
 
-def report(dims, mets, days=DAYS, limit=50, order=None, start=None):
+KR = FilterExpression(
+    filter=Filter(field_name="country", string_filter=Filter.StringFilter(value="South Korea"))
+)
+NOT_KR = FilterExpression(not_expression=KR)
+
+
+def report(dims, mets, days=DAYS, limit=50, order=None, start=None, flt=KR):
     return client.run_report(
         RunReportRequest(
             property=PROPERTY,
@@ -42,6 +55,7 @@ def report(dims, mets, days=DAYS, limit=50, order=None, start=None):
             dimensions=[Dimension(name=d) for d in dims],
             metrics=[Metric(name=m) for m in mets],
             order_bys=order or [],
+            dimension_filter=flt,
             limit=limit,
         )
     ).rows
@@ -61,6 +75,15 @@ def bar(n, top, width=22):
 
 
 print(f"\n{'=' * 62}\n  딸깍 — 최근 {DAYS}일\n{'=' * 62}")
+
+# 무엇을 걸렀는지 먼저 보여 준다 — 조용히 빼면 같은 착각을 또 한다
+밖 = report([], ["activeUsers", "sessions", "engagementRate", "userEngagementDuration"], flt=NOT_KR)
+if 밖 and num(밖[0], 0):
+    밖명, 밖세션 = int(num(밖[0], 0)), int(num(밖[0], 1))
+    밖참여 = num(밖[0], 2) * 100
+    밖체류 = num(밖[0], 3) / 밖세션 if 밖세션 else 0
+    경고 = "  <- 참여·체류가 높다. 봇이 아닐 수 있다" if (밖참여 > 40 or 밖체류 > 30) else ""
+    print(f"\n[걸러낸 것]  한국 밖 {밖명}명 · {밖세션}세션 · 참여 {밖참여:.0f}% · 체류 {밖체류:.0f}초{경고}")
 
 # ── 1. 일별 방문 ──────────────────────────────────────────
 rows = report(
