@@ -1,6 +1,7 @@
 <script lang="ts">
 	import ProblemView from '$lib/components/ProblemView.svelte';
 	import type { PageData } from './$types';
+	import { ctaTrack } from '$lib/analytics';
 
 	let { data }: { data: PageData } = $props();
 
@@ -69,7 +70,7 @@
 
 	<section class="sec ctas">
 		<a class="cta" href="/play?filter=puzzle">발견형 무한으로 풀기 <span aria-hidden="true">→</span></a>
-		<a class="cta ghost" href="/">오늘의 10문제 풀러 가기</a>
+		<a class="cta ghost" href="/" use:ctaTrack={'foot'}>오늘의 10문제 풀러 가기</a>
 	</section>
 
 	<section class="sec">

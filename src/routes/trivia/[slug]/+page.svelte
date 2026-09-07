@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { PageData } from './$types';
+	import { ctaTrack } from '$lib/analytics';
 
 	let { data }: { data: PageData } = $props();
 
@@ -46,7 +47,7 @@
 
 	<!-- 검색으로 이 페이지에 떨어진 사람은 찾던 답만 읽고 나간다. 26문제와 해설을 다 지나야
 	     데일리로 가는 길이 나오면 늦다 — 목록에 들어가기 전에 한 줄로 알린다. -->
-	<a class="daily-band" href="/">
+	<a class="daily-band" href="/" use:ctaTrack={'band'}>
 		<span class="t">이 문제들, 매일 <b>10문제</b>씩 새로 나와요</span>
 		<span class="go">오늘 문제 풀기 →</span>
 	</a>
@@ -83,7 +84,9 @@
 	</section>
 
 	<section class="sec ctas">
-		<a class="cta" href="/">오늘의 10문제 풀러 가기 <span aria-hidden="true">→</span></a>
+		<a class="cta" href="/" use:ctaTrack={'foot'}>
+			오늘의 10문제 풀러 가기 <span aria-hidden="true">→</span>
+		</a>
 		<a class="cta ghost" href="/play?filter=trivia">상식 퀴즈 무한으로 풀기</a>
 	</section>
 
