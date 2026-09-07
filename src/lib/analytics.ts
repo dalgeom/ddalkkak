@@ -35,25 +35,40 @@ export function ctaTrack(node: HTMLElement, slot: 'band' | 'foot') {
 	const onClick = () => track(`cta_${slot}_click`);
 	node.addEventListener('click', onClick);
 
+	/** 콜백을 믿지 않고 좌표로 다시 본다 — 절반 이상이 화면 안에 들어와 있는가 */
+	const 보이나 = () => {
+		const r = node.getBoundingClientRect();
+		const vh = window.innerHeight || document.documentElement.clientHeight;
+		const 겹침 = Math.min(r.bottom, vh) - Math.max(r.top, 0);
+		return r.height > 0 && 겹침 >= r.height * 0.5;
+	};
+
+	let done = false;
 	let io: IntersectionObserver | undefined;
+	const 끝내기 = () => {
+		io?.disconnect();
+		io = undefined;
+		window.removeEventListener('scroll', 확인);
+	};
+	function 확인() {
+		if (done || !보이나()) return;
+		done = true;
+		track(`cta_${slot}_seen`);
+		끝내기();
+	}
+
 	if (typeof IntersectionObserver === 'function') {
-		io = new IntersectionObserver(
-			(entries) => {
-				// 절반 이상 보인 적이 있으면 한 번만 찍고 끊는다
-				if (entries.some((e) => e.isIntersecting)) {
-					track(`cta_${slot}_seen`);
-					io?.disconnect();
-					io = undefined;
-				}
-			},
-			{ threshold: 0.5 }
-		);
+		io = new IntersectionObserver(확인, { threshold: [0, 0.5, 1] });
 		io.observe(node);
 	}
+	// 관찰자만 두면 안 된다. 9/7에 라이브에서 /trivia는 울렸는데 /discover는 같은 조건
+	// (top 512 · 높이 54 · 뷰포트 844)에서 끝내 안 울렸다. 원인을 못 짚었으므로 길을
+	// 하나 더 둔다 — 스크롤에서도 본다. 둘 중 먼저 확인되는 쪽이 찍고 나머지를 끊는다.
+	window.addEventListener('scroll', 확인, { passive: true });
 
 	return {
 		destroy() {
-			io?.disconnect();
+			끝내기();
 			node.removeEventListener('click', onClick);
 		}
 	};
