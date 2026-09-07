@@ -113,6 +113,9 @@ LABEL = [
     ("daily_complete", "완주"),
     ("problem_result", "문제 풀이(정답·오답 제출)"),
     ("practice_start", "무한 연습 시작"),
+    # 노출은 렌더가 아니라 화면에 절반 이상 들어온 순간이다(analytics.ts ctaTrack).
+    # 「공유 영역을 본 사람」 대비 「누른 사람」이 곧 공유율의 분모·분자다.
+    ("cta_share_seen", "공유 영역이 눈에 들어옴"),
     ("share_click", "공유 누름"),
     ("share_result", "결과 공유"),
 ]

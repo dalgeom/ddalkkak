@@ -29,6 +29,7 @@
 		type DailyKind
 	} from '$lib/game';
 	import { shareResult, outcomeMessage } from '$lib/shareCard';
+	import { ctaTrack } from '$lib/analytics';
 	import { weekOf, readDayRecord } from '$lib/record';
 	import { bankSizesAt } from '$lib/bankHistory';
 	import { logoClicks } from '$lib/nav';
@@ -672,6 +673,18 @@
 			origin: browser ? location.origin : ''
 		})
 	);
+
+	/**
+	 * 데스크톱에서는 「결과 복사」가 1순위다.
+	 *
+	 * 완주자의 53%가 데스크톱인데 거기서는 canShare({files})가 대개 false라
+	 * shareResult가 텍스트 경로로 가고, 그건 OS 공유 시트를 띄운다. 파일을 못 받는
+	 * 시트를 띄웠다가 닫는 것보다 클립보드가 낫다.
+	 */
+	let 복사우선 = $state(false);
+	$effect(() => {
+		if (browser) 복사우선 = !window.matchMedia('(pointer: coarse)').matches;
+	});
 
 	async function copyLink() {
 		track('share_click', { method: 'copy', score: correctCount });
@@ -1400,9 +1413,22 @@
 	<a class="review-link" href="/today">오늘 문제 다시 보기 <span aria-hidden="true">→</span></a>
 
 
-	<p class="share-label">결과 공유</p>
-	<div class="share-btns">
-		<button class="sh-btn primary" onclick={shareNative}>
+	<!-- 공유될 것을 먼저 보여 준다.
+	     여기까지 온 사람은 자기 점수만 봤지 무엇이 전달되는지는 한 번도 못 봤다 —
+	     gridRow가 공유 카드 이미지에만 쓰이고 화면엔 안 그려지고 있었다(9/07 확인).
+	     완주 88명 중 공유 13명(14.8%)이 기준선이다.
+
+	     노출(share_seen)은 렌더가 아니라 화면에 절반 이상 들어온 순간을 찍는다 —
+	     push_offer가 렌더 시점이라 8/26에 「다섯 명에게 떴는데 아무도 못 눌렀다」가
+	     됐던 것과 같은 함정을 피한다. -->
+	<div class="share-box" use:ctaTrack={'share'}>
+		<p class="share-label">결과 공유</p>
+		{#if gridRow}
+			<div class="grid-row" aria-label="문제별 결과">{gridRow}</div>
+			<p class="share-hint">이 줄과 링크만 전달돼요 · 정답은 안 담깁니다</p>
+		{/if}
+	<div class="share-btns" class:copy-first={복사우선}>
+		<button class="sh-btn" class:primary={!복사우선} onclick={shareNative}>
 			<svg
 				viewBox="0 0 24 24"
 				fill="none"
@@ -1418,7 +1444,7 @@
 			</svg>
 			공유하기
 		</button>
-		<button class="sh-btn" onclick={copyLink}>
+		<button class="sh-btn" class:primary={복사우선} onclick={copyLink}>
 			<svg
 				viewBox="0 0 24 24"
 				fill="none"
@@ -1433,6 +1459,7 @@
 			</svg>
 			링크 복사
 		</button>
+	</div>
 	</div>
 
 	<!-- 다음 행동: 가장 약했던 유형의 연습으로 이어준다 -->
@@ -2752,6 +2779,25 @@
 	.share-btns {
 		display: flex;
 		gap: 8px;
+	}
+	/* 데스크톱은 「결과 복사」가 1순위 — 순서만 바꾸고 마크업은 그대로 둔다 */
+	.share-btns.copy-first {
+		flex-direction: row-reverse;
+	}
+	/* 열 칸이 한 덩이로 읽혀야 한다(game.ts shareGrid 주석). 두 줄로 접히면 궤적이
+	   안 보인다 — 390px에서 26px은 9+1로 접혔다. 이모지는 글자 크기의 1.46배쯤
+	   차지해서 화면 폭에 묶어 둔다. */
+	.grid-row {
+		font-size: min(24px, 5.6vw);
+		line-height: 1.3;
+		letter-spacing: 1px;
+		white-space: nowrap;
+		margin-bottom: 6px;
+	}
+	.share-hint {
+		font-size: 12px;
+		color: var(--muted-2);
+		margin: 0 0 10px;
 	}
 	.sh-btn {
 		flex: 1;

@@ -189,7 +189,10 @@ export async function shareResult(card: ShareCardData, text: string): Promise<Sh
 			return 'shared';
 		}
 	} catch (e) {
-		if ((e as Error)?.name === 'AbortError') return 'failed';
+		// 사용자가 시트를 닫은 것은 실패가 아니다. 경로 1은 canceled를 내는데 여기만
+		// failed를 내고 있었다 — 데스크톱은 canShare({files})가 대개 false라 이 경로로
+		// 오므로, 완주자의 절반이 공유를 취소할 때마다 「공유에 실패했어요」를 봤다.
+		if ((e as Error)?.name === 'AbortError') return 'canceled';
 	}
 	try {
 		if (navigator.clipboard?.writeText) {
