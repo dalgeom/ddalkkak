@@ -5693,13 +5693,13 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'pre',
-				text: '물음표 클럽\n\n회원: WHO, WHAT, WHEN, HOW\n거절: NOW, TWO, WOW\n\n다음 후보 중, 이 클럽에 가입할 수 있는 단어를 모두 고르시오.\n① WHY  ② NEW  ③ WHERE  ④ HOT'
+				text: '물음표 클럽\n\n회원: WHO, WHAT, WHEN, HOW\n거절: NOW, TWO, WOW, HAT\n\n다음 후보 중, 이 클럽에 가입할 수 있는 단어를 모두 고르시오.\n① WHY  ② NEW  ③ WHERE  ④ HOT'
 			}
 		],
 		type: 'text',
 		answers: ['WHY, WHERE', 'WHERE, WHY', 'why, where', 'why,where', 'WHY,WHERE'],
 		hints: [
-			'"W가 든 단어"라면 NOW·TWO·WOW가 거절될 리 없고, HOW는 W로 시작하지도 않습니다.',
+			'"W가 든 단어"라면 NOW·TWO·WOW가, "H가 든 단어"라면 HAT이 거절될 리 없습니다. HOW는 W로 시작하지도 않고요.',
 			'회원들은 전부 문장 맨 앞에서 무언가를 "묻습니다".',
 			'물음을 만드는 단어들만 회원입니다.'
 		],
