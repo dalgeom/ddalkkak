@@ -44,6 +44,17 @@ const C = {
  *   id     src/lib/problems.ts의 문제 id — 나중에 대조할 수 있게 남긴다
  */
 const CARDS = {
+	'2026-09-07': {
+		id: 'kr-loan-stretch',
+		chip: '한글',
+		물음: '물음표에 들어갈 수는?',
+		줄: [
+			'영어는 셋 다 1음절이다.',
+			'MILK  →  밀크 · 2글자',
+			'STRIKE  →  스트라이크 · 5글자',
+			'SPRING  →  ?'
+		]
+	},
 	'2026-09-04': {
 		id: 'rc-chain-sqsum',
 		chip: '사슬',
@@ -220,10 +231,31 @@ const bulb = (size) => `
   <rect x="16" y="39" width="14" height="6" rx="1.5" fill="${C.text}"/>
 </svg>`;
 
+/**
+ * 한 줄의 대략적인 폭(em). 한글·CJK·화살표는 1, 라틴·숫자는 0.58, 공백은 0.28,
+ * 문장부호는 0.35로 친다. 정확할 필요는 없고 넘치는 줄을 잡을 정도면 된다.
+ */
+function 폭(s) {
+	let w = 0;
+	for (const ch of s) {
+		if (ch === ' ') w += 0.28;
+		else if (/[가-힣ㄱ-ㆎ一-鿿→←↔↑↓]/.test(ch)) w += 1;
+		else if (/[.,·:=()?!]/.test(ch)) w += 0.35;
+		else w += 0.58;
+	}
+	return w;
+}
+
 function page(card) {
-	// 줄이 많으면 글자를 줄여 카드 밖으로 넘치지 않게 한다
+	// 줄 개수로 높이를 맞추고, 가장 긴 줄로 폭을 맞춘다.
+	//
+	// 예전에는 개수만 봤다. 그래서 2026-09-07 카드에서 「STRIKE → 스트라이크 · 5글자」가
+	// 회색 상자를 양쪽으로 25px씩 삐져나왔다 — white-space:pre라 줄바꿈도 안 된다.
+	// 상자 안폭은 카드 830 − 좌우 여백 60×2 = 710px이다.
 	const n = card.줄.length;
-	const fs = n <= 4 ? 56 : n <= 5 ? 52 : n <= 6 ? 46 : 40;
+	const 높이기준 = n <= 4 ? 56 : n <= 5 ? 52 : n <= 6 ? 46 : 40;
+	const 최장 = Math.max(...card.줄.map(폭), 1);
+	const fs = Math.max(28, Math.min(높이기준, Math.floor(710 / 최장)));
 	const gap = n <= 5 ? 20 : 15;
 	// 한 줄짜리(수열)는 줄 전체를 물들이면 대비가 사라지고, 이어진 수열이 두 덩어리로
 	// 보이기까지 한다. 그럴 땐 물음표만 물들인다.
