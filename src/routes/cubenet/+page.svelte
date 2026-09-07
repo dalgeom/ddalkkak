@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { ctaTrack } from '$lib/analytics';
 	import { problemAt, FACES, NETS, objectParticle, type CubeNetProblem } from '$lib/cubenet';
 	import { CUBE_TOTAL } from '$lib/game';
 	import CubeNetFigure from '$lib/components/CubeNetFigure.svelte';
@@ -218,7 +219,7 @@
 	</section>
 
 	<section class="sec ctas">
-		<a class="cta" href="/">오늘의 딸깍 풀러 가기</a>
+		<a class="cta" href="/" use:ctaTrack={'foot'}>오늘의 딸깍 풀러 가기</a>
 		<a class="cta ghost" href="/matchstick">성냥개비 퍼즐도 풀기</a>
 	</section>
 </article>

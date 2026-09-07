@@ -49,7 +49,8 @@
 	import Bulb from '$lib/components/Bulb.svelte';
 	import InstallPrompt from '$lib/components/InstallPrompt.svelte';
 	import PushPrompt from '$lib/components/PushPrompt.svelte';
-	import { shouldOfferPush } from '$lib/push';
+	import { shouldOfferPush, pushSkipReason } from '$lib/push';
+	import { platformOf } from '$lib/pwa';
 	import InstallHint from '$lib/components/InstallHint.svelte';
 
 	let {
@@ -573,11 +574,18 @@
 			persist(true);
 			completeDailySession(dayNum);
 			loadTomorrowTeaser();
-			// 완주 퍼널의 끝 — 점수와 걸린 시간을 함께 보내 분포를 본다
+			// 완주 퍼널의 끝 — 점수와 걸린 시간을 함께 보내 분포를 본다.
+			//
+			// push·platform을 여기서 함께 보낸다. push_offer·install_offer·prompt_skip은
+			// 조건이 맞는 사람에게만 찍혀서 완주자 79명 중 최소 16명(20%)이 어느 계측에도
+			// 없었다 — 「돌아올 장치를 못 본 사람」이 안 보이면 재방문 11%의 원인을 못 가른다.
+			// 완주는 모두가 지나는 유일한 지점이라 여기가 100%를 덮는다.
 			track('daily_complete', {
 				score: correctCount,
 				total: DAILY_SIZE,
-				seconds: Math.round(sessionMs / 1000)
+				seconds: Math.round(sessionMs / 1000),
+				push: pushSkipReason(dayNum) ?? 'ok',
+				platform: platformOf(navigator.userAgent, navigator.maxTouchPoints ?? 0)
 			});
 			if (browser) window.scrollTo({ top: 0, behavior: 'smooth' });
 		}

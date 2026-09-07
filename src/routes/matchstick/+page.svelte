@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { ctaTrack } from '$lib/analytics';
 	import { onMount, onDestroy } from 'svelte';
 	import { browser } from '$app/environment';
 	import { page } from '$app/state';
@@ -407,7 +408,7 @@
 			<p class="mp">
 				매일 자정에 새 10문제가 올라옵니다. 성냥개비뿐 아니라 숫자·한글·도형까지 섞여 나와요.
 			</p>
-			<a class="big" href="/">오늘 문제 풀러 가기 <span class="arr" aria-hidden="true">→</span></a>
+			<a class="big" href="/" use:ctaTrack={'foot'}>오늘 문제 풀러 가기 <span class="arr" aria-hidden="true">→</span></a>
 		</section>
 	</div>
 

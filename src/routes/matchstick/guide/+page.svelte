@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { ctaTrack } from '$lib/analytics';
 	import MatchstickBoard from '$lib/components/MatchstickBoard.svelte';
 	import { parseEq } from '$lib/matchstick';
 	import { MATCH_TOTAL } from '$lib/game';
@@ -187,7 +188,7 @@
 
 	<section class="sec ctas">
 		<a class="cta" href="/matchstick">성냥개비 {MATCH_TOTAL}문제 풀러 가기 <span aria-hidden="true">→</span></a>
-		<a class="cta ghost" href="/">오늘의 10문제 풀어보기</a>
+		<a class="cta ghost" href="/" use:ctaTrack={'foot'}>오늘의 10문제 풀어보기</a>
 		<p class="xlink">
 			규칙을 스스로 찾아내는 <a href="/guide">발견형 퍼즐 풀이 가이드</a>도 있어요.
 		</p>

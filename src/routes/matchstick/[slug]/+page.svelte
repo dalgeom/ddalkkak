@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { ctaTrack } from '$lib/analytics';
 	import MatchstickBoard from '$lib/components/MatchstickBoard.svelte';
 	import { parseEq } from '$lib/matchstick';
 	import type { PageData } from './$types';
@@ -104,7 +105,7 @@
 
 	<section class="sec ctas">
 		<a class="cta" href="/play?filter=match">성냥개비 무한으로 풀기 <span aria-hidden="true">→</span></a>
-		<a class="cta ghost" href="/">오늘의 10문제 풀러 가기</a>
+		<a class="cta ghost" href="/" use:ctaTrack={'foot'}>오늘의 10문제 풀러 가기</a>
 	</section>
 
 	<section class="sec">

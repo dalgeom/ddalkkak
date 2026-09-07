@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { ctaTrack } from '$lib/analytics';
 	import type { Snippet } from 'svelte';
 
 	/**
@@ -13,7 +14,7 @@
 	let { children }: { children: Snippet } = $props();
 </script>
 
-<a class="daily-band" href="/">
+<a class="daily-band" href="/" use:ctaTrack={'band'}>
 	<span class="t">{@render children()}</span>
 	<span class="go">오늘 문제 풀기 →</span>
 </a>
