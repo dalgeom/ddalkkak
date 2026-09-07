@@ -19,6 +19,21 @@ import { attackOps, attackSeqs, attackClubs, 적발된_id } from './ruleAttack';
  * 이 라이브러리로 못 깼다는 뜻이다.
  */
 const 알려진_적발: string[] = [
+	// ── 2026-09-07 스레드 댓글이 연 새 종류: 격간(자리 홀짝) 읽기 ──
+	// 「홀수 자리끼리, 짝수 자리끼리」로 갈라 보는 흔한 가설인데, 갈래마다 점이 둘뿐이면
+	// 등차와 등비가 안 갈린다. 아래 다섯은 전부 수열(쉼표·공백 나열)이라 화살표가 없어
+	// 「앞 수 → 다음 수」로 못 박을 수도 없다. 항을 더 보여 주거나 지문을 손봐야 한다.
+	//   binary-seq        110 ↔ 190(등차) · 1000(등비)
+	//   disc-6           6036 ↔ 6028(등차)
+	//   nm-seven-ones       2 ↔ 12(등차) · 16(등비)
+	//   nm-grow-mult      120 ↔ 11(등차) · 36(등비)
+	//   nm-square-reverse  63 ↔ 118(등차)
+	// 사슬 둘(rc-chain-maxdigit·rc-chain-sqsum)은 지문에 「앞의 수로 다음 수」를 넣어 고쳤다.
+	'binary-seq',
+	'disc-6',
+	'nm-seven-ones',
+	'nm-grow-mult',
+	'nm-square-reverse',
 	// ── 비어 있다. 2026-09-04에 남아 있던 9건을 전부 고쳤다.
 	//
 	// 9건 중 하나(digit-sum-op)만 답이 대놓고 갈렸고, 나머지 여덟은 전부 조건형이었다 —

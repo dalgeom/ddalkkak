@@ -193,7 +193,7 @@ function parseOp(txt: string): { rows: [number, number, number][]; q: [number, n
 }
 
 export type Alt = { 답: number | string; 규칙: string };
-export type Finding = { id: string; 종류: '갈림' | '자명'; 공식답: number | string; 대안: Alt[] };
+export type Finding = { id: string; 종류: '갈림' | '자명' | '격간'; 공식답: number | string; 대안: Alt[] };
 export type Skipped = { id: string; 이유: string };
 export type Report = { 적발: Finding[]; 통과: string[]; 판단불가: Skipped[]; 검사수: number };
 
@@ -298,6 +298,49 @@ const SEQ: [string, (a: number[]) => number][] = [
 	['앞항÷2', (a) => a[a.length - 1] / 2]
 ];
 
+/**
+ * 격간(자리 홀짝) 읽기 — 항을 한 칸 걸러 두 수열로 갈라 보는 흔한 가설이다.
+ *
+ * 2026-09-07에 스레드 댓글이 rc-chain-maxdigit(27 → 20 → 18 → 10 → ?)에서 이걸 짚었다.
+ * 홀수 자리 27·18, 짝수 자리 20·10인데 **갈래마다 점이 둘뿐**이라 등차로 읽으면 9,
+ * 등비로 읽으면 12다. 둘 다 보인 항을 정확히 통과한다. 공식답은 9였다.
+ *
+ * SEQ 목록으로는 못 잡는다 — 격간 규칙은 대상 자리에서 처음 계산되므로 확인할 앞자리가
+ * 없고, 검사기는 「확인한 자리가 둘 미만이면 세지 않는다」로 걸러 버린다. 그 규칙은
+ * 옳지만(한 점에 맞춘 것은 증거가 아니다) 그래서 **정보 부족 자체가 안 보인다.**
+ * 그래서 따로 본다 — 같은 홀짝의 보인 항으로 등차와 등비가 안 갈리면 그것이 결함이다.
+ *
+ * 다항식 보간과는 다르다. 저건 항 수만큼 자유도를 써서 어떤 수열에도 맞지만, 격간은
+ * 사람이 실제로 세우는 가설이고 자유도가 갈래마다 둘뿐이다.
+ */
+function 격간공격(known: number[], 공식: number): Alt[] {
+	const par = known.length % 2; // 물음표 자리의 홀짝
+	const s = known.filter((_, i) => i % 2 === par);
+	if (s.length < 2) return [];
+	// 보인 항이 전부 0 이상이면 음수 답은 사람이 세우는 가설이 아니다(연산 엔진과 같은 정책)
+	const 음수금지 = known.every((v) => v >= 0);
+	const 쓸까 = (v: number) => Number.isInteger(v) && v !== 공식 && !(음수금지 && v < 0);
+	const [y, x] = [s[s.length - 2], s[s.length - 1]];
+	const 맞나 = (pred: (i: number) => number) =>
+		s.every((v, i) => i < 2 || Math.abs(pred(i) - v) < 1e-9);
+	const out: Alt[] = [];
+	// 등차 — 같은 홀짝 항이 전부 공차를 지키는가
+	const d = x - y;
+	if (맞나((i) => s[0] + d * i)) {
+		const v = x + d;
+		if (쓸까(v)) out.push({ 답: v, 규칙: `격간 등차(공차 ${d})` });
+	}
+	// 등비
+	if (y !== 0) {
+		const r = x / y;
+		if (맞나((i) => s[0] * r ** i)) {
+			const v = x * r;
+			if (쓸까(v)) out.push({ 답: v, 규칙: `격간 등비(공비 ${x}/${y})` });
+		}
+	}
+	return out;
+}
+
 function parseSeq(txt: string): number[] | null {
 	for (const line of txt.split('\n')) {
 		const toks = line
@@ -361,6 +404,16 @@ export function attackSeqs(): Report {
 			}
 			if (Number.isFinite(v)) fit.push({ name, v });
 		}
+		// 격간은 의도한 규칙을 몰라도 판정된다 — 라이브러리에 그 규칙이 없어서
+		// 「못 찾음」으로 빠져나가는 문제(rc-chain-maxdigit이 그랬다)도 잡아야 한다.
+		// 지문이 「앞의 수로 다음 수」라고 못 박았으면 격간 읽기는 성립하지 않는다.
+		// 자리의 홀짝이 아니라 바로 앞 항만 보라는 뜻이기 때문이다.
+		const 단계고정 = /앞의 수|앞 수/.test(textOf(p));
+		const 격 = 단계고정 ? [] : 격간공격(known, 공식);
+		if (격.length) {
+			적발.push({ id: p.id, 종류: '격간', 공식답: 공식, 대안: 격 });
+			continue;
+		}
 		if (!fit.length) {
 			판단불가.push({ id: p.id, 이유: `맞는 규칙을 못 찾음(공식답 ${공식})` });
 			continue;
@@ -379,7 +432,9 @@ export function attackSeqs(): Report {
 				대안.push({ 답: r.v, 규칙: r.name });
 			}
 			적발.push({ id: p.id, 종류: '갈림', 공식답: 공식, 대안 });
-		} else 통과.push(p.id);
+			continue;
+		}
+		통과.push(p.id);
 	}
 	return { 적발, 통과, 판단불가, 검사수: targets.length };
 }

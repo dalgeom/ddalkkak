@@ -23,6 +23,16 @@ function 찍기(제목, r, 덧말 = '') {
 			console.log('');
 		}
 	}
+	const 격간 = r.적발.filter((f) => f.종류 === '격간');
+	if (격간.length) {
+		console.log(`████ 격간(홀짝)으로 읽으면 갈린다 — ${격간.length}건
+`);
+		for (const f of 격간) {
+			console.log(`  ✗ ${f.id}   공식답 ${f.공식답}`);
+			for (const a of f.대안) console.log(`       ${String(a.답).padEnd(8)} ← ${a.규칙}`);
+			console.log('');
+		}
+	}
 	if (자명.length) {
 		console.log(`████ 자명한 연산이다 — ${자명.length}건\n`);
 		for (const f of 자명)
