@@ -323,6 +323,24 @@ function 격간공격(known: number[], 공식: number): Alt[] {
 	const [y, x] = [s[s.length - 2], s[s.length - 1]];
 	const 맞나 = (pred: (i: number) => number) =>
 		s.every((v, i) => i < 2 || Math.abs(pred(i) - v) < 1e-9);
+	/**
+	 * 반대쪽 갈래도 규칙처럼 보여야 한다.
+	 *
+	 * 사람이 「자리 홀짝으로 가른다」를 세우려면 **양쪽이 다** 등차나 등비여야 한다.
+	 * 한쪽만 보면 거짓 적발이 난다 — nm-square-reverse(1 4 9 61 52 ?)의 반대쪽은
+	 * 1·9·52라 등차도 등비도 아니고, 그걸 본 사람은 이 가설을 버린다.
+	 */
+	const 반대 = known.filter((_, i) => i % 2 !== par);
+	const 진행인가 = (t: number[]) => {
+		if (t.length < 2) return false;
+		if (t.length === 2) return true; // 두 점은 뭐든 통과시킨다 — 그래서 위험한 것이다
+		const d = t[1] - t[0];
+		if (t.every((v, i) => Math.abs(t[0] + d * i - v) < 1e-9)) return true;
+		if (t[0] === 0) return false;
+		const r = t[1] / t[0];
+		return t.every((v, i) => Math.abs(t[0] * r ** i - v) < 1e-9);
+	};
+	if (!진행인가(반대)) return [];
 	const out: Alt[] = [];
 	// 등차 — 같은 홀짝 항이 전부 공차를 지키는가
 	const d = x - y;
