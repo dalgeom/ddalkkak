@@ -43,15 +43,15 @@ const C = {
    성냥개비 쪽에서 문제만 갈고 자막은 앞 문제 것을 그대로 둔 영상이 한 번 나갔다
    (2026-08-24). 같은 실수를 여기서 되풀이하지 않는다. */
 const 문제 = {
-	id: 'squares-between',
-	chip: '이상한 연산',
-	제목: '차이가 아닙니다',
-	줄: ['50 ★ 65 = 1', '5 ★ 26 = 3', '26 ★ 50 = 2'],
-	물음좌: '10 ★ 50 =',
-	답: '4',
-	규칙: '두 수 <b>사이에 있는 제곱수의 개수</b>입니다.<br>50과 65 사이엔 64 하나 — 10과 50 사이엔 16·25·36·49 넷이라 <b>4</b>.',
+	id: 'num-keypad-flip',
+	chip: '숫자의 정체',
+	제목: '수식이 아닙니다',
+	줄: ['1 → 7', '5 → 5', '8 → 2'],
+	물음좌: '9 →',
+	답: '3',
+	규칙: '<b>전화기는 123이 위, 계산기는 789가 위</b>입니다.<br>줄 배열이 상하로 뒤집혀 1↔7, 2↔8, 3↔9 — 가운데 4·5·6은 제자리. 9의 자리엔 <b>3</b>.',
 	/** 파일 이름에 쓸 짧은 말 */
-	슬러그: '제곱수사이'
+	슬러그: '전화기계산기'
 };
 const OUT = `promo/video/쇼츠-발견형-${문제.슬러그}.mp4`;
 
@@ -113,7 +113,10 @@ ${문제.줄.map((_, i) => `.row.r${i}{animation-delay:${T.rows[i]}s}`).join('')
 @keyframes markOut{from{opacity:1;transform:none}to{opacity:0;transform:scale(.3) rotate(-24deg)}}
 .ans{position:absolute;opacity:0;animation:ansIn .55s ${T.reveal + 0.16}s cubic-bezier(.2,1.7,.4,1)}
 @keyframes ansIn{from{opacity:0;transform:scale(2.1) translateY(-16px)}to{opacity:1;transform:none}}
-.qwrap{position:relative;display:flex;align-items:center;justify-content:center;min-width:150px}
+/* 답 슬롯 폭은 답 길이에서 뽑는다. 150px 고정이던 시절엔 한 글자 답에서
+   물음표 줄의 간격이 예시 줄의 여섯 배가 되어 혼자 왼쪽으로 밀려 보였다(9/8). */
+.qwrap{position:relative;display:flex;align-items:center;justify-content:center;
+  min-width:${Math.max(64, String(문제.답).length * 42)}px}
 
 /* 정답 순간 카드가 한 번 숨을 쉰다 */
 .card{animation:cardIn .55s cubic-bezier(.2,1.3,.4,1),breathe .5s ${T.reveal}s ease-out}

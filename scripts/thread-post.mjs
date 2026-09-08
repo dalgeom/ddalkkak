@@ -95,14 +95,17 @@ function 문제(id) {
  * 규칙 찾기를 앞에 세운다 — 사이트 정체성이고, 첫 줄에서 세운 가설이 다음 줄에서
  * 무너지는 구조가 댓글을 부른다.
  */
-const 좋은칩 = ['수열', '사슬', '규칙', '한글', '연산', '변환', '암호', '다의어'];
+// 부분 일치다 — '연산'은 은행에 없는 이름이고 실제로는 '이상한 연산'이다.
+// 정확 일치로 두었더니 20개짜리 최대 후보군이 통째로 걸러져 후보가 15개뿐이었다(9/8).
+const 좋은칩 = ['연산', '수열', '사슬', '규칙', '한글', '수의 성질', '숫자의 정체',
+	'수 뒤집기', '숨은 표기법', '자판', '초성', '단어 겹침', '함정', '다의어'];
 
 function 후보(쓴id) {
 	const out = [];
 	for (const { id, body } of 문제블록()) {
 		if (쓴id.has(id)) continue;
 		const chip = body.match(/chip: '([^']+)'/)?.[1] ?? '';
-		if (!좋은칩.includes(chip)) continue;
+		if (!좋은칩.some((k) => chip.includes(k))) continue;
 		const kinds = new Set([...body.matchAll(/kind: '(\w+)'/g)].map((m) => m[1]));
 		for (const k of kinds) if (k !== 'text' && k !== 'pre') { kinds.add('X'); break; }
 		if (kinds.has('X')) continue; // 그림이 필요한 문제
@@ -112,7 +115,8 @@ function 후보(쓴id) {
 		out.push(p);
 	}
 	// 칩 순서대로 모아 보여준다
-	return out.sort((a, b) => 좋은칩.indexOf(a.chip) - 좋은칩.indexOf(b.chip));
+	const 순위 = (c) => { const i = 좋은칩.findIndex((k) => c.includes(k)); return i < 0 ? 99 : i; };
+	return out.sort((a, b) => 순위(a.chip) - 순위(b.chip));
 }
 
 /* ═══════════ 찍는다 ═══════════ */
@@ -183,14 +187,14 @@ console.log('  · 오늘 문제는 어디서 막히는지 한 줄만. 내용을 
 console.log('  · 본문에 핸들을 태그하지 않는다. 개인 반응은 각 댓글의 답글로.');
 console.log('  · 답글에 정답을 쓰지 않고 판정도 하지 않는다. 공개는 본문에서만.');
 console.log('  · 금요일 문제 정답은 월요일 공개(주말 미게시).');
+console.log('  · 댓글 얘기는 본문에 쓰지 않는다 — 그 댓글의 답글로 단다.');
+console.log('    예외: 문제에 결함이 있었으면 정답 공개에서 밝힌다(답이 갈렸다는 사실 자체라서).');
 console.log('');
 console.log('  골격:');
 console.log('    [지난] 문제 정답입니다.');
 console.log('');
 console.log('    답은 「○○」 — 한 줄 해설.');
 console.log('    왜 그렇게 되는지 한두 줄.');
-console.log('');
-console.log('    [댓글 반응 한 줄 — 핸들 없이 수만]');
 console.log('');
 console.log('    오늘 건 ○○입니다.');
 console.log('    어디서 막히는지 한 줄.');
