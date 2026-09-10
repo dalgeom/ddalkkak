@@ -35,11 +35,8 @@ const KEEP_DIR = new Set(['images']);
 const 대상폴더 = ['social', 'video', 'naver', 'images', 'youtube'];
 
 const 기록 = readFileSync('promo/게시-기록.md', 'utf-8');
-/** 블로그 원고들도 이미지 경로를 적어 둔다 — 원고가 있으면 그 글은 쓴 것이다 */
-const 원고 = readdirSync('promo')
-	.filter((f) => f.endsWith('.md'))
-	.map((f) => readFileSync(join('promo', f), 'utf-8'))
-	.join('\n');
+/** 게시 기록의 네이버 블로그 표만 잘라 둔다 — 날짜를 기록 전체에서 찾으면 스레드 행에 걸린다 */
+const 블로그섹션 = 기록.split('## 네이버 블로그')[1]?.split(String.fromCharCode(10) + '## ')[0] ?? '';
 
 /** 미추적 파일은 지우면 못 되살린다 — 목록에 표시하려고 미리 뽑아 둔다 */
 const 미추적 = new Set(
@@ -56,16 +53,28 @@ const 미추적 = new Set(
  *   naver   원고가 `promo/naver/함정-*.png` 처럼 접두어로 참조한다
  */
 function 올렸나(dir, name) {
-	if (dir === 'video') return 기록.includes(name);
+	if (dir === 'video') {
+		const 줄 = 기록.split(String.fromCharCode(10)).find((l) => l.includes(name));
+		if (!줄) return false;
+		// 목적지가 하나가 아니다. 유튜브에 올렸어도 네이버 클립이 남아 있으면 파일이 필요하다 —
+		// 9/8에 유튜브 업로드만 보고 지웠다가 9/9에 클립을 하려니 파일이 없어 재렌더했다.
+		// 기록 행에 「대기」가 적혀 있으면 아직 갈 곳이 남은 것이다.
+		return !줄.includes('대기');
+	}
 	if (dir === 'social') {
 		const d = name.match(/(20\d\d-\d\d-\d\d)/)?.[1];
 		return !!d && 기록.includes(d);
 	}
 	if (dir === 'naver') {
-		// 원고마다 적는 방식이 다르다 — `promo/naver/함정-*.png`(8/26)로도 적고
-		// `성냥-숫자표.png`처럼 파일명만 적기도 한다(8/07). 둘 다 본다.
+		// 블로그 원고 .md는 더 이상 만들지 않는다(2026-09-09 결정 — 원고는 세션에서 직접 준다).
+		// 그래서 판정 근거를 **게시 기록 하나로** 옮겼다: 네이버 블로그 표에 그 이미지의
+		// 이름이나 접두어가 적혀 있어야 지운다.
+		//
+		// **올릴 때 기록 행에 이미지 이름을 함께 적어라.** 안 적으면 영영 안 지워진다 —
+		// 8/07 「성냥개비 푸는 법」 행이 그래서 이미지 참조가 없다.
+		// 날짜를 기록 전체에서 찾으면 안 된다(같은 날 스레드 행에 걸린다). 그래서 표만 자른다.
 		const 접두 = name.split('-')[0];
-		return 원고.includes(name) || 원고.includes(`promo/naver/${접두}-`) || 기록.includes(`promo/naver/${접두}-`);
+		return 블로그섹션.includes(name) || 블로그섹션.includes(`promo/naver/${접두}-`);
 	}
 	return false;
 }

@@ -169,10 +169,32 @@ if (오늘카드) {
 
 const 쓴 = new Set(Object.values(카드).map((c) => c.id));
 const 후보들 = 후보(쓴);
+
+/**
+ * 이미 쓴 카드를 chip별로 먼저 보여준다.
+ *
+ * 왜: 이 스크립트는 **id로만** 중복을 본다. 2026-09-09에 diamond-op(곱한 뒤 뒤집기)를
+ * 골랐는데, 8/12에 num-mult-flip으로 **똑같은 메커니즘**이 이미 나갔었다. id가 달라서
+ * 후보에 남았고, num-mult-flip은 그 뒤 은행에서 교체돼 흔적조차 없었다. 사용자가 잡았다.
+ * 「중복은 소재가 아니라 메커니즘으로 본다」(CLAUDE.md)를 기계가 못 하니, 같은 chip에
+ * 뭘 썼는지를 눈앞에 놓아 사람이 판단하게 한다.
+ */
+const 쓴카드 = 카드들();
+const chip별 = new Map();
+for (const [날짜, v] of Object.entries(쓴카드)) {
+	if (!chip별.has(v.chip)) chip별.set(v.chip, []);
+	chip별.get(v.chip).push(`${날짜.slice(5)} ${v.id}`);
+}
+console.log('');
+console.log('■ 이미 쓴 카드 — **같은 chip에 뭘 썼는지 먼저 본다(메커니즘 중복 방지)**');
+for (const [chip, list] of [...chip별].sort((a, b) => b[1].length - a[1].length)) {
+	console.log(`  [${chip}] ${list.sort().reverse().join(' · ')}`);
+}
 console.log('');
 console.log(`■ 아직 안 쓴 후보 ${후보들.length}개${많이 ? '' : ' (앞 6개만 — 전체는 --후보)'}`);
 for (const p of 후보들.slice(0, 많이 ? 99 : 6)) {
-	console.log(`  [${p.chip}] ${p.id}  답 ${p.답}`);
+	const 겹침 = chip별.get(p.chip);
+	console.log(`  [${p.chip}] ${p.id}  답 ${p.답}${겹침 ? `   ⚠ 같은 chip을 ${겹침.length}번 썼다 — 메커니즘이 겹치는지 봐라` : ''}`);
 	for (const l of p.줄) console.log(`      ${l}`);
 }
 
