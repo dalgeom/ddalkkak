@@ -66,6 +66,22 @@ def rep(dims, mets, limit=50, flt=KR):
     ).rows
 
 
+def rep7(dims, mets, limit=50, flt=KR):
+    """DAY 직전 7일. 하루 25명 규모에서 일간 비교는 노이즈라 기준선이 필요하다."""
+    a = (DAY - datetime.timedelta(days=7)).isoformat()
+    b = (DAY - datetime.timedelta(days=1)).isoformat()
+    return client.run_report(
+        RunReportRequest(
+            property=PROPERTY,
+            date_ranges=[DateRange(start_date=a, end_date=b)],
+            dimensions=[Dimension(name=d) for d in dims],
+            metrics=[Metric(name=m) for m in mets],
+            dimension_filter=flt,
+            limit=limit,
+        )
+    ).rows
+
+
 def num(rows, i=0):
     return int(float(rows[0].metric_values[i].value)) if rows else 0
 
@@ -80,6 +96,24 @@ mmss = f"{eng // users // 60}:{eng // users % 60:02d}" if users else "0:00"
 print(f"\n{'=' * 52}")
 print(f"  {DAY.month}월 {DAY.day}일 ({WD}) 하루")
 print(f"{'=' * 52}")
+# ── 아직 못 믿는 숫자 ──
+# 같은 지표를 이틀에 세 번 잘못 읽었다(2026-09-08·09·10). GA4는 참여세션·이탈률을
+# 늦게 채우고 총계도 며칠 뒤 늘린다. 문서에 적어 둬도 또 읽으니 여기서 찍는다.
+성숙 = rep([], ["sessions", "engagedSessions"])
+세션수, 참여수 = num(성숙, 0), num(성숙, 1)
+참여율 = 참여수 / 세션수 * 100 if 세션수 else 0
+못믿을것 = []
+if 세션수 and 참여율 < 20:
+    못믿을것.append(f"참여세션·이탈률·체류 (참여 {참여율:.0f}% — 여문 날은 70~90%다)")
+if BACK <= 2:
+    못믿을것.append("총계(방문자·세션·PV) — 며칠 뒤 늘어난다")
+if 못믿을것:
+    print("\n[아직 못 믿는 숫자]")
+    for x in 못믿을것:
+        print(f"        · {x}")
+    print("        GA4가 나중에 채운다. 사나흘 뒤에 다시 재라.")
+    print("        실측(9/08을 다음 날 vs 이틀 뒤): 참여 4% → 76% · 세션 27 → 29 · 재방문 7명 → 4명")
+
 # 무엇을 걸렀는지 반드시 보여 준다 — 조용히 빼면 같은 착각을 또 한다
 밖 = rep([], ["activeUsers", "sessions", "engagementRate", "userEngagementDuration"], flt=NOT_KR)
 if 밖 and num(밖, 0):
@@ -91,6 +125,25 @@ if 밖 and num(밖, 0):
 
 print(f"\n[사람]  방문자 {users}명 — 처음 온 사람 {new}, 다시 온 사람 {back}")
 print(f"        세션 {sess} · 페이지뷰 {pv} · 1인 평균 체류 {mmss}")
+
+# 하루 25명 규모에서 「어제보다 늘었다」는 동전 던지기 해설이다. 2026-09-10에 재방문
+# 42%를 「지금까지 최고」라고 했다가 5분 만에 뒤집었다 — 13일 시리즈가 0~42%를 튄다.
+# 그래서 어제 숫자 바로 밑에 기준선을 놓는다. 이 줄 안에 들면 아무 일도 안 일어난 것이다.
+# **date 차원 없이 기간으로 부르면 안 된다.** GA4가 사람을 기간 단위로 중복 제거해서
+# 1일에 처음 와서 3일에 또 온 사람이 「신규」로 잡힌다 — 재방문율이 22%가 아니라 10%로
+# 나온다(9/10에 이 줄을 처음 찍고 바로 발견했다). 일별로 뽑아 더해야 어제 숫자와 같은 자다.
+기 = rep7(["date"], ["activeUsers", "newUsers", "sessions"], limit=10)
+if 기:
+    기명 = sum(int(float(r.metric_values[0].value)) for r in 기)
+    기신규 = sum(int(float(r.metric_values[1].value)) for r in 기)
+    기세션 = sum(int(float(r.metric_values[2].value)) for r in 기)
+    기재방문 = (기명 - 기신규) / 기명 * 100 if 기명 else 0
+    지재방문 = back / users * 100 if users else 0
+    print(
+        f"        재방문율 {지재방문:.0f}% (n={users})"
+        f"   ← 앞 7일 {기재방문:.0f}% (n={기명}) · 세션 하루 평균 {기세션 / 7:.1f}"
+    )
+    print("        표본이 이만하면 일간 차이는 대개 노이즈다. 이 줄과 크게 어긋날 때만 파고들어라.")
 
 # ── 유입 ──
 print("\n[어디서 왔나]")
