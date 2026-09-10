@@ -22,6 +22,11 @@ jobs:
           node-version: 20
           cache: npm
       - run: npm ci
+      # 기준선을 명시한다. main에 직접 푸시하는 프로젝트라 origin/main은 곧 방금 푸시한
+      # 커밋이고, 그러면 새 코드를 새 코드와 비교해 가드가 빈손으로 통과한다(9/10 확인).
+      # PR에서는 안 넘긴다 — 거기서는 origin/main이 맞는 기준선이다.
       - run: npm test
+        env:
+          BASELINE_REF: ${{ github.event_name == 'push' && github.event.before || '' }}
       # 빌드까지 통과해야 머지 가능 — 배포 실패를 PR 단계에서 잡는다
       - run: npm run build

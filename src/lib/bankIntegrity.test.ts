@@ -4,6 +4,7 @@ import { PROBLEMS } from './problems';
 import { TRIVIA } from './trivia';
 import { BANK_HISTORY_ALL, BANK_HISTORY_LAST, bankSizesAt } from './bankHistory';
 import { kstDayNumber } from './game';
+import { baselineRef } from './baselineRef';
 
 /**
  * 문제를 더하고 갈 때 사람이 손으로 지켜야 했던 규칙들을 기계가 지킨다.
@@ -31,10 +32,12 @@ describe('은행 무결성 — 사람 규율을 기계로', () => {
 	 * 작업본이 오늘 쓰는 크기가 같으면 낮에 세트가 바뀔 일이 없다. 미래 엔트리를 아무리
 	 * 더해도 통과하고, 오늘 자리를 건드리면 날짜를 어떻게 적었든 걸린다.
 	 */
-	it('오늘 쓰는 은행 크기가 origin/main과 같다 — 낮에 세트가 바뀌지 않는다', () => {
+	it('오늘 쓰는 은행 크기가 기준선과 같다 — 낮에 세트가 바뀌지 않는다', () => {
+		const ref = baselineRef();
+		if (!ref) return; // 비교할 이전 상태가 없다(새 브랜치 첫 푸시)
 		let raw: string;
 		try {
-			raw = execSync('git show origin/main:src/lib/bankHistory.ts', {
+			raw = execSync(`git show ${ref}:src/lib/bankHistory.ts`, {
 				encoding: 'utf-8',
 				stdio: ['ignore', 'pipe', 'ignore']
 			});

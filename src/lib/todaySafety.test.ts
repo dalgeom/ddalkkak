@@ -6,6 +6,7 @@ import { PROBLEMS, fieldOfChip } from './problems';
 import { TRIVIA } from './trivia';
 import { buildDailySetStable, MATCH_TOTAL, kstDayNumber } from './game';
 import { bankSizesAt } from './bankHistory';
+import { baselineRef } from './baselineRef';
 
 /**
  * 오늘 출제 중인 자리의 내용을 낮에 바꾸면, 아침에 풀던 사람의 문제가 오후에 달라진다.
@@ -32,11 +33,13 @@ function splitBlocks(src: string, marker: string): string[] {
 	return parts;
 }
 
-/** origin/main 시점의 원문. 없으면 null(검증 불가), 파싱이 깨지면 예외(테스트 실패) */
+/** 기준선 시점의 원문. 없으면 null(검증 불가), 파싱이 깨지면 예외(테스트 실패) */
 function baseline(file: string, marker: string): string[] | null {
+	const ref = baselineRef();
+	if (!ref) return null;
 	let raw: string;
 	try {
-		raw = execSync(`git show origin/main:src/lib/${file}`, {
+		raw = execSync(`git show ${ref}:src/lib/${file}`, {
 			encoding: 'utf-8',
 			stdio: ['ignore', 'pipe', 'ignore'],
 			maxBuffer: 32 * 1024 * 1024
