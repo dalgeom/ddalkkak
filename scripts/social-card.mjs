@@ -44,6 +44,14 @@ const C = {
  *   id     src/lib/problems.ts의 문제 id — 나중에 대조할 수 있게 남긴다
  */
 const CARDS = {
+	// 어제 dalma_shian이 num-coin-count를 로마 숫자로 읽어 답이 갈렸다(9/10 본문에서 공개).
+	// 오늘은 진짜 로마 숫자 문제다 — 우연이지만 결이 이어진다.
+	'2026-09-11': {
+		id: 'num-roman-strokes',
+		chip: '숫자의 정체',
+		물음: '물음표에 들어갈 수는?',
+		줄: ['II = 2', 'VI = 3', 'IX = 3', 'XX = ?']
+	},
 	'2026-09-10': {
 		id: 'square-diff',
 		chip: '이상한 연산',
