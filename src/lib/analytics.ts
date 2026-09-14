@@ -32,7 +32,12 @@ export function track(name: string, params?: Params): void {
  * 차원인 pagePath로 교차하면 된다.
  */
 export function ctaTrack(node: HTMLElement, slot: 'band' | 'foot' | 'share') {
-	const onClick = () => track(`cta_${slot}_click`);
+	const onClick = () => {
+		track(`cta_${slot}_click`);
+		// 띠·하단 버튼은 데일리로 가는 버튼이다(공유 영역은 아니다). 홈이 뜨면 곧장 시작하도록
+		// 표시를 남긴다 — +page.svelte의 onMount가 takeGoDaily()로 읽고 지운다.
+		if (slot !== 'share') markGoDaily();
+	};
 	node.addEventListener('click', onClick);
 
 	/** 콜백을 믿지 않고 좌표로 다시 본다 — 절반 이상이 화면 안에 들어와 있는가 */
@@ -72,4 +77,51 @@ export function ctaTrack(node: HTMLElement, slot: 'band' | 'foot' | 'share') {
 			node.removeEventListener('click', onClick);
 		}
 	};
+}
+
+/**
+ * 콘텐츠 페이지의 데일리 버튼에서 온 사람은 홈 소개를 건너뛰고 곧장 시작한다.
+ *
+ * 왜: 9/07~9/12에 검색으로 콘텐츠 페이지에 떨어진 사람 중 띠·하단 버튼을 누른 25명의
+ * **64%(16명)가 홈에 와서 시작 버튼을 또 누르지 않고 나갔다.** 「오늘 문제 풀기 →」를
+ * 눌렀는데 소개 화면이 뜨니 한 번 더 찾아 눌러야 했다. 같은 기간 홈으로 곧장 온 사람은
+ * 대부분 시작했다.
+ *
+ * 왜 URL 파라미터(`/?go=daily`)가 아니라 세션 저장소인가: 파라미터는 새로고침·뒤로가기마다
+ * 다시 시작시키고, 지우려면 SvelteKit 라우터와 history를 건드려야 한다. 누른 순간 표시를
+ * 남기고 홈이 한 번 읽고 지우면 그 문제가 없고, 링크 8곳을 고칠 필요도 없다.
+ *
+ * 1분이 지난 표시는 버린다 — 버튼을 새 탭으로 열어 두고 원래 탭에서 나중에 홈으로 가는
+ * 사람이 뜬금없이 시작되지 않게.
+ */
+type 저장소 = Pick<Storage, 'getItem' | 'setItem' | 'removeItem'> | null;
+const GO_KEY = 'ddal.go';
+const GO_MAX_AGE_MS = 60_000;
+
+function 세션저장소(): 저장소 {
+	try {
+		return typeof sessionStorage === 'undefined' ? null : sessionStorage;
+	} catch {
+		return null;
+	}
+}
+
+export function markGoDaily(now = Date.now(), s: 저장소 = 세션저장소()): void {
+	try {
+		s?.setItem(GO_KEY, String(now));
+	} catch {
+		/* 저장소가 막혀 있으면 평소처럼 홈에서 버튼을 누르게 둔다 */
+	}
+}
+
+export function takeGoDaily(now = Date.now(), s: 저장소 = 세션저장소()): boolean {
+	try {
+		const v = s?.getItem(GO_KEY);
+		s?.removeItem(GO_KEY);
+		if (!v) return false;
+		const 지남 = now - Number(v);
+		return 지남 >= 0 && 지남 < GO_MAX_AGE_MS;
+	} catch {
+		return false;
+	}
 }

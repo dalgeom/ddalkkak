@@ -29,7 +29,7 @@
 		type DailyKind
 	} from '$lib/game';
 	import { shareResult, outcomeMessage } from '$lib/shareCard';
-	import { ctaTrack } from '$lib/analytics';
+	import { ctaTrack, takeGoDaily } from '$lib/analytics';
 	import { weekOf, readDayRecord } from '$lib/record';
 	import { bankSizesAt } from '$lib/bankHistory';
 	import { logoClicks } from '$lib/nav';
@@ -837,6 +837,15 @@
 
 		// 알림을 권할 자리인지 — 권한 상태와 아이폰 홈 화면 여부를 여기서야 볼 수 있다
 		offerPush = shouldOfferPush(dayNum);
+
+		// 콘텐츠 페이지의 데일리 버튼(띠·하단)에서 왔으면 소개를 건너뛰고 곧장 시작한다.
+		// 누른 25명 중 16명이 여기서 시작 버튼을 또 안 누르고 나갔다(9/07~12, analytics.ts 주석).
+		// 완주한 날은 위에서 이미 결과 화면이라 건드리지 않고, 이어풀기·새로 시작은
+		// startOrResume이 갈라 준다. cta_go는 「버튼에서 와서 곧장 넘어갔다」의 분모다.
+		if (takeGoDaily()) {
+			track('cta_go', { done: savedProgress.done ? 1 : 0 });
+			if (!savedProgress.done) startOrResume();
+		}
 
 		/* 탭을 떠나면 타이머를 멈춘다. 이게 없으면 앱을 닫아둔 시간까지 다 세어져
 		   '오늘 11시간 걸림' 같은 기록이 남는다. pagehide는 모바일에서 탭이
