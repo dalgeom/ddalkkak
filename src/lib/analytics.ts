@@ -80,6 +80,31 @@ export function ctaTrack(node: HTMLElement, slot: 'band' | 'foot' | 'share' | 't
 }
 
 /**
+ * 데일리를 푸는 도중 화면을 떠난 자리 — `leave_p3_tried`처럼 몇 번째 문제에서, 무엇을 하던 중이었는지.
+ *
+ * 왜: 9/14에 문제별 제출 기록(KV)으로 8/19~9/13을 복원했더니 시작 143명 → 완주 74명이고
+ * 이탈의 53%가 2번 문제에 닿기 전이었다. 그런데 KV는 「냈다 → 다음을 안 냈다」만 보여서
+ * 결과를 보고 나간 건지, 다음 문제에서 막혀 나간 건지를 못 갈랐다. 그 둘은 처방이 다르다.
+ *
+ *   open   아무것도 안 해 보고 떠남 — 문제를 보자마자 나감
+ *   tried  오답·힌트·입력은 했는데 못 풀고 떠남 — 막힘
+ *   after  답을 내고 결과를 본 뒤 다음으로 안 넘어감
+ *
+ * 앱을 잠깐 바꿨다 오는 사람도 화면이 가려지는 순간 leave가 찍힌다(모바일은 탭이 버려질 때
+ * pagehide가 안 오기도 해서, 가려지는 순간이 유일하게 믿을 신호다). 돌아오면 같은 꼴의
+ * back_p3_tried를 찍는다 — 자리별 순수 이탈은 leave − back이다.
+ * 이름으로 가르는 이유는 ctaTrack 주석과 같다(파라미터는 GA 등록 전엔 안 보인다).
+ */
+export function leaveEventName(
+	prefix: 'leave' | 'back',
+	pos: number,
+	s: { judged: boolean; tried: boolean }
+): string {
+	const p = Math.min(10, Math.max(1, Math.floor(pos) + 1));
+	return `${prefix}_p${p}_${s.judged ? 'after' : s.tried ? 'tried' : 'open'}`;
+}
+
+/**
  * 콘텐츠 페이지의 데일리 버튼에서 온 사람은 홈 소개를 건너뛰고 곧장 시작한다.
  *
  * 왜: 9/07~9/12에 검색으로 콘텐츠 페이지에 떨어진 사람 중 띠·하단 버튼을 누른 25명의

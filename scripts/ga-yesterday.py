@@ -233,7 +233,7 @@ INAPP = [
     ("inapp_skip", "그냥 인앱에서 계속"),
 ]
 ev = defaultdict(lambda: (0, 0))
-for r in rep(["eventName"], ["eventCount", "activeUsers"], limit=80):
+for r in rep(["eventName"], ["eventCount", "activeUsers"], limit=250):
     ev[r.dimension_values[0].value] = (int(r.metric_values[0].value), int(r.metric_values[1].value))
 
 
@@ -269,6 +269,23 @@ if press >= start and start:
 elif press:
     print(f"        (버튼 누름 {press} — 계측이 하루를 다 못 덮은 날이라 비율은 내지 않는다)")
 print(f"                  →  완주 {comp} ({comp / start * 100:.0f}% of 시작)" if start else "                  →  완주 0")
+
+# ── 어디서 떠났나 ──
+# 9/14부터 푸는 도중 화면을 떠나는 순간 자리와 상태를 이름으로 찍는다(analytics.ts leaveEventName).
+#   처음봄  아무것도 안 해 보고 떠남 · 막힘  오답·힌트·입력은 했는데 못 풀고 떠남 · 결과뒤  답을 내고 결과를 본 뒤
+# 앱을 잠깐 바꿨다 오면 leave와 같은 꼴의 back이 함께 찍힌다 — 칸마다 떠난 수에서 돌아온 수를 뺀다.
+# 8/19~9/13 KV 복원에서는 이탈의 53%가 2번 문제에 닿기 전이었다(지표-기록.md 9/14).
+if any(k.startswith("leave_p") for k in ev):
+    print("\n[어디서 떠났나]  명 기준 · 떠남−돌아옴")
+    print("        번호    처음봄   막힘   결과뒤")
+    for p in range(1, 11):
+        칸 = []
+        for s in ("open", "tried", "after"):
+            칸.append(ev[f"leave_p{p}_{s}"][1] - ev[f"back_p{p}_{s}"][1])
+        if any(ev[f"leave_p{p}_{s}"][0] for s in ("open", "tried", "after")):
+            print(f"        {p:>2}번   {칸[0]:>6} {칸[1]:>6} {칸[2]:>7}")
+    돌아옴 = sum(ev[k][0] for k in ev if k.startswith("back_p"))
+    print(f"        (잠깐 나갔다 돌아온 {돌아옴}회는 뺐다)")
 
 # 10문제를 /api/day로 받았는지, 실패해서 문제은행 전체(gz 174KB)로 떨어졌는지.
 # 9/3에 앞의 길을 냈다 — full이 계속 잡히면 엔드포인트가 어딘가에서 막히는 것이다.

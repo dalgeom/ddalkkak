@@ -29,7 +29,7 @@
 		type DailyKind
 	} from '$lib/game';
 	import { shareResult, outcomeMessage } from '$lib/shareCard';
-	import { ctaTrack, takeGoDaily } from '$lib/analytics';
+	import { ctaTrack, takeGoDaily, leaveEventName } from '$lib/analytics';
 	import { parseChallenge, judgeChallenge, type Challenge } from '$lib/challenge';
 	import { teaserOf, type Teaser } from '$lib/teaser';
 	import { weekOf, readDayRecord } from '$lib/record';
@@ -338,6 +338,7 @@
 				resetProblem();
 				startTimer();
 				track(saved.marks.length ? 'daily_resume' : 'daily_start', { at: saved.marks.length });
+				markBack();
 			}
 		} catch {
 			// 문제은행 동적 로드 실패(오프라인 등) — 빈 화면 대신 홈에 남기고 안내한다
@@ -614,7 +615,31 @@
 		}
 	}
 
+	/* ───────── 이탈 지점 (analytics.ts leaveEventName) ─────────
+	 * 푸는 도중 화면이 가려지거나 떠나는 순간 자리와 상태를 찍고, 돌아오면 같은 꼴의 back을 찍는다.
+	 * leftAt이 찍어 둔 이름이다 — 가려짐과 pagehide가 연달아 와도 한 번만, 돌아왔을 때만 짝을 맞춘다. */
+	let leftAt: { pos: number; judged: boolean; tried: boolean } | null = null;
+
+	function markLeave() {
+		if (phase !== 'play' || leftAt) return;
+		leftAt = {
+			pos,
+			judged,
+			// 오답·힌트·성냥 옮기다 틀림·입력해 둔 답·집어 든 성냥 — 하나라도 있으면 해 보다 막힌 것이다
+			tried: wrongAttempts > 0 || hintsUsed > 0 || mMisses > 0 || !!answerValue.trim() || !!mPicked
+		};
+		track(leaveEventName('leave', leftAt.pos, leftAt));
+	}
+
+	function markBack() {
+		if (!leftAt) return;
+		track(leaveEventName('back', leftAt.pos, leftAt));
+		leftAt = null;
+	}
+
 	function quit() {
+		// 로고를 눌러 홈으로 나가는 것도 푸는 화면을 떠난 것이다 — 이어 풀면 startOrResume이 back을 찍는다
+		markLeave();
 		flushTimer();
 		persist();
 		phase = 'home';
@@ -889,10 +914,21 @@
 		};
 		const onVis = () => {
 			if (document.visibilityState === 'hidden') pause();
-			else startTimer();
+			else {
+				startTimer();
+				markBack();
+			}
 		};
 		document.addEventListener('visibilitychange', onVis);
 		window.addEventListener('pagehide', pause);
+
+		// 이탈은 캡처 단계에서 가장 먼저 찍는다. gtag도 가려지는 순간 모아 둔 이벤트를 비콘으로
+		// 내보내는데, 그 뒤에 쌓인 이벤트는 페이지가 버려지면 못 나간다.
+		const onLeave = () => {
+			if (document.visibilityState === 'hidden') markLeave();
+		};
+		window.addEventListener('visibilitychange', onLeave, { capture: true });
+		window.addEventListener('pagehide', markLeave, { capture: true });
 
 		const iv = setInterval(() => {
 			if (phase === 'play' && !judged) elapsedMs = Date.now() - startedAt;
@@ -920,9 +956,13 @@
 			countdown = `${h}:${m}:${s}`;
 		}, 1000);
 		return () => {
+			// 푸는 도중 다른 페이지로 옮겨 가면(머리글의 무한 연습·가이드) 여기서 떠난다
+			markLeave();
 			clearInterval(iv);
 			document.removeEventListener('visibilitychange', onVis);
 			window.removeEventListener('pagehide', pause);
+			window.removeEventListener('visibilitychange', onLeave, { capture: true });
+			window.removeEventListener('pagehide', markLeave, { capture: true });
 		};
 	});
 </script>
