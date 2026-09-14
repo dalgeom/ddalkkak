@@ -1,4 +1,5 @@
 import type { Problem } from './problems';
+import { encodeChallenge, type Challenge } from './challenge';
 
 /** 힌트 사용 수(0~3)에 따른 획득 점수 */
 export const HINT_SCORES = [100, 80, 50, 20] as const;
@@ -748,7 +749,13 @@ export function shareGrid(marks: Mark[]): string {
 	return marks.map((m) => MARK_EMOJI[m] ?? '').join('');
 }
 
-/** 공유 문구 전체 — 회차·그리드·점수·시간·링크. 회차가 "같은 문제를 풀었다"는 공통 화폐가 된다. */
+/**
+ * 공유 문구 전체 — 회차·그리드·점수·시간·링크. 회차가 "같은 문제를 풀었다"는 공통 화폐가 된다.
+ *
+ * 링크에는 내 기록을 도전장으로 싣는다(challenge.ts). 예전의 `?ref=daily`는 GA가 읽지 못하는
+ * 파라미터라 공유로 온 사람이 `(direct)`에 섞였다 — `utm_source=share`로 출처를 남긴다.
+ * vs는 내가 받은 도전장이다. 거기에 응한 결과라면 그 사실을 한 줄로 밝혀 되받아 보내게 한다.
+ */
 export function shareMessage(o: {
 	puzzleNo: number;
 	marks: Mark[];
@@ -757,14 +764,19 @@ export function shareMessage(o: {
 	elapsedMs?: number;
 	streak?: number;
 	origin?: string;
+	vs?: Challenge | null;
 }): string {
 	const time = o.elapsedMs && o.elapsedMs > 0 ? ` · ${formatDuration(o.elapsedMs)}` : '';
 	const streak = o.streak && o.streak > 1 ? ` · 🔥${o.streak}일째` : '';
-	return [
-		`딸깍 #${o.puzzleNo} — ${o.correct}/${o.total}${time}${streak}`,
-		shareGrid(o.marks),
-		`${o.origin ?? ''}/?ref=daily`
-	].join('\n');
+	const secs = o.elapsedMs && o.elapsedMs > 0 ? Math.round(o.elapsedMs / 1000) : undefined;
+	const c = encodeChallenge({ no: o.puzzleNo, correct: o.correct, secs });
+	const lines = [`딸깍 #${o.puzzleNo} — ${o.correct}/${o.total}${time}${streak}`, shareGrid(o.marks)];
+	if (o.vs) {
+		const vsTime = o.vs.secs ? ` · ${formatDuration(o.vs.secs * 1000)}` : '';
+		lines.push(`⚔️ 친구 ${o.vs.correct}/${o.total}${vsTime}에 도전`);
+	}
+	lines.push(`${o.origin ?? ''}/?c=${c}&utm_source=share`);
+	return lines.join('\n');
 }
 
 /** elapsedMs는 화면을 보고 있던 시간의 누적치. 이 기능 이전에 푼 날에는 없다(undefined). */

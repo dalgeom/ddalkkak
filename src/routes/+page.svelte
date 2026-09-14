@@ -30,6 +30,7 @@
 	} from '$lib/game';
 	import { shareResult, outcomeMessage } from '$lib/shareCard';
 	import { ctaTrack, takeGoDaily } from '$lib/analytics';
+	import { parseChallenge, judgeChallenge, type Challenge } from '$lib/challenge';
 	import { teaserOf, type Teaser } from '$lib/teaser';
 	import { weekOf, readDayRecord } from '$lib/record';
 	import { bankSizesAt } from '$lib/bankHistory';
@@ -137,6 +138,27 @@
 	let shownHints = $derived(current?.problem?.hints ? current.problem.hints.slice(0, hintsUsed) : []);
 	let correctCount = $derived(marks.filter((m) => m !== 'miss').length);
 	let puzzleNo = $derived(puzzleNumber(dayNum));
+
+	/* ───────── 도전장 (challenge.ts) ─────────
+	 * 공유 링크의 ?c=로 온 사람에게 보낸 사람의 기록을 보여 준다. URL에서만 읽는다 —
+	 * 새로고침해도 링크가 그대로라 다시 읽히고, 저장해 둘 이유가 없다.
+	 * 회차가 오늘과 같을 때만 겨룬다. 지난 회차면 기록만 보여 주고 오늘 문제로 권한다. */
+	let challenge = $state<Challenge | null>(null);
+	let vs = $derived(challenge && challenge.no === puzzleNo ? challenge : null);
+	let vsOutcome = $derived(
+		vs && phase === 'done'
+			? judgeChallenge({ correct: correctCount, secs: sessionMs > 0 ? Math.round(sessionMs / 1000) : undefined }, vs)
+			: null
+	);
+	const VS_LABEL = { win: '이겼어요!', lose: '졌어요', draw: '비겼어요' } as const;
+	let vsTracked = false;
+	$effect(() => {
+		// 결과는 이름으로 나눠 찍는다 — 파라미터는 GA에 등록 전엔 안 보인다(analytics.ts ctaTrack 주석)
+		if (vsOutcome && !vsTracked) {
+			vsTracked = true;
+			track(`challenge_${vsOutcome}`);
+		}
+	});
 
 	const KIND_LABEL: Record<DailyKind, string> = {
 		discover: '발견',
@@ -678,7 +700,8 @@
 			total: DAILY_SIZE,
 			elapsedMs: sessionMs,
 			streak: doneStats.streak,
-			origin: browser ? location.origin : ''
+			origin: browser ? location.origin : '',
+			vs: vsOutcome ? vs : null
 		})
 	);
 
@@ -725,7 +748,8 @@
 				scoreLabel: `${correctCount} / ${DAILY_SIZE}`,
 				emojiRow: gridRow,
 				subLine: sessionMs > 0 ? `${todayLabel} · ${formatDuration(sessionMs)}` : `${todayLabel}의 10문제`,
-				cta: '너도 오늘 문제 풀어볼래?'
+				// 링크에 내 기록이 도전장으로 실린다 — 카드도 겨루자고 말한다
+				cta: vs ? `친구 ${vs.correct}/${DAILY_SIZE}에 도전했어. 너는?` : '같은 10문제, 이 기록 깰 수 있어?'
 			},
 			shareText
 		);
@@ -838,6 +862,14 @@
 		// 알림을 권할 자리인지 — 권한 상태와 아이폰 홈 화면 여부를 여기서야 볼 수 있다
 		offerPush = shouldOfferPush(dayNum);
 
+		challenge = parseChallenge(new URLSearchParams(location.search).get('c'));
+		if (challenge) {
+			// 같은 회차면 겨루고, 지난 회차면 오늘 문제로 권한다 — 둘의 시작률이 다를 것이라 이름을 가른다
+			track(challenge.no === puzzleNumber(dayNum) ? 'challenge_land' : 'challenge_land_old', {
+				done: savedProgress.done ? 1 : 0
+			});
+		}
+
 		// 콘텐츠 페이지의 데일리 버튼(띠·하단)에서 왔으면 소개를 건너뛰고 곧장 시작한다.
 		// 누른 25명 중 16명이 여기서 시작 버튼을 또 안 누르고 나갔다(9/07~12, analytics.ts 주석).
 		// 완주한 날은 위에서 이미 결과 화면이라 건드리지 않고, 이어풀기·새로 시작은
@@ -935,6 +967,21 @@
 			</div>
 		{/if}
 
+		<!-- 도전장: 친구가 몇 점이었는지 알고 시작해야 겨루는 게 된다. 버튼 바로 위에 둔다. -->
+		{#if challenge && !savedProgress.done}
+			<div class="challenge">
+				<p class="ch-h">친구가 보낸 도전장</p>
+				<p class="ch-rec">
+					딸깍 #{challenge.no} · <b>{challenge.correct}/{DAILY_SIZE}</b>{challenge.secs
+						? ` · ${formatDuration(challenge.secs * 1000)}`
+						: ''}
+				</p>
+				{#if !vs}
+					<p class="ch-old">그날 문제는 지났어요. 오늘 문제로 겨뤄 보세요</p>
+				{/if}
+			</div>
+		{/if}
+
 		<button class="cta" onclick={startOrResume} disabled={loading}>
 			{#if loading}
 				불러오는 중…
@@ -943,6 +990,8 @@
 			{:else if resumable}
 				<span class="cta-main">이어서 풀기 <span class="arr" aria-hidden="true">→</span></span>
 				<span class="cta-sub">{savedProgress.pos} / {DAILY_SIZE}문제 진행 중</span>
+			{:else if challenge}
+				도전 받고 10문제 시작 <span class="arr" aria-hidden="true">→</span>
 			{:else}
 				오늘의 10문제 시작하기 <span class="arr" aria-hidden="true">→</span>
 			{/if}
@@ -1358,6 +1407,14 @@
 		{/if}
 	{/if}
 
+	<!-- 받은 도전장의 결과. 한 줄로만 — 아래 알림 카드의 버튼이 접히는 선 위에 서야 한다(그 주석 참고).
+	     되받아 보내는 곳은 공유 칸이고, 거기 문구에도 이 결과가 실린다. -->
+	{#if vs && vsOutcome}
+		<p class="vs-line" class:win={vsOutcome === 'win'}>
+			친구 {vs.correct}/{DAILY_SIZE}{vs.secs ? ` · ${formatDuration(vs.secs * 1000)}` : ''} → <b>{VS_LABEL[vsOutcome]}</b>
+		</p>
+	{/if}
+
 	<div class="rows">
 		{#each resultRows as r (r.label)}
 			<div class="row">
@@ -1439,7 +1496,7 @@
 	     push_offer가 렌더 시점이라 8/26에 「다섯 명에게 떴는데 아무도 못 눌렀다」가
 	     됐던 것과 같은 함정을 피한다. -->
 	<div class="share-box" use:ctaTrack={'share'}>
-		<p class="share-label">결과 공유</p>
+		<p class="share-label">{vsOutcome ? '친구에게 결과 돌려보내기' : '결과 공유 — 내 기록이 도전장으로 가요'}</p>
 		{#if gridRow}
 			<div class="grid-row" aria-label="문제별 결과">{gridRow}</div>
 			<p class="share-hint">이 줄과 링크만 전달돼요 · 정답은 안 담깁니다</p>
@@ -2093,6 +2150,36 @@
 		color: var(--muted);
 		font-weight: 600;
 	}
+	.challenge {
+		margin: 18px auto 0;
+		max-width: 320px;
+		padding: 12px 14px;
+		border: 1px solid var(--border-strong);
+		border-radius: 14px;
+		background: var(--panel-2);
+	}
+	.challenge p {
+		margin: 0;
+	}
+	.ch-h {
+		font-size: 13px;
+		font-weight: 700;
+		color: var(--muted);
+	}
+	.ch-rec {
+		margin-top: 2px !important;
+		font-size: 18px;
+		font-weight: 800;
+	}
+	.ch-rec b {
+		color: var(--accent-text);
+	}
+	.ch-old {
+		margin-top: 4px !important;
+		font-size: 12.5px;
+		font-weight: 600;
+		color: var(--muted-2);
+	}
 
 	/* ── 진행 틱 ── */
 	.ticks {
@@ -2659,6 +2746,19 @@
 		color: var(--muted-2);
 	}
 	.took-note.record {
+		color: var(--accent-text);
+	}
+	.vs-line {
+		margin: 8px 0 0;
+		text-align: center;
+		font-size: 14px;
+		font-weight: 700;
+		color: var(--muted);
+	}
+	.vs-line b {
+		color: var(--text);
+	}
+	.vs-line.win b {
 		color: var(--accent-text);
 	}
 	.rows {

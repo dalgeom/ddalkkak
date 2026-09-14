@@ -171,6 +171,12 @@ LABEL = [
     ("cta_share_seen", "공유 영역이 눈에 들어옴"),
     ("share_click", "공유 누름"),
     ("share_result", "결과 공유"),
+    # 9/14부터 공유 링크에 보낸 사람의 기록이 도전장으로 실린다(challenge.ts). 유입 출처는 share.
+    ("challenge_land", "도전장 링크로 옴(같은 회차)"),
+    ("challenge_land_old", "도전장 링크로 옴(지난 회차)"),
+    ("challenge_win", "도전장에 응해 이김"),
+    ("challenge_draw", "도전장에 응해 비김"),
+    ("challenge_lose", "도전장에 응해 짐"),
     # 결과 화면의 내일 예고(teaser.ts). 9/14에 유형 이름 → 첫 예시 한 줄로 바꾸고 위로 올렸다
     ("cta_teaser_seen", "내일 예고가 눈에 들어옴"),
 ]

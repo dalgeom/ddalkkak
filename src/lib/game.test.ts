@@ -279,7 +279,7 @@ describe('힌트 게이팅 · 근접 피드백', () => {
 		expect(msg.split('\n')[0]).toContain('2/3');
 		expect(msg.split('\n')[0]).toContain('🔥4일째');
 		expect(msg.split('\n')[1]).toBe('🟩🟩⬜');
-		expect(msg).toContain('https://ddalkkak.app/?ref=daily');
+		expect(msg).toContain('https://ddalkkak.app/?c=31-2-72&utm_source=share');
 		// 연속 1일이면 굳이 자랑하지 않는다
 		expect(shareMessage({ puzzleNo: 1, marks: [], correct: 0, total: 10, streak: 1 })).not.toContain('🔥');
 	});
