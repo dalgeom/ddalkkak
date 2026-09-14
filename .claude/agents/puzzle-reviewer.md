@@ -1,7 +1,7 @@
 ---
 name: puzzle-reviewer
 description: 딸깍 문제 후보를 설계 명세의 품질 게이트로 검수한다. 재미·규칙 발견의 즐거움·중복을 판정하고 통과/조건부/반려를 낸다.
-model: fable
+model: opus
 tools: Read, Grep, Glob, Bash
 ---
 
