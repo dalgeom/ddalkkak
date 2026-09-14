@@ -44,10 +44,10 @@ const C = {
    것을 자동화한 것이라, 문제를 바꾸려면 이 블록만 갈아 끼우면 된다.
    지원하는 모양은 '한 자리 X (+|-) 한 자리 Y = 한 자리 Z' 하나뿐이다. */
 const 문제 = {
-	displayed: '1 + 8 = 6',
-	solution: '1 + 8 = 9',
-	from: [4, 'e'], // 6의 왼아래를 집어
-	to: [4, 'b']    // 9 자리로 옮긴다
+	displayed: '3 - 6 = 9',
+	solution: '9 - 6 = 3',
+	from: [4, 'f'], // 9의 왼위를 집어
+	to: [0, 'f']    // 맨 앞 3의 왼위에 놓는다 — 첫 숫자와 답이 자리를 바꾼다
 };
 /* ── 해설 문구는 문제에서 뽑는다 ──
    손으로 적어 두면 문제만 갈고 문구는 그대로 남는다. 2026-08-24에 실제로 그렇게
@@ -70,6 +70,9 @@ function 획(키) {
 }
 /** 숫자를 읽은 소리의 받침 — 조사가 갈린다. 일·칠은 「은」, 이·사는 「는」 */
 const 받침있음 = [true, true, false, true, false, false, true, true, true, false];
+/** 「으로」는 ㄹ 아닌 받침 뒤에만 — 영·삼·육은 「으로」, 일·칠·팔은 ㄹ이라 「로」.
+ *  21호(9−6=3)에서 「9는 3로」가 찍힐 뻔했다. 그 전엔 목적지가 9·5·+라 안 드러났다. */
+const 으로받침 = [true, false, false, true, false, false, true, false, false, false];
 const 을를 = (w) => (/[가-힣]$/.test(w) && (w.charCodeAt(w.length - 1) - 0xac00) % 28 ? '을' : '를');
 
 function 해설() {
@@ -83,7 +86,8 @@ function 해설() {
 		.map((c, i) => {
 			if (c === 답글자[i]) return null;
 			const 은는 = /\d/.test(c) && 받침있음[Number(c)] ? '은' : '는';
-			return `${c}${은는} ${답글자[i]}로`;
+			const 로 = /\d/.test(답글자[i]) && 으로받침[Number(답글자[i])] ? '으로' : '로';
+			return `${c}${은는} ${답글자[i]}${로}`;
 		})
 		.filter(Boolean);
 	return { 집, 놓, 집조사: 을를(집), 결과: 바뀐.length ? `${바뀐.join(', ')} 바뀝니다.` : '식이 성립합니다.' };
