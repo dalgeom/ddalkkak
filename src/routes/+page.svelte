@@ -30,6 +30,7 @@
 	} from '$lib/game';
 	import { shareResult, outcomeMessage } from '$lib/shareCard';
 	import { ctaTrack, takeGoDaily } from '$lib/analytics';
+	import { teaserOf, type Teaser } from '$lib/teaser';
 	import { weekOf, readDayRecord } from '$lib/record';
 	import { bankSizesAt } from '$lib/bankHistory';
 	import { logoClicks } from '$lib/nav';
@@ -603,7 +604,7 @@
 	   완주 화면이 카운트다운 한 줄로 끝나면 다시 올 이유가 남지 않는다.
 	   세트는 날짜로 결정되니 내일 것을 지금 계산할 수 있다 — 답이 아니라 '결'만 흘린다. */
 
-	let tomorrowChips = $state<string[]>([]);
+	let tomorrow = $state<Teaser | null>(null);
 
 	async function loadTomorrowTeaser() {
 		try {
@@ -617,10 +618,9 @@
 				(x) => x.category ?? '기타',
 				bankSizesAt
 			);
-			tomorrowChips = picks
-				.filter((q) => q.kind === 'discover')
-				.map((q) => p.PROBLEMS[q.index].chip)
-				.slice(0, 3);
+			// 유형 이름 셋이던 것을 첫 발견형 문제의 예시 한 줄로 바꿨다(teaser.ts)
+			const first = picks.find((q) => q.kind === 'discover');
+			tomorrow = first ? teaserOf(p.PROBLEMS[first.index]) : null;
 		} catch {
 			/* 예고는 있으면 좋은 것 — 실패해도 결과 화면은 그대로 */
 		}
@@ -1479,6 +1479,29 @@
 	</div>
 	</div>
 
+	<!-- 내일의 갈고리: 예고 + 알림. 카운트다운만으로는 아무도 돌아오지 않는다.
+	     9/14에 연습 권유보다 위로 올렸다 — 맨 아래라 스크롤 끝까지 간 사람만 봤다. 예고도 유형
+	     이름 셋에서 내일 문제의 첫 예시 한 줄로 바꿨다(teaser.ts). 보였는지는 cta_teaser_seen으로 잰다. -->
+	<div class="tomorrow" use:ctaTrack={'teaser'}>
+		<p class="next-day">내일 10문제까지 {countdown || '--:--:--'}</p>
+		{#if tomorrow}
+			<div class="peek">
+				<p class="peek-h">내일의 발견형 미리보기 · <b>{tomorrow.chip}</b></p>
+				{#if tomorrow.line}
+					<p class="peek-line">{tomorrow.line}</p>
+					<p class="peek-more">다음 줄과 물음표는 자정에 열려요</p>
+				{/if}
+			</div>
+		{/if}
+		<button class="remind" onclick={downloadReminder}>
+			<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+				<rect x="3" y="5" width="18" height="16" rx="2" />
+				<path d="M8 3v4M16 3v4M3 10h18" />
+			</svg>
+			매일 아침 알림 받기
+		</button>
+	</div>
+
 	<!-- 다음 행동: 가장 약했던 유형의 연습으로 이어준다 -->
 	<div class="nudge">
 		{#if weakest}
@@ -1494,23 +1517,6 @@
 				무한 연습하러 가기 <span class="arr" aria-hidden="true">→</span>
 			</a>
 		{/if}
-	</div>
-
-	<!-- 내일의 갈고리: 예고 + 알림. 카운트다운만으로는 아무도 돌아오지 않는다. -->
-	<div class="tomorrow">
-		<p class="next-day">내일 10문제까지 {countdown || '--:--:--'}</p>
-		{#if tomorrowChips.length}
-			<p class="teaser">
-				내일 예고 — {#each tomorrowChips as c, i (i)}<b>{c}</b>{#if i < tomorrowChips.length - 1}<span class="dot">·</span>{/if}{/each}
-			</p>
-		{/if}
-		<button class="remind" onclick={downloadReminder}>
-			<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
-				<rect x="3" y="5" width="18" height="16" rx="2" />
-				<path d="M8 3v4M16 3v4M3 10h18" />
-			</svg>
-			매일 아침 알림 받기
-		</button>
 	</div>
 {/if}
 
@@ -1654,18 +1660,38 @@
 		border-top: 1px solid var(--border);
 		text-align: center;
 	}
-	.teaser {
-		margin: 8px 0 0;
-		font-size: 13.5px;
+	.peek {
+		margin: 10px auto 0;
+		max-width: 320px;
+		padding: 12px 14px;
+		border: 1px dashed var(--border-strong);
+		border-radius: 14px;
+		background: var(--panel-2);
+	}
+	.peek p {
+		margin: 0;
+	}
+	.peek-h {
+		font-size: 13px;
+		font-weight: 600;
 		color: var(--muted);
 		word-break: keep-all;
 	}
-	.teaser b {
+	.peek-h b {
 		color: var(--accent-2);
 		font-weight: 700;
 	}
-	.teaser .dot {
-		margin: 0 6px;
+	.peek-line {
+		margin-top: 6px !important;
+		font-size: 19px;
+		font-weight: 800;
+		white-space: pre;
+		overflow-x: auto;
+		font-variant-numeric: tabular-nums;
+	}
+	.peek-more {
+		margin-top: 4px !important;
+		font-size: 12px;
 		color: var(--muted-2);
 	}
 	.remind {
