@@ -74,6 +74,13 @@ const CARDS = {
 		물음: '물음표에 들어갈 수는?',
 		줄: ['600 → 2', '300 → 3', '1500 → 2', '50 → 1', '900 → ?']
 	},
+	// 블로그 8편(9/15) 「한국사 상식퀴즈 5문제」 문제 카드. 줄이 보기 넷이라 마지막 줄 강조를 끈다 —
+	// 켜 두면 ④번만 주황이 되어 정답처럼 보인다. 렌더 뒤 promo/naver/퀴즈-N.png로 옮긴다.
+	'blog-퀴즈-1': { chip: '한국사 상식퀴즈 · Q1', 물음: '고려에서 과거제를 처음 실시한 왕은?', 줄: ['① 태조 왕건', '② 광종', '③ 성종', '④ 공민왕'], 강조없음: true },
+	'blog-퀴즈-2': { chip: '한국사 상식퀴즈 · Q2', 물음: '세종 때 만들어진, 비가 내린 양을 재는 기구는?', 줄: ['① 혼천의', '② 자격루', '③ 측우기', '④ 앙부일구'], 강조없음: true },
+	'blog-퀴즈-3': { chip: '한국사 상식퀴즈 · Q3', 물음: '조선이 일본과 맺은 강화도조약, 체결된 해는?', 줄: ['① 1876년', '② 1882년', '③ 1894년', '④ 1905년'], 강조없음: true },
+	'blog-퀴즈-4': { chip: '한국사 상식퀴즈 · Q4', 물음: '우정총국 개국 축하연에서 일어난 갑신정변을 주도한 인물은?', 줄: ['① 김홍집', '② 전봉준', '③ 김옥균', '④ 안창호'], 강조없음: true },
+	'blog-퀴즈-5': { chip: '한국사 상식퀴즈 · Q5', 물음: '외환위기로 정부가 IMF에 구제금융을 요청한 해는?', 줄: ['① 1990년', '② 1997년', '③ 1998년', '④ 2008년'], 강조없음: true },
 	// 블로그 7편(9/8)용 삽화. 날짜 키가 아니라 blog- 키다 — 스레드 카드가 아니므로
 	// 게시 기록의 날짜 대조에 걸리지 않는다. 렌더 뒤 promo/naver/구멍-*.png로 옮긴다.
 	'blog-격간': {
@@ -319,7 +326,7 @@ function page(card) {
 		.map((r, i) =>
 			n === 1
 				? `<div class="row">${r.replace(/\?/g, '<span class="qm">?</span>')}</div>`
-				: `<div class="row${i === n - 1 ? ' q' : ''}">${r}</div>`
+				: `<div class="row${i === n - 1 && !card.강조없음 ? ' q' : ''}">${r}</div>`
 		)
 		.join('');
 
@@ -336,7 +343,7 @@ function page(card) {
    border-radius:34px;padding:54px 60px 60px}
  .chip{display:inline-block;background:${C.chipBg};color:${C.chipText};
    font-size:27px;font-weight:700;padding:9px 20px;border-radius:12px;letter-spacing:-.02em}
- h1{margin-top:26px;font-size:47px;font-weight:800;color:${C.text};letter-spacing:-.03em}
+ h1{margin-top:26px;font-size:47px;font-weight:800;color:${C.text};letter-spacing:-.03em;word-break:keep-all}
  .box{margin-top:32px;background:${C.bg};border-radius:22px;padding:42px 0;
    display:flex;flex-direction:column;align-items:center;gap:${gap}px}
  .row{font-size:${fs}px;font-weight:600;color:${C.text};letter-spacing:.02em;white-space:pre}
