@@ -1484,7 +1484,7 @@
 	     157px를 건너뛰어 정오표 바로 뒤로 올린다 — 버튼이 y=562로 들어온다. 연속 일수는
 	     카드가 streak으로 직접 받아 보여주므로 통계 블록보다 위에 서도 설득력을 잃지 않는다. -->
 	{#if offerPush}
-		<PushPrompt {dayNum} streak={doneStats.streak} />
+		<PushPrompt {dayNum} streak={doneStats.streak} {tomorrow} />
 	{:else}
 		<InstallPrompt {dayNum} streak={doneStats.streak} />
 	{/if}
@@ -1581,7 +1581,8 @@
 	     이름 셋에서 내일 문제의 첫 예시 한 줄로 바꿨다(teaser.ts). 보였는지는 cta_teaser_seen으로 잰다. -->
 	<div class="tomorrow" use:ctaTrack={'teaser'}>
 		<p class="next-day">내일 10문제까지 {countdown || '--:--:--'}</p>
-		{#if tomorrow}
+		<!-- 알림 카드가 떴으면 예고는 그 카드 안에 이미 있다(9/15) — 같은 줄을 두 번 보이지 않는다 -->
+		{#if tomorrow && !offerPush}
 			<div class="peek">
 				<p class="peek-h">내일의 발견형 미리보기 · <b>{tomorrow.chip}</b></p>
 				{#if tomorrow.line}

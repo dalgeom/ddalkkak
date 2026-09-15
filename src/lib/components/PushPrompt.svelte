@@ -2,14 +2,23 @@
 	import { onMount } from 'svelte';
 	import { shouldOfferPush, notePushDismissed, stopOfferingPush, enablePush } from '$lib/push';
 	import { track } from '$lib/analytics';
+	import type { Teaser } from '$lib/teaser';
 
 	/**
 	 * 내일 알림 권유. 10문제를 막 끝낸 순간에만 묻는다.
 	 *
 	 * 알림 권한은 한 번 거부당하면 사이트 쪽에서 되살릴 수 없다. 그래서 첫 화면이 아니라
 	 * 방금 재미를 느낀 자리에서, 무엇을 보낼지 먼저 밝히고 나서 묻는다.
+	 *
+	 * tomorrow — 내일 발견형 문제의 첫 예시 한 줄(teaser.ts). 9/15에 카드 안으로 들였다.
+	 * 8/01~9/14에 이 카드가 뜬 25명 중 3명(12%)만 켰는데, 켤 이유(내일 무엇이 오나)는 결과 화면
+	 * 맨 아래 예고에 따로 있었다. 이유를 버튼 바로 위에 둔다. 효과는 날짜로 가른다 — 그 전 12%.
 	 */
-	let { dayNum, streak = 0 }: { dayNum: number; streak?: number } = $props();
+	let {
+		dayNum,
+		streak = 0,
+		tomorrow = null
+	}: { dayNum: number; streak?: number; tomorrow?: Teaser | null } = $props();
 
 	let show = $state(false);
 	let busy = $state(false);
@@ -43,8 +52,15 @@
 		show = false;
 	}
 
+	let peek = $derived(tomorrow?.line ? tomorrow : null);
 	let headline = $derived(
-		streak >= 2 ? `연속 ${streak}일, 내일 아침에 알려드릴까요?` : '내일 아침에 알려드릴까요?'
+		peek
+			? streak >= 2
+				? `연속 ${streak}일, 내일 이 문제가 열리면 알려드릴까요?`
+				: '내일 이 문제가 열리면 알려드릴까요?'
+			: streak >= 2
+				? `연속 ${streak}일, 내일 아침에 알려드릴까요?`
+				: '내일 아침에 알려드릴까요?'
 	);
 </script>
 
@@ -57,6 +73,10 @@
 				<h2>{headline}</h2>
 				<button class="x" onclick={close} aria-label="닫기">✕</button>
 			</div>
+			<!-- 한 줄로만 — 버튼이 접히는 선 위에 서야 하는 카드다(+page.svelte의 이 카드 주석) -->
+			{#if peek}
+				<p class="peek"><span>내일의 {peek.chip}</span><b>{peek.line}</b></p>
+			{/if}
 			<p class="why">
 				하루 한 번, 새 문제가 올라왔을 때만 보냅니다. 그 외에는 아무것도 보내지 않아요.
 			</p>
@@ -102,6 +122,28 @@
 		font-weight: 800;
 		cursor: pointer;
 		font-family: inherit;
+	}
+	.peek {
+		margin-top: 9px;
+		display: flex;
+		align-items: baseline;
+		flex-wrap: wrap;
+		gap: 4px 10px;
+		padding: 8px 12px;
+		border: 1px dashed var(--border-strong);
+		border-radius: 11px;
+		background: var(--panel-2);
+	}
+	.peek span {
+		font-size: 12.5px;
+		font-weight: 700;
+		color: var(--accent-2);
+	}
+	.peek b {
+		font-size: 17px;
+		font-weight: 800;
+		white-space: pre;
+		font-variant-numeric: tabular-nums;
 	}
 	.why {
 		margin-top: 6px;
