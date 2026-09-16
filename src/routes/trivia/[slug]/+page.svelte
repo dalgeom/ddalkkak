@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 	import { ctaTrack } from '$lib/analytics';
+	import DailyBand from '$lib/components/DailyBand.svelte';
 
 	let { data }: { data: PageData } = $props();
 
@@ -47,10 +48,7 @@
 
 	<!-- 검색으로 이 페이지에 떨어진 사람은 찾던 답만 읽고 나간다. 26문제와 해설을 다 지나야
 	     데일리로 가는 길이 나오면 늦다 — 목록에 들어가기 전에 한 줄로 알린다. -->
-	<a class="daily-band" href="/" use:ctaTrack={'band'}>
-		<span class="t">이 문제들, 매일 <b>10문제</b>씩 새로 나와요</span>
-		<span class="go">오늘 문제 풀기 →</span>
-	</a>
+	<DailyBand>이 문제들, 매일 <b>10문제</b>씩 새로 나와요</DailyBand>
 
 	<section class="sec">
 		<h2 class="sh">{data.category.name}, 이런 데서 틀립니다</h2>
@@ -337,35 +335,6 @@
 		border: 1px solid var(--border-strong);
 		border-radius: 14px;
 		padding: 15px 16px;
-	}
-
-	.daily-band {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		gap: 12px;
-		margin-top: 18px;
-		padding: 14px 16px;
-		background: var(--correct-bg);
-		border: 1px solid var(--accent);
-		border-radius: 14px;
-		text-decoration: none;
-		color: var(--text);
-	}
-	.daily-band .t {
-		font-size: 14px;
-		font-weight: 700;
-		line-height: 1.5;
-		word-break: keep-all;
-	}
-	.daily-band .t b {
-		color: var(--accent-text);
-	}
-	.daily-band .go {
-		flex: none;
-		font-size: 13px;
-		font-weight: 800;
-		color: var(--accent-text);
 	}
 
 	.ctas {

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { PageData } from './$types';
+	import DailyBand from '$lib/components/DailyBand.svelte';
 
 	let { data }: { data: PageData } = $props();
 
@@ -57,6 +58,11 @@
 			<time datetime={data.article.date}>{data.article.date.replaceAll('-', '.')}</time>
 		</p>
 	</header>
+
+	<!-- 글만 읽고 나가면 이 사람은 사이트가 매일 문제를 낸다는 걸 모른 채 떠난다.
+	     읽을거리에는 데일리로 가는 길이 헤더 링크 하나뿐이었다(글 끝 버튼은 그 글의 분야로 간다).
+	     콘텐츠 페이지와 같은 자리, 같은 띠를 쓴다 — 오늘 1번 문제의 예시 한 줄이 실린다. -->
+	<DailyBand>읽는 김에, 오늘의 <b>10문제</b>도 열려 있어요</DailyBand>
 
 	<div class="body">
 		<!-- eslint-disable-next-line svelte/no-at-html-tags -- 본문은 articles.ts에 빌드 시점에 박힌 우리 글이다 -->
