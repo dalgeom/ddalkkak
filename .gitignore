@@ -21,3 +21,9 @@ Thumbs.db
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .gstack/
+
+# 작업 중 생기는 것들 — 저장소에 들어갈 이유가 없다
+.claude/tmp/
+.claude/worktrees/
+*.stackdump
+scripts/tmp-*.mjs
