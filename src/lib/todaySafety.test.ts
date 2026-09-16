@@ -6,6 +6,7 @@ import { PROBLEMS, fieldOfChip } from './problems';
 import { TRIVIA } from './trivia';
 import { buildDailySetStable, MATCH_TOTAL, kstDayNumber } from './game';
 import { bankSizesAt } from './bankHistory';
+import { isOpener } from './opener';
 import { baselineRef } from './baselineRef';
 
 /**
@@ -71,7 +72,8 @@ describe('오늘 출제 중인 자리는 낮에 바뀌지 않는다', () => {
 			day,
 			(x) => fieldOfChip(x.chip),
 			(x) => x.category ?? '기타',
-			bankSizesAt
+			bankSizesAt,
+			isOpener
 		);
 
 		for (const p of picks) {

@@ -10,6 +10,7 @@ import {
 	DAILY_SIZE
 } from './game';
 import { bankSizesAt } from './bankHistory';
+import { isOpener } from './opener';
 
 /** 안정 뽑기 v2 — 은행이 자라도 세트와 재출제 간격이 흔들리지 않아야 한다 */
 describe('buildDailySetStable', () => {
@@ -27,14 +28,14 @@ describe('buildDailySetStable', () => {
 				fieldOf,
 				catOf
 			);
-			const v2 = buildDailySetStable(PROBLEMS, TRIVIA, MATCH_TOTAL, day, fieldOf, catOf, bankSizesAt);
+			const v2 = buildDailySetStable(PROBLEMS, TRIVIA, MATCH_TOTAL, day, fieldOf, catOf, bankSizesAt, isOpener);
 			expect(v2, `day ${day}`).toEqual(v1);
 		}
 	});
 
 	it('v2 날짜도 하루 10문제, 발견형은 분야가 서로 다르다', () => {
 		for (let day = PICK_V2_START_DAY; day < PICK_V2_START_DAY + 60; day++) {
-			const set = buildDailySetStable(PROBLEMS, TRIVIA, MATCH_TOTAL, day, fieldOf, catOf, bankSizesAt);
+			const set = buildDailySetStable(PROBLEMS, TRIVIA, MATCH_TOTAL, day, fieldOf, catOf, bankSizesAt, isOpener);
 			expect(set.length, `day ${day}`).toBe(DAILY_SIZE);
 			const dIdx = set.filter((p) => p.kind === 'discover').map((p) => p.index);
 			expect(new Set(dIdx).size, `day ${day} 중복`).toBe(dIdx.length);
@@ -57,11 +58,11 @@ describe('buildDailySetStable', () => {
 		for (let day = PICK_V2_START_DAY; day < GROW_DAY; day++) {
 			const before = buildDailySetStable(
 				mkDiscover(300), mkTrivia(400), MATCH_TOTAL, day,
-				(x) => x.f, (x) => x.c, sizesSmall
+				(x) => x.f, (x) => x.c, sizesSmall, () => false
 			);
 			const after = buildDailySetStable(
 				mkDiscover(330), mkTrivia(420), MATCH_TOTAL, day,
-				(x) => x.f, (x) => x.c, sizesGrown
+				(x) => x.f, (x) => x.c, sizesGrown, () => false
 			);
 			expect(after, `day ${day}`).toEqual(before);
 		}
@@ -75,7 +76,7 @@ describe('buildDailySetStable', () => {
 		for (let day = GROW_DAY - 15; day <= GROW_DAY + 25; day++) {
 			const set = buildDailySetStable(
 				mkDiscover(330), mkTrivia(420), MATCH_TOTAL, day,
-				(x) => x.f, (x) => x.c, sizesGrown
+				(x) => x.f, (x) => x.c, sizesGrown, () => false
 			);
 			for (const p of set) {
 				if (p.kind !== 'discover') continue;

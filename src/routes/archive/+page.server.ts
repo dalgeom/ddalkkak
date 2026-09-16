@@ -2,6 +2,7 @@ import { kstDayNumber, archiveDays, dayLabel, buildDailySetStable, MATCH_TOTAL }
 import { PROBLEMS, fieldOfChip } from '$lib/problems';
 import { TRIVIA } from '$lib/trivia';
 import { bankSizesAt } from '$lib/bankHistory';
+import { isOpener } from '$lib/opener';
 import type { PageServerLoad } from './$types';
 
 // 요청 시점에 '오늘'을 계산해 매일 재배포 없이도 목록이 갱신되게 한다(prerender 시 빌드 날짜에 고정됨).
@@ -27,7 +28,8 @@ export const load: PageServerLoad = () => {
 			d,
 			(x) => fieldOfChip(x.chip),
 			(x) => x.category ?? '기타',
-			bankSizesAt
+			bankSizesAt,
+			isOpener
 		)
 			.filter((p) => p.kind === 'discover')
 			.map((p) => PROBLEMS[p.index].chip)

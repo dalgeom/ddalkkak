@@ -32,6 +32,7 @@
 	import { ctaTrack, takeGoDaily, leaveEventName } from '$lib/analytics';
 	import { parseChallenge, judgeChallenge, type Challenge } from '$lib/challenge';
 	import { teaserOf, type Teaser } from '$lib/teaser';
+	import { isOpener } from '$lib/opener';
 	import { weekOf, readDayRecord } from '$lib/record';
 	import { bankSizesAt } from '$lib/bankHistory';
 	import { logoClicks } from '$lib/nav';
@@ -296,7 +297,8 @@
 			dayNum,
 			(x) => p.fieldOfChip(x.chip),
 			(x) => x.category ?? '기타',
-			bankSizesAt
+			bankSizesAt,
+			isOpener
 		);
 		queue = picks.map((pick) => ({
 			kind: pick.kind,
@@ -663,7 +665,8 @@
 				dayNum + 1,
 				(x) => p.fieldOfChip(x.chip),
 				(x) => x.category ?? '기타',
-				bankSizesAt
+				bankSizesAt,
+				isOpener
 			);
 			// 유형 이름 셋이던 것을 첫 발견형 문제의 예시 한 줄로 바꿨다(teaser.ts)
 			const first = picks.find((q) => q.kind === 'discover');

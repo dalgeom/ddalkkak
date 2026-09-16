@@ -9,6 +9,7 @@ import { PROBLEMS, fieldOfChip, type Problem } from './problems';
 import { TRIVIA } from './trivia';
 import { buildDailySetStable, MATCH_TOTAL } from './game';
 import { bankSizesAt } from './bankHistory';
+import { isOpener } from './opener';
 import { problemAt, type CubeNetProblem } from './cubenet';
 import matchData from './data/matchstick-problems.json';
 
@@ -56,7 +57,8 @@ export function assembleDayQueue(day: number): DayQueueItem[] {
 		day,
 		(x) => fieldOfChip(x.chip),
 		(x) => x.category ?? '기타',
-		bankSizesAt
+		bankSizesAt,
+		isOpener
 	);
 	return picks.map((p) => ({
 		kind: p.kind,

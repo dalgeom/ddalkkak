@@ -26,11 +26,12 @@ const rows = Object.entries(items).filter(([id]) => !id.startsWith('__'));
 
 let want = null;
 if (day !== null) {
-	const [{ PROBLEMS, fieldOfChip }, { TRIVIA }, game, { bankSizesAt }] = await Promise.all([
+	const [{ PROBLEMS, fieldOfChip }, { TRIVIA }, game, { bankSizesAt }, { isOpener }] = await Promise.all([
 		import('../src/lib/problems.ts'),
 		import('../src/lib/trivia.ts'),
 		import('../src/lib/game.ts'),
-		import('../src/lib/bankHistory.ts')
+		import('../src/lib/bankHistory.ts'),
+		import('../src/lib/opener.ts')
 	]);
 	want = new Set(
 		game
@@ -41,7 +42,8 @@ if (day !== null) {
 				day,
 				(x) => fieldOfChip(x.chip),
 				(x) => x.category ?? '기타',
-				bankSizesAt
+				bankSizesAt,
+				isOpener
 			)
 			.map((p) =>
 				p.kind === 'discover' ? PROBLEMS[p.index]?.id

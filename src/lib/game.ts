@@ -610,9 +610,21 @@ function pickStable<T>(
 }
 
 /**
+ * 문지기 규칙이 서는 날 — 2026-09-17(KST)부터. 오늘(20712) 세트는 건드리지 않는다.
+ *
+ * 이 날부터 그날 뽑힌 발견형 세 문제 중 **예시가 보이는 문제**를 1번으로 올린다(opener.ts).
+ * 뽑기 자체는 그대로다 — 세 문제의 구성도, 상식·성냥·전개도의 자리도 안 바뀌고
+ * 발견형 레인 안의 순서만 돈다. 그래서 재출제 간격도 골든 스냅샷(과거 날짜)도 무사하다.
+ */
+export const OPENER_START_DAY = 20713;
+
+/**
  * 그날의 10문제 — 안정 뽑기 버전. 모든 호출처는 이 함수를 쓴다.
  * v2 시작일 전(과거·아카이브)은 기존 buildDailySet(v1)에 그대로 위임하고,
  * 그 후는 발견형·상식만 v2로 뽑는다(성냥·전개도는 은행이 고정이라 v1 공식이 이미 안정).
+ *
+ * openerOf는 선택이 아니라 필수다 — 호출처가 일곱 군데라 하나라도 빠뜨리면 홈과
+ * 아카이브가 서로 다른 순서를 내놓는다. 타입이 그걸 막는다.
  */
 export function buildDailySetStable<D, T>(
 	discoverAll: D[],
@@ -621,7 +633,8 @@ export function buildDailySetStable<D, T>(
 	dayNum: number,
 	fieldOf: (d: D) => string,
 	catOf: (t: T) => string,
-	sizesAt: BankSizesAt
+	sizesAt: BankSizesAt,
+	openerOf: (d: D) => boolean
 ): DailyPick[] {
 	const sizes = sizesAt(dayNum);
 	if (dayNum < PICK_V2_START_DAY) {
@@ -642,6 +655,17 @@ export function buildDailySetStable<D, T>(
 	const bonusKind = kinds[d % kinds.length];
 
 	const dAll = pickStable(discoverAll, (e) => sizesAt(e).discover, fieldOf, 20260101, 'discover', d);
+	// 문지기: 정규 발견형 안에서만 자리를 돌린다(보너스 칸은 마지막이라 건드리지 않는다).
+	// 셋 다 산문이면 그대로 둔다 — 그런 날은 두 달에 이틀쯤이고, 억지로 바꾸면 뽑기가 흔들린다.
+	if (d >= OPENER_START_DAY) {
+		const head = dAll.slice(0, counts.discover);
+		const at = head.findIndex((i) => openerOf(discoverAll[i]));
+		if (at > 0) {
+			const [opener] = head.splice(at, 1);
+			head.unshift(opener);
+			for (let i = 0; i < head.length; i++) dAll[i] = head[i];
+		}
+	}
 	const tAll = pickStable(triviaAll, (e) => sizesAt(e).trivia, catOf, 20260202, 'trivia', d);
 	const mAll = pickAtCursor(
 		Array.from({ length: matchTotal }, (_, i) => i),

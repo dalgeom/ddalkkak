@@ -5,6 +5,7 @@ import { PROBLEMS, fieldOfChip } from './problems';
 import { TRIVIA } from './trivia';
 import { buildDailySetStable, MATCH_TOTAL, SITE_START_DAY, kstDayNumber } from './game';
 import { bankSizesAt } from './bankHistory';
+import { isOpener } from './opener';
 
 /**
  * 골든 스냅샷 — 날짜별 세트(인덱스)를 픽스처로 박제한다.
@@ -41,7 +42,8 @@ function computeDay(day: number): { d: number[]; t: number[] } {
 		day,
 		(x) => fieldOfChip(x.chip),
 		(x) => x.category ?? '기타',
-		bankSizesAt
+		bankSizesAt,
+		isOpener
 	);
 	return {
 		d: picks.filter((p) => p.kind === 'discover').map((p) => p.index),

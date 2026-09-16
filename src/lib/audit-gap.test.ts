@@ -3,6 +3,7 @@ import { PROBLEMS, fieldOfChip } from './problems';
 import { TRIVIA } from './trivia';
 import { buildDailySetStable, MATCH_TOTAL, PICK_V2_START_DAY } from './game';
 import { bankSizesAt } from './bankHistory';
+import { isOpener } from './opener';
 
 // 임시: 실은행으로 v1→v2 컷오버 전후 재출제 간격 검증
 describe('감사: 실데이터 컷오버 간격', () => {
@@ -12,7 +13,7 @@ describe('감사: 실데이터 컷오버 간격', () => {
 		for (let day = PICK_V2_START_DAY - 20; day <= PICK_V2_START_DAY + 20; day++) {
 			const set = buildDailySetStable(
 				PROBLEMS, TRIVIA, MATCH_TOTAL, day,
-				(x) => fieldOfChip(x.chip), (x) => x.category ?? '기타', bankSizesAt
+				(x) => fieldOfChip(x.chip), (x) => x.category ?? '기타', bankSizesAt, isOpener
 			);
 			for (const p of set) {
 				if (p.kind !== 'discover') continue;
