@@ -293,13 +293,21 @@
 </script>
 
 <svelte:head>
-	<title>성냥개비 퍼즐 {problems.length}문제 — 하나만 옮겨 식 완성 | 딸깍 퍼즐</title>
+	<!--
+		제목은 사람들이 실제로 치는 말로 연다 — 2026-09-28 서치어드바이저 실측.
+		「성냥개비 문제」가 7일 노출 687로 사이트 전체 노출의 18%인데 CTR이 8.3%다.
+		같은 뜻인데 표기가 다른 「성냥개비문제」는 11.6%, 「성냥 문제」는 30%다.
+		제목이 「성냥개비 퍼즐」로 시작해 제일 큰 검색어와 글자가 안 맞았다 — 네이버는
+		검색어와 같은 글자를 굵게 보여주는데, 그 굵은 글자가 제목 맨 앞에 없었다.
+		「정답 풀이」는 실제로 있는 기능이다(무한·개수 모드의 「정답 보기」 버튼).
+	-->
+	<title>성냥개비 문제 {problems.length}개 — 하나만 옮겨 식 완성 · 정답 풀이 | 딸깍</title>
 	<meta
 		name="description"
-		content="성냥개비 문제 {problems.length}개를 무료로. 성냥 하나만 옮겨 틀린 등식을 참으로 만드는 고전 퍼즐 — 무한 연습·타임어택·개수 도전 모드로 원하는 만큼 풀어보세요."
+		content="성냥개비 문제 {problems.length}개를 무료로 풉니다. 성냥 하나만 옮겨 틀린 식을 참으로 — 막히면 정답 풀이를 바로 볼 수 있습니다. 무한 연습·타임어택 모드."
 	/>
 	<link rel="canonical" href="https://ddalkkak.app/matchstick" />
-	<meta property="og:title" content="성냥개비 퍼즐 {problems.length}문제 — 하나만 옮겨 식 완성 | 딸깍 퍼즐" />
+	<meta property="og:title" content="성냥개비 문제 {problems.length}개 — 하나만 옮겨 식 완성 · 정답 풀이 | 딸깍" />
 	<meta property="og:description" content="성냥 하나만 옮겨 등식을 참으로! 무한 연습·타임어택·개수 도전." />
 	<meta property="og:url" content="https://ddalkkak.app/matchstick" />
 </svelte:head>
