@@ -57,9 +57,21 @@ export function load({ params }) {
 		count: all.filter((t) => t.grade === g).length
 	})).filter((g) => g.count > 0);
 
-	// 다른 분야로 넘어갈 수 있게 — 문제 수가 많은 순으로
+	/**
+	 * 다른 분야로 넘어갈 수 있게 — 문제 수가 많은 순으로.
+	 *
+	 * **링크에 쓰는 세 값만 보낸다.** 예전에는 `...c`로 분야 객체를 통째로 실었는데,
+	 * 그 안에는 intro·desc·deepDive(2천 자 안팎)와 대표 문제 11개의 why가 들어 있다.
+	 * 프리렌더된 HTML에 그게 17개 분야치 직렬화돼 실리면서 **분야 페이지 18장이 서로
+	 * 81%(62KB 중 51KB)가 같은 문서**가 돼 있었다(2026-09-28 실측). 화면에 나오지도
+	 * 않는 남의 분야 해설이 모든 페이지에 박혀 있던 셈이다.
+	 */
 	const others = TRIVIA_CATEGORIES.filter((c) => c.slug !== category.slug)
-		.map((c) => ({ ...c, count: TRIVIA.filter((t) => t.category === c.name).length }))
+		.map((c) => ({
+			slug: c.slug,
+			name: c.name,
+			count: TRIVIA.filter((t) => t.category === c.name).length
+		}))
 		.sort((a, b) => b.count - a.count);
 
 	return { category, items, count: all.length, byGrade, others, total: TRIVIA.length };

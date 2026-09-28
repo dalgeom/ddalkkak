@@ -35,8 +35,11 @@ export function load({ params }) {
 		.map((chip) => ({ chip, count: all.filter((p) => p.chip === chip).length }))
 		.sort((a, b) => b.count - a.count || a.chip.localeCompare(b.chip));
 
+	// 링크에 쓰는 값만 보낸다 — 객체를 통째로 실으면 남의 분야 deepDive·featured가
+	// 모든 페이지에 직렬화돼 페이지끼리 사실상 같은 문서가 된다(trivia 쪽 주석 참고).
 	const others = DISCOVER_FIELD_META.filter((f) => f.slug !== field.slug).map((f) => ({
-		...f,
+		slug: f.slug,
+		name: f.name,
 		count: PROBLEMS.filter((p) => fieldOfChip(p.chip) === f.name).length
 	}));
 
