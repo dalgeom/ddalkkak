@@ -33,9 +33,15 @@ export function sentencesOf(html: string): string[] {
  * 인용(」)이나 괄호로 끝나는 문장은 종결이 안 보이므로 보지 않는다.
  */
 export function isOffTone(sentence: string): boolean {
-	const s = sentence.replace(/[.!?…]+$/, '').trim();
+	const raw = sentence.trim();
+	const s = raw.replace(/[.!?…]+$/, '').trim();
 	if (/[」)\]』"']$/.test(s)) return false;
-	return /다$/.test(s) || /니까$/.test(s);
+	if (/다$/.test(s) || /니까$/.test(s)) return true;
+	// 반말 질문(「누구인가?」「몇 개일까?」) — 9/29 지문 개편 때 「~다.」만 보다가 80개를 놓쳤다.
+	// 「물음표는?」「몇 등?」 같은 명사형 질문은 괜찮다
+	if (/\?$/.test(raw) && /(까|는가|인가|은가|던가|했나|았나|었나|니|냐)$/.test(s)) return true;
+	// 명령·청유(「찾아라」「풀어 보자」). 「보라」는 색 이름(답 보라)과 겹쳐서 넣지 않는다
+	return /(아라|어라|해라|하라|보자|하자)$/.test(s);
 }
 
 export type StyleIssue = { kind: 'tone' | 'dash'; text: string };

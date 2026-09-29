@@ -170,7 +170,7 @@ export const PROBLEMS: Problem[] = [
 		id: 'diamond-op',
 		chip: '이상한 연산',
 		blocks: [
-			{ kind: 'text', html: '◆의 규칙을 찾아라.' },
+			{ kind: 'text', html: '◆의 규칙을 찾아보세요.' },
 			{ kind: 'pre', text: '9 ◆ 9 = 18\n3 ◆ 4 = 21\n7 ◆ 8 = 65\n\n6 ◆ 7 = ?' }
 		],
 		type: 'text',
@@ -189,7 +189,7 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'text',
-				html: '거울에 비춰도 <b>글자 그대로 읽히는</b> 단어만 통과시키는 클럽이 있다.<br>통과: <b>MOM · TOOT · OTTO</b><br>탈락: <b>LEVEL · DAD · TIME</b><br>다음 중 통과하는 단어는?'
+				html: '거울에 비춰도 <b>글자 그대로 읽히는</b> 단어만 통과시키는 클럽이 있어요.<br>통과: <b>MOM · TOOT · OTTO</b><br>탈락: <b>LEVEL · DAD · TIME</b><br>다음 중 통과하는 단어는?'
 			}
 		],
 		type: 'choice',
@@ -224,7 +224,7 @@ export const PROBLEMS: Problem[] = [
 		id: 'color-add',
 		chip: '색깔',
 		blocks: [
-			{ kind: 'text', html: '위 두 식은 성립한다. 마지막 줄의 <b>? ?</b>에 올 색은?' },
+			{ kind: 'text', html: '위 두 식은 성립해요. 마지막 줄의 <b>? ?</b>에 올 색은?' },
 			{ kind: 'colors', rows: ['G R + Y O = P Y', 'O B - R Y = R O', 'R B + G R = ? ?'] }
 		],
 		type: 'choice',
@@ -259,7 +259,7 @@ export const PROBLEMS: Problem[] = [
 		id: 'lcd-star',
 		chip: '전광판',
 		blocks: [
-			{ kind: 'text', html: '전광판의 ★ 연산 규칙을 찾아라.' },
+			{ kind: 'text', html: '전광판의 ★ 연산 규칙을 찾아보세요.' },
 			{ kind: 'lcd', lines: ['7918 ★ 0632 = 7512', '4590 ★ 7638 = 1530', '9748 ★ 6395 = ?'] }
 		],
 		type: 'text',
@@ -278,7 +278,7 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'text',
-				html: '이 전광판은 <b>고장 나서 틀린 식</b>을 표시하고 있다.<br>원래 식의 정답(등호 오른쪽)은?'
+				html: '이 전광판은 <b>고장 나서 틀린 식</b>을 표시하고 있어요.<br>원래 식의 정답(등호 오른쪽)은?'
 			},
 			{ kind: 'lcd', lines: ['13 + 72 = 31'] }
 		],
@@ -313,7 +313,7 @@ export const PROBLEMS: Problem[] = [
 		id: 'digit-sum-op',
 		chip: '이상한 연산',
 		blocks: [
-			{ kind: 'text', html: '◇의 규칙을 찾아라.' },
+			{ kind: 'text', html: '◇의 규칙을 찾아보세요.' },
 			{ kind: 'pre', text: '9 ◇ 9 = 9\n7 ◇ 8 = 11\n6 ◇ 7 = 6\n8 ◇ 6 = 12\n\n8 ◇ 8 = ?' }
 		],
 		type: 'text',
@@ -395,7 +395,7 @@ export const PROBLEMS: Problem[] = [
 		id: 'elevator-4',
 		chip: '관찰',
 		blocks: [
-			{ kind: 'text', html: '이 동네 건물들의 엘리베이터 숫자 버튼 개수다. 물음표는?' },
+			{ kind: 'text', html: '이 동네 건물들의 엘리베이터 숫자 버튼 개수예요. 물음표는?' },
 			{ kind: 'pre', text: '13층 건물 = 버튼 12개\n15층 건물 = 버튼 14개\n20층 건물 = 버튼 19개\n2층 건물 = 버튼 2개\n3층 건물 = 버튼 ?개' }
 		],
 		type: 'text',
@@ -472,7 +472,7 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'text',
-				html: '31일이 없는 달은 5개다.<br>그럼 <b>30일이 없는 달</b>은 몇 개?'
+				html: '31일이 없는 달은 5개예요.<br>그럼 <b>30일이 없는 달</b>은 몇 개?'
 			}
 		],
 		type: 'text',
@@ -490,7 +490,7 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'text',
-				html: '주사위를 탑처럼 쌓고, 밖에서 <b>보이지 않는 가로면</b>(서로 맞닿은 면들과 맨 아래 바닥)의 눈을 모두 더했다. 물음표는?'
+				html: '주사위를 탑처럼 쌓고, 밖에서 <b>보이지 않는 가로면</b>(서로 맞닿은 면들과 맨 아래 바닥)의 눈을 모두 더했어요. 물음표는?'
 			},
 			{ kind: 'pre', text: '2층 · 맨 위 2 = 12\n2층 · 맨 위 5 = 9\n3층 · 맨 위 1 = 20\n3층 · 맨 위 4 = ?' }
 		],
@@ -510,7 +510,7 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'text',
-				html: '분침은 하루 동안 시계판을 <b>24바퀴</b> 돈다.<br>그럼 <b>시침</b>은 하루에 몇 바퀴 돌까?'
+				html: '분침은 하루 동안 시계판을 <b>24바퀴</b> 돌아요.<br>그럼 <b>시침</b>은 하루에 몇 바퀴 돌까요?'
 			}
 		],
 		type: 'text',
@@ -527,7 +527,7 @@ export const PROBLEMS: Problem[] = [
 		id: 'month-letters',
 		chip: '수열',
 		blocks: [
-			{ kind: 'text', html: '이 수열은 정확히 <b>열두 개</b>다. 물음표는?' },
+			{ kind: 'text', html: '이 수열은 정확히 <b>열두 개</b>예요. 물음표는?' },
 			{ kind: 'pre', text: '7, 8, 5, 5, 3, ?, 4, 6, 9, 7, 8, 8' }
 		],
 		type: 'text',
@@ -582,7 +582,7 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'text',
-				html: '작은 정육면체 27개를 붙여 만든 <b>3×3×3 큐브</b>의 겉면 전체에 페인트를 칠했다.<br>다시 27개로 떼어냈을 때, <b>한 면도 칠해지지 않은</b> 조각은 몇 개일까?'
+				html: '작은 정육면체 27개를 붙여 만든 <b>3×3×3 큐브</b>의 겉면 전체에 페인트를 칠했어요.<br>다시 27개로 떼어냈을 때, <b>한 면도 칠해지지 않은</b> 조각은 몇 개일까요?'
 			}
 		],
 		type: 'text',
@@ -627,11 +627,11 @@ export const PROBLEMS: Problem[] = [
 		// 그게 이 문제의 아하다. 원래의 매력(오전·오후·정오·자정이 한 체계)은 해설로 옮겼다.
 		chip: '시간',
 		blocks: [
-			{ kind: 'text', html: '옛 시계는 하루를 <b>열두 칸</b>으로 나눴다. 한 칸이 두 시간씩이다.' },
+			{ kind: 'text', html: '옛 시계는 하루를 <b>열두 칸</b>으로 나눴어요. 한 칸이 두 시간씩이에요.' },
 			{ kind: 'pre', text: '자 축 인 묘 진 사 오 미 신 유 술 해' },
 			{
 				kind: 'text',
-				html: '「정오(正午)」는 일곱째 칸 <b>오</b>의 한가운데를 뜻하는데, 그것이 <b>낮 12시</b>다.<br>그렇다면 다섯째 칸 <b>진(辰)</b>은 몇 시에 시작할까?'
+				html: '「정오(正午)」는 일곱째 칸 <b>오</b>의 한가운데를 뜻하는데, 그것이 <b>낮 12시</b>예요.<br>그렇다면 다섯째 칸 <b>진(辰)</b>은 몇 시에 시작할까요?'
 			}
 		],
 		type: 'text',
@@ -728,7 +728,7 @@ export const PROBLEMS: Problem[] = [
 		id: 'sum-eq-product',
 		chip: '탐색',
 		blocks: [
-			{ kind: 'text', html: '어떤 클럽의 가입 기준을 찾아라.' },
+			{ kind: 'text', html: '어떤 클럽의 가입 기준을 찾아보세요.' },
 			{
 				kind: 'pre',
 				text: '회원 : 22   123   231   312\n거절 : 33   111   124   235\n\n후보 : 321   122   44   246'
@@ -765,7 +765,7 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'text',
-				html: '수를 영어로 차례로 쓴다 — ONE, TWO, THREE, FOUR…<br>알파벳 <b>A</b>가 처음 등장하는 수는? <b>(AND는 넣지 않고 읽는다)</b>'
+				html: '수를 영어로 차례로 써요: ONE, TWO, THREE, FOUR…<br>알파벳 <b>A</b>가 처음 등장하는 수는? <b>(AND는 넣지 않고 읽어요)</b>'
 			}
 		],
 		type: 'choice',
@@ -783,7 +783,7 @@ export const PROBLEMS: Problem[] = [
 		id: 'kr-lip-sounds',
 		chip: '한글',
 		blocks: [
-			{ kind: 'text', html: '어떤 기준으로 한 가족일까? 가족에 들어갈 수 있는 자음은?' },
+			{ kind: 'text', html: '어떤 기준으로 한 가족일까요? 가족에 들어갈 수 있는 자음은?' },
 			{ kind: 'pre', text: '한 가족: ㅁ, ㅂ, ㅍ\n남남: ㄱ, ㅅ, ㅎ' }
 		],
 		type: 'choice',
@@ -816,7 +816,7 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'text',
-				html: 'ELEVEN + TWO = TWELVE + ONE<br>이 등식은 산술(11+2 = 12+1) 말고 <b>또 한 번</b> 참이다. 같은 방식으로 "참"인 짝은?'
+				html: 'ELEVEN + TWO = TWELVE + ONE<br>이 등식은 산술(11+2 = 12+1) 말고 <b>또 한 번</b> 참이에요. 같은 방식으로 "참"인 짝은?'
 			}
 		],
 		type: 'choice',
@@ -837,7 +837,7 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'text',
-				html: '어느 해든 <b>4월 4일, 6월 6일, 8월 8일, 10월 10일, 12월 12일</b>은 전부 <b>같은 요일</b>이다.<br>이 말은?'
+				html: '어느 해든 <b>4월 4일, 6월 6일, 8월 8일, 10월 10일, 12월 12일</b>은 전부 <b>같은 요일</b>이에요.<br>이 말은?'
 			}
 		],
 		type: 'choice',
@@ -857,7 +857,7 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'text',
-				html: '평년(365일)의 <b>정중앙 날짜</b> — 그날을 기준으로 앞뒤로 남는 날수가 똑같아지는 날은?'
+				html: '평년(365일)의 <b>정중앙 날짜</b>, 그날을 기준으로 앞뒤로 남는 날수가 똑같아지는 날은?'
 			}
 		],
 		type: 'choice',
@@ -875,7 +875,7 @@ export const PROBLEMS: Problem[] = [
 		id: 'tomorrow-yesterday',
 		chip: '시간',
 		blocks: [
-			{ kind: 'text', html: '<b>"내일의 어제의 내일의 어제"</b>는 언제일까?' }
+			{ kind: 'text', html: '<b>"내일의 어제의 내일의 어제"</b>는 언제일까요?' }
 		],
 		type: 'text',
 		answers: ['오늘'],
@@ -909,7 +909,7 @@ export const PROBLEMS: Problem[] = [
 			// thirty…·sixty…·seventy…가 전부 들어간다. 2026-08-31 카드로 나갔을 때
 			// 스레드에서 지적을 받았다. 해설에만 「0~9를」이라고 적어 두고 지문에는
 			// 안 적은 것이 화근이었다 — 8/26 옹알이와 같은 종류의 헐거움이다.
-			{ kind: 'text', html: '<b>0부터 9까지 한 번씩</b> 쓴 줄이다. 물음표에 들어갈 수는?' },
+			{ kind: 'text', html: '<b>0부터 9까지 한 번씩</b> 쓴 줄이에요. 물음표에 들어갈 수는?' },
 			{ kind: 'pre', text: '8, 5, 4, 9, 1, 7, ?, 3, 2, 0' }
 		],
 		type: 'text',
@@ -960,7 +960,7 @@ export const PROBLEMS: Problem[] = [
 		id: 'nm-factorial-zeros',
 		chip: '수의 성질',
 		blocks: [
-			{ kind: 'text', html: '1부터 차례로 곱한 수의 <b>끝에 붙는 0의 개수</b>다. 물음표는?' },
+			{ kind: 'text', html: '1부터 차례로 곱한 수의 <b>끝에 붙는 0의 개수</b>예요. 물음표는?' },
 			{ kind: 'pre', text: '1×2×…×5 = 120 → 0이 1개\n1×2×…×10 → 0이 2개\n1×2×…×15 → 0이 3개\n\n1×2×…×25 → ?' }
 		],
 		type: 'text',
@@ -1027,7 +1027,7 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'text',
-				html: '어떤 클럽: 2 ✓, 4 ✓, 6 ✓ — 그런데 <b>8은 거절</b>당했다.<br>다음 중 회원이 될 수 있는 수는?'
+				html: '어떤 클럽: 2 ✓, 4 ✓, 6 ✓. 그런데 <b>8은 거절</b>당했어요.<br>다음 중 회원이 될 수 있는 수는?'
 			}
 		],
 		type: 'choice',
@@ -1048,7 +1048,7 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'text',
-				html: '1층에서 4층까지 계단으로 <b>30초</b> 걸린다. 같은 속도로 1층에서 8층까지는?'
+				html: '1층에서 4층까지 계단으로 <b>30초</b> 걸려요. 같은 속도로 1층에서 8층까지는?'
 			}
 		],
 		type: 'text',
@@ -1115,7 +1115,7 @@ export const PROBLEMS: Problem[] = [
 		id: 'anagram-numbers',
 		chip: '영단어',
 		blocks: [
-			{ kind: 'text', html: '다음 등식들이 성립한다.' },
+			{ kind: 'text', html: '다음 등식들이 성립해요.' },
 			{ kind: 'pre', text: 'EON + TOW = THERE\nTHERE + EVENS = NET\n\nNET − EVENS − TOW = ?' }
 		],
 		type: 'text',
@@ -1132,7 +1132,7 @@ export const PROBLEMS: Problem[] = [
 		id: 'lcd-fragments',
 		chip: '전광판',
 		blocks: [
-			{ kind: 'text', html: '전광판에 <b>부서진 파편</b> 같은 것들이 떠 있는데, 등식은 성립한다고 한다.' },
+			{ kind: 'text', html: '전광판에 <b>부서진 파편</b> 같은 것들이 떠 있는데, 등식은 성립한다고 해요.' },
 			{
 				kind: 'lcd',
 				lines: ['X + Y = 7', 'Z + W = 9', 'U + V = ?'],
@@ -1155,7 +1155,7 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'text',
-				html: '운동장에 꽂힌 막대의 그림자가 점점 짧아지더니, 어느 순간 <b>그림자와 막대의 길이가 정확히 같아졌다</b>.<br>이 순간 해는 지평선에서 몇 도 높이에 있을까?'
+				html: '운동장에 꽂힌 막대의 그림자가 점점 짧아지더니, 어느 순간 <b>그림자와 막대의 길이가 정확히 같아졌어요</b>.<br>이 순간 해는 지평선에서 몇 도 높이에 있을까요?'
 			}
 		],
 		type: 'text',
@@ -1174,7 +1174,7 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'text',
-				html: "카드 '68'을 거꾸로 들면 '89'가 된다.<br>거꾸로 들어도 <b>자기 자신</b>인 두 자리 수 중 가장 큰 것은?"
+				html: "카드 '68'을 거꾸로 들면 '89'가 돼요.<br>거꾸로 들어도 <b>자기 자신</b>인 두 자리 수 중 가장 큰 것은?"
 			}
 		],
 		type: 'text',
@@ -1193,7 +1193,7 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'text',
-				html: '시계 문자판의 열두 숫자를 전부 더하면? <b>(암산 5초 컷이 가능하다)</b>'
+				html: '시계 문자판의 열두 숫자를 전부 더하면? <b>(암산 5초 컷이 가능해요)</b>'
 			}
 		],
 		type: 'text',
@@ -1211,7 +1211,7 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'text',
-				html: '두 자리 수 AB에 일의 자리 <b>B를 더했더니</b> 자리가 뒤집힌 <b>BA</b>가 됐다. AB는?'
+				html: '두 자리 수 AB에 일의 자리 <b>B를 더했더니</b> 자리가 뒤집힌 <b>BA</b>가 됐어요. AB는?'
 			}
 		],
 		type: 'text',
@@ -1382,7 +1382,7 @@ export const PROBLEMS: Problem[] = [
 		id: 'compound-mult',
 		chip: '영단어',
 		blocks: [
-			{ kind: 'text', html: 'RAINBOW는 얼마일까?' },
+			{ kind: 'text', html: 'RAINBOW는 얼마일까요?' },
 			{ kind: 'pre', text: 'SUNFLOWER = 18\nFOOTBALL = 16\nBIRTHDAY = 15\nRAINBOW = ?' }
 		],
 		type: 'text',
@@ -1398,7 +1398,7 @@ export const PROBLEMS: Problem[] = [
 		id: 'rhyme-number',
 		chip: '영단어',
 		blocks: [
-			{ kind: 'text', html: 'SHINE은 얼마일까?' },
+			{ kind: 'text', html: 'SHINE은 얼마일까요?' },
 			{ kind: 'pre', text: 'DOOR = 4\nHIVE = 5\nPEN = 10\nGATE = 8\nSHINE = ?' }
 		],
 		type: 'text',
@@ -1414,7 +1414,7 @@ export const PROBLEMS: Problem[] = [
 		id: 'leet-letters',
 		chip: '영단어',
 		blocks: [
-			{ kind: 'text', html: 'TOAST는 얼마일까?' },
+			{ kind: 'text', html: 'TOAST는 얼마일까요?' },
 			{ kind: 'pre', text: 'TASTE = 26\nBAIT = 20\nSEAT = 19\nTOAST = ?' }
 		],
 		type: 'text',
@@ -1430,7 +1430,7 @@ export const PROBLEMS: Problem[] = [
 		id: 'day-month',
 		chip: '달력',
 		blocks: [
-			{ kind: 'text', html: '물음표에 들어갈 것은 몇 월 며칠인가?' },
+			{ kind: 'text', html: '물음표에 들어갈 것은 몇 월 며칠인가요?' },
 			{ kind: 'pre', text: '14.3 = 파이데이\n1.5 = 근로자의날\n25.12 = 크리스마스\n3.6 = ?' }
 		],
 		type: 'text',
@@ -1446,7 +1446,7 @@ export const PROBLEMS: Problem[] = [
 		id: 'month-nth-letter',
 		chip: '달력',
 		blocks: [
-			{ kind: 'text', html: '괄호 안 두 숫자에서 알파벳 하나가 나온다. 물음표는?' },
+			{ kind: 'text', html: '괄호 안 두 숫자에서 알파벳 하나가 나와요. 물음표는?' },
 			{ kind: 'pre', text: '(3, 3) → R\n(5, 2) → A\n(7, 4) → Y\n(9, 8) → E\n(11, 6) → B\n(12, 5) → ?' }
 		],
 		type: 'text',
@@ -1494,7 +1494,7 @@ export const PROBLEMS: Problem[] = [
 		id: 'stadium-seats',
 		chip: '관찰',
 		blocks: [
-			{ kind: 'text', html: '체육관 계단식 관중석, 한 층에 20석씩. 물리적으로 왼쪽에서 7번째 자리의 좌석 번호는 층마다 다르다. 5층의 좌석 번호는?' },
+			{ kind: 'text', html: '체육관 계단식 관중석, 한 층에 20석씩. 물리적으로 왼쪽에서 7번째 자리의 좌석 번호는 층마다 달라요. 5층의 좌석 번호는?' },
 			{ kind: 'pre', text: '1층 → 7번\n2층 → 34번\n3층 → 47번\n4층 → 74번\n5층 → ?번' }
 		],
 		type: 'text',
@@ -1560,7 +1560,7 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'text',
-				html: '사다리타기를 하다 문득 — 운이 나쁘면 <b>두 사람이 같은 곳에 도착</b>할 수도 있지 않을까?'
+				html: '사다리타기를 하다 문득, 운이 나쁘면 <b>두 사람이 같은 곳에 도착</b>할 수도 있지 않을까요?'
 			}
 		],
 		type: 'choice',
@@ -1578,7 +1578,7 @@ export const PROBLEMS: Problem[] = [
 		id: 'digitwise-add',
 		chip: '이상한 연산',
 		blocks: [
-			{ kind: 'text', html: '⊕ 의 규칙을 찾아라.' },
+			{ kind: 'text', html: '⊕ 의 규칙을 찾아보세요.' },
 			{ kind: 'pre', text: '27 ⊕ 15 = 312\n34 ⊕ 21 = 55\n58 ⊕ 34 = 812\n27 ⊕ 14 = 311\n19 ⊕ 19 = 218\n46 ⊕ 37 = ?' }
 		],
 		type: 'text',
@@ -1597,7 +1597,7 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'text',
-				html: '6시 정각, 시침과 분침의 각도는 180도다.<br>그럼 <b>6시 30분</b>에는 몇 도일까?'
+				html: '6시 정각, 시침과 분침의 각도는 180도예요.<br>그럼 <b>6시 30분</b>에는 몇 도일까요?'
 			}
 		],
 		type: 'text',
@@ -1616,7 +1616,7 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'text',
-				html: '어떤 클럽: <b>SKY ✓  GYM ✓  FLY ✓</b> — 그런데 <b>SUN은 거절</b>당했다.<br>다음 중 회원이 될 수 있는 단어는?'
+				html: '어떤 클럽: <b>SKY ✓  GYM ✓  FLY ✓</b>. 그런데 <b>SUN은 거절</b>당했어요.<br>다음 중 회원이 될 수 있는 단어는?'
 			}
 		],
 		type: 'choice',
@@ -1637,7 +1637,7 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'text',
-				html: '어떤 클럽: <b>4 ✓  6 ✓  8 ✓  9 ✓</b> — 그런데 <b>7과 11은 거절</b>당했다.<br>다음 중 회원이 될 수 있는 수는?'
+				html: '어떤 클럽: <b>4 ✓  6 ✓  8 ✓  9 ✓</b>. 그런데 <b>7과 11은 거절</b>당했어요.<br>다음 중 회원이 될 수 있는 수는?'
 			}
 		],
 		type: 'choice',
@@ -1657,7 +1657,7 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'text',
-				html: '어떤 클럽의 회원은 <b>1·3·5·7·8·10·12</b>, 거절은 <b>2·4·6·9·11</b>이다.<br>거절된 수 중에서도 유독 <b>더 심하게</b> 자격 미달인 수가 하나 있다. 무엇일까?'
+				html: '어떤 클럽의 회원은 <b>1·3·5·7·8·10·12</b>, 거절은 <b>2·4·6·9·11</b>이에요.<br>거절된 수 중에서도 유독 <b>더 심하게</b> 자격 미달인 수가 하나 있어요. 무엇일까요?'
 			}
 		],
 		type: 'text',
@@ -1676,7 +1676,7 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'text',
-				html: '나는 <b>숫자 10</b>이기도 하고,<br>몸에서 <b>펄펄 나기도</b> 하고,<br>줄지어 <b>맞춰 서기도</b> 합니다.<br>나는 어떤 <b>한 글자</b>일까요?'
+				html: '나는 <b>숫자 10</b>이기도 하고,<br>몸에서 <b>펄펄 나기도</b> 하고,<br>줄지어 <b>맞춰 서기도</b> 해요.<br>나는 어떤 <b>한 글자</b>일까요?'
 			}
 		],
 		type: 'text',
@@ -1694,7 +1694,7 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'text',
-				html: '나는 <b>곱하기 기호</b>이고,<br>수학에서는 <b>모르는 수</b>이고,<br>로마 숫자로는 <b>10</b>입니다.<br>나는 무엇일까요?'
+				html: '나는 <b>곱하기 기호</b>이고,<br>수학에서는 <b>모르는 수</b>이고,<br>로마 숫자로는 <b>10</b>이에요.<br>나는 무엇일까요?'
 			}
 		],
 		type: 'text',
@@ -1710,7 +1710,7 @@ export const PROBLEMS: Problem[] = [
 		id: 'en-lowercase-nations',
 		chip: '영단어',
 		blocks: [
-			{ kind: 'text', html: '대문자로 쓰면 나라, 소문자로 쓰면 다른 뜻이 된다. 물음표는?' },
+			{ kind: 'text', html: '대문자로 쓰면 나라, 소문자로 쓰면 다른 뜻이 돼요. 물음표는?' },
 			{ kind: 'pre', text: 'China → 중국   china → 도자기\nJapan → 일본   japan → 옻칠\nTurkey → 튀르키예   turkey → ?' }
 		],
 		type: 'text',
@@ -1746,7 +1746,7 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'text',
-				html: '오늘 지하철은 <b>다섯 번</b> 출발했다(시:분, 4자리). 그런데 전광판은 세 줄뿐이다.'
+				html: '오늘 지하철은 <b>다섯 번</b> 출발했어요(시:분, 4자리). 그런데 전광판은 세 줄뿐이에요.'
 			},
 			{ kind: 'lcd', lines: ['0800123', '0154519', '002110'] },
 			{ kind: 'text', html: '<b>세 번째</b>로 출발한 시각은?' }
@@ -1782,7 +1782,7 @@ export const PROBLEMS: Problem[] = [
 		id: 'club-double-letter',
 		chip: '클럽',
 		blocks: [
-			{ kind: 'text', html: '<b>겹친 글자 클럽</b>의 가입 기준을 찾아라.' },
+			{ kind: 'text', html: '<b>겹친 글자 클럽</b>의 가입 기준을 찾아보세요.' },
 			{
 				kind: 'pre',
 				text: '회원 :   THREE   SEVEN\n             NINE      TWELVE\n거절 :   ONE        FOUR\n             FIVE       SIX\n\n후보 :   EIGHT    ELEVEN\n             TEN       FIFTEEN'
@@ -1803,7 +1803,7 @@ export const PROBLEMS: Problem[] = [
 		id: 'club-case-twin',
 		chip: '클럽',
 		blocks: [
-			{ kind: 'text', html: '<b>모양 쌍둥이 클럽</b>의 가입 기준을 찾아라.' },
+			{ kind: 'text', html: '<b>모양 쌍둥이 클럽</b>의 가입 기준을 찾아보세요.' },
 			{
 				kind: 'pre',
 				text: '회원 : C   O   S   W\n거절 : A   B   E   G   N\n\n후보 : Z   R   V   D'
@@ -1862,7 +1862,7 @@ export const PROBLEMS: Problem[] = [
 	{
 		id: 'disc-4',
 		chip: '영단어',
-		blocks: [{ kind: 'text', html: 'jungle은 얼마일까?' }, { kind: 'pre', text: 'bold = 3\npuppy = -4\neight = 1\n\njungle = ?' }],
+		blocks: [{ kind: 'text', html: 'jungle은 얼마일까요?' }, { kind: 'pre', text: 'bold = 3\npuppy = -4\neight = 1\n\njungle = ?' }],
 		type: 'text',
 		answers: ['-1'],
 		hints: [
@@ -1928,7 +1928,7 @@ export const PROBLEMS: Problem[] = [
 		id: 'bus-dir',
 		chip: '탐색',
 		blocks: [
-			{ kind: 'text', html: '이 버스는 <b>왼쪽</b>과 <b>오른쪽</b> 중 어느 쪽으로 가고 있을까?' },
+			{ kind: 'text', html: '이 버스는 <b>왼쪽</b>과 <b>오른쪽</b> 중 어느 쪽으로 가고 있을까요?' },
 			{ kind: 'figure', svg: '<svg viewBox=\'0 0 300 150\' role=\'img\' aria-label=\'옆에서 본 버스\'><rect x=\'18\' y=\'34\' width=\'264\' height=\'78\' rx=\'16\' fill=\'var(--accent-soft)\' stroke=\'var(--accent)\' stroke-width=\'3\'/><rect x=\'36\' y=\'48\' width=\'46\' height=\'34\' rx=\'5\' fill=\'#fff\' stroke=\'var(--accent)\' stroke-width=\'2\'/><rect x=\'92\' y=\'48\' width=\'46\' height=\'34\' rx=\'5\' fill=\'#fff\' stroke=\'var(--accent)\' stroke-width=\'2\'/><rect x=\'148\' y=\'48\' width=\'46\' height=\'34\' rx=\'5\' fill=\'#fff\' stroke=\'var(--accent)\' stroke-width=\'2\'/><rect x=\'204\' y=\'48\' width=\'46\' height=\'34\' rx=\'5\' fill=\'#fff\' stroke=\'var(--accent)\' stroke-width=\'2\'/><circle cx=\'74\' cy=\'118\' r=\'18\' fill=\'var(--text)\'/><circle cx=\'74\' cy=\'118\' r=\'7\' fill=\'var(--panel)\'/><circle cx=\'226\' cy=\'118\' r=\'18\' fill=\'var(--text)\'/><circle cx=\'226\' cy=\'118\' r=\'7\' fill=\'var(--panel)\'/><rect x=\'20\' y=\'92\' width=\'10\' height=\'12\' rx=\'2\' fill=\'var(--gold)\'/><rect x=\'270\' y=\'92\' width=\'10\' height=\'12\' rx=\'2\' fill=\'var(--accent-2)\'/></svg>', caption: '옆에서 본 버스 (한국 도로)' }
 		],
 		type: 'text',
@@ -1972,7 +1972,7 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'text',
-				html: '주머니에 동전이 <b>두 개</b> 있고, 합치면 <b>600원</b>이다.<br>그중 하나는 <b>500원짜리가 아니다</b>. 두 동전은?'
+				html: '주머니에 동전이 <b>두 개</b> 있고, 합치면 <b>600원</b>이에요.<br>그중 하나는 <b>500원짜리가 아니에요</b>. 두 동전은?'
 			}
 		],
 		type: 'choice',
@@ -2265,7 +2265,7 @@ export const PROBLEMS: Problem[] = [
 		id: 'kr-acronym-expand',
 		chip: '한글',
 		blocks: [
-			{ kind: 'text', html: '줄임말을 원래 문장으로 되돌리는 규칙을 찾아, <b>내로남불</b>을 풀어 보라.' },
+			{ kind: 'text', html: '줄임말을 원래 문장으로 되돌리는 규칙을 찾아, <b>내로남불</b>을 풀어 보세요.' },
 			{ kind: 'pre', text: '노조 → 노동조합\n비번 → 비밀번호\n특검 → 특별검사\n\n내로남불 → ?' }
 		],
 		type: 'choice',
@@ -2336,7 +2336,7 @@ export const PROBLEMS: Problem[] = [
 		id: 'fig-fold',
 		chip: '종이접기',
 		blocks: [
-			{ kind: 'text', html: '점선을 접는 선으로 종이를 반 접으면, 물감 자국은 모두 몇 개가 될까?' },
+			{ kind: 'text', html: '점선을 접는 선으로 종이를 반 접으면, 물감 자국은 모두 몇 개가 될까요?' },
 			{ kind: 'figure', svg: '<svg viewBox=\'0 0 460 124\' role=\'img\' aria-label=\'종이를 접으면 물감자국이 몇 개\'><rect x=\'6\' y=\'12\' width=\'62\' height=\'74\' rx=\'3\' style=\'stroke:#2c2822;stroke-width:3;fill:none\'/><line x1=\'43\' y1=\'12\' x2=\'43\' y2=\'86\' style=\'stroke:#c0392b;stroke-width:2;stroke-dasharray:5 4\'/><circle cx=\'24\' cy=\'49\' r=\'11\' fill=\'#7fb2e6\'/><text x=\'37\' y=\'112\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:19px;font-weight:800;fill:#2c2822\'>= 2</text><rect x=\'96\' y=\'12\' width=\'62\' height=\'74\' rx=\'3\' style=\'stroke:#2c2822;stroke-width:3;fill:none\'/><line x1=\'133\' y1=\'12\' x2=\'133\' y2=\'86\' style=\'stroke:#c0392b;stroke-width:2;stroke-dasharray:5 4\'/><circle cx=\'128\' cy=\'49\' r=\'11\' fill=\'#7fb2e6\'/><text x=\'127\' y=\'112\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:19px;font-weight:800;fill:#2c2822\'>= 1</text><rect x=\'186\' y=\'12\' width=\'62\' height=\'74\' rx=\'3\' style=\'stroke:#2c2822;stroke-width:3;fill:none\'/><line x1=\'223\' y1=\'12\' x2=\'223\' y2=\'86\' style=\'stroke:#c0392b;stroke-width:2;stroke-dasharray:5 4\'/><circle cx=\'204\' cy=\'34\' r=\'11\' fill=\'#7fb2e6\'/><circle cx=\'204\' cy=\'66\' r=\'11\' fill=\'#7fb2e6\'/><text x=\'217\' y=\'112\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:19px;font-weight:800;fill:#2c2822\'>= 4</text><rect x=\'276\' y=\'12\' width=\'62\' height=\'74\' rx=\'3\' style=\'stroke:#2c2822;stroke-width:3;fill:none\'/><line x1=\'313\' y1=\'12\' x2=\'313\' y2=\'86\' style=\'stroke:#c0392b;stroke-width:2;stroke-dasharray:5 4\'/><circle cx=\'311\' cy=\'40\' r=\'11\' fill=\'#7fb2e6\'/><circle cx=\'292\' cy=\'68\' r=\'11\' fill=\'#7fb2e6\'/><text x=\'307\' y=\'112\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:19px;font-weight:800;fill:#2c2822\'>= 3</text><rect x=\'366\' y=\'12\' width=\'62\' height=\'74\' rx=\'3\' style=\'stroke:#2c2822;stroke-width:3;fill:none\'/><line x1=\'403\' y1=\'12\' x2=\'403\' y2=\'86\' style=\'stroke:#c0392b;stroke-width:2;stroke-dasharray:5 4\'/><circle cx=\'401\' cy=\'32\' r=\'11\' fill=\'#7fb2e6\'/><circle cx=\'401\' cy=\'62\' r=\'11\' fill=\'#7fb2e6\'/><circle cx=\'384\' cy=\'78\' r=\'11\' fill=\'#7fb2e6\'/><text x=\'397\' y=\'112\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:22px;font-weight:800;fill:#c0392b\'>= ?</text></svg>', caption: '접기 전 (물감은 왼쪽에만)' }
 		],
 		type: 'text',
@@ -2352,7 +2352,7 @@ export const PROBLEMS: Problem[] = [
 		id: 'fig-seesaw',
 		chip: '시소',
 		blocks: [
-			{ kind: 'text', html: '물음표 시소는 어느 쪽으로 기울까? (왼쪽 · 오른쪽 · 균형)' },
+			{ kind: 'text', html: '물음표 시소는 어느 쪽으로 기울까요? (왼쪽 · 오른쪽 · 균형)' },
 			{ kind: 'figure', svg: '<svg viewBox=\'0 0 470 100\' role=\'img\' aria-label=\'시소가 어느 쪽으로 기우나\'><line x1=\'9\' y1=\'60\' x2=\'109\' y2=\'44\' style=\'stroke:#2c2822;stroke-width:3;fill:none\'/><path d=\'M50 66 L68 66 L59 52 Z\' style=\'stroke:#2c2822;stroke-width:2;fill:#c9a24a\'/><circle cx=\'35\' cy=\'47\' r=\'6\' fill=\'#2c2822\'/><circle cx=\'71\' cy=\'41\' r=\'6\' fill=\'#2c2822\'/><text x=\'59\' y=\'90\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:19px;font-weight:800;fill:#2c2822\'>왼쪽</text><line x1=\'125\' y1=\'44\' x2=\'225\' y2=\'60\' style=\'stroke:#2c2822;stroke-width:3;fill:none\'/><path d=\'M166 66 L184 66 L175 52 Z\' style=\'stroke:#2c2822;stroke-width:2;fill:#c9a24a\'/><circle cx=\'163\' cy=\'41\' r=\'6\' fill=\'#2c2822\'/><circle cx=\'163\' cy=\'28\' r=\'6\' fill=\'#2c2822\'/><circle cx=\'163\' cy=\'15\' r=\'6\' fill=\'#2c2822\'/><circle cx=\'223\' cy=\'51\' r=\'6\' fill=\'#2c2822\'/><text x=\'175\' y=\'90\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:19px;font-weight:800;fill:#2c2822\'>오른쪽</text><line x1=\'241\' y1=\'52\' x2=\'341\' y2=\'52\' style=\'stroke:#2c2822;stroke-width:3;fill:none\'/><path d=\'M282 66 L300 66 L291 52 Z\' style=\'stroke:#2c2822;stroke-width:2;fill:#c9a24a\'/><circle cx=\'255\' cy=\'43\' r=\'6\' fill=\'#2c2822\'/><circle cx=\'255\' cy=\'30\' r=\'6\' fill=\'#2c2822\'/><circle cx=\'315\' cy=\'43\' r=\'6\' fill=\'#2c2822\'/><circle cx=\'315\' cy=\'30\' r=\'6\' fill=\'#2c2822\'/><circle cx=\'315\' cy=\'17\' r=\'6\' fill=\'#2c2822\'/><text x=\'291\' y=\'90\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:19px;font-weight:800;fill:#2c2822\'>균형</text><line x1=\'357\' y1=\'52\' x2=\'457\' y2=\'52\' style=\'stroke:#2c2822;stroke-width:3;fill:none\'/><path d=\'M398 66 L416 66 L407 52 Z\' style=\'stroke:#2c2822;stroke-width:2;fill:#c9a24a\'/><circle cx=\'395\' cy=\'43\' r=\'6\' fill=\'#2c2822\'/><circle cx=\'395\' cy=\'30\' r=\'6\' fill=\'#2c2822\'/><circle cx=\'443\' cy=\'43\' r=\'6\' fill=\'#2c2822\'/><text x=\'407\' y=\'90\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:22px;font-weight:800;fill:#c0392b\'>?</text></svg>', caption: '추 하나의 무게는 모두 같음' }
 		],
 		type: 'text',
@@ -2400,7 +2400,7 @@ export const PROBLEMS: Problem[] = [
 		id: 'fig-chiral',
 		chip: '손잡이 방향',
 		blocks: [
-			{ kind: 'text', html: '오른쪽 그림은 왼쪽을 <b>돌린 것</b>(회전)일까, <b>뒤집은 것</b>(거울)일까?' },
+			{ kind: 'text', html: '오른쪽 그림은 왼쪽을 <b>돌린 것</b>(회전)일까, <b>뒤집은 것</b>(거울)일까요?' },
 			{ kind: 'figure', svg: '<svg viewBox=\'0 0 470 84\' role=\'img\' aria-label=\'돌린 것인가 뒤집은 것인가\'><g transform=\'translate(6 12)\'><path d=\'M0 0 L26 0 L38 12 L38 38 L0 38 Z\' style=\'stroke:#2c2822;stroke-width:3;fill:none\'/><circle cx=\'9\' cy=\'9\' r=\'4\' style=\'fill:#2c2822;stroke:none\'/></g><g transform=\'translate(58 12)\'><g transform=\'translate(19 19) rotate(90) translate(-19 -19)\'><path d=\'M0 0 L26 0 L38 12 L38 38 L0 38 Z\' style=\'stroke:#2c2822;stroke-width:3;fill:none\'/><circle cx=\'9\' cy=\'9\' r=\'4\' style=\'fill:#2c2822;stroke:none\'/></g></g><text x=\'51\' y=\'72\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:19px;font-weight:800;fill:#2c2822\'>회전</text><g transform=\'translate(98 12)\'><path d=\'M0 0 L26 0 L38 12 L38 38 L0 38 Z\' style=\'stroke:#2c2822;stroke-width:3;fill:none\'/><circle cx=\'9\' cy=\'9\' r=\'4\' style=\'fill:#2c2822;stroke:none\'/></g><g transform=\'translate(150 12)\'><g transform=\'translate(19 19) scale(-1 1) translate(-19 -19)\'><path d=\'M0 0 L26 0 L38 12 L38 38 L0 38 Z\' style=\'stroke:#2c2822;stroke-width:3;fill:none\'/><circle cx=\'9\' cy=\'9\' r=\'4\' style=\'fill:#2c2822;stroke:none\'/></g></g><text x=\'143\' y=\'72\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:19px;font-weight:800;fill:#2c2822\'>거울</text><g transform=\'translate(190 12)\'><path d=\'M0 0 L26 0 L38 12 L38 38 L0 38 Z\' style=\'stroke:#2c2822;stroke-width:3;fill:none\'/><circle cx=\'9\' cy=\'9\' r=\'4\' style=\'fill:#2c2822;stroke:none\'/></g><g transform=\'translate(242 12)\'><g transform=\'translate(19 19) rotate(180) translate(-19 -19)\'><path d=\'M0 0 L26 0 L38 12 L38 38 L0 38 Z\' style=\'stroke:#2c2822;stroke-width:3;fill:none\'/><circle cx=\'9\' cy=\'9\' r=\'4\' style=\'fill:#2c2822;stroke:none\'/></g></g><text x=\'235\' y=\'72\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:19px;font-weight:800;fill:#2c2822\'>회전</text><g transform=\'translate(282 12)\'><path d=\'M0 0 L26 0 L38 12 L38 38 L0 38 Z\' style=\'stroke:#2c2822;stroke-width:3;fill:none\'/><circle cx=\'9\' cy=\'9\' r=\'4\' style=\'fill:#2c2822;stroke:none\'/></g><g transform=\'translate(334 12)\'><g transform=\'translate(19 19) scale(-1 1) rotate(90) translate(-19 -19)\'><path d=\'M0 0 L26 0 L38 12 L38 38 L0 38 Z\' style=\'stroke:#2c2822;stroke-width:3;fill:none\'/><circle cx=\'9\' cy=\'9\' r=\'4\' style=\'fill:#2c2822;stroke:none\'/></g></g><text x=\'327\' y=\'72\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:19px;font-weight:800;fill:#2c2822\'>거울</text><g transform=\'translate(374 12)\'><path d=\'M0 0 L26 0 L38 12 L38 38 L0 38 Z\' style=\'stroke:#2c2822;stroke-width:3;fill:none\'/><circle cx=\'9\' cy=\'9\' r=\'4\' style=\'fill:#2c2822;stroke:none\'/></g><g transform=\'translate(426 12)\'><g transform=\'translate(19 19) rotate(-90) translate(-19 -19)\'><path d=\'M0 0 L26 0 L38 12 L38 38 L0 38 Z\' style=\'stroke:#2c2822;stroke-width:3;fill:none\'/><circle cx=\'9\' cy=\'9\' r=\'4\' style=\'fill:#2c2822;stroke:none\'/></g></g><text x=\'419\' y=\'72\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:22px;font-weight:800;fill:#c0392b\'>?</text></svg>', caption: '점과 잘린 모서리의 관계를 보라' }
 		],
 		type: 'text',
@@ -2416,7 +2416,7 @@ export const PROBLEMS: Problem[] = [
 		id: 'fig-shadow',
 		chip: '정면 그림자',
 		blocks: [
-			{ kind: 'text', html: '정면에서 비친 그림자 막대의 높이는 몇 층일까?' },
+			{ kind: 'text', html: '정면에서 비친 그림자 막대의 높이는 몇 층일까요?' },
 			{ kind: 'figure', svg: '<svg viewBox=\'0 0 470 122\' role=\'img\' aria-label=\'정면 그림자 높이\'><rect x=\'8\' y=\'87\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#a9d0f5\'/><rect x=\'23\' y=\'87\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#54707e\'/><rect x=\'23\' y=\'74\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#54707e\'/><rect x=\'23\' y=\'61\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#54707e\'/><rect x=\'52\' y=\'61\' width=\'16\' height=\'39\' style=\'fill:#9aa0a6;stroke:#5f6368;stroke-width:1\'/><text x=\'15\' y=\'114\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:13px;font-weight:700;fill:#5f6368\'>앞</text><text x=\'30\' y=\'114\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:13px;font-weight:700;fill:#5f6368\'>뒤</text><text x=\'60\' y=\'114\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:13px;font-weight:700;fill:#5f6368\'>그림자</text><rect x=\'128\' y=\'87\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#a9d0f5\'/><rect x=\'128\' y=\'74\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#a9d0f5\'/><rect x=\'128\' y=\'61\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#a9d0f5\'/><rect x=\'128\' y=\'48\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#a9d0f5\'/><rect x=\'143\' y=\'87\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#54707e\'/><rect x=\'172\' y=\'48\' width=\'16\' height=\'52\' style=\'fill:#9aa0a6;stroke:#5f6368;stroke-width:1\'/><text x=\'135\' y=\'114\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:13px;font-weight:700;fill:#5f6368\'>앞</text><text x=\'150\' y=\'114\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:13px;font-weight:700;fill:#5f6368\'>뒤</text><text x=\'180\' y=\'114\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:13px;font-weight:700;fill:#5f6368\'>그림자</text><rect x=\'248\' y=\'87\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#a9d0f5\'/><rect x=\'248\' y=\'74\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#a9d0f5\'/><rect x=\'263\' y=\'87\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#54707e\'/><rect x=\'263\' y=\'74\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#54707e\'/><rect x=\'292\' y=\'74\' width=\'16\' height=\'26\' style=\'fill:#9aa0a6;stroke:#5f6368;stroke-width:1\'/><text x=\'255\' y=\'114\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:13px;font-weight:700;fill:#5f6368\'>앞</text><text x=\'270\' y=\'114\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:13px;font-weight:700;fill:#5f6368\'>뒤</text><text x=\'300\' y=\'114\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:13px;font-weight:700;fill:#5f6368\'>그림자</text><rect x=\'368\' y=\'87\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#a9d0f5\'/><rect x=\'383\' y=\'87\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#54707e\'/><rect x=\'383\' y=\'74\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#54707e\'/><rect x=\'383\' y=\'61\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#54707e\'/><rect x=\'383\' y=\'48\' width=\'13\' height=\'13\' style=\'stroke:#2c2822;stroke-width:1.2;fill:#54707e\'/><rect x=\'412\' y=\'48\' width=\'16\' height=\'52\' style=\'fill:none;stroke:#c0392b;stroke-width:1.5;stroke-dasharray:4 3\'/><text x=\'420\' y=\'80\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:22px;font-weight:800;fill:#c0392b\'>?</text><text x=\'375\' y=\'114\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:13px;font-weight:700;fill:#5f6368\'>앞</text><text x=\'390\' y=\'114\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:13px;font-weight:700;fill:#5f6368\'>뒤</text><text x=\'420\' y=\'114\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:13px;font-weight:700;fill:#5f6368\'>?</text></svg>', caption: '앞·뒤 블록과 정면에서 비친 그림자' }
 		],
 		type: 'text',
@@ -2432,7 +2432,7 @@ export const PROBLEMS: Problem[] = [
 		id: 'fig-pipe',
 		chip: '물길',
 		blocks: [
-			{ kind: 'text', html: '물은 어느 출구로 도착할까? (A · B · C)' },
+			{ kind: 'text', html: '물은 어느 출구로 도착할까요? (A · B · C)' },
 			{ kind: 'figure', svg: '<svg viewBox=\'0 0 470 112\' role=\'img\' aria-label=\'물이 도착하는 곳\'><g transform=\'translate(4 0)\'><line x1=\'50\' y1=\'16\' x2=\'50\' y2=\'92\' style=\'stroke:#8a8f94;stroke-width:5;fill:none;stroke-linecap:round\'/><rect x=\'46\' y=\'49\' width=\'8\' height=\'10\' fill=\'#fdf6e9\'/><line x1=\'10\' y1=\'54\' x2=\'84\' y2=\'54\' style=\'stroke:#8a8f94;stroke-width:5;fill:none;stroke-linecap:round\'/><text x=\'10\' y=\'45\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:13px;font-weight:700;fill:#5f6368\'>시작</text><circle cx=\'10\' cy=\'54\' r=\'4\' fill=\'#c0392b\'/><circle cx=\'50\' cy=\'12\' r=\'7\' style=\'fill:#fff;stroke:#2c2822;stroke-width:1.2\'/><text x=\'50\' y=\'17\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:13px;font-weight:700;fill:#5f6368\'>A</text><circle cx=\'50\' cy=\'96\' r=\'7\' style=\'fill:#fff;stroke:#2c2822;stroke-width:1.2\'/><text x=\'50\' y=\'101\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:13px;font-weight:700;fill:#5f6368\'>B</text><circle cx=\'90\' cy=\'54\' r=\'7\' style=\'fill:#fff;stroke:#2c2822;stroke-width:1.2\'/><text x=\'90\' y=\'59\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:13px;font-weight:700;fill:#5f6368\'>C</text></g><g transform=\'translate(120 0)\'><line x1=\'10\' y1=\'54\' x2=\'52\' y2=\'54\' style=\'stroke:#8a8f94;stroke-width:5;fill:none;stroke-linecap:round\'/><line x1=\'52\' y1=\'16\' x2=\'52\' y2=\'92\' style=\'stroke:#8a8f94;stroke-width:5;fill:none;stroke-linecap:round\'/><circle cx=\'52\' cy=\'54\' r=\'4\' fill=\'#2c2822\'/><text x=\'10\' y=\'45\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:13px;font-weight:700;fill:#5f6368\'>시작</text><circle cx=\'10\' cy=\'54\' r=\'4\' fill=\'#c0392b\'/><circle cx=\'52\' cy=\'12\' r=\'7\' style=\'fill:#fff;stroke:#2c2822;stroke-width:1.2\'/><text x=\'52\' y=\'17\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:13px;font-weight:700;fill:#5f6368\'>A</text><circle cx=\'52\' cy=\'96\' r=\'7\' style=\'fill:#fff;stroke:#2c2822;stroke-width:1.2\'/><text x=\'52\' y=\'101\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:13px;font-weight:700;fill:#5f6368\'>B</text><circle cx=\'90\' cy=\'54\' r=\'7\' style=\'fill:#fff;stroke:#2c2822;stroke-width:1.2\'/><text x=\'90\' y=\'59\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:13px;font-weight:700;fill:#5f6368\'>C</text></g><g transform=\'translate(236 0)\'><line x1=\'66\' y1=\'16\' x2=\'66\' y2=\'92\' style=\'stroke:#8a8f94;stroke-width:5;fill:none;stroke-linecap:round\'/><rect x=\'62\' y=\'25\' width=\'8\' height=\'10\' fill=\'#fdf6e9\'/><polyline points=\'10 54 32 54 32 30 88 30\' style=\'stroke:#8a8f94;stroke-width:5;fill:none;stroke-linecap:round\'/><text x=\'10\' y=\'45\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:13px;font-weight:700;fill:#5f6368\'>시작</text><circle cx=\'10\' cy=\'54\' r=\'4\' fill=\'#c0392b\'/><circle cx=\'90\' cy=\'30\' r=\'7\' style=\'fill:#fff;stroke:#2c2822;stroke-width:1.2\'/><text x=\'90\' y=\'35\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:13px;font-weight:700;fill:#5f6368\'>A</text><circle cx=\'66\' cy=\'96\' r=\'7\' style=\'fill:#fff;stroke:#2c2822;stroke-width:1.2\'/><text x=\'66\' y=\'101\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:13px;font-weight:700;fill:#5f6368\'>B</text><circle cx=\'90\' cy=\'78\' r=\'7\' style=\'fill:#fff;stroke:#2c2822;stroke-width:1.2\'/><text x=\'90\' y=\'83\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:13px;font-weight:700;fill:#5f6368\'>C</text></g><g transform=\'translate(352 0)\'><line x1=\'34\' y1=\'16\' x2=\'34\' y2=\'92\' style=\'stroke:#8a8f94;stroke-width:5;fill:none;stroke-linecap:round\'/><line x1=\'78\' y1=\'16\' x2=\'78\' y2=\'60\' style=\'stroke:#8a8f94;stroke-width:5;fill:none;stroke-linecap:round\'/><rect x=\'30\' y=\'35\' width=\'8\' height=\'10\' fill=\'#fdf6e9\'/><polyline points=\'10 40 56 40 56 84 88 84\' style=\'stroke:#8a8f94;stroke-width:5;fill:none;stroke-linecap:round\'/><circle cx=\'56\' cy=\'40\' r=\'4\' fill=\'#2c2822\'/><text x=\'10\' y=\'31\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:13px;font-weight:700;fill:#5f6368\'>시작</text><circle cx=\'10\' cy=\'40\' r=\'4\' fill=\'#c0392b\'/><circle cx=\'34\' cy=\'12\' r=\'7\' style=\'fill:#fff;stroke:#2c2822;stroke-width:1.2\'/><text x=\'34\' y=\'17\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:13px;font-weight:700;fill:#5f6368\'>A</text><circle cx=\'90\' cy=\'84\' r=\'7\' style=\'fill:#fff;stroke:#2c2822;stroke-width:1.2\'/><text x=\'90\' y=\'89\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:13px;font-weight:700;fill:#5f6368\'>B</text><circle cx=\'78\' cy=\'12\' r=\'7\' style=\'fill:#fff;stroke:#2c2822;stroke-width:1.2\'/><text x=\'78\' y=\'17\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:13px;font-weight:700;fill:#5f6368\'>C</text><text x=\'20\' y=\'104\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:22px;font-weight:800;fill:#c0392b\'>?</text></g></svg>', caption: '검은 점(●)은 진짜 연결, 그냥 겹쳐 지나가면 다리' }
 		],
 		type: 'text',
@@ -2448,7 +2448,7 @@ export const PROBLEMS: Problem[] = [
 		id: 'fig-rotpair',
 		chip: '따로 도는 점',
 		blocks: [
-			{ kind: 'text', html: '물음표 칸에서 점은 다음에 어디로 갈까? (위 · 왼아래 · 오른아래)' },
+			{ kind: 'text', html: '물음표 칸에서 점은 다음에 어디로 갈까요? (위 · 왼아래 · 오른아래)' },
 			{ kind: 'figure', svg: '<svg viewBox=\'0 0 470 104\' role=\'img\' aria-label=\'점은 다음에 어디로\'><g transform=\'translate(4 0)\'><path d=\'M28 12 L88 12 L88 88 L12 88 L12 28 Z\' style=\'stroke:#2c2822;stroke-width:3;fill:none\'/><circle cx=\'50\' cy=\'32\' r=\'6\' fill=\'#2c2822\'/></g><g transform=\'translate(96 0)\'><path d=\'M12 12 L72 12 L88 28 L88 88 L12 88 Z\' style=\'stroke:#2c2822;stroke-width:3;fill:none\'/><circle cx=\'32\' cy=\'68\' r=\'6\' fill=\'#2c2822\'/></g><g transform=\'translate(188 0)\'><path d=\'M12 12 L88 12 L88 72 L72 88 L12 88 Z\' style=\'stroke:#2c2822;stroke-width:3;fill:none\'/><circle cx=\'68\' cy=\'68\' r=\'6\' fill=\'#2c2822\'/></g><g transform=\'translate(280 0)\'><path d=\'M12 12 L88 12 L88 88 L28 88 L12 72 Z\' style=\'stroke:#2c2822;stroke-width:3;fill:none\'/><circle cx=\'50\' cy=\'32\' r=\'6\' fill=\'#2c2822\'/></g><g transform=\'translate(372 0)\'><path d=\'M28 12 L88 12 L88 88 L12 88 L12 28 Z\' style=\'stroke:#2c2822;stroke-width:3;fill:none\'/><text x=\'50\' y=\'58\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:22px;font-weight:800;fill:#c0392b\'>?</text></g></svg>', caption: '잘린 모서리와 점은 서로 다른 속도로 돈다' }
 		],
 		type: 'text',
@@ -2464,7 +2464,7 @@ export const PROBLEMS: Problem[] = [
 		id: 'fig-foldarrow',
 		chip: '상자 접기',
 		blocks: [
-			{ kind: 'text', html: '이 십자 전개도를 상자로 접으면, 화살표는 어느 쪽을 향할까? (바닥 · 하늘 · 옆벽)' },
+			{ kind: 'text', html: '이 십자 전개도를 상자로 접으면, 화살표는 어느 쪽을 향할까요? (바닥 · 하늘 · 옆벽)' },
 			{ kind: 'figure', svg: '<svg viewBox=\'0 0 470 104\' role=\'img\' aria-label=\'전개도를 접으면 화살표는 어디로\'><rect x=\'36\' y=\'28\' width=\'26\' height=\'26\' style=\'stroke:#2c2822;stroke-width:2;fill:#d8d2c4\'/><rect x=\'36\' y=\'2\' width=\'26\' height=\'26\' style=\'stroke:#2c2822;stroke-width:2;fill:none\'/><rect x=\'36\' y=\'54\' width=\'26\' height=\'26\' style=\'stroke:#c9c3b4;stroke-width:2;fill:none\'/><rect x=\'10\' y=\'28\' width=\'26\' height=\'26\' style=\'stroke:#c9c3b4;stroke-width:2;fill:none\'/><rect x=\'62\' y=\'28\' width=\'26\' height=\'26\' style=\'stroke:#c9c3b4;stroke-width:2;fill:none\'/><line x1=\'49\' y1=\'5\' x2=\'49\' y2=\'25\' style=\'stroke:#c0392b;stroke-width:2.5\'/><polyline points=\'44 20 49 25 54 20\' style=\'stroke:#c0392b;stroke-width:2.5;fill:none\'/><text x=\'49\' y=\'96\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:13px;font-weight:700;fill:#5f6368\'>바닥</text><rect x=\'156\' y=\'28\' width=\'26\' height=\'26\' style=\'stroke:#2c2822;stroke-width:2;fill:#d8d2c4\'/><rect x=\'156\' y=\'2\' width=\'26\' height=\'26\' style=\'stroke:#c9c3b4;stroke-width:2;fill:none\'/><rect x=\'156\' y=\'54\' width=\'26\' height=\'26\' style=\'stroke:#c9c3b4;stroke-width:2;fill:none\'/><rect x=\'130\' y=\'28\' width=\'26\' height=\'26\' style=\'stroke:#c9c3b4;stroke-width:2;fill:none\'/><rect x=\'182\' y=\'28\' width=\'26\' height=\'26\' style=\'stroke:#2c2822;stroke-width:2;fill:none\'/><line x1=\'185\' y1=\'41\' x2=\'205\' y2=\'41\' style=\'stroke:#c0392b;stroke-width:2.5\'/><polyline points=\'200 36 205 41 200 46\' style=\'stroke:#c0392b;stroke-width:2.5;fill:none\'/><text x=\'169\' y=\'96\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:13px;font-weight:700;fill:#5f6368\'>하늘</text><rect x=\'276\' y=\'28\' width=\'26\' height=\'26\' style=\'stroke:#2c2822;stroke-width:2;fill:#d8d2c4\'/><rect x=\'276\' y=\'2\' width=\'26\' height=\'26\' style=\'stroke:#c9c3b4;stroke-width:2;fill:none\'/><rect x=\'276\' y=\'54\' width=\'26\' height=\'26\' style=\'stroke:#c9c3b4;stroke-width:2;fill:none\'/><rect x=\'250\' y=\'28\' width=\'26\' height=\'26\' style=\'stroke:#2c2822;stroke-width:2;fill:none\'/><rect x=\'302\' y=\'28\' width=\'26\' height=\'26\' style=\'stroke:#c9c3b4;stroke-width:2;fill:none\'/><line x1=\'263\' y1=\'51\' x2=\'263\' y2=\'31\' style=\'stroke:#c0392b;stroke-width:2.5\'/><polyline points=\'258 36 263 31 268 36\' style=\'stroke:#c0392b;stroke-width:2.5;fill:none\'/><text x=\'289\' y=\'96\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:13px;font-weight:700;fill:#5f6368\'>옆벽</text><rect x=\'396\' y=\'28\' width=\'26\' height=\'26\' style=\'stroke:#2c2822;stroke-width:2;fill:#d8d2c4\'/><rect x=\'396\' y=\'2\' width=\'26\' height=\'26\' style=\'stroke:#c9c3b4;stroke-width:2;fill:none\'/><rect x=\'396\' y=\'54\' width=\'26\' height=\'26\' style=\'stroke:#2c2822;stroke-width:2;fill:none\'/><rect x=\'370\' y=\'28\' width=\'26\' height=\'26\' style=\'stroke:#c9c3b4;stroke-width:2;fill:none\'/><rect x=\'422\' y=\'28\' width=\'26\' height=\'26\' style=\'stroke:#c9c3b4;stroke-width:2;fill:none\'/><line x1=\'409\' y1=\'77\' x2=\'409\' y2=\'57\' style=\'stroke:#c0392b;stroke-width:2.5\'/><polyline points=\'404 62 409 57 414 62\' style=\'stroke:#c0392b;stroke-width:2.5;fill:none\'/><text x=\'409\' y=\'96\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:22px;font-weight:800;fill:#c0392b\'>?</text></svg>', caption: '회색이 바닥, 나머지는 접혀 세워지는 벽' }
 		],
 		type: 'text',
@@ -2480,7 +2480,7 @@ export const PROBLEMS: Problem[] = [
 		id: 'fig-lonely',
 		chip: '외톨이 점',
 		blocks: [
-			{ kind: 'text', html: '세로 점선을 접는 선으로 종이를 반 접으면, 짝을 못 만나 홀로 남는 점(외톨이)은 몇 개일까?' },
+			{ kind: 'text', html: '세로 점선을 접는 선으로 종이를 반 접으면, 짝을 못 만나 홀로 남는 점(외톨이)은 몇 개일까요?' },
 			{ kind: 'figure', svg: '<svg viewBox=\'0 0 470 112\' role=\'img\' aria-label=\'세로축으로 접으면 짝 없는 점 세기\'><line x1=\'11.5\' y1=\'13.5\' x2=\'11.5\' y2=\'79.5\' style=\'stroke:#e6e0d2;stroke-width:1\'/><line x1=\'22.5\' y1=\'13.5\' x2=\'22.5\' y2=\'79.5\' style=\'stroke:#e6e0d2;stroke-width:1\'/><line x1=\'33.5\' y1=\'13.5\' x2=\'33.5\' y2=\'79.5\' style=\'stroke:#e6e0d2;stroke-width:1\'/><line x1=\'44.5\' y1=\'13.5\' x2=\'44.5\' y2=\'79.5\' style=\'stroke:#e6e0d2;stroke-width:1\'/><line x1=\'55.5\' y1=\'13.5\' x2=\'55.5\' y2=\'79.5\' style=\'stroke:#e6e0d2;stroke-width:1\'/><line x1=\'66.5\' y1=\'13.5\' x2=\'66.5\' y2=\'79.5\' style=\'stroke:#e6e0d2;stroke-width:1\'/><line x1=\'77.5\' y1=\'13.5\' x2=\'77.5\' y2=\'79.5\' style=\'stroke:#e6e0d2;stroke-width:1\'/><line x1=\'88.5\' y1=\'13.5\' x2=\'88.5\' y2=\'79.5\' style=\'stroke:#e6e0d2;stroke-width:1\'/><line x1=\'99.5\' y1=\'13.5\' x2=\'99.5\' y2=\'79.5\' style=\'stroke:#e6e0d2;stroke-width:1\'/><line x1=\'11.5\' y1=\'79.5\' x2=\'99.5\' y2=\'79.5\' style=\'stroke:#e6e0d2;stroke-width:1\'/><line x1=\'11.5\' y1=\'68.5\' x2=\'99.5\' y2=\'68.5\' style=\'stroke:#e6e0d2;stroke-width:1\'/><line x1=\'11.5\' y1=\'57.5\' x2=\'99.5\' y2=\'57.5\' style=\'stroke:#e6e0d2;stroke-width:1\'/><line x1=\'11.5\' y1=\'46.5\' x2=\'99.5\' y2=\'46.5\' style=\'stroke:#e6e0d2;stroke-width:1\'/><line x1=\'11.5\' y1=\'35.5\' x2=\'99.5\' y2=\'35.5\' style=\'stroke:#e6e0d2;stroke-width:1\'/><line x1=\'11.5\' y1=\'24.5\' x2=\'99.5\' y2=\'24.5\' style=\'stroke:#e6e0d2;stroke-width:1\'/><line x1=\'11.5\' y1=\'13.5\' x2=\'99.5\' y2=\'13.5\' style=\'stroke:#e6e0d2;stroke-width:1\'/><line x1=\'55.5\' y1=\'7.5\' x2=\'55.5\' y2=\'85.5\' style=\'stroke:#c0392b;stroke-width:1.5;stroke-dasharray:4 3\'/><circle cx=\'22.5\' cy=\'35.5\' r=\'4.5\' fill=\'#2c2822\'/><circle cx=\'88.5\' cy=\'35.5\' r=\'4.5\' fill=\'#2c2822\'/><circle cx=\'33.5\' cy=\'68.5\' r=\'4.5\' fill=\'#2c2822\'/><circle cx=\'77.5\' cy=\'68.5\' r=\'4.5\' fill=\'#2c2822\'/><circle cx=\'66.5\' cy=\'24.5\' r=\'4.5\' fill=\'#2c2822\'/><text x=\'55.5\' y=\'104\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:13px;font-weight:700;fill:#5f6368\'>외톨이 1</text><line x1=\'131.5\' y1=\'13.5\' x2=\'131.5\' y2=\'79.5\' style=\'stroke:#e6e0d2;stroke-width:1\'/><line x1=\'142.5\' y1=\'13.5\' x2=\'142.5\' y2=\'79.5\' style=\'stroke:#e6e0d2;stroke-width:1\'/><line x1=\'153.5\' y1=\'13.5\' x2=\'153.5\' y2=\'79.5\' style=\'stroke:#e6e0d2;stroke-width:1\'/><line x1=\'164.5\' y1=\'13.5\' x2=\'164.5\' y2=\'79.5\' style=\'stroke:#e6e0d2;stroke-width:1\'/><line x1=\'175.5\' y1=\'13.5\' x2=\'175.5\' y2=\'79.5\' style=\'stroke:#e6e0d2;stroke-width:1\'/><line x1=\'186.5\' y1=\'13.5\' x2=\'186.5\' y2=\'79.5\' style=\'stroke:#e6e0d2;stroke-width:1\'/><line x1=\'197.5\' y1=\'13.5\' x2=\'197.5\' y2=\'79.5\' style=\'stroke:#e6e0d2;stroke-width:1\'/><line x1=\'208.5\' y1=\'13.5\' x2=\'208.5\' y2=\'79.5\' style=\'stroke:#e6e0d2;stroke-width:1\'/><line x1=\'219.5\' y1=\'13.5\' x2=\'219.5\' y2=\'79.5\' style=\'stroke:#e6e0d2;stroke-width:1\'/><line x1=\'131.5\' y1=\'79.5\' x2=\'219.5\' y2=\'79.5\' style=\'stroke:#e6e0d2;stroke-width:1\'/><line x1=\'131.5\' y1=\'68.5\' x2=\'219.5\' y2=\'68.5\' style=\'stroke:#e6e0d2;stroke-width:1\'/><line x1=\'131.5\' y1=\'57.5\' x2=\'219.5\' y2=\'57.5\' style=\'stroke:#e6e0d2;stroke-width:1\'/><line x1=\'131.5\' y1=\'46.5\' x2=\'219.5\' y2=\'46.5\' style=\'stroke:#e6e0d2;stroke-width:1\'/><line x1=\'131.5\' y1=\'35.5\' x2=\'219.5\' y2=\'35.5\' style=\'stroke:#e6e0d2;stroke-width:1\'/><line x1=\'131.5\' y1=\'24.5\' x2=\'219.5\' y2=\'24.5\' style=\'stroke:#e6e0d2;stroke-width:1\'/><line x1=\'131.5\' y1=\'13.5\' x2=\'219.5\' y2=\'13.5\' style=\'stroke:#e6e0d2;stroke-width:1\'/><line x1=\'175.5\' y1=\'7.5\' x2=\'175.5\' y2=\'85.5\' style=\'stroke:#c0392b;stroke-width:1.5;stroke-dasharray:4 3\'/><circle cx=\'142.5\' cy=\'46.5\' r=\'4.5\' fill=\'#2c2822\'/><circle cx=\'208.5\' cy=\'46.5\' r=\'4.5\' fill=\'#2c2822\'/><circle cx=\'164.5\' cy=\'35.5\' r=\'4.5\' fill=\'#2c2822\'/><circle cx=\'186.5\' cy=\'57.5\' r=\'4.5\' fill=\'#2c2822\'/><circle cx=\'197.5\' cy=\'24.5\' r=\'4.5\' fill=\'#2c2822\'/><text x=\'175.5\' y=\'104\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:13px;font-weight:700;fill:#5f6368\'>3</text><line x1=\'251.5\' y1=\'13.5\' x2=\'251.5\' y2=\'79.5\' style=\'stroke:#e6e0d2;stroke-width:1\'/><line x1=\'262.5\' y1=\'13.5\' x2=\'262.5\' y2=\'79.5\' style=\'stroke:#e6e0d2;stroke-width:1\'/><line x1=\'273.5\' y1=\'13.5\' x2=\'273.5\' y2=\'79.5\' style=\'stroke:#e6e0d2;stroke-width:1\'/><line x1=\'284.5\' y1=\'13.5\' x2=\'284.5\' y2=\'79.5\' style=\'stroke:#e6e0d2;stroke-width:1\'/><line x1=\'295.5\' y1=\'13.5\' x2=\'295.5\' y2=\'79.5\' style=\'stroke:#e6e0d2;stroke-width:1\'/><line x1=\'306.5\' y1=\'13.5\' x2=\'306.5\' y2=\'79.5\' style=\'stroke:#e6e0d2;stroke-width:1\'/><line x1=\'317.5\' y1=\'13.5\' x2=\'317.5\' y2=\'79.5\' style=\'stroke:#e6e0d2;stroke-width:1\'/><line x1=\'328.5\' y1=\'13.5\' x2=\'328.5\' y2=\'79.5\' style=\'stroke:#e6e0d2;stroke-width:1\'/><line x1=\'339.5\' y1=\'13.5\' x2=\'339.5\' y2=\'79.5\' style=\'stroke:#e6e0d2;stroke-width:1\'/><line x1=\'251.5\' y1=\'79.5\' x2=\'339.5\' y2=\'79.5\' style=\'stroke:#e6e0d2;stroke-width:1\'/><line x1=\'251.5\' y1=\'68.5\' x2=\'339.5\' y2=\'68.5\' style=\'stroke:#e6e0d2;stroke-width:1\'/><line x1=\'251.5\' y1=\'57.5\' x2=\'339.5\' y2=\'57.5\' style=\'stroke:#e6e0d2;stroke-width:1\'/><line x1=\'251.5\' y1=\'46.5\' x2=\'339.5\' y2=\'46.5\' style=\'stroke:#e6e0d2;stroke-width:1\'/><line x1=\'251.5\' y1=\'35.5\' x2=\'339.5\' y2=\'35.5\' style=\'stroke:#e6e0d2;stroke-width:1\'/><line x1=\'251.5\' y1=\'24.5\' x2=\'339.5\' y2=\'24.5\' style=\'stroke:#e6e0d2;stroke-width:1\'/><line x1=\'251.5\' y1=\'13.5\' x2=\'339.5\' y2=\'13.5\' style=\'stroke:#e6e0d2;stroke-width:1\'/><line x1=\'295.5\' y1=\'7.5\' x2=\'295.5\' y2=\'85.5\' style=\'stroke:#c0392b;stroke-width:1.5;stroke-dasharray:4 3\'/><circle cx=\'262.5\' cy=\'24.5\' r=\'4.5\' fill=\'#2c2822\'/><circle cx=\'328.5\' cy=\'24.5\' r=\'4.5\' fill=\'#2c2822\'/><circle cx=\'284.5\' cy=\'57.5\' r=\'4.5\' fill=\'#2c2822\'/><circle cx=\'306.5\' cy=\'57.5\' r=\'4.5\' fill=\'#2c2822\'/><circle cx=\'273.5\' cy=\'46.5\' r=\'4.5\' fill=\'#2c2822\'/><circle cx=\'317.5\' cy=\'46.5\' r=\'4.5\' fill=\'#2c2822\'/><text x=\'295.5\' y=\'104\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:13px;font-weight:700;fill:#5f6368\'>0</text><line x1=\'371.5\' y1=\'13.5\' x2=\'371.5\' y2=\'79.5\' style=\'stroke:#e6e0d2;stroke-width:1\'/><line x1=\'382.5\' y1=\'13.5\' x2=\'382.5\' y2=\'79.5\' style=\'stroke:#e6e0d2;stroke-width:1\'/><line x1=\'393.5\' y1=\'13.5\' x2=\'393.5\' y2=\'79.5\' style=\'stroke:#e6e0d2;stroke-width:1\'/><line x1=\'404.5\' y1=\'13.5\' x2=\'404.5\' y2=\'79.5\' style=\'stroke:#e6e0d2;stroke-width:1\'/><line x1=\'415.5\' y1=\'13.5\' x2=\'415.5\' y2=\'79.5\' style=\'stroke:#e6e0d2;stroke-width:1\'/><line x1=\'426.5\' y1=\'13.5\' x2=\'426.5\' y2=\'79.5\' style=\'stroke:#e6e0d2;stroke-width:1\'/><line x1=\'437.5\' y1=\'13.5\' x2=\'437.5\' y2=\'79.5\' style=\'stroke:#e6e0d2;stroke-width:1\'/><line x1=\'448.5\' y1=\'13.5\' x2=\'448.5\' y2=\'79.5\' style=\'stroke:#e6e0d2;stroke-width:1\'/><line x1=\'459.5\' y1=\'13.5\' x2=\'459.5\' y2=\'79.5\' style=\'stroke:#e6e0d2;stroke-width:1\'/><line x1=\'371.5\' y1=\'79.5\' x2=\'459.5\' y2=\'79.5\' style=\'stroke:#e6e0d2;stroke-width:1\'/><line x1=\'371.5\' y1=\'68.5\' x2=\'459.5\' y2=\'68.5\' style=\'stroke:#e6e0d2;stroke-width:1\'/><line x1=\'371.5\' y1=\'57.5\' x2=\'459.5\' y2=\'57.5\' style=\'stroke:#e6e0d2;stroke-width:1\'/><line x1=\'371.5\' y1=\'46.5\' x2=\'459.5\' y2=\'46.5\' style=\'stroke:#e6e0d2;stroke-width:1\'/><line x1=\'371.5\' y1=\'35.5\' x2=\'459.5\' y2=\'35.5\' style=\'stroke:#e6e0d2;stroke-width:1\'/><line x1=\'371.5\' y1=\'24.5\' x2=\'459.5\' y2=\'24.5\' style=\'stroke:#e6e0d2;stroke-width:1\'/><line x1=\'371.5\' y1=\'13.5\' x2=\'459.5\' y2=\'13.5\' style=\'stroke:#e6e0d2;stroke-width:1\'/><line x1=\'415.5\' y1=\'7.5\' x2=\'415.5\' y2=\'85.5\' style=\'stroke:#c0392b;stroke-width:1.5;stroke-dasharray:4 3\'/><circle cx=\'382.5\' cy=\'57.5\' r=\'4.5\' fill=\'#2c2822\'/><circle cx=\'448.5\' cy=\'57.5\' r=\'4.5\' fill=\'#2c2822\'/><circle cx=\'393.5\' cy=\'24.5\' r=\'4.5\' fill=\'#2c2822\'/><circle cx=\'437.5\' cy=\'68.5\' r=\'4.5\' fill=\'#2c2822\'/><text x=\'415.5\' y=\'104\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:22px;font-weight:800;fill:#c0392b\'>?</text></svg>', caption: '빨간 점선이 접는 축' }
 		],
 		type: 'text',
@@ -2513,7 +2513,7 @@ export const PROBLEMS: Problem[] = [
 		id: 'txt-ssbatchim',
 		chip: '겹받침',
 		blocks: [
-			{ kind: 'text', html: '받침 안을 자세히 들여다보고 규칙을 찾아보자.<br><b>산</b> → 0<br><b>닭발</b> → 1<br><b>몫</b> → 1<br><b>여덟</b> → 1<br><b>닭값</b> → ?' }
+			{ kind: 'text', html: '받침 안을 자세히 들여다보고 규칙을 찾아보세요.<br><b>산</b> → 0<br><b>닭발</b> → 1<br><b>몫</b> → 1<br><b>여덟</b> → 1<br><b>닭값</b> → ?' }
 		],
 		type: 'text',
 		answers: ['2', '2개', '두 개', '두개'],
@@ -2528,7 +2528,7 @@ export const PROBLEMS: Problem[] = [
 		id: 'txt-dateformat',
 		chip: '숨은 표기법',
 		blocks: [
-			{ kind: 'text', html: '어느 여행 앱은 날짜를 항상 같은 방식으로 두 자리씩 나란히 표시한다:<br>04/07, 11/09, 25/03, 12/12<br>이 앱과 같은 방식으로 쓴다면, <b>08/06</b>은 몇 월 며칠일까?' }
+			{ kind: 'text', html: '어느 여행 앱은 날짜를 항상 같은 방식으로 두 자리씩 나란히 표시해요:<br>04/07, 11/09, 25/03, 12/12<br>이 앱과 같은 방식으로 쓴다면, <b>08/06</b>은 몇 월 며칠일까요?' }
 		],
 		type: 'text',
 		answers: ['6월 8일', '6/8', '6월8일', '08/06 = 6월 8일', '06월 08일'],
@@ -2608,7 +2608,7 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'text',
-				html: '시계 A는 하루에 1분씩 느려지고, 시계 B는 아예 멈춰 있다.<br>정확한 시각을 <b>더 자주</b> 가리키는 쪽은?'
+				html: '시계 A는 하루에 1분씩 느려지고, 시계 B는 아예 멈춰 있어요.<br>정확한 시각을 <b>더 자주</b> 가리키는 쪽은?'
 			}
 		],
 		type: 'text',
@@ -2642,7 +2642,7 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'text',
-				html: '분침이 떨어져 나간 시계. 시침이 <b>정확히 6과 7의 한가운데</b>를 가리키고 있다. 지금은 몇 시 몇 분?'
+				html: '분침이 떨어져 나간 시계. 시침이 <b>정확히 6과 7의 한가운데</b>를 가리키고 있어요. 지금은 몇 시 몇 분?'
 			}
 		],
 		type: 'text',
@@ -2676,7 +2676,7 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'text',
-				html: '시계판의 <b>2</b>에서 <b>8</b>까지, 시침이 시계 방향으로 가면 6시간 걸린다.<br>반대 방향(거꾸로)으로 가도 <b>딱 6시간</b>이다. 이런 짝은 2와 8 말고도 있다 — 두 숫자는 어떤 관계일까?'
+				html: '시계판의 <b>2</b>에서 <b>8</b>까지, 시침이 시계 방향으로 가면 6시간 걸려요.<br>반대 방향(거꾸로)으로 가도 <b>딱 6시간</b>이에요. 이런 짝은 2와 8 말고도 있어요. 두 숫자는 어떤 관계일까요?'
 			}
 		],
 		type: 'choice',
@@ -2696,7 +2696,7 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'text',
-				html: '소라는 <b>그저께</b>만 해도 8살이었는데, <b>내년</b>에는 11살이 된다.<br>오늘은 몇 월 며칠일까?'
+				html: '소라는 <b>그저께</b>만 해도 8살이었는데, <b>내년</b>에는 11살이 돼요.<br>오늘은 몇 월 며칠일까요?'
 			}
 		],
 		type: 'text',
@@ -2714,7 +2714,7 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'text',
-				html: '서랍에 검은 양말 10짝, 흰 양말 10짝이 뒤섞여 있다. 캄캄해서 색이 안 보인다.<br>같은 색 <b>한 켤레를 확실히</b> 만들려면 최소 몇 짝을 꺼내야 할까?'
+				html: '서랍에 검은 양말 10짝, 흰 양말 10짝이 뒤섞여 있어요. 캄캄해서 색이 안 보여요.<br>같은 색 <b>한 켤레를 확실히</b> 만들려면 최소 몇 짝을 꺼내야 할까요?'
 			}
 		],
 		type: 'text',
@@ -2732,7 +2732,7 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'text',
-				html: '달팽이가 깊이 10m 우물 바닥에 있다. 낮 동안 3m 오르고, 밤에 2m 미끄러진다.<br>며칠째 <b>낮</b>에 우물 밖으로 나올까?'
+				html: '달팽이가 깊이 10m 우물 바닥에 있어요. 낮 동안 3m 오르고, 밤에 2m 미끄러져요.<br>며칠째 <b>낮</b>에 우물 밖으로 나올까요?'
 			}
 		],
 		type: 'text',
@@ -2750,7 +2750,7 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'text',
-				html: '빈 병 3개를 가져가면 새 음료 1병으로 바꿔 주는 가게가 있다.<br>음료 9병을 산 소라는 <b>최대 몇 병</b>을 마실 수 있을까?'
+				html: '빈 병 3개를 가져가면 새 음료 1병으로 바꿔 주는 가게가 있어요.<br>음료 9병을 산 소라는 <b>최대 몇 병</b>을 마실 수 있을까요?'
 			}
 		],
 		type: 'text',
@@ -2768,7 +2768,7 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'text',
-				html: '마라톤 결승선 직전, 소라가 마지막 스퍼트로 <b>2등 선수를 추월</b>했다.<br>소라는 지금 몇 등?'
+				html: '마라톤 결승선 직전, 소라가 마지막 스퍼트로 <b>2등 선수를 추월</b>했어요.<br>소라는 지금 몇 등?'
 			}
 		],
 		type: 'text',
@@ -2786,7 +2786,7 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'text',
-				html: '연못의 수련이 <b>매일 2배</b>로 넓어져, 30일째에 연못을 가득 덮는다.<br>연못의 <b>절반</b>을 덮는 날은 며칠째일까?'
+				html: '연못의 수련이 <b>매일 2배</b>로 넓어져, 30일째에 연못을 가득 덮어요.<br>연못의 <b>절반</b>을 덮는 날은 며칠째일까요?'
 			}
 		],
 		type: 'text',
@@ -2804,7 +2804,7 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'text',
-				html: '둥근 케이크를 <b>칼질 딱 세 번</b>으로 최대 몇 조각까지 나눌 수 있을까?'
+				html: '둥근 케이크를 <b>칼질 딱 세 번</b>으로 최대 몇 조각까지 나눌 수 있을까요?'
 			}
 		],
 		type: 'text',
@@ -2822,7 +2822,7 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'text',
-				html: '정우네 어머니는 자식이 <b>아들 셋</b>뿐이다.<br>첫째 이름은 일남, 둘째 이름은 이남. 셋째의 이름은?'
+				html: '정우네 어머니는 자식이 <b>아들 셋</b>뿐이에요.<br>첫째 이름은 일남, 둘째 이름은 이남. 셋째의 이름은?'
 			}
 		],
 		type: 'text',
@@ -2840,7 +2840,7 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'text',
-				html: '16팀이 토너먼트(지면 바로 탈락)로 우승팀을 가린다.<br>우승팀이 나올 때까지 <b>총 몇 경기</b>가 열릴까? <b>(암산 3초 컷이 가능하다)</b>'
+				html: '16팀이 토너먼트(지면 바로 탈락)로 우승팀을 가려요.<br>우승팀이 나올 때까지 <b>총 몇 경기</b>가 열릴까요? <b>(암산 3초 컷이 가능해요)</b>'
 			}
 		],
 		type: 'text',
@@ -2858,7 +2858,7 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'text',
-				html: '정전된 밤, 손에는 <b>성냥 한 개비</b>뿐이다.<br>방에는 <b>양초</b>, <b>석유 램프</b>, <b>벽난로</b>가 있다. 무엇에 <b>가장 먼저</b> 불을 붙여야 할까?'
+				html: '정전된 밤, 손에는 <b>성냥 한 개비</b>뿐이에요.<br>방에는 <b>양초</b>, <b>석유 램프</b>, <b>벽난로</b>가 있어요. 무엇에 <b>가장 먼저</b> 불을 붙여야 할까요?'
 			}
 		],
 		type: 'choice',
@@ -2881,7 +2881,7 @@ export const PROBLEMS: Problem[] = [
 		// 한글 표기를 걷어내고 숫자만 남겼다. TRUCK → 2가 킬 라인이다 —
 		// 4자→2, 5자→2, 6자→5라 철자 수만의 함수가 전부 죽는다.
 		blocks: [
-			{ kind: 'text', html: '영어로는 <b>셋 다 1음절</b>이다. 물음표에 들어갈 수는?' },
+			{ kind: 'text', html: '영어로는 <b>셋 다 1음절</b>이에요. 물음표에 들어갈 수는?' },
 			{ kind: 'pre', text: 'MILK → 2\nSTRIKE → 5\nTRUCK → 2\n\nSPRING → ?' }
 		],
 		type: 'text',
@@ -2900,7 +2900,7 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'text',
-				html: '한쪽 무리는 <b>-장이</b>, 다른 무리는 <b>-쟁이</b>로 끝난다.<br>그렇다면 옹기 굽는 사람은 "옹기장이"일까, "옹기쟁이"일까?'
+				html: '한쪽 무리는 <b>-장이</b>, 다른 무리는 <b>-쟁이</b>로 끝나요.<br>그렇다면 옹기 굽는 사람은 "옹기장이"일까, "옹기쟁이"일까요?'
 			},
 			{ kind: 'pre', text: '미장이, 대장장이\n겁쟁이, 멋쟁이\n\n옹기___이 → ?' }
 		],
@@ -2920,7 +2920,7 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'text',
-				html: '어떤 클럽의 가입 심사 결과다.<br>합격: <b>노</b>, <b>구</b>, <b>흐</b><br>불합격: <b>나</b>, <b>거</b>, <b>히</b>, <b>새</b><br>다음 중 합격할 수 있는 글자는?'
+				html: '어떤 클럽의 가입 심사 결과예요.<br>합격: <b>노</b>, <b>구</b>, <b>흐</b><br>불합격: <b>나</b>, <b>거</b>, <b>히</b>, <b>새</b><br>다음 중 합격할 수 있는 글자는?'
 			}
 		],
 		type: 'choice',
@@ -2971,7 +2971,7 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'text',
-				html: '어떤 클럽의 가입 심사 결과다.<br>합격: <b>KNEE</b>, <b>LAMB</b>, <b>HOUR</b><br>불합격: <b>KING</b>, <b>LAMP</b>, <b>HAND</b><br>다음 중 합격은?'
+				html: '어떤 클럽의 가입 심사 결과예요.<br>합격: <b>KNEE</b>, <b>LAMB</b>, <b>HOUR</b><br>불합격: <b>KING</b>, <b>LAMP</b>, <b>HAND</b><br>다음 중 합격은?'
 			}
 		],
 		type: 'choice',
@@ -3006,7 +3006,7 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'text',
-				html: '어떤 클럽의 가입 심사 결과다.<br>합격: <b>동문서답</b>, <b>우왕좌왕</b>, <b>동분서주</b><br>불합격: <b>일석이조</b>, <b>유비무환</b>, <b>새옹지마</b><br>다음 중 합격은?'
+				html: '어떤 클럽의 가입 심사 결과예요.<br>합격: <b>동문서답</b>, <b>우왕좌왕</b>, <b>동분서주</b><br>불합격: <b>일석이조</b>, <b>유비무환</b>, <b>새옹지마</b><br>다음 중 합격은?'
 			}
 		],
 		type: 'choice',
@@ -3057,7 +3057,7 @@ export const PROBLEMS: Problem[] = [
 		id: 'num-hundred-gap',
 		chip: '이상한 연산',
 		blocks: [
-			{ kind: 'text', html: '● 의 규칙을 찾아라.' },
+			{ kind: 'text', html: '● 의 규칙을 찾아보세요.' },
 			{ kind: 'pre', text: '30 ● 70 = 0\n45 ● 65 = 10\n40 ● 50 = 10\n80 ● 90 = 70\n15 ● 25 = 60\n25 ● 35 = ?' }
 		],
 		type: 'text',
@@ -3132,7 +3132,7 @@ export const PROBLEMS: Problem[] = [
 		id: 'num-carry-count',
 		chip: '이상한 연산',
 		blocks: [
-			{ kind: 'text', html: '★의 규칙을 찾아라.' },
+			{ kind: 'text', html: '★의 규칙을 찾아보세요.' },
 			{ kind: 'pre', text: '47 ★ 38 = 1\n25 ★ 13 = 0\n99 ★ 11 = 2\n87 ★ 46 = 2\n68 ★ 57 = ?' }
 		],
 		type: 'text',
@@ -3164,7 +3164,7 @@ export const PROBLEMS: Problem[] = [
 		id: 'nm-sheep-riddle',
 		chip: '숫자 아님',
 		blocks: [
-			{ kind: 'text', html: '농장에 양이 <b>17마리</b> 있었다.<br>어느 날 울타리가 부서져 <b>9마리만 빼고</b> 전부 달아났다.<br>남은 양은 몇 마리일까?' }
+			{ kind: 'text', html: '농장에 양이 <b>17마리</b> 있었어요.<br>어느 날 울타리가 부서져 <b>9마리만 빼고</b> 전부 달아났어요.<br>남은 양은 몇 마리일까요?' }
 		],
 		type: 'text',
 		answers: ['9', '9마리', '아홉 마리'],
@@ -3180,7 +3180,7 @@ export const PROBLEMS: Problem[] = [
 		id: 'num-odometer',
 		chip: '순서 규칙',
 		blocks: [
-			{ kind: 'text', html: '자동차 주행계(앞의 빈자리에는 0이 켜져 있다)가 1km를 더 달릴 때, 계기판에서 <b>바뀌는 숫자의 개수</b>를 적었다. 물음표는?' },
+			{ kind: 'text', html: '자동차 주행계(앞의 빈자리에는 0이 켜져 있다)가 1km를 더 달릴 때, 계기판에서 <b>바뀌는 숫자의 개수</b>를 적었어요. 물음표는?' },
 			{ kind: 'pre', text: '105 → 1\n289 → 2\n199 → 3\n999 → ?' }
 		],
 		type: 'text',
@@ -3196,7 +3196,7 @@ export const PROBLEMS: Problem[] = [
 		id: 'club-cube',
 		chip: '클럽',
 		blocks: [
-			{ kind: 'text', html: '<b>쌓기나무 클럽</b>의 가입 기준을 찾아라.' },
+			{ kind: 'text', html: '<b>쌓기나무 클럽</b>의 가입 기준을 찾아보세요.' },
 			{
 				kind: 'pre',
 				text: '회원 : 1   8   27   64\n거절 : 4   9   16   25   36\n\n후보 : 125   100   216   81'
@@ -3216,7 +3216,7 @@ export const PROBLEMS: Problem[] = [
 		id: 'club-letter-sound',
 		chip: '클럽',
 		blocks: [
-			{ kind: 'text', html: '<b>한 글자 클럽</b>의 가입 기준을 찾아라.' },
+			{ kind: 'text', html: '<b>한 글자 클럽</b>의 가입 기준을 찾아보세요.' },
 			{
 				kind: 'pre',
 				text: '회원 : BEE   SEA   WHY   TEA\n거절 : DOG   SKY   SUN   MAP   TOE\n\n후보 : EYE   PEA   EGG   JAM'
@@ -3236,7 +3236,7 @@ export const PROBLEMS: Problem[] = [
 		id: 'club-number-start',
 		chip: '클럽',
 		blocks: [
-			{ kind: 'text', html: '<b>첫 글자 클럽</b>의 가입 기준을 찾아라.' },
+			{ kind: 'text', html: '<b>첫 글자 클럽</b>의 가입 기준을 찾아보세요.' },
 			{
 				kind: 'pre',
 				text: '회원 : 사과   오리   구두   육지   팔찌   천사\n거절 : 나무   바다   하늘   소금\n\n후보 : 백조   이불   강산   만두'
@@ -3256,7 +3256,7 @@ export const PROBLEMS: Problem[] = [
 		id: 'club-plural',
 		chip: '클럽',
 		blocks: [
-			{ kind: 'text', html: '<b>변신 클럽</b>의 가입 기준을 찾아라.' },
+			{ kind: 'text', html: '<b>변신 클럽</b>의 가입 기준을 찾아보세요.' },
 			{
 				kind: 'pre',
 				text: '회원 :   FOOT         TOOTH\n             GOOSE     MAN\n거절 :   BOOK        MOON\n             DOG          PEN\n\n후보 :   MOUSE     SPOON\n             WOMAN   SON'
@@ -3276,7 +3276,7 @@ export const PROBLEMS: Problem[] = [
 		id: 'club-body-pairs',
 		chip: '클럽',
 		blocks: [
-			{ kind: 'text', html: '<b>짝꿍 클럽</b>의 가입 기준을 찾아라.' },
+			{ kind: 'text', html: '<b>짝꿍 클럽</b>의 가입 기준을 찾아보세요.' },
 			{
 				kind: 'pre',
 				text: '회원 : 눈   귀   손   발\n거절 : 코   입   배   목\n\n후보 : 팔   다리   이마   턱'
@@ -3296,7 +3296,7 @@ export const PROBLEMS: Problem[] = [
 		id: 'club-baby-animals',
 		chip: '클럽',
 		blocks: [
-			{ kind: 'text', html: '<b>병설 유치원 클럽</b>의 가입 기준을 찾아라.' },
+			{ kind: 'text', html: '<b>병설 유치원 클럽</b>의 가입 기준을 찾아보세요.' },
 			{
 				kind: 'pre',
 				text: '회원 : 강아지   송아지   병아리   올챙이\n거절 : 개   소   닭   개구리\n\n후보 : 망아지   두더지   돼지   참새'
@@ -3316,7 +3316,7 @@ export const PROBLEMS: Problem[] = [
 		id: 'club-self-divisible',
 		chip: '클럽',
 		blocks: [
-			{ kind: 'text', html: '<b>자립 클럽</b>의 가입 기준을 찾아라.' },
+			{ kind: 'text', html: '<b>자립 클럽</b>의 가입 기준을 찾아보세요.' },
 			{
 				kind: 'pre',
 				text: '회원 : 11   15   24   36   66\n거절 : 13   25   32   45\n\n후보 : 22   48   27   50'
@@ -3336,7 +3336,7 @@ export const PROBLEMS: Problem[] = [
 		id: 'club-sun-partner',
 		chip: '클럽',
 		blocks: [
-			{ kind: 'text', html: '<b>비밀 파트너 클럽</b>의 가입 기준을 찾아라.' },
+			{ kind: 'text', html: '<b>비밀 파트너 클럽</b>의 가입 기준을 찾아보세요.' },
 			{
 				kind: 'pre',
 				text: '회원 :   FLOWER   SHINE\n             RISE          GLASSES\n거절 :   TABLE       HAPPY\n             WATER     MUSIC\n\n후보 :   SET            LIGHT\n             MOON      BOOK'
@@ -3356,7 +3356,7 @@ export const PROBLEMS: Problem[] = [
 		id: 'club-doer',
 		chip: '클럽',
 		blocks: [
-			{ kind: 'text', html: '<b>일꾼 클럽</b>의 가입 기준을 찾아라.' },
+			{ kind: 'text', html: '<b>일꾼 클럽</b>의 가입 기준을 찾아보세요.' },
 			{
 				kind: 'pre',
 				text: '회원 :   TEACHER   SINGER\n             DRIVER       BAKER\n거절 :   WATER        PAPER\n             RIVER          SUMMER\n\n후보 :   DANCER      FINGER\n             PLAYER      UNDER'
@@ -3376,7 +3376,7 @@ export const PROBLEMS: Problem[] = [
 		id: 'lcd-half-hidden',
 		chip: '전광판',
 		blocks: [
-			{ kind: 'text', html: '전광판 <b>아래쪽 절반이 가림막에 가려져</b> 위쪽 획만 보인다. 그런데 식은 성립한다고 한다. 첫 번째 수는?' },
+			{ kind: 'text', html: '전광판 <b>아래쪽 절반이 가림막에 가려져</b> 위쪽 획만 보여요. 그런데 식은 성립한다고 해요. 첫 번째 수는?' },
 			{
 				kind: 'lcd',
 				lines: ['XY + PP = QR'],
@@ -3412,7 +3412,7 @@ export const PROBLEMS: Problem[] = [
 		id: 'lcd-horizontal-only',
 		chip: '전광판',
 		blocks: [
-			{ kind: 'text', html: '금고 비밀번호 네 자리를 표시하던 전광판이 고장 나 <b>세로획이 전부 꺼졌다</b>. 남은 표시가 아래와 같고, 네 자리의 합은 13이다. 비밀번호는?' },
+			{ kind: 'text', html: '금고 비밀번호 네 자리를 표시하던 전광판이 고장 나 <b>세로획이 전부 꺼졌어요</b>. 남은 표시가 아래와 같고, 네 자리의 합은 13이에요. 비밀번호는?' },
 			{
 				kind: 'lcd',
 				lines: ['WXYZ'],
@@ -3432,7 +3432,7 @@ export const PROBLEMS: Problem[] = [
 		id: 'lcd-clock-repdigit',
 		chip: '전광판',
 		blocks: [
-			{ kind: 'text', html: '디지털 시계에서 어떤 시각들만 골라 순서대로 적었다. 다음에 올 시각은?' },
+			{ kind: 'text', html: '디지털 시계에서 어떤 시각들만 골라 순서대로 적었어요. 다음에 올 시각은?' },
 			{ kind: 'lcd', lines: ['1:11', '2:22', '3:33', '4:44', '5:55', '?'] }
 		],
 		type: 'text',
@@ -3448,7 +3448,7 @@ export const PROBLEMS: Problem[] = [
 		id: 'lcd-look-say',
 		chip: '전광판',
 		blocks: [
-			{ kind: 'text', html: '전광판이 스스로 다음 줄을 만들어낸다. 물음표에 들어갈 수는?' },
+			{ kind: 'text', html: '전광판이 스스로 다음 줄을 만들어내요. 물음표에 들어갈 수는?' },
 			{ kind: 'lcd', lines: ['1', '11', '21', '1211', '111221', '?'] }
 		],
 		type: 'text',
@@ -3554,7 +3554,7 @@ export const PROBLEMS: Problem[] = [
 		id: 'kr-chunjiin',
 		chip: '자판',
 		blocks: [
-			{ kind: 'text', html: '옛날 휴대폰의 한글 자판은 <b>점(·)과 선 두 개(ㅡ, ㅣ)</b>만으로 모든 모음을 만들었다. 물음표는?' },
+			{ kind: 'text', html: '옛날 휴대폰의 한글 자판은 <b>점(·)과 선 두 개(ㅡ, ㅣ)</b>만으로 모든 모음을 만들었어요. 물음표는?' },
 			{ kind: 'pre', text: '· + ㅡ = ㅗ\nㅡ + · = ㅜ\nㅣ + · = ㅏ\n\n· + ㅣ = ?' }
 		],
 		type: 'text',
@@ -3579,7 +3579,7 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'text',
-				html: '통나무 하나를 <b>3토막</b>으로 자르는 데 8분이 걸린다. 같은 속도로 <b>6토막</b>을 내려면?'
+				html: '통나무 하나를 <b>3토막</b>으로 자르는 데 8분이 걸려요. 같은 속도로 <b>6토막</b>을 내려면?'
 			}
 		],
 		type: 'text',
@@ -3598,7 +3598,7 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'text',
-				html: '<b>전기 기관차</b>가 시속 100km로 <b>북풍</b>(북쪽에서 남쪽으로 부는 바람)을 뚫고 북쪽으로 달린다.<br>기관차의 연기는 어느 쪽으로 날릴까?'
+				html: '<b>전기 기관차</b>가 시속 100km로 <b>북풍</b>(북쪽에서 남쪽으로 부는 바람)을 뚫고 북쪽으로 달려요.<br>기관차의 연기는 어느 쪽으로 날릴까요?'
 			}
 		],
 		type: 'choice',
@@ -3618,7 +3618,7 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'text',
-				html: 'A가게는 <b>30% 할인 후 다시 20% 할인</b>, B가게는 <b>50% 할인</b>이다.<br>정가가 같을 때 더 싼 쪽은? (같으면 "같다")'
+				html: 'A가게는 <b>30% 할인 후 다시 20% 할인</b>, B가게는 <b>50% 할인</b>이에요.<br>정가가 같을 때 더 싼 쪽은? (같으면 "같다")'
 			}
 		],
 		type: 'text',
@@ -3637,7 +3637,7 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'text',
-				html: '같은 길을 갈 때는 <b>시속 60km</b>, 올 때는 <b>시속 30km</b>로 달렸다.<br>왕복 평균 속력은?'
+				html: '같은 길을 갈 때는 <b>시속 60km</b>, 올 때는 <b>시속 30km</b>로 달렸어요.<br>왕복 평균 속력은?'
 			}
 		],
 		type: 'text',
@@ -3656,7 +3656,7 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'text',
-				html: '에베레스트가 발견되기 <b>전</b>, 세계에서 가장 높은 산은 어디였을까?'
+				html: '에베레스트가 발견되기 <b>전</b>, 세계에서 가장 높은 산은 어디였을까요?'
 			}
 		],
 		type: 'choice',
@@ -3676,7 +3676,7 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'text',
-				html: '가로 2m, 세로 2m, 깊이 2m로 판 <b>구덩이</b>가 있다.<br>이 구덩이 <b>안에 든 흙</b>은 몇 ㎥일까?'
+				html: '가로 2m, 세로 2m, 깊이 2m로 판 <b>구덩이</b>가 있어요.<br>이 구덩이 <b>안에 든 흙</b>은 몇 ㎥일까요?'
 			}
 		],
 		type: 'text',
@@ -3698,7 +3698,7 @@ export const PROBLEMS: Problem[] = [
 		// 읽으면 홀수 자리 7·97의 등차가 187을 낸다. 화살표는 「앞 수 → 다음 수」라는 뜻이고,
 		// 그렇게 읽으면 매 단계가 스스로 검산된다. 9/04 댓글의 다항식 지적에도 같은 답을 했다.
 		blocks: [
-			{ kind: 'text', html: '<b>앞의 수로 다음 수</b>를 만든다. 물음표에 들어갈 수는?' },
+			{ kind: 'text', html: '<b>앞의 수로 다음 수</b>를 만들어요. 물음표에 들어갈 수는?' },
 			{ kind: 'pre', text: '7 → 49 → 97 → 130 → ?' }
 		],
 		type: 'text',
@@ -3739,7 +3739,7 @@ export const PROBLEMS: Problem[] = [
 		// 「최대 자릿수를 뺀다」 하나뿐이다(자릿수 합·일의 자리·십의 자리·최소 자릿수·
 		// 자릿수 곱은 전부 예시에서 죽는다).
 		blocks: [
-			{ kind: 'text', html: '<b>앞의 수로 다음 수</b>를 만든다. 물음표에 들어갈 수는?' },
+			{ kind: 'text', html: '<b>앞의 수로 다음 수</b>를 만들어요. 물음표에 들어갈 수는?' },
 			{ kind: 'pre', text: '27 → 20 → 18 → 10 → ?' }
 		],
 		type: 'text',
@@ -3826,7 +3826,7 @@ export const PROBLEMS: Problem[] = [
 		id: 'rc-chain-shrink',
 		chip: '사슬',
 		blocks: [
-			{ kind: 'text', html: '물음표에 들어갈 영어 단어는? <b>첫 글자 S는 그대로 남는다.</b>' },
+			{ kind: 'text', html: '물음표에 들어갈 영어 단어는? <b>첫 글자 S는 그대로 남아요.</b>' },
 			{ kind: 'pre', text: 'STARING → STRING → STING → ?' }
 		],
 		type: 'text',
@@ -3880,7 +3880,7 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'text',
-				html: '벽돌 한 장의 무게는 <b>1kg에 벽돌 반 장의 무게를 더한 것</b>과 같다.<br>벽돌 한 장은 몇 kg일까?'
+				html: '벽돌 한 장의 무게는 <b>1kg에 벽돌 반 장의 무게를 더한 것</b>과 같아요.<br>벽돌 한 장은 몇 kg일까요?'
 			}
 		],
 		type: 'text',
@@ -3939,7 +3939,7 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'text',
-				html: '길이 <b>100m</b>인 기차가 길이 <b>200m</b>인 터널을 <b>완전히 빠져나오려면</b> 모두 몇 m를 달려야 할까?'
+				html: '길이 <b>100m</b>인 기차가 길이 <b>200m</b>인 터널을 <b>완전히 빠져나오려면</b> 모두 몇 m를 달려야 할까요?'
 			}
 		],
 		type: 'text',
@@ -4093,7 +4093,7 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'text',
-				html: '평년이다. <b>어제가 생일</b>이었다.<br>다음 생일까지 남은 날은 며칠일까?'
+				html: '평년이에요. <b>어제가 생일</b>이었어요.<br>다음 생일까지 남은 날은 며칠일까요?'
 			}
 		],
 		type: 'text',
@@ -4110,7 +4110,7 @@ export const PROBLEMS: Problem[] = [
 		id: 'cal-week-back',
 		chip: '요일',
 		blocks: [
-			{ kind: 'text', html: '오늘이 <b>금요일</b>이라면, <b>100일 뒤</b>는 무슨 요일일까?' }
+			{ kind: 'text', html: '오늘이 <b>금요일</b>이라면, <b>100일 뒤</b>는 무슨 요일일까요?' }
 		],
 		type: 'text',
 		answers: ['일', '일요일'],
@@ -4128,7 +4128,7 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'text',
-				html: '어느 달력에서 <b>田자 모양</b>으로 붙어 있는 네 날짜를 더했더니 <b>60</b>이 되었다.<br>네 날짜 중 <b>가장 빠른</b> 날은 며칠일까?'
+				html: '어느 달력에서 <b>田자 모양</b>으로 붙어 있는 네 날짜를 더했더니 <b>60</b>이 되었어요.<br>네 날짜 중 <b>가장 빠른</b> 날은 며칠일까요?'
 			}
 		],
 		type: 'text',
@@ -4147,7 +4147,7 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'text',
-				html: '2024년 <b>2월 29일</b>에 태어난 아기가 있다.<br>이 아기가 <b>만 20살</b>이 되는 생일까지(그날도 포함해서), 달력에 진짜 생일(2월 29일)이 다시 등장하는 해는 몇 번일까?'
+				html: '2024년 <b>2월 29일</b>에 태어난 아기가 있어요.<br>이 아기가 <b>만 20살</b>이 되는 생일까지(그날도 포함해서), 달력에 진짜 생일(2월 29일)이 다시 등장하는 해는 몇 번일까요?'
 			}
 		],
 		type: 'text',
@@ -4200,7 +4200,7 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'text',
-				html: '시계의 두 바늘은 <b>12시 정각</b>에 겹친다. 이 겹침을 첫 번째로 세면, 다음 날 12시가 되기 전까지 <b>24시간 동안</b> 두 바늘은 모두 몇 번 겹칠까?'
+				html: '시계의 두 바늘은 <b>12시 정각</b>에 겹쳐요. 이 겹침을 첫 번째로 세면, 다음 날 12시가 되기 전까지 <b>24시간 동안</b> 두 바늘은 모두 몇 번 겹칠까요?'
 			}
 		],
 		type: 'text',
@@ -4236,7 +4236,7 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'text',
-				html: '<b>100만 초</b>는 약 12일이다.<br>그렇다면 <b>10억 초</b>는 얼마쯤일까?'
+				html: '<b>100만 초</b>는 약 12일이에요.<br>그렇다면 <b>10억 초</b>는 얼마쯤일까요?'
 			}
 		],
 		type: 'choice',
@@ -4256,7 +4256,7 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'text',
-				html: '등대 A는 <b>12초마다</b>, 등대 B는 <b>18초마다</b> 반짝인다.<br>방금 둘이 <b>동시에</b> 반짝였다. 다음번에 또 동시에 반짝이는 것은 몇 초 뒤일까?'
+				html: '등대 A는 <b>12초</b>마다, 등대 B는 <b>18초</b>마다 반짝여요.<br>방금 둘이 <b>동시에</b> 반짝였어요. 다음번에 또 동시에 반짝이는 것은 몇 초 뒤일까요?'
 			}
 		],
 		type: 'text',
@@ -4275,7 +4275,7 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'text',
-				html: '1년(평년)에 일요일은 보통 52번이다.<br>그런데 <b>53번</b>인 해도 있다. 언제일까?'
+				html: '1년(평년)에 일요일은 보통 52번이에요.<br>그런데 <b>53번</b>인 해도 있어요. 언제일까요?'
 			}
 		],
 		type: 'choice',
@@ -4315,7 +4315,7 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'text',
-				html: '시침과 분침이 <b>정확히 반대 방향</b>(일직선)을 가리키는 <b>"정각"</b>은 하루에 몇 번 있을까?'
+				html: '시침과 분침이 <b>정확히 반대 방향</b>(일직선)을 가리키는 <b>"정각"</b>은 하루에 몇 번 있을까요?'
 			}
 		],
 		type: 'text',
@@ -4334,7 +4334,7 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'text',
-				html: '1년 열두 달 가운데 <b>28일이 있는 달</b>은 모두 몇 개일까?'
+				html: '1년 열두 달 가운데 <b>28일이 있는 달</b>은 모두 몇 개일까요?'
 			}
 		],
 		type: 'text',
@@ -4353,7 +4353,7 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'text',
-				html: '<b>3월 1일부터 3월 10일까지</b> 매일 알약을 하나씩 먹으려면 알약이 몇 개 필요할까?'
+				html: '<b>3월 1일부터 3월 10일까지</b> 매일 알약을 하나씩 먹으려면 알약이 몇 개 필요할까요?'
 			}
 		],
 		type: 'text',
@@ -4372,7 +4372,7 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'text',
-				html: '보름달에서 다음 보름달까지는 <b>약 29.5일</b>이다.<br>그렇다면 <b>한 달 안에 보름달을 두 번</b> 보는 일이 있을 수 있을까?'
+				html: '보름달에서 다음 보름달까지는 <b>약 29.5일</b>이에요.<br>그렇다면 <b>한 달 안에 보름달을 두 번</b> 보는 일이 있을 수 있을까요?'
 			}
 		],
 		type: 'choice',
@@ -4412,7 +4412,7 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'text',
-				html: '한 해가 끝나면 달력은 쓸모없어 보인다.<br>그런데 <b>올해 달력을 통째로 다시 쓸 수 있는 해</b>가 언젠가 올까?'
+				html: '한 해가 끝나면 달력은 쓸모없어 보여요.<br>그런데 <b>올해 달력을 통째로 다시 쓸 수 있는 해</b>가 언젠가 올까요?'
 			}
 		],
 		type: 'choice',
@@ -4466,7 +4466,7 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'text',
-				html: '<b>3시 30분</b>에 긴바늘과 짧은바늘이 이루는 각은 몇 도일까?'
+				html: '<b>3시 30분</b>에 긴바늘과 짧은바늘이 이루는 각은 몇 도일까요?'
 			}
 		],
 		type: 'text',
@@ -4485,7 +4485,7 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'text',
-				html: '<b>월요일 오전 10시</b>에서 정확히 <b>50시간</b> 뒤는 언제일까?'
+				html: '<b>월요일 오전 10시</b>에서 정확히 <b>50시간</b> 뒤는 언제일까요?'
 			}
 		],
 		type: 'text',
@@ -4504,7 +4504,7 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'text',
-				html: '어느 달의 <b>1일이 토요일</b>이라면, 그 달에 토요일은 최소 몇 번 있을까?'
+				html: '어느 달의 <b>1일이 토요일</b>이라면, 그 달에 토요일은 최소 몇 번 있을까요?'
 			}
 		],
 		type: 'text',
@@ -4523,7 +4523,7 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'text',
-				html: '파일 이름에 날짜를 넣을 때 <b>2026-08-13</b>처럼 "년-월-일" 순으로, 월과 일을 꼭 <b>두 자리</b>로 쓰는 사람들이 있다.<br>가장 큰 실용적 이유는?'
+				html: '파일 이름에 날짜를 넣을 때 <b>2026-08-13</b>처럼 "년-월-일" 순으로, 월과 일을 꼭 <b>두 자리</b>로 쓰는 사람들이 있어요.<br>가장 큰 실용적 이유는?'
 			}
 		],
 		type: 'choice',
@@ -4559,7 +4559,7 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'text',
-				html: '약을 <b>30분마다</b> 한 알씩 <b>세 알</b> 먹으라고 했다. 다 먹는 데 몇 분이 걸릴까?'
+				html: '약을 <b>30분</b>마다 한 알씩 <b>세 알</b> 먹으라고 했어요. 다 먹는 데 몇 분이 걸릴까요?'
 			}
 		],
 		type: 'text',
@@ -4577,7 +4577,7 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'text',
-				html: '한 남자가 사진을 보며 말했다.<br>"나는 형제자매가 없다. 그리고 <b>이 남자의 아버지</b>는 <b>내 아버지의 아들</b>이다."<br>사진 속 남자는 누구일까?'
+				html: '한 남자가 사진을 보며 말했어요.<br>"나는 형제자매가 없어요. 그리고 <b>이 남자의 아버지</b>는 <b>내 아버지의 아들</b>이에요."<br>사진 속 남자는 누구일까요?'
 			}
 		],
 		type: 'choice',
@@ -4597,7 +4597,7 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'text',
-				html: '겉보기 같은 동전 <b>9개</b> 중 하나만 <b>더 가볍다</b>. 양팔 저울을 <b>최소 몇 번</b> 써야 반드시 찾을 수 있을까?'
+				html: '겉보기 같은 동전 <b>9개</b> 중 하나만 <b>더 가벼워요</b>. 양팔 저울을 <b>최소 몇 번</b> 써야 반드시 찾을 수 있을까요?'
 			}
 		],
 		type: 'text',
@@ -4616,7 +4616,7 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'text',
-				html: '<b>5L</b>와 <b>3L</b> 물통만으로 정확히 <b>4L</b>를 만들려 한다. 최소 몇 번 물을 옮기거나 버려야 할까? (채우기·비우기·옮기기를 각각 한 번으로 셈)'
+				html: '<b>5L</b>와 <b>3L</b> 물통만으로 정확히 <b>4L</b>를 만들려고 해요. 최소 몇 번 물을 옮기거나 버려야 할까요? (채우기·비우기·옮기기를 각각 한 번으로 셈)'
 			}
 		],
 		type: 'text',
@@ -4635,7 +4635,7 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'text',
-				html: '어느 사냥꾼의 오두막은 <b>네 벽의 창문이 전부 남쪽</b>을 향한다.<br>어느 날 창밖으로 곰 한 마리가 지나갔다. 곰은 무슨 색일까?'
+				html: '어느 사냥꾼의 오두막은 <b>네 벽의 창문이 전부 남쪽</b>을 향해요.<br>어느 날 창밖으로 곰 한 마리가 지나갔어요. 곰은 무슨 색일까요?'
 			}
 		],
 		type: 'choice',
@@ -4655,7 +4655,7 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'text',
-				html: '형제 중 <b>형은 늘 참말, 동생은 늘 거짓말</b>만 한다. 한 명에게 "<b>너는 형이니?</b>"라고 물었다.<br>형이라면 뭐라고 답할까?'
+				html: '형제 중 <b>형은 늘 참말, 동생은 늘 거짓말</b>만 해요. 한 명에게 <b>"너는 형이니?"</b>라고 물었어요.<br>형이라면 뭐라고 답할까요?'
 			}
 		],
 		type: 'choice',
@@ -4675,7 +4675,7 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'text',
-				html: '<b>1분·2분</b>이 걸리는 두 사람이 손전등 하나로 다리를 건넌다. 다리는 <b>한 번에 두 명</b>까지, 손전등이 있어야만 건널 수 있다. 둘이 모두 건너는 최소 시간은?'
+				html: '<b>1분·2분</b>이 걸리는 두 사람이 손전등 하나로 다리를 건너요. 다리는 <b>한 번에 두 명</b>까지, 손전등이 있어야만 건널 수 있어요. 둘이 모두 건너는 최소 시간은?'
 			}
 		],
 		type: 'text',
@@ -4694,7 +4694,7 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'text',
-				html: '<b>12층</b>에 사는 아이가 있다. 내려갈 땐 엘리베이터로 1층까지 잘 내려온다.<br>그런데 올라갈 땐 꼭 <b>8층에서 내려 계단으로</b> 올라간다. 비 오는 날엔 12층까지 타고 가면서. 왜일까?'
+				html: '<b>12층</b>에 사는 아이가 있어요. 내려갈 땐 엘리베이터로 1층까지 잘 내려와요.<br>그런데 올라갈 땐 꼭 <b>8층에서 내려 계단으로</b> 올라가요. 비 오는 날엔 12층까지 타고 가면서요. 왜일까요?'
 			}
 		],
 		type: 'choice',
@@ -4719,7 +4719,7 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'text',
-				html: '신문에서 낱장 하나가 툭 떨어졌다. 주워 보니 <b>8면과 21면</b>이 같은 한 장에 인쇄돼 있다.<br>이 신문은 모두 <b>몇 면</b>일까?'
+				html: '신문에서 낱장 하나가 툭 떨어졌어요. 주워 보니 <b>8면과 21면</b>이 같은 한 장에 인쇄돼 있어요.<br>이 신문은 모두 <b>몇 면</b>일까요?'
 			}
 		],
 		type: 'text',
@@ -4738,7 +4738,7 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'text',
-				html: '한 집의 남자아이들은 저마다 "나는 <b>남자 형제 2명, 여자 형제 3명</b>이 있다"고 하고,<br>여자아이들은 저마다 "나는 <b>남자 형제 3명, 여자 형제 2명</b>이 있다"고 한다.<br>이 집 아이는 모두 몇 명일까?'
+				html: '한 집의 남자아이들은 저마다 "나는 <b>남자 형제 2명, 여자 형제 3명</b>이 있다"고 하고,<br>여자아이들은 저마다 "나는 <b>남자 형제 3명, 여자 형제 2명</b>이 있다"고 해요.<br>이 집 아이는 모두 몇 명일까요?'
 			}
 		],
 		type: 'text',
@@ -4757,7 +4757,7 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'text',
-				html: '상자 세 개에 각각 <b>사과만</b>, <b>귤만</b>, <b>사과와 귤</b>이 들었는데 <b>세 상자의 이름표가 모두 틀렸다</b>.<br>과일을 최소 몇 개 꺼내 보면 전부 알아낼 수 있을까?'
+				html: '상자 세 개에 각각 <b>사과만</b>, <b>귤만</b>, <b>사과와 귤</b>이 들었는데 <b>세 상자의 이름표가 모두 틀렸어요</b>.<br>과일을 최소 몇 개 꺼내 보면 전부 알아낼 수 있을까요?'
 			}
 		],
 		type: 'text',
@@ -4776,7 +4776,7 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'text',
-				html: '고르지 않게 타는 끈이 있다. 한쪽 끝에 불을 붙이면 <b>정확히 60분</b>에 다 탄다.<br>끈 하나로 <b>30분</b>을 재려면?'
+				html: '고르지 않게 타는 끈이 있어요. 한쪽 끝에 불을 붙이면 <b>정확히 60분</b>에 다 타요.<br>끈 하나로 <b>30분</b>을 재려면?'
 			}
 		],
 		type: 'choice',
@@ -4801,7 +4801,7 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'text',
-				html: '모자가 <b>빨강 2개, 파랑 2개</b>다. 세 사람이 한 줄로 서서 <b>앞사람만</b> 볼 수 있게 모자를 썼다.<br>맨 뒤 사람이 앞의 두 모자를 보고 "<b>내 모자 색을 모르겠다</b>"고 했다면, 앞의 두 모자는?'
+				html: '모자가 <b>빨강 2개, 파랑 2개</b>예요. 세 사람이 한 줄로 서서 <b>앞사람만</b> 볼 수 있게 모자를 썼어요.<br>맨 뒤 사람이 앞의 두 모자를 보고 <b>"내 모자 색을 모르겠다"</b>고 했다면, 앞의 두 모자는?'
 			}
 		],
 		type: 'choice',
@@ -4821,7 +4821,7 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'text',
-				html: '가로세로 <b>3칸씩</b> 격자에서 찾을 수 있는 <b>정사각형</b>은 모두 몇 개일까? (크기 상관없이)'
+				html: '가로세로 <b>3칸씩</b> 격자에서 찾을 수 있는 <b>정사각형</b>은 모두 몇 개일까요? (크기 상관없이)'
 			}
 		],
 		type: 'text',
@@ -4856,7 +4856,7 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'text',
-				html: '뾰족한 지붕 꼭대기에 <b>수탉이 알을 낳았다</b>.<br>알은 어느 쪽으로 굴러떨어질까?'
+				html: '뾰족한 지붕 꼭대기에 <b>수탉이 알을 낳았어요</b>.<br>알은 어느 쪽으로 굴러떨어질까요?'
 			}
 		],
 		type: 'choice',
@@ -4876,7 +4876,7 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'text',
-				html: '방망이와 공을 합쳐 <b>1100원</b>이다. 방망이가 공보다 <b>1000원</b> 비싸다면, 공은 얼마일까?'
+				html: '방망이와 공을 합쳐 <b>1100원</b>이에요. 공보다 방망이가 <b>1000원</b> 비싸다면, 공은 얼마일까요?'
 			}
 		],
 		type: 'text',
@@ -4952,7 +4952,7 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'text',
-				html: '정육면체(주사위 모양)에 빛을 비춰 그림자를 만든다.<br>빛의 방향을 어떻게 바꿔도 <b>절대 만들 수 없는</b> 그림자는?'
+				html: '정육면체(주사위 모양)에 빛을 비춰 그림자를 만들어요.<br>빛의 방향을 어떻게 바꿔도 <b>절대 만들 수 없는</b> 그림자는?'
 			}
 		],
 		type: 'choice',
@@ -4989,7 +4989,7 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'text',
-				html: '정사각형을 변끼리 붙여 모양을 만든다. <b>돌리거나 뒤집어 겹쳐지면 같은 모양</b>으로 센다.<br>정사각형 <b>3개</b>로는 <b>2가지</b>(일자, ㄱ자)뿐이다.<br>정사각형 <b>4개</b>로는 몇 가지일까?'
+				html: '정사각형을 변끼리 붙여 모양을 만들어요. <b>돌리거나 뒤집어 겹쳐지면 같은 모양</b>으로 세요.<br>정사각형 <b>3개</b>로는 <b>2가지</b>(일자, ㄱ자)뿐이에요.<br>정사각형 <b>4개</b>로는 몇 가지일까요?'
 			}
 		],
 		type: 'text',
@@ -5008,7 +5008,7 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'text',
-				html: '같은 크기의 <b>정사각형 종이 두 장</b>을 겹쳐 놓았다.<br>겹쳐진 부분의 모양이 <b>될 수 없는</b> 것은?'
+				html: '같은 크기의 <b>정사각형 종이 두 장</b>을 겹쳐 놓았어요.<br>겹쳐진 부분의 모양이 <b>될 수 없는</b> 것은?'
 			}
 		],
 		type: 'choice',
@@ -5026,7 +5026,7 @@ export const PROBLEMS: Problem[] = [
 		id: 'sh-nine-dots',
 		chip: '교차점',
 		blocks: [
-			{ kind: 'text', html: '점 아홉 개를 <b>펜을 떼지 않고</b> 모두 지나가려 한다.<br><b>직선 최소 몇 개</b>면 될까?' },
+			{ kind: 'text', html: '점 아홉 개를 <b>펜을 떼지 않고</b> 모두 지나가려고 해요.<br><b>직선 최소 몇 개</b>면 될까요?' },
 			{ kind: 'pre', text: '●  ●  ●\n●  ●  ●\n●  ●  ●' }
 		],
 		type: 'text',
@@ -5045,7 +5045,7 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'text',
-				html: '달걀 <b>한 개</b>를 삶는 데 <b>10분</b>이 걸린다.<br>넉넉한 냄비에서 달걀 <b>세 개</b>를 한꺼번에 삶으면 몇 분 걸릴까?'
+				html: '달걀 <b>한 개</b>를 삶는 데 <b>10분</b>이 걸려요.<br>넉넉한 냄비에서 달걀 <b>세 개</b>를 한꺼번에 삶으면 몇 분 걸릴까요?'
 			}
 		],
 		type: 'text',
@@ -5064,7 +5064,7 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'text',
-				html: '똑같은 동전 두 개. 하나를 고정하고, 다른 하나를 <b>미끄러지지 않게 굴려</b> 고정된 동전의 둘레를 한 바퀴 돌게 한다.<br>구르는 동전 자신은 <b>몇 바퀴</b> 회전할까?'
+				html: '똑같은 동전 두 개. 하나를 고정하고, 다른 하나를 <b>미끄러지지 않게 굴려</b> 고정된 동전의 둘레를 한 바퀴 돌게 해요.<br>구르는 동전 자신은 <b>몇 바퀴</b> 회전할까요?'
 			}
 		],
 		type: 'choice',
@@ -5084,7 +5084,7 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'text',
-				html: '길쭉한 종이 띠를 <b>한 번 꼬아서</b> 끝끼리 붙여 고리를 만들었다.<br>이 고리의 <b>한가운데를 따라 끝까지 가위질</b>하면 어떻게 될까?'
+				html: '길쭉한 종이 띠를 <b>한 번 꼬아서</b> 끝끼리 붙여 고리를 만들었어요.<br>이 고리의 <b>한가운데를 따라 끝까지 가위질</b>하면 어떻게 될까요?'
 			}
 		],
 		type: 'choice',
@@ -5104,7 +5104,7 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'text',
-				html: '종이를 반으로 접고, <b>접힌 모서리 한가운데</b>에서 반원을 오려낸 뒤 펼쳤다.<br>종이에 뚫린 구멍은 어떤 모양일까?'
+				html: '종이를 반으로 접고, <b>접힌 모서리 한가운데</b>에서 반원을 오려낸 뒤 펼쳤어요.<br>종이에 뚫린 구멍은 어떤 모양일까요?'
 			}
 		],
 		type: 'choice',
@@ -5124,7 +5124,7 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'text',
-				html: '네모난 종이의 <b>모서리 하나</b>를 직선으로 잘라내면, 남은 조각의 <b>꼭짓점</b>은 몇 개일까?'
+				html: '네모난 종이의 <b>모서리 하나</b>를 직선으로 잘라내면, 남은 조각의 <b>꼭짓점</b>은 몇 개일까요?'
 			}
 		],
 		type: 'text',
@@ -5160,7 +5160,7 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'text',
-				html: '정사각형에 <b>두 대각선</b>을 모두 그었다.<br>이 그림에서 찾을 수 있는 삼각형은 <b>모두</b> 몇 개일까?'
+				html: '정사각형에 <b>두 대각선</b>을 모두 그었어요.<br>이 그림에서 찾을 수 있는 삼각형은 <b>모두</b> 몇 개일까요?'
 			}
 		],
 		type: 'text',
@@ -5233,7 +5233,7 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'text',
-				html: '아버지가 낙타 <b>17마리</b>를 남기며 유언했다: 첫째는 <b>2분의 1</b>, 둘째는 <b>3분의 1</b>, 셋째는 <b>9분의 1</b>을 가져라.<br>17은 나누어떨어지지 않아 셋이 다투는데, 지나가던 노인이 <b>자기 낙타 1마리를 보태</b> 18마리로 만들었다. 첫째 9, 둘째 6, 셋째 2마리를 가져가니 <b>1마리가 남아 노인이 도로 타고 떠났다</b>.<br>어떻게 이럴 수 있었을까?'
+				html: '아버지가 낙타 <b>17마리</b>를 남기며 유언했어요: 첫째는 <b>2분의 1</b>, 둘째는 <b>3분의 1</b>, 셋째는 <b>9분의 1</b>을 가져라.<br>17은 나누어떨어지지 않아 셋이 다투는데, 지나가던 노인이 <b>자기 낙타 1마리를 보태</b> 18마리로 만들었어요. 첫째 9, 둘째 6, 셋째 2마리를 가져가니 <b>1마리가 남아 노인이 도로 타고 떠났어요</b>.<br>어떻게 이럴 수 있었을까요?'
 			}
 		],
 		type: 'choice',
@@ -5273,7 +5273,7 @@ export const PROBLEMS: Problem[] = [
 		id: 'nm-fake-prime',
 		chip: '수의 성질',
 		blocks: [
-			{ kind: 'text', html: '넷 중 하나만 <b>소수가 아니다</b>. 어느 것일까?' }
+			{ kind: 'text', html: '넷 중 하나만 <b>소수가 아니에요</b>. 어느 것일까요?' }
 		],
 		type: 'choice',
 		choices: ['31', '41', '51', '61'],
@@ -5359,7 +5359,7 @@ export const PROBLEMS: Problem[] = [
 		// 등차(1·6 → 11)와 등비(1·6 → 36)가 안 갈렸다. 이 문제의 규칙은 실제로
 		// 「앞 수에서 다음 수」(×2, ×3, ×4…)이므로 지문에 못 박아 그 길을 막는다.
 		blocks: [
-			{ kind: 'text', html: '<b>앞의 수로 다음 수</b>를 만든다. 물음표에 들어갈 수는?' },
+			{ kind: 'text', html: '<b>앞의 수로 다음 수</b>를 만들어요. 물음표에 들어갈 수는?' },
 			{ kind: 'pre', text: '1, 2, 6, 24, ?' }
 		],
 		type: 'text',
@@ -5376,7 +5376,7 @@ export const PROBLEMS: Problem[] = [
 		id: 'nm-gcd-op',
 		chip: '이상한 연산',
 		blocks: [
-			{ kind: 'text', html: '★의 규칙을 찾아라.' },
+			{ kind: 'text', html: '★의 규칙을 찾아보세요.' },
 			// 7★13=1이 "차" 가설을 죽인다 — 앞 두 줄은 차와 답이 우연히 같다
 			// 9★24=3은 2a-b 가설을 죽인다 — 앞 두 줄이 2:3 비율이라 2a-b도 gcd와 같아진다.
 			// 2:3 쌍(16★24 등)은 이 가설을 못 죽이니 예시로 쓰지 마라.
@@ -5396,7 +5396,7 @@ export const PROBLEMS: Problem[] = [
 		id: 'nm-4100-trap',
 		chip: '큰 수',
 		blocks: [
-			{ kind: 'text', html: '<b>머릿속으로만</b> 차례대로 더하라. 종이 금지!' },
+			{ kind: 'text', html: '<b>머릿속으로만</b> 차례대로 더해 보세요. 종이 금지!' },
 			{ kind: 'pre', text: '1000 + 40\n+ 1000 + 30\n+ 1000 + 20\n+ 1000 + 10\n= ?' }
 		],
 		type: 'text',
@@ -5415,7 +5415,7 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'text',
-				html: '1부터 100까지 빠짐없이 쓸 때, 숫자 <b>1</b>은 모두 몇 번 나올까?'
+				html: '1부터 100까지 빠짐없이 쓸 때, 숫자 <b>1</b>은 모두 몇 번 나올까요?'
 			}
 		],
 		type: 'text',
@@ -5451,7 +5451,7 @@ export const PROBLEMS: Problem[] = [
 		id: 'en-compound-literal',
 		chip: '영단어',
 		blocks: [
-			{ kind: 'text', html: '영어 낱말을 반으로 쪼개 그대로 직역했다. 물음표는?' },
+			{ kind: 'text', html: '영어 낱말을 반으로 쪼개 그대로 직역했어요. 물음표는?' },
 			{ kind: 'pre', text: 'RAINBOW = 비 + 활\nSEAHORSE = 바다 + 말\nSAWDUST = 톱 + 먼지\nHOTDOG = 뜨거운 + 개\n\nBUTTERFLY = ?' }
 		],
 		type: 'text',
@@ -5506,7 +5506,7 @@ export const PROBLEMS: Problem[] = [
 		id: 'nm-percent-updown',
 		chip: '수의 성질',
 		blocks: [
-			{ kind: 'text', html: '어떤 물건의 가격을 <b>10% 올렸다가</b>, 다시 <b>10% 내렸다</b>.<br>지금 가격은?' }
+			{ kind: 'text', html: '어떤 물건의 가격을 <b>10% 올렸다가</b>, 다시 <b>10% 내렸어요</b>.<br>지금 가격은?' }
 		],
 		type: 'choice',
 		choices: ['원래 가격 그대로', '원래보다 싸다', '원래보다 비싸다', '올리고 내린 순서에 따라 다르다'],
@@ -5544,7 +5544,7 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'text',
-				html: '양팔 저울에서는 추를 <b>물건 반대쪽에도, 물건과 같은 쪽에도</b> 올릴 수 있다.<br>그래서 <b>1g과 3g</b> 두 개만으로 1·2·3·4g을 모두 잰다 (2 = 3 − 1, 4 = 3 + 1).<br>추 <b>세 개</b>로 1g부터 13g까지 모두 재려면, 세 추는 몇 g짜리여야 할까?'
+				html: '양팔 저울에서는 추를 <b>물건 반대쪽에도, 물건과 같은 쪽에도</b> 올릴 수 있어요.<br>그래서 <b>1g과 3g</b> 두 개만으로 1·2·3·4g을 모두 재요 (2 = 3 − 1, 4 = 3 + 1).<br>추 <b>세 개</b>로 1g부터 13g까지 모두 재려면, 세 추는 몇 g짜리여야 할까요?'
 			}
 		],
 		type: 'text',
@@ -5580,7 +5580,7 @@ export const PROBLEMS: Problem[] = [
 		id: 'sh-rotate-180',
 		chip: '뒤집기',
 		blocks: [
-			{ kind: 'text', html: '전광판을 <b>180도 돌렸습니다.</b> 물음표에 들어갈 수는?' },
+			{ kind: 'text', html: '전광판을 <b>180도 돌렸어요.</b> 물음표에 들어갈 수는?' },
 			/* 16→91 이 자리 뒤집힘까지 알려준다. 이게 없으면 숫자만 바꾸는 규칙(16→19)도
 			   성립해 답이 갈린다. 69→69 는 돌려도 같아서 규칙이 맞는지 스스로 검산이 된다. */
 			{ kind: 'lcd', lines: ['16 → 91', '69 → 69', '80 → 08', '86 → ?'] }
@@ -5635,7 +5635,7 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'text',
-				html: '태엽식 아날로그 자명종을 <b>저녁 8시에 울리도록</b> 맞춰 두었다.<br>그런데 <b>아침 8시에도</b> 울렸다. 왜일까?'
+				html: '태엽식 아날로그 자명종을 <b>저녁 8시에 울리도록</b> 맞춰 두었어요.<br>그런데 <b>아침 8시에도</b> 울렸어요. 왜일까요?'
 			}
 		],
 		type: 'choice',
@@ -5718,7 +5718,7 @@ export const PROBLEMS: Problem[] = [
 		id: 'nm-flip-product',
 		chip: '수 뒤집기',
 		blocks: [
-			{ kind: 'text', html: '양쪽 두 수를 <b>모두 뒤집었는데 곱이 그대로</b>인 짝들이다.' },
+			{ kind: 'text', html: '양쪽 두 수를 <b>모두 뒤집었는데 곱이 그대로</b>인 짝들이에요.' },
 			{ kind: 'pre', text: '12 × 42 = 21 × 24\n36 × 84 = 63 × 48\n23 × 96 = 32 × 69' },
 			{ kind: 'text', html: '다음 중 이 성질이 성립하는 짝은?' }
 		],
@@ -5758,7 +5758,7 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'text',
-				html: '"<b>모레가 어제였다면</b>, 오늘은 금요일이었을 것이다."<br>그렇다면 <b>진짜 오늘</b>은 무슨 요일일까?'
+				html: '"<b>모레가 어제였다면</b>, 오늘은 금요일이었을 것이다."<br>그렇다면 <b>진짜 오늘</b>은 무슨 요일일까요?'
 			}
 		],
 		type: 'text',
@@ -5777,7 +5777,7 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'text',
-				html: '정사각형 색종이를 반으로 접고, 다시 반으로 접었다. 접힌 종이의 한복판에 구멍을 <b>하나</b> 뚫고 펼치면, 구멍은 모두 몇 개일까?'
+				html: '정사각형 색종이를 반으로 접고, 다시 반으로 접었어요. 접힌 종이의 한복판에 구멍을 <b>하나</b> 뚫고 펼치면, 구멍은 모두 몇 개일까요?'
 			}
 		],
 		type: 'text',
@@ -5796,7 +5796,7 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'text',
-				html: '서울에서 부산으로 가는 기차와 부산에서 서울로 가는 기차가 어느 순간 <b>서로 스쳐 지나갔다.</b> 그 순간, 어느 기차가 서울에 더 가까울까?'
+				html: '서울에서 부산으로 가는 기차와 부산에서 서울로 가는 기차가 어느 순간 <b>서로 스쳐 지나갔어요.</b> 그 순간, 어느 기차가 서울에 더 가까울까요?'
 			}
 		],
 		type: 'text',
@@ -5813,7 +5813,7 @@ export const PROBLEMS: Problem[] = [
 		id: 'num-op-plus-times',
 		chip: '이상한 연산',
 		blocks: [
-			{ kind: 'text', html: '◆의 규칙을 찾아라.' },
+			{ kind: 'text', html: '◆의 규칙을 찾아보세요.' },
 			{ kind: 'pre', text: '2 ◆ 3 = 11\n4 ◆ 7 = 39\n8 ◆ 2 = 26\n\n5 ◆ 6 = ?' }
 		],
 		type: 'text',
@@ -5870,7 +5870,7 @@ export const PROBLEMS: Problem[] = [
 		id: 'sh-seg-union',
 		chip: '세그먼트',
 		blocks: [
-			{ kind: 'text', html: '⊕의 규칙을 찾아라.' },
+			{ kind: 'text', html: '⊕의 규칙을 찾아보세요.' },
 			/* 결과를 9·6·0·8로 다양하게 뒀다 — "겹치면 무조건 8" 같은 어림짐작을 막고,
 			   5⊕6=6과 0⊕7=0(한쪽이 다른 쪽을 품는 경우)이 규칙의 열쇠 구멍이 된다. */
 			{ kind: 'pre', text: '1 ⊕ 5 = 9\n5 ⊕ 6 = 6\n0 ⊕ 7 = 0\n2 ⊕ 5 = 8\n\n3 ⊕ 4 = ?' }
@@ -5891,7 +5891,7 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'text',
-				html: '두 아버지와 두 아들이 낚시를 가서 물고기를 <b>세 마리</b> 잡았다. 그런데 모두가 정확히 <b>한 마리씩</b> 잡았다. 어떻게 된 일일까?'
+				html: '두 아버지와 두 아들이 낚시를 가서 물고기를 <b>세 마리</b> 잡았어요. 그런데 모두가 정확히 <b>한 마리씩</b> 잡았어요. 어떻게 된 일일까요?'
 			}
 		],
 		type: 'choice',
@@ -5916,7 +5916,7 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'text',
-				html: '어느 해의 <b>1월 1일</b>이 월요일인데, 같은 해 <b>12월 31일</b>도 월요일이다. 이 해는 평년일까, 윤년일까?'
+				html: '어느 해의 <b>1월 1일</b>이 월요일인데, 같은 해 <b>12월 31일</b>도 월요일이에요. 이 해는 평년일까요, 윤년일까요?'
 			}
 		],
 		type: 'choice',
@@ -5936,7 +5936,7 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'text',
-				html: '규칙을 찾아보자.<br><b>삼월</b> → 1<br><b>사월</b> → 0<br><b>오월</b> → 0<br><b>칠월</b> → 1<br><b>시월</b> → ?'
+				html: '규칙을 찾아보세요.<br><b>삼월</b> → 1<br><b>사월</b> → 0<br><b>오월</b> → 0<br><b>칠월</b> → 1<br><b>시월</b> → ?'
 			}
 		],
 		type: 'text',
@@ -5974,7 +5974,7 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'text',
-				html: '계단을 <b>한 번에 한 칸이나 두 칸씩</b> 오를 수 있다.<br>3칸을 오르는 방법은 3가지, 4칸은 5가지다.<br><b>5칸</b>을 오르는 방법은 몇 가지일까?'
+				html: '계단을 <b>한 번에 한 칸이나 두 칸씩</b> 오를 수 있어요.<br>3칸을 오르는 방법은 3가지, 4칸은 5가지예요.<br><b>5칸</b>을 오르는 방법은 몇 가지일까요?'
 			}
 		],
 		type: 'text',
@@ -6010,7 +6010,7 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'text',
-				html: '항구에 배가 떠 있고, 뱃전에 <b>줄사다리</b>가 걸려 있다.<br>발판은 <b>30cm 간격</b>이고 지금은 아래 <b>세 칸</b>이 물에 잠겨 있다.<br>밀물로 물이 <b>90cm</b> 오르면 잠기는 칸은 몇 칸이 될까?'
+				html: '항구에 배가 떠 있고, 뱃전에 <b>줄사다리</b>가 걸려 있어요.<br>발판은 <b>30cm 간격</b>이고 지금은 아래 <b>세 칸</b>이 물에 잠겨 있어요.<br>밀물로 물이 <b>90cm</b> 오르면 잠기는 칸은 몇 칸이 될까요?'
 			}
 		],
 		type: 'text',
@@ -6029,7 +6029,7 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'text',
-				html: '나는 <b>물 위를 떠다니기도</b> 하고,<br>가을이면 <b>나무에 열리기도</b> 하고,<br>많이 먹으면 <b>불러오기도</b> 합니다.<br>둘을 곱하면 그것도 나입니다.<br>나는 어떤 <b>한 글자</b>일까요?'
+				html: '나는 <b>물 위를 떠다니기도</b> 하고,<br>가을이면 <b>나무에 열리기도</b> 하고,<br>많이 먹으면 <b>불러오기도</b> 해요.<br>둘을 곱하면 그것도 나예요.<br>나는 어떤 <b>한 글자</b>일까요?'
 			}
 		],
 		type: 'text',
@@ -6070,7 +6070,7 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'text',
-				html: '정사각형 색종이를 <b>세로로 반</b> 접고, 다시 <b>가로로 반</b> 접었다. 종이는 네 겹이 되었다.<br>네 구석 중 <b>두 변이 모두 접힌 선인 구석</b>을 찾자. 펄럭이는 종이 끝이 하나도 없는 쪽이다.<br>그 구석의 <b>뾰족한 끝을 가위로 조금 잘라냈다.</b> 펼치면 구멍은 몇 개일까?'
+				html: '정사각형 색종이를 <b>세로로 반</b> 접고, 다시 <b>가로로 반</b> 접었어요. 종이는 네 겹이 되었어요.<br>네 구석 중 <b>두 변이 모두 접힌 선인 구석</b>을 찾아보세요. 펄럭이는 종이 끝이 하나도 없는 쪽이에요.<br>그 구석의 <b>뾰족한 끝을 가위로 조금 잘라냈어요.</b> 펼치면 구멍은 몇 개일까요?'
 			}
 		],
 		type: 'choice',
@@ -6090,7 +6090,7 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'text',
-				html: '나는 <b>얼굴에 둘</b> 있습니다.<br>겨울이면 <b>하늘에서 내려오기도</b> 하고,<br>저울과 자에는 <b>촘촘히 그어져</b> 있습니다.<br>봄이면 <b>나뭇가지에서 트기도</b> 하지요.<br>나는 어떤 <b>한 글자</b>일까요?'
+				html: '나는 <b>얼굴에 둘</b> 있어요.<br>겨울이면 <b>하늘에서 내려오기도</b> 하고,<br>저울과 자에는 <b>촘촘히 그어져</b> 있어요.<br>봄이면 <b>나뭇가지에서 트기도</b> 하지요.<br>나는 어떤 <b>한 글자</b>일까요?'
 			}
 		],
 		type: 'text',
@@ -6112,7 +6112,7 @@ export const PROBLEMS: Problem[] = [
 				// 「발 없는 말이 천리 간다」급 국민 동음쌍이라 둘째 줄에서 끝나 방황이 사라진다.
 				// 가장 낯선 뜻(그릇)부터 걸고 가장 익은 뜻으로 닫는다.
 				kind: 'text',
-				html: '나는 <b>쌀을 되어 세는 그릇</b>이기도 하고,<br>윷판 위에서는 <b>넷이 함께 돌기도</b> 하고,<br><b>입 밖으로 나와</b> 사람을 다치게도 합니다.<br>들판을 <b>네 발로 달리기도</b> 하지요.<br>나는 어떤 <b>한 글자</b>일까요?'
+				html: '나는 <b>쌀을 되어 세는 그릇</b>이기도 하고,<br>윷판 위에서는 <b>넷이 함께 돌기도</b> 하고,<br><b>입 밖으로 나와</b> 사람을 다치게도 해요.<br>들판을 <b>네 발로 달리기도</b> 하지요.<br>나는 어떤 <b>한 글자</b>일까요?'
 			}
 		],
 		type: 'text',
@@ -6161,7 +6161,7 @@ export const PROBLEMS: Problem[] = [
 				// 불가능하다」는 역전이 생겨 아하가 커지고, ob-ladder-unique와 같은
 				// 「가능 셋 vs 불가능 하나」 tell도 사라진다.
 				kind: 'text',
-				html: '탁자에 컵 <b>일곱 개</b>짜리 무리와 <b>여덟 개</b>짜리 무리가 있다. 전부 엎어져 있다.<br>한 무리 안에서 <b>정확히 두 개</b>를 골라 뒤집는 일을 몇 번이든 반복할 수 있다.<br>그 무리의 컵을 <b>모두 바로 세울 수 있는 쪽</b>은?'
+				html: '탁자에 컵 <b>일곱 개</b>짜리 무리와 <b>여덟 개</b>짜리 무리가 있어요. 전부 엎어져 있어요.<br>한 무리 안에서 <b>정확히 두 개</b>를 골라 뒤집는 일을 몇 번이든 반복할 수 있어요.<br>그 무리의 컵을 <b>모두 바로 세울 수 있는 쪽</b>은?'
 			}
 		],
 		type: 'choice',
@@ -6215,7 +6215,7 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'text',
-				html: '책장에 백과사전 <b>1권, 2권, 3권</b>이 왼쪽부터 차례로, <b>책등이 앞을 보게</b> 꽂혀 있다.<br>각 권은 본문이 <b>4cm</b>, 앞표지와 뒤표지가 각각 <b>0.5cm</b>다.<br>책벌레가 <b>1권의 첫 쪽</b>에서 <b>3권의 마지막 쪽</b>까지 일직선으로 파고 들어갔다.<br>벌레가 지나간 거리는 몇 cm일까?'
+				html: '책장에 백과사전 <b>1권, 2권, 3권</b>이 왼쪽부터 차례로, <b>책등이 앞을 보게</b> 꽂혀 있어요.<br>각 권은 본문이 <b>4cm</b>, 앞표지와 뒤표지가 각각 <b>0.5cm</b>예요.<br>책벌레가 <b>1권의 첫 쪽</b>에서 <b>3권의 마지막 쪽</b>까지 일직선으로 파고 들어갔어요.<br>벌레가 지나간 거리는 몇 cm일까요?'
 			}
 		],
 		type: 'text',
@@ -6265,7 +6265,7 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'text',
-				html: '거울 두 장을 한쪽 끝이 맞닿게 세우고 그 사이에 구슬 하나를 놓았다. 두 거울이 벌어진 <b>각도</b>에 따라 <b>거울 속에 비친 구슬</b>의 개수가 달라진다. 물음표는?'
+				html: '거울 두 장을 한쪽 끝이 맞닿게 세우고 그 사이에 구슬 하나를 놓았어요. 두 거울이 벌어진 <b>각도</b>에 따라 <b>거울 속에 비친 구슬</b>의 개수가 달라져요. 물음표는?'
 			},
 			{ kind: 'pre', text: '90도 → 3개\n60도 → 5개\n180도 → 1개\n\n30도 → ?' }
 		],
@@ -6324,7 +6324,7 @@ export const PROBLEMS: Problem[] = [
 		// 없으면 홀수 자리 33412·23341만 보고 등차 −10071 → 13270이 살아난다(9/7 스레드 댓글).
 		chip: '사슬',
 		blocks: [
-			{ kind: 'text', html: '<b>앞의 수로 다음 수</b>를 만든다. 물음표에 들어갈 수는?' },
+			{ kind: 'text', html: '<b>앞의 수로 다음 수</b>를 만들어요. 물음표에 들어갈 수는?' },
 			{ kind: 'pre', text: '33412 → 12334 → 23341 → 34123 → ?' }
 		],
 		type: 'text',
@@ -6367,7 +6367,7 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'text',
-				html: '필요한 쪽을 얻으려고 책에서 <b>종이를 장째로 뜯었다</b>. 「3쪽 ~ 14쪽」은 양끝 쪽을 포함한다. 뜯은 종이는 몇 장?'
+				html: '필요한 쪽을 얻으려고 책에서 <b>종이를 장째로 뜯었어요</b>. 「3쪽 ~ 14쪽」은 양끝 쪽을 포함해요. 뜯은 종이는 몇 장?'
 			},
 			// 다섯째 줄 18~27은 시작 쪽이 두 자리인 유일한 예시 — 이게 없으면
 			// 「정답 + k·([시작 한 자리]−1)」 가족이 네 줄을 통과해 물음표에서 5−k를 낸다.
@@ -6486,7 +6486,7 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'text',
-				html: '각 줄의 화살표 오른쪽은 왼쪽 수들에 매긴 번호다. 마지막 줄에서 <b>6</b>에 매길 번호는?'
+				html: '각 줄의 화살표 오른쪽은 왼쪽 수들에 매긴 번호예요. 마지막 줄에서 <b>6</b>에 매길 번호는?'
 			},
 			{
 				kind: 'pre',
@@ -6513,12 +6513,12 @@ export const PROBLEMS: Problem[] = [
 		//   여기는 그 사실 자체를 1·2줄에서 발견하게 한다 — 소재는 인접하나 조작이 다르다.
 		chip: '보이는 면',
 		blocks: [
-			{ kind: 'text', html: '똑같은 정육면체 블록을 <b>바닥에</b> 놓았다. 물음표에 들어갈 수는?' },
+			{ kind: 'text', html: '똑같은 정육면체 블록을 <b>바닥에</b> 놓았어요. 물음표에 들어갈 수는?' },
 			{
 				kind: 'pre',
 				text: '1개 → 5\n나란히 2개 → 8\n바닥에 2×2로 4개 → 12\n위로 쌓아 2개 → 9\n2×2로 깐 4개 위에 2×2로 4개 포개기 → 20\n\n나란히 2개 위에 2개 포개기 → ?'
 			},
-			{ kind: 'text', html: '포갠 것은 모두 아래 블록과 <b>똑같은 자리에</b> 얹은 2층이다.' }
+			{ kind: 'text', html: '포갠 것은 모두 아래 블록과 <b>똑같은 자리에</b> 얹은 2층이에요.' }
 		],
 		type: 'text',
 		answers: ['14', '14개', '14면', '열넷', '열네 개', '열네개'],
@@ -6539,7 +6539,7 @@ export const PROBLEMS: Problem[] = [
 		//   발견의 핵심은 끝과 끝이 이어진 고리다 — 위치를 감아 도는 문제는 은행에 없다.
 		chip: '이웃 순환',
 		blocks: [
-			{ kind: 'text', html: '두 묶음 모두 <b>윗줄로 아랫줄을 만든다</b> — 규칙은 같다. 물음표에 들어갈 수는?' },
+			{ kind: 'text', html: '두 묶음 모두 <b>윗줄로 아랫줄을 만들어요</b>. 규칙은 같아요. 물음표에 들어갈 수는?' },
 			{ kind: 'pre', text: '  3   8   1   5   2   7\n 15   4  13   3  12   5\n\n  6   2   9   4   3\n  ?  15   6  12  10' }
 		],
 		type: 'text',
@@ -6592,7 +6592,7 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'text',
-				html: '주사위를 <b>앞으로</b>(앞면이 향한 쪽으로) 한 칸씩 굴린다. 마주 보는 면의 눈은 합이 7이다. 위 3 · 앞 5인 주사위는 <b>몇 칸</b> 굴려야 처음으로 윗면이 5가 될까?'
+				html: '주사위를 <b>앞으로</b>(앞면이 향한 쪽으로) 한 칸씩 굴려요. 마주 보는 면의 눈은 합이 7이에요. 위 3 · 앞 5인 주사위는 <b>몇 칸</b> 굴려야 처음으로 윗면이 5가 될까요?'
 			},
 			{
 				kind: 'pre',
@@ -6621,10 +6621,10 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'text',
-				html: '평년 <b>1월 1일</b>에 손목시계의 날짜 창을 <b>1</b>로 맞추고 1년 내내 손대지 않았다. 날짜 창은 매일 자정에 한 칸씩 넘어간다.'
+				html: '평년 <b>1월 1일</b>에 손목시계의 날짜 창을 <b>1</b>로 맞추고 1년 내내 손대지 않았어요. 날짜 창은 매일 자정에 한 칸씩 넘어가요.'
 			},
 			{ kind: 'pre', text: '2월 14일 → 창 14\n3월 1일 → 창 29\n5월 10일 → 창 6\n12월 25일 → 창 18' },
-			{ kind: 'text', html: '어느 한 달은 <b>한 달 내내</b> 창에 <b>28</b>이 한 번도 뜨지 않았다. 몇 월일까?' }
+			{ kind: 'text', html: '어느 한 달은 <b>한 달 내내</b> 창에 <b>28</b>이 한 번도 뜨지 않았어요. 몇 월일까요?' }
 		],
 		type: 'text',
 		answers: ['4월', '4', '사월', '4월달'],
@@ -6670,10 +6670,10 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'text',
-				html: '의자가 한 줄로 놓인 방에 사람들이 <b>한 명씩</b> 들어와 앉는다. 앉으면 옮기지 않고, 자리를 고르는 방식은 늘 같다. 숫자는 들어온 순서, _ 는 빈 의자다.'
+				html: '의자가 한 줄로 놓인 방에 사람들이 <b>한 명씩</b> 들어와 앉아요. 앉으면 옮기지 않고, 자리를 고르는 방식은 늘 같아요. 숫자는 들어온 순서, _ 는 빈 의자예요.'
 			},
 			{ kind: 'pre', text: '7개   1 _ _ 3 _ _ 2\n8개   1 _ _ 3 _ 4 _ 2\n10개  1 _ 4 _ 3 _ 5 _ _ 2' },
-			{ kind: 'text', html: '의자가 <b>12개</b>인 방에서 <b>4번째</b>로 들어온 사람은 왼쪽에서 몇 번째 의자에 앉을까?' }
+			{ kind: 'text', html: '의자가 <b>12개</b>인 방에서 <b>4번째</b>로 들어온 사람은 왼쪽에서 몇 번째 의자에 앉을까요?' }
 		],
 		type: 'text',
 		answers: [
@@ -6711,7 +6711,7 @@ export const PROBLEMS: Problem[] = [
 		blocks: [
 			{
 				kind: 'text',
-				html: '공연장 한 줄 좌석. 번호를 매기는 방식이 조금 특이하다. 두 좌석 <b>사이에 있는</b> 좌석 수:'
+				html: '공연장 한 줄 좌석. 번호를 매기는 방식이 조금 특이해요. 두 좌석 <b>사이에 있는</b> 좌석 수:'
 			},
 			{ kind: 'pre', text: '1번 · 8번 → 3석\n3번 · 8번 → 4석\n7번 · 9번 → 0석\n2번 · 4번 → 0석\n4번 · 10번 → 2석\n6번 · 9번 → 6석\n\n9번 · 10번 → ?석' }
 		],
@@ -6734,12 +6734,12 @@ export const PROBLEMS: Problem[] = [
 		// book-sheet-tear(종이 한 장 = 홀짝 두 쪽)와 「홀수 쪽」 사실을 공유한다. 조작은 장 시작 맞추기(빈 쪽 끼우기)라 다르다.
 		chip: '숫자의 정체',
 		blocks: [
-			{ kind: 'text', html: '어느 책의 장별 분량과, 그 장이 <b>몇 쪽에서 시작하는지</b>다.' },
+			{ kind: 'text', html: '어느 책의 장별 분량과, 그 장이 <b>몇 쪽에서 시작하는지</b>예요.' },
 			{
 				kind: 'pre',
 				text: '1장 5쪽 분량 → 1쪽부터\n2장 4쪽 분량 → 7쪽부터\n3장 3쪽 분량 → 11쪽부터\n4장 6쪽 분량 → 15쪽부터\n5장 3쪽 분량 → 21쪽부터\n6장 4쪽 · 7장 5쪽 분량'
 			},
-			{ kind: 'text', html: '<b>8장</b>은 몇 쪽부터 시작할까?' }
+			{ kind: 'text', html: '<b>8장</b>은 몇 쪽부터 시작할까요?' }
 		],
 		type: 'text',
 		answers: ['35', '35쪽', '35쪽부터', '35페이지', '35p', '삼십오', '삼십오 쪽', 'p35'],
@@ -6761,7 +6761,7 @@ export const PROBLEMS: Problem[] = [
 		// 「짧은바늘도 움직인다」는 clock-630-angle·cal-half-past·hour-hand-half와 같은 둘째 아하다. 「두 바늘을 바꿔 읽는」 조작은 은행에 없다.
 		chip: '시계',
 		blocks: [
-			{ kind: 'text', html: '민수는 바늘 시계를 읽을 때마다 <b>늘 같은 실수</b>를 한다. 왼쪽은 실제 시각, 오른쪽은 민수가 읽은 시각이다.' },
+			{ kind: 'text', html: '민수는 바늘 시계를 읽을 때 <b>늘 같은 실수</b>를 해요. 왼쪽은 실제 시각, 오른쪽은 민수가 읽은 시각이에요.' },
 			{ kind: 'pre', text: '3:00 → 12:15\n7:24 → 4:37\n10:48 → 9:54\n\n5:36 → ?' }
 		],
 		type: 'text',

@@ -13,7 +13,7 @@ import { CHOSUNG_CATEGORIES } from './data/chosung';
 import { PROBLEMS } from './problems';
 import { TRIVIA } from './trivia';
 
-export type StyleScope = 'fields' | 'articles' | 'explains';
+export type StyleScope = 'fields' | 'articles' | 'explains' | 'stems';
 
 export function styleTexts(): { scope: StyleScope; key: string; text: string }[] {
 	const out: { scope: StyleScope; key: string; text: string }[] = [];
@@ -56,6 +56,12 @@ export function styleTexts(): { scope: StyleScope; key: string; text: string }[]
 		p.hints?.forEach((h, i) => add('explains', `problems/${p.id}/hint/${i}`, h));
 	}
 	for (const t of TRIVIA) add('explains', `trivia/${t.id}/explain`, t.explain);
+
+	// 4단계 — 문제 지문(text 블록). 예시(pre)·전광판·그림은 문장이 아니라 뺀다
+	for (const p of [...PROBLEMS, ...TRIVIA])
+		p.blocks.forEach((b, i) => {
+			if (b.kind === 'text') add('stems', `${p.trivia ? 'trivia' : 'problems'}/${p.id}/stem/${i}`, b.html);
+		});
 
 	return out;
 }
