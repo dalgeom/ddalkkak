@@ -9,8 +9,12 @@
 	const url = $derived(`https://ddalkkak.app/matchstick/${data.meta.slug}`);
 	const heading = $derived(`${data.meta.title} ${data.count}개`);
 	const desc = $derived(
-		`${data.meta.title} ${data.count}개. 이 유형이 어떻게 갈리는지 대표 문제로 짚고, 왜 그 획을 옮기는지까지 설명합니다.`
+		data.isLevel
+			? `${data.meta.title} ${data.count}개. 어떤 기준으로 골랐는지 밝히고, 대표 문제마다 왜 그 획을 옮기는지까지 설명합니다.`
+			: `${data.meta.title} ${data.count}개. 이 유형이 어떻게 갈리는지 대표 문제로 짚고, 왜 그 획을 옮기는지까지 설명합니다.`
 	);
+	// 난이도 페이지는 그 난이도만 도는 연습으로 보낸다(/matchstick?level=)
+	const practice = $derived(data.isLevel ? `/matchstick?level=${data.meta.slug}` : '/play?filter=match');
 
 	// 대표 예시 — 문제와 정답을 나란히 놓는다
 	const before = $derived(parseEq(data.meta.example.displayed));
@@ -36,7 +40,7 @@
 	</header>
 
 	<section class="sec">
-		<h2 class="sh">이 유형은 이렇게 풉니다</h2>
+		<h2 class="sh">{data.isLevel ? '이렇게 풀어 보세요' : '이 유형은 이렇게 풉니다'}</h2>
 		{#each data.meta.how as p, i (i)}
 			<p class="how">{p}</p>
 		{/each}
@@ -98,21 +102,23 @@
 			{/each}
 		</ol>
 		<p class="note">
-			이 유형에 {data.count}개가 있습니다. 나머지는
-			<a href="/play?filter=match">무한 연습</a>에서 이어서 풀 수 있어요.
+			{data.isLevel ? '이 난이도에' : '이 유형에'} {data.count}개가 있습니다. 나머지는
+			<a href={practice}>무한 연습</a>에서 이어서 풀 수 있어요.
 		</p>
 	</section>
 
 	<section class="sec ctas">
-		<a class="cta" href="/play?filter=match">성냥개비 무한으로 풀기 <span aria-hidden="true">→</span></a>
+		<a class="cta" href={practice}>
+			{data.isLevel ? `${data.meta.short}만 무한으로 풀기` : '성냥개비 무한으로 풀기'} <span aria-hidden="true">→</span>
+		</a>
 		<a class="cta ghost" href="/" use:ctaTrack={'foot'}>오늘의 10문제 풀러 가기</a>
 	</section>
 
 	<section class="sec">
-		<h2 class="sh">다른 유형도 있어요</h2>
-		<p class="sub">전체 {data.total}개를 해법에 따라 3가지로 나눠 두었습니다.</p>
+		<h2 class="sh">다른 유형·난이도도 있어요</h2>
+		<p class="sub">전체 {data.total}개를 해법에 따라 3가지로, 난이도에 따라 쉬움·어려움으로 나눠 두었습니다.</p>
 		<div class="cats">
-			{#each data.others as k (k.slug)}
+			{#each [...data.others, ...data.levels] as k (k.slug)}
 				<a class="cat" href="/matchstick/{k.slug}">{k.title} <b>{k.count}</b></a>
 			{/each}
 		</div>

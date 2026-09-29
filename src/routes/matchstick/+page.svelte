@@ -6,6 +6,7 @@
 	import problems from '$lib/data/matchstick-problems.json';
 	import { parseEq, cloneBoard, isSolved, bit, type Board } from '$lib/matchstick';
 	import { MATCH_KINDS } from '$lib/matchstickKinds';
+	import { MATCH_LEVELS, levelOf, type MatchLevel } from '$lib/matchstickLevels';
 	import { kstDayNumber } from '$lib/game';
 	import { matchOfDay, nextStreak, shownStreak, type MatchStreak } from '$lib/matchDaily';
 	import PushPrompt from '$lib/components/PushPrompt.svelte';
@@ -27,6 +28,9 @@
 	let done = $state<number[]>([]);
 	let stats = $state({ solved: 0, streak: 0, best: 0 });
 	let bests = $state<Record<string, number>>({});
+	/** 난이도 페이지의 「~만 무한으로 풀기」(?level=)로 들어오면 그 난이도만 낸다. 메뉴로 나가면 풀린다 */
+	let level = $state<MatchLevel | null>(null);
+	const inLevel = (i: number) => !level || levelOf(problems[i].displayed, problems[i].solution) === level;
 
 	// 오늘의 성냥개비(matchDaily.ts). 날짜는 onMount에서 잡는다 — 서버 렌더 시각과 어긋나지 않게.
 	let day = $state(0);
@@ -132,6 +136,7 @@
 	function toMenu() {
 		clearInterval(timerId);
 		timerId = undefined;
+		level = null;
 		screen = 'menu';
 	}
 
@@ -143,11 +148,11 @@
 		} else if (first && mode.type === 'free' && page.url.searchParams.has('p') && !Number.isNaN(forced)) {
 			idx = Math.max(0, Math.min(problems.length - 1, forced));
 		} else {
-			let pool = problems.map((_, i) => i).filter((i) => !done.includes(i));
+			let pool = problems.map((_, i) => i).filter((i) => inLevel(i) && !done.includes(i));
 			if (pool.length === 0) {
-				done = [];
+				done = done.filter((i) => !inLevel(i));
 				persist();
-				pool = problems.map((_, i) => i);
+				pool = problems.map((_, i) => i).filter(inLevel);
 			}
 			idx = pool[Math.floor(Math.random() * pool.length)];
 		}
@@ -327,7 +332,11 @@
 		load();
 		day = kstDayNumber(Date.now());
 		track('match_daily_seen', { done: todayDone, streak: dailyStreak });
-		if (page.url.searchParams.has('p')) startMode({ type: 'free' });
+		const lv = page.url.searchParams.get('level');
+		if (lv === 'easy' || lv === 'hard') {
+			level = lv;
+			startMode({ type: 'free' });
+		} else if (page.url.searchParams.has('p')) startMode({ type: 'free' });
 	});
 	onDestroy(() => clearInterval(timerId));
 </script>
@@ -478,6 +487,12 @@
 					<a class="kind" href="/matchstick/{k.slug}">{k.short}</a>
 				{/each}
 			</div>
+			<h3 class="kh">난이도별로 모아 보기</h3>
+			<div class="kinds">
+				{#each MATCH_LEVELS as l (l.slug)}
+					<a class="kind" href="/matchstick/{l.slug}">{l.title}</a>
+				{/each}
+			</div>
 		</section>
 
 		<section class="msec">
@@ -501,6 +516,7 @@
 			<div class="emoji-mini">{runResults.map((r) => (r === 'win' ? '✅' : '🔓')).join('')}</div>
 		{:else}
 			<div class="stats">
+				{#if level}<div class="stat-box"><span>난이도</span><b>{level === 'easy' ? '쉬움' : '어려움'}</b></div>{/if}
 				<div class="stat-box"><span>성공</span><b>{stats.solved}</b></div>
 				<div class="stat-box"><span>연속</span><b>{stats.streak}</b></div>
 			</div>

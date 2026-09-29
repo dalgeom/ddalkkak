@@ -2,6 +2,7 @@ import { kstDayNumber } from '$lib/game';
 import { TRIVIA_CATEGORIES } from '$lib/triviaCategories';
 import { DISCOVER_FIELD_META } from '$lib/discoverFields';
 import { MATCH_KINDS } from '$lib/matchstickKinds';
+import { MATCH_LEVELS } from '$lib/matchstickLevels';
 import { CHOSUNG_CATEGORIES } from '$lib/data/chosung';
 import { ARTICLES } from '$lib/articles';
 import type { RequestHandler } from './$types';
@@ -58,7 +59,7 @@ export const GET: RequestHandler = () => {
 		freq: 'monthly',
 		priority: '0.7'
 	}));
-	const matchKinds = MATCH_KINDS.map((k) => ({
+	const matchKinds = [...MATCH_KINDS, ...MATCH_LEVELS].map((k) => ({
 		path: `/matchstick/${k.slug}`,
 		freq: 'monthly',
 		priority: '0.7'
