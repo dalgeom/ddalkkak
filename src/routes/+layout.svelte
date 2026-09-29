@@ -49,6 +49,9 @@
 				<span class="sep" aria-hidden="true"></span>
 			{/if}
 			<a href="/play">무한 연습</a>
+			<!-- 초성 퀴즈는 매일 10문제에 안 나오는 별도 놀이라 헤더 말고는 들어갈 길이 없다(9/29) -->
+			<span class="sep" aria-hidden="true"></span>
+			<a href="/chosung">초성 퀴즈</a>
 			{#if page.url.pathname === '/'}
 				<span class="sep" aria-hidden="true"></span>
 				<a href="/guide">가이드</a>

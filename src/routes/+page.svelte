@@ -172,7 +172,7 @@
 	   예전엔 여기에 숫자를 박아뒀는데, 문제를 추가할 때마다 홈만 옛 숫자로 남았다. */
 	const KIND_COUNT = $derived(data.counts);
 	const TOTAL_PROBLEMS = $derived(
-		data.counts.discover + data.counts.trivia + data.counts.match + data.counts.cube
+		data.counts.discover + data.counts.trivia + data.counts.match + data.counts.cube + data.counts.chosung
 	);
 	// 성냥개비 소개 카드에 띄우는 읽기전용 보드
 	const demoBoard = parseEq('8 - 0 = 8');
@@ -1181,6 +1181,11 @@
 					<span class="mb-n">{KIND_COUNT.cube}</span>
 				</a>
 			</div>
+			<!-- 초성은 /play의 한 유형이 아니라 따로 도는 놀이라 격자에 끼우지 않고 한 줄로 둔다 -->
+			<a class="mcho" href="/chosung">
+				<span class="mc-t">초성 퀴즈 <b>{KIND_COUNT.chosung}</b></span>
+				<span class="mc-s">따로 즐기는 새 놀이 →</span>
+			</a>
 			<a class="mall" href="/play?filter=all">
 				전부 섞어서 풀기 <span class="arr" aria-hidden="true">→</span>
 			</a>
@@ -2036,6 +2041,39 @@
 		font-weight: 800;
 		color: var(--accent-text);
 		font-variant-numeric: tabular-nums;
+	}
+	.mcho {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 8px;
+		margin-top: 8px;
+		padding: 12px 14px;
+		border-radius: 14px;
+		background: var(--panel-2);
+		border: 1px solid var(--border);
+		text-decoration: none;
+		color: inherit;
+	}
+	.mcho:hover {
+		border-color: var(--accent-text);
+	}
+	.mc-t {
+		font-size: 13px;
+		font-weight: 700;
+	}
+	.mc-t b {
+		margin-left: 4px;
+		font-size: 17px;
+		font-weight: 800;
+		color: var(--accent-text);
+		font-variant-numeric: tabular-nums;
+	}
+	.mc-s {
+		font-size: 12.5px;
+		font-weight: 700;
+		color: var(--muted-2);
+		white-space: nowrap;
 	}
 	.mall {
 		display: block;
