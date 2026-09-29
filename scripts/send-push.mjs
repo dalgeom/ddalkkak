@@ -107,6 +107,12 @@ const payload = JSON.stringify({
 	body: '새 문제가 올라왔어요. 오늘도 딸깍?',
 	url: '/'
 });
+// /matchstick의 「오늘의 성냥개비」에서 켠 구독(api/push의 from). 기다린 것이 성냥개비다.
+const matchPayload = JSON.stringify({
+	title: '딸깍 — 오늘의 성냥개비',
+	body: '새 성냥개비 문제가 열렸어요. 연속 기록 이어 가기!',
+	url: '/matchstick'
+});
 
 let sent = 0;
 let gone = 0;
@@ -120,7 +126,9 @@ for (const key of keys) {
 		continue;
 	}
 	try {
-		await webpush.sendNotification(sub, payload, { TTL: 12 * 3600 });
+		await webpush.sendNotification(sub, sub.from === 'match' ? matchPayload : payload, {
+			TTL: 12 * 3600
+		});
 		sent++;
 	} catch (e) {
 		if (e.statusCode === 404 || e.statusCode === 410) {

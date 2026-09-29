@@ -13,12 +13,18 @@
 	 * tomorrow — 내일 발견형 문제의 첫 예시 한 줄(teaser.ts). 9/15에 카드 안으로 들였다.
 	 * 8/01~9/14에 이 카드가 뜬 25명 중 3명(12%)만 켰는데, 켤 이유(내일 무엇이 오나)는 결과 화면
 	 * 맨 아래 예고에 따로 있었다. 이유를 버튼 바로 위에 둔다. 효과는 날짜로 가른다 — 그 전 12%.
+	 *
+	 * slot — 어느 자리에서 권했나. 이벤트 이름에 붙인다(push_offer_match). 파라미터로 나누면
+	 * GA 등록 전 데이터가 (not set)으로만 남는다(analytics.ts ctaTrack 주석).
 	 */
 	let {
 		dayNum,
 		streak = 0,
-		tomorrow = null
-	}: { dayNum: number; streak?: number; tomorrow?: Teaser | null } = $props();
+		tomorrow = null,
+		slot = ''
+	}: { dayNum: number; streak?: number; tomorrow?: Teaser | null; slot?: string } = $props();
+
+	const ev = (name: string) => (slot ? `${name}_${slot}` : name);
 
 	let show = $state(false);
 	let busy = $state(false);
@@ -27,15 +33,15 @@
 	onMount(() => {
 		if (!shouldOfferPush(dayNum)) return;
 		show = true;
-		track('push_offer', { streak });
+		track(ev('push_offer'), { streak });
 	});
 
 	async function allow() {
 		busy = true;
-		track('push_click');
-		const state = await enablePush();
+		track(ev('push_click'));
+		const state = await enablePush(slot);
 		busy = false;
-		track('push_result', { state });
+		track(ev('push_result'), { state });
 		if (state === 'granted') {
 			done = true;
 			stopOfferingPush();
@@ -47,7 +53,7 @@
 	}
 
 	function close() {
-		track('push_dismiss');
+		track(ev('push_dismiss'));
 		notePushDismissed(dayNum);
 		show = false;
 	}

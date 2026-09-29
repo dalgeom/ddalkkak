@@ -1,11 +1,14 @@
 <script lang="ts">
-	import { ctaTrack } from '$lib/analytics';
+	import { ctaTrack, track } from '$lib/analytics';
 	import { onMount, onDestroy } from 'svelte';
 	import { browser } from '$app/environment';
 	import { page } from '$app/state';
 	import problems from '$lib/data/matchstick-problems.json';
 	import { parseEq, cloneBoard, isSolved, bit, type Board } from '$lib/matchstick';
 	import { MATCH_KINDS } from '$lib/matchstickKinds';
+	import { kstDayNumber } from '$lib/game';
+	import { matchOfDay, nextStreak, shownStreak, type MatchStreak } from '$lib/matchDaily';
+	import PushPrompt from '$lib/components/PushPrompt.svelte';
 	import { shareResult as shareCardResult, outcomeMessage } from '$lib/shareCard';
 	import MatchstickBoard, { type PickLoc } from '$lib/components/MatchstickBoard.svelte';
 	import AdSlot from '$lib/components/AdSlot.svelte';
@@ -15,7 +18,8 @@
 	type Mode =
 		| { type: 'free' }
 		| { type: 'time'; seconds: number }
-		| { type: 'count'; total: number };
+		| { type: 'count'; total: number }
+		| { type: 'today' };
 
 	let screen = $state<'menu' | 'play' | 'result'>('menu');
 	let mode = $state<Mode>({ type: 'free' });
@@ -23,6 +27,20 @@
 	let done = $state<number[]>([]);
 	let stats = $state({ solved: 0, streak: 0, best: 0 });
 	let bests = $state<Record<string, number>>({});
+
+	// 오늘의 성냥개비(matchDaily.ts). 날짜는 onMount에서 잡는다 — 서버 렌더 시각과 어긋나지 않게.
+	let day = $state(0);
+	let daily = $state<MatchStreak | null>(null);
+	let todayIdx = $derived(day ? matchOfDay(day) : -1);
+	let todayDone = $derived(!!day && daily?.day === day);
+	let todayWon = $derived(todayDone && (daily?.streak ?? 0) > 0);
+	let dailyStreak = $derived(day ? shownStreak(daily, day) : 0);
+	let todayLabel = $derived.by(() => {
+		if (!day) return '';
+		const d = new Date(day * 86400000);
+		return `${d.getUTCMonth() + 1}월 ${d.getUTCDate()}일`;
+	});
+	let tomorrowPeek = $derived(day ? { chip: '성냥개비', line: problems[matchOfDay(day + 1)].displayed } : null);
 
 	let pIdx = $state(-1);
 	let orig = $state<Board | null>(null);
@@ -50,11 +68,13 @@
 	function modeKey(m: Mode): string {
 		if (m.type === 'time') return `time-${m.seconds}`;
 		if (m.type === 'count') return `count-${m.total}`;
+		if (m.type === 'today') return 'today';
 		return 'free';
 	}
 	function modeLabel(m: Mode): string {
 		if (m.type === 'time') return `타임어택 ${m.seconds / 60}분`;
 		if (m.type === 'count') return `${m.total}문제 도전`;
+		if (m.type === 'today') return '오늘의 성냥개비';
 		return '무한 연습';
 	}
 	function load() {
@@ -64,6 +84,7 @@
 				localStorage.getItem('ddal.match.stats') || '{"solved":0,"streak":0,"best":0}'
 			);
 			bests = JSON.parse(localStorage.getItem('ddal.match.bests') || '{}');
+			daily = JSON.parse(localStorage.getItem('ddal.match.daily') || 'null');
 		} catch {
 			/* 무시 */
 		}
@@ -74,6 +95,7 @@
 			localStorage.setItem('ddal.match.done', JSON.stringify(done));
 			localStorage.setItem('ddal.match.stats', JSON.stringify(stats));
 			localStorage.setItem('ddal.match.bests', JSON.stringify(bests));
+			if (daily) localStorage.setItem('ddal.match.daily', JSON.stringify(daily));
 		} catch {
 			/* 무시 */
 		}
@@ -116,7 +138,9 @@
 	function nextProblem(first = false) {
 		const forced = Number(page.url.searchParams.get('p'));
 		let idx: number;
-		if (first && mode.type === 'free' && page.url.searchParams.has('p') && !Number.isNaN(forced)) {
+		if (mode.type === 'today') {
+			idx = todayIdx;
+		} else if (first && mode.type === 'free' && page.url.searchParams.has('p') && !Number.isNaN(forced)) {
 			idx = Math.max(0, Math.min(problems.length - 1, forced));
 		} else {
 			let pool = problems.map((_, i) => i).filter((i) => !done.includes(i));
@@ -170,7 +194,8 @@
 			markDone();
 			persist();
 
-			if (mode.type === 'free') {
+			if (mode.type === 'today') finishToday('won');
+			if (mode.type === 'free' || mode.type === 'today') {
 				// 점수 시스템은 없다 — 있지도 않은 점수를 암시하지 말고 시도 횟수만 알려준다
 				feedback = attempts === 0 ? '딸깍! 한 번에 맞혔어요' : `딸깍! ${attempts + 1}번 만에 맞혔어요`;
 			} else {
@@ -227,6 +252,7 @@
 		solvedThis = 'revealed';
 		stats.streak = 0;
 		markDone();
+		if (mode.type === 'today') finishToday('revealed');
 		persist();
 		feedback = `정답: ${problems[pIdx].solution.replace('-', '−')}`;
 		if (mode.type === 'count') {
@@ -237,6 +263,18 @@
 				else nextProblem();
 			}, 1400);
 		}
+	}
+
+	function finishToday(result: 'won' | 'revealed') {
+		if (todayDone) return;
+		daily = nextStreak(daily, day, result);
+		persist();
+		track(result === 'won' ? 'match_daily_solve' : 'match_daily_reveal', { streak: daily.streak });
+	}
+
+	function startToday() {
+		track('match_daily_start', { streak: dailyStreak });
+		startMode({ type: 'today' });
 	}
 
 	let toastTimer: ReturnType<typeof setTimeout>;
@@ -287,6 +325,8 @@
 
 	onMount(() => {
 		load();
+		day = kstDayNumber(Date.now());
+		track('match_daily_seen', { done: todayDone, streak: dailyStreak });
 		if (page.url.searchParams.has('p')) startMode({ type: 'free' });
 	});
 	onDestroy(() => clearInterval(timerId));
@@ -325,6 +365,35 @@
 				<div class="ms"><b>{problems.length - done.length}</b><span>남은 새 문제</span></div>
 			</div>
 		</header>
+
+		<!-- 오늘의 성냥개비 — 검색으로 온 사람에게 매일 올 이유를 준다(matchDaily.ts) -->
+		{#if day && todayIdx >= 0}
+			<section class="today" class:done={todayDone}>
+				<div class="t-top">
+					<span class="kicker">오늘의 성냥개비 · {todayLabel}</span>
+					{#if dailyStreak > 0}<span class="t-streak">🔥 {dailyStreak}일 연속</span>{/if}
+				</div>
+				{#if todayDone}
+					<p class="t-done">
+						{todayWon ? '오늘 문제를 풀었어요.' : '오늘 문제는 정답을 봤어요.'} 내일 자정에 새 문제가 열려요.
+					</p>
+				{:else}
+					<div class="t-board">
+						<MatchstickBoard
+							board={parseEq(problems[todayIdx].displayed)}
+							picked={null}
+							onstick={() => {}}
+							interactive={false}
+							label={problems[todayIdx].displayed}
+						/>
+					</div>
+					<button class="big" onclick={startToday}>
+						풀어 보기 <span class="arr" aria-hidden="true">→</span>
+					</button>
+					<p class="t-note">하루 한 문제, 모두 같은 문제예요. 매일 풀면 연속 기록이 쌓입니다.</p>
+				{/if}
+			</section>
+		{/if}
 
 		<!-- 처음 온 사람이 푸는 법을 찾을 수 있어야 한다(문장 속 링크는 눈에 안 띈다) -->
 		<a class="gbanner" href="/matchstick/guide">
@@ -425,6 +494,8 @@
 		{#if mode.type === 'time'}
 			<div class="timer" class:danger={timeLeft <= 10}><Icon name="timer" size={15} />{timeStr}</div>
 			<div class="run-score"><Icon name="correct" size={15} />{runSolved}</div>
+		{:else if mode.type === 'today'}
+			<div class="run-score">오늘의 성냥개비 · {todayLabel}</div>
 		{:else if mode.type === 'count'}
 			<div class="run-score">문제 {runResults.length + 1} / {mode.total}</div>
 			<div class="emoji-mini">{runResults.map((r) => (r === 'win' ? '✅' : '🔓')).join('')}</div>
@@ -465,6 +536,13 @@
 					<button class="btn ghost" onclick={toMenu}>나가기</button>
 				{/if}
 			</div>
+		{:else if mode.type === 'today'}
+			<p class="t-after">
+				{#if todayWon}🔥 <b>{daily?.streak}일 연속</b> · 내일 자정에 새 문제{:else}내일 문제를 맞히면 연속 기록이 시작돼요{/if}
+			</p>
+			<PushPrompt dayNum={day} streak={daily?.streak ?? 0} tomorrow={tomorrowPeek} slot="match" />
+			<button class="btn wide" onclick={() => startMode({ type: 'free' })}>무한 연습 이어서 →</button>
+			<button class="btn ghost wide" onclick={toMenu}>모드 선택으로</button>
 		{:else if mode.type === 'free'}
 			<button class="btn wide" onclick={() => nextProblem()}>다음 문제 →</button>
 			<button class="btn ghost wide" onclick={share}>기록 공유하기</button>
@@ -536,6 +614,50 @@
 		font-size: 13.5px;
 		line-height: 1.7;
 		color: var(--muted);
+		word-break: keep-all;
+	}
+	/* 오늘의 성냥개비 — 모드 카드보다 앞에 서는 자리라 강조선으로 구분한다 */
+	.today {
+		background: var(--panel);
+		border: 2px solid var(--accent);
+		border-radius: 18px;
+		padding: 16px;
+	}
+	.today.done {
+		border-color: var(--border-strong);
+	}
+	.t-top {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		flex-wrap: wrap;
+		gap: 6px 10px;
+	}
+	.t-streak {
+		font-size: 13.5px;
+		font-weight: 800;
+		color: var(--accent-text);
+	}
+	.t-board {
+		margin: 12px 0 14px;
+	}
+	.t-done,
+	.t-note {
+		margin-top: 10px;
+		font-size: 13.5px;
+		line-height: 1.7;
+		color: var(--muted);
+		word-break: keep-all;
+	}
+	.t-done {
+		color: var(--text);
+		font-weight: 700;
+	}
+	.t-after {
+		margin: 4px 0 0;
+		text-align: center;
+		font-size: 14.5px;
+		line-height: 1.7;
 		word-break: keep-all;
 	}
 	/* 풀이 가이드 배너 — 모드 카드와 구분되게 왼쪽 강조선 + 연한 바탕 */

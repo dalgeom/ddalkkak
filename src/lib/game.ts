@@ -469,7 +469,7 @@ export const PICK_V2_START_DAY = 20680; // 2026-08-15(KST)부터
 export type BankSizesAt = (day: number) => { discover: number; trivia: number };
 
 /** v1 cursorOf와 동일한 값 — 그날 시작 시점까지 그 유형이 쓴 슬롯 수 */
-function cursorAt(kind: DailyKind, d: number): number {
+export function cursorAt(kind: DailyKind, d: number): number {
 	const bonusUsed: Record<string, number> = { discover: 0, trivia: 0, match: 0, cube: 0 };
 	for (let e = 0; e < d; e++) {
 		const ks = dailyKinds(e);

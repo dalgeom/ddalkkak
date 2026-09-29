@@ -29,7 +29,11 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 		return json({ ok: false });
 	}
 
-	const sub = body as { endpoint?: unknown; keys?: { p256dh?: unknown; auth?: unknown } };
+	const sub = body as {
+		endpoint?: unknown;
+		keys?: { p256dh?: unknown; auth?: unknown };
+		from?: unknown;
+	};
 	if (
 		typeof sub?.endpoint !== 'string' ||
 		!sub.endpoint.startsWith('https://') ||
@@ -47,7 +51,9 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 			JSON.stringify({
 				endpoint: sub.endpoint,
 				keys: { p256dh: sub.keys.p256dh, auth: sub.keys.auth },
-				at: new Date().toISOString().slice(0, 10)
+				at: new Date().toISOString().slice(0, 10),
+				// 받는 값은 하나뿐이다 — 아무 문자열이나 KV에 담지 않는다
+				...(sub.from === 'match' ? { from: 'match' } : {})
 			})
 		);
 		return json({ ok: true });
