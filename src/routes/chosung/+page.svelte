@@ -237,6 +237,10 @@
 					오히려 두 글자가 어렵습니다. ㅅㅈ, ㄱㄹ처럼 짧으면 떠오르는 후보가 너무 많아서 머릿속이 비어
 					버리거든요. 한 분야에서 초성이 같은 낱말(ㄱㄹ = 고래·기린)은 둘 다 정답으로 받습니다.
 				</p>
+				<p class="mp long">
+					막혔을 때 어디부터 붙잡을지는 <a class="inl" href="/read/chosung-tips">초성 퀴즈 잘 푸는 법</a>에 정리해
+					두었습니다.
+				</p>
 				<h3 class="kh">분야별로 모아 보기</h3>
 				<div class="links">
 					{#each CHOSUNG_CATEGORIES as c (c.slug)}
@@ -516,6 +520,10 @@
 	.cat.all {
 		grid-column: 1 / -1;
 		border-color: var(--accent);
+	}
+	.inl {
+		color: var(--accent-text);
+		font-weight: 700;
 	}
 	.links {
 		display: flex;

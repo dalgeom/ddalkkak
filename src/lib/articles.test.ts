@@ -42,6 +42,7 @@ describe('읽을거리', () => {
 			'/discover',
 			'/play',
 			'/trivia',
+			'/chosung',
 			...DISCOVER_FIELD_META.map((f) => `/discover/${f.slug}`)
 		];
 		for (const a of ARTICLES) expect(valid, a.slug).toContain(a.cta.href);
