@@ -47,7 +47,8 @@ const BANK_HISTORY: ({ fromDay: number } & BankSizes)[] = [
 	{ fromDay: 20707, discover: 351, trivia: 426 }, // 9/10 배포분, 9/11부터 출제
 	{ fromDay: 20711, discover: 354, trivia: 426 }, // 9/14 배포분, 9/15부터 출제
 	{ fromDay: 20712, discover: 357, trivia: 426 }, // 9/15 배포분, 9/16부터 출제
-	{ fromDay: 20725, discover: 357, trivia: 441 } // 9/28 배포분(상식 15개), 9/29부터 출제
+	{ fromDay: 20725, discover: 357, trivia: 441 }, // 9/28 배포분(상식 15개), 9/29부터 출제
+	{ fromDay: 20726, discover: 360, trivia: 441 } // 9/29 배포분, 9/30부터 출제
 ];
 
 /** day의 세트를 계산할 때 쓸 은행 크기 — fromDay가 day 이하인 마지막 엔트리 */
