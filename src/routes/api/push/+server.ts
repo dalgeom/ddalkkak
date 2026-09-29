@@ -52,8 +52,8 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 				endpoint: sub.endpoint,
 				keys: { p256dh: sub.keys.p256dh, auth: sub.keys.auth },
 				at: new Date().toISOString().slice(0, 10),
-				// 받는 값은 하나뿐이다 — 아무 문자열이나 KV에 담지 않는다
-				...(sub.from === 'match' ? { from: 'match' } : {})
+				// 받는 값은 정해져 있다 — 아무 문자열이나 KV에 담지 않는다
+				...(sub.from === 'match' || sub.from === 'chosung' ? { from: sub.from } : {})
 			})
 		);
 		return json({ ok: true });

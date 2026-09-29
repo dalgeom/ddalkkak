@@ -18,22 +18,5 @@ export function matchOfDay(day: number): number {
 	return order[(cursorAt('match', day) + AHEAD) % MATCH_TOTAL];
 }
 
-/** day — 마지막으로 끝낸 날. streak — 그날까지 연속으로 「맞힌」 날 수. */
-export type MatchStreak = { day: number; streak: number; best: number };
-
-export function nextStreak(
-	prev: MatchStreak | null,
-	day: number,
-	result: 'won' | 'revealed'
-): MatchStreak {
-	if (prev && prev.day === day) return prev;
-	const best = prev?.best ?? 0;
-	if (result === 'revealed') return { day, streak: 0, best };
-	const streak = prev && prev.day === day - 1 ? prev.streak + 1 : 1;
-	return { day, streak, best: Math.max(best, streak) };
-}
-
-/** 오늘 아직 안 풀었어도 어제까지 이어졌으면 산 기록이다 */
-export function shownStreak(s: MatchStreak | null, day: number): number {
-	return s && s.day >= day - 1 ? s.streak : 0;
-}
+// 연속 기록은 초성 퀴즈와 같이 쓴다(dailyStreak.ts)
+export { nextStreak, shownStreak, type DayStreak as MatchStreak } from './dailyStreak';

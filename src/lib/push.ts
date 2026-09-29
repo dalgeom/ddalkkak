@@ -130,8 +130,8 @@ export function stopOfferingPush(): void {
  * 권한을 묻고 구독을 서버에 등록한다.
  * 어느 단계에서 실패하든 게임에는 영향이 없어야 하므로 예외를 밖으로 던지지 않는다.
  *
- * from — 어디서 켰나. 'match'면 발송이 오늘의 성냥개비 문구와 /matchstick 링크로 간다
- * (성냥개비를 기다린 사람을 10문제 홈에 떨구지 않는다).
+ * from — 어디서 켰나. 'match'·'chosung'이면 발송이 그 놀이의 문구와 링크로 간다
+ * (성냥개비·초성을 기다린 사람을 10문제 홈에 떨구지 않는다).
  */
 export async function enablePush(from = ''): Promise<PushState> {
 	if (!pushSupported()) return 'unsupported';

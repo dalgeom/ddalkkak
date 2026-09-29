@@ -2,6 +2,7 @@ import { kstDayNumber } from '$lib/game';
 import { TRIVIA_CATEGORIES } from '$lib/triviaCategories';
 import { DISCOVER_FIELD_META } from '$lib/discoverFields';
 import { MATCH_KINDS } from '$lib/matchstickKinds';
+import { CHOSUNG_CATEGORIES } from '$lib/data/chosung';
 import { ARTICLES } from '$lib/articles';
 import type { RequestHandler } from './$types';
 
@@ -62,11 +63,17 @@ export const GET: RequestHandler = () => {
 		freq: 'monthly',
 		priority: '0.7'
 	}));
+	// 초성 퀴즈 분야 모음 — /chosung(게임 화면)은 /matchstick과 같은 이유로 뺀다
+	const chosungCats = CHOSUNG_CATEGORIES.map((c) => ({
+		path: `/chosung/${c.slug}`,
+		freq: 'monthly',
+		priority: '0.7'
+	}));
 	const articles = [
 		{ path: '/read', freq: 'weekly', priority: '0.7' },
 		...ARTICLES.map((a) => ({ path: `/read/${a.slug}`, freq: 'monthly', priority: '0.7' }))
 	];
-	const all = [...PAGES, ...triviaCats, ...discoverFields, ...matchKinds, ...articles];
+	const all = [...PAGES, ...triviaCats, ...discoverFields, ...matchKinds, ...chosungCats, ...articles];
 	const body = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${all

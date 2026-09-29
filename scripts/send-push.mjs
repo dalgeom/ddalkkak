@@ -113,6 +113,14 @@ const matchPayload = JSON.stringify({
 	body: '새 성냥개비 문제가 열렸어요. 연속 기록 이어 가기!',
 	url: '/matchstick'
 });
+// /chosung의 「오늘의 초성」에서 켠 구독
+const chosungPayload = JSON.stringify({
+	title: '딸깍 — 오늘의 초성',
+	body: '새 초성 퀴즈가 열렸어요. 연속 기록 이어 가기!',
+	url: '/chosung'
+});
+const payloadOf = (sub) =>
+	sub.from === 'match' ? matchPayload : sub.from === 'chosung' ? chosungPayload : payload;
 
 let sent = 0;
 let gone = 0;
@@ -126,7 +134,7 @@ for (const key of keys) {
 		continue;
 	}
 	try {
-		await webpush.sendNotification(sub, sub.from === 'match' ? matchPayload : payload, {
+		await webpush.sendNotification(sub, payloadOf(sub), {
 			TTL: 12 * 3600
 		});
 		sent++;

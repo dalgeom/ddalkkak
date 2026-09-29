@@ -78,6 +78,8 @@
 			<span aria-hidden="true">·</span>
 			<a href="/cubenet">전개도</a>
 			<span aria-hidden="true">·</span>
+			<a href="/chosung">초성퀴즈</a>
+			<span aria-hidden="true">·</span>
 			<a href="/about">소개</a>
 			<span aria-hidden="true">·</span>
 			<a href="/record">내 기록</a>
