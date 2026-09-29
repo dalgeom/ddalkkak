@@ -94,7 +94,8 @@ describe('오늘의 딸깍 — 실제 문제은행 검증', () => {
 					expect(p.index, `day ${day}`).toBeGreaterThanOrEqual(0);
 					expect(p.index, `day ${day}`).toBeLessThan(CUBE_TOTAL);
 				}
-	});
+		// 3,650일을 세워 로컬 2초 — CI 러너는 2~3배 느려 기본 5초에 걸렸다(9/29 9486a09)
+	}, 20000);
 
 	/**
 	 * 재출제 주기. 발견형은 가장 작은 분야(규칙·분류)가 이틀에 한 번 나와야 하므로
