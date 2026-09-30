@@ -17,6 +17,9 @@ export function load({ params }) {
 	if (!category) error(404, '없는 분야입니다');
 
 	const all = TRIVIA.filter((t) => t.category === category.name);
+	// 본문의 분야 전체 수는 {n}으로 적어 둔다 — 문제를 추가할 때마다 「34문제 중」 같은 숫자가
+	// 제목(39문제)과 어긋났다(2026-09-30 실측). 여기서 실제 수로 채운다.
+	const fill = (s: string) => s.replaceAll('{n}', String(all.length));
 
 	/**
 	 * 전 문제를 늘어놓던 것을 걷고 대표만 싣는다.
@@ -47,7 +50,7 @@ export function load({ params }) {
 				// 객관식은 보기 중 하나, 주관식은 대표 답안 하나만 보여준다
 				answer: t.type === 'choice' ? (t.choices?.[t.answerIndex ?? 0] ?? '') : (t.answers?.[0] ?? ''),
 				explain: t.explain,
-				why
+				why: fill(why)
 			};
 		});
 
@@ -74,5 +77,12 @@ export function load({ params }) {
 		}))
 		.sort((a, b) => b.count - a.count);
 
-	return { category, items, count: all.length, byGrade, others, total: TRIVIA.length };
+	return {
+		category: { ...category, intro: fill(category.intro), desc: fill(category.desc), deepDive: fill(category.deepDive) },
+		items,
+		count: all.length,
+		byGrade,
+		others,
+		total: TRIVIA.length
+	};
 }

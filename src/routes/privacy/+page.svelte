@@ -1,13 +1,13 @@
 <script lang="ts">
 	const CONTACT = 'hyun7219@gmail.com';
-	const UPDATED = '2026년 8월 20일';
+	const UPDATED = '2026년 9월 30일';
 </script>
 
 <svelte:head>
 	<title>개인정보처리방침 — 딸깍 퍼즐</title>
 	<meta
 		name="description"
-		content="딸깍은 회원가입 없이 이용하는 서비스로 개인 식별 정보를 수집하지 않습니다. 게임 기록은 브라우저에만 저장됩니다."
+		content="딸깍은 회원가입 없이 이용하는 서비스로 개인 식별 정보를 직접 수집하지 않습니다. 게임 기록은 브라우저에만 저장되고, 광고·방문 통계에는 Google의 쿠키가 쓰일 수 있습니다."
 	/>
 	<link rel="canonical" href="https://ddalkkak.app/privacy" />
 	<meta property="og:title" content="개인정보처리방침 — 딸깍 퍼즐" />
@@ -17,7 +17,7 @@
 <article>
 	<header class="cover">
 		<span class="kicker">개인정보처리방침</span>
-		<h1>딸깍은 개인정보를<br /><b>수집하지 않습니다</b></h1>
+		<h1>딸깍은 개인을 식별하는 정보를<br /><b>직접 수집하지 않습니다</b></h1>
 		<p class="lead">
 			회원가입도, 로그인도 없습니다. 푼 기록은 이용자의 브라우저 안에만 남습니다. 서버로 가는
 			것은 문제별 정답률을 내기 위한 익명 숫자, 그리고 알림을 켠 경우의 알림 주소뿐입니다.
@@ -32,7 +32,8 @@
 			<div class="srow"><span class="mark">·</span><b>브라우저에만 저장</b><span class="d">푼 문제, 진행 상태, 연속 일수</span></div>
 			<div class="srow"><span class="mark">·</span><b>서버로 가는 것</b><span class="d">문제 번호와 정답 여부 (익명 집계용)</span></div>
 			<div class="srow"><span class="mark">·</span><b>알림을 켠 경우</b><span class="d">브라우저가 발급한 알림 주소 (언제든 끌 수 있음)</span></div>
-			<div class="srow"><span class="mark">·</span><b>제3자 쿠키</b><span class="d">광고 게재 시 Google 등이 사용할 수 있음</span></div>
+			<div class="srow"><span class="mark">·</span><b>방문 통계</b><span class="d">Google Analytics가 쿠키로 방문 페이지·기기 종류 등을 집계</span></div>
+			<div class="srow"><span class="mark">·</span><b>제3자 쿠키</b><span class="d">광고 게재 시 Google 등이 쿠키·웹 비콘·IP 주소를 사용할 수 있음</span></div>
 		</div>
 	</section>
 
@@ -72,8 +73,21 @@
 		<div class="box">
 			<p>본 사이트는 Google AdSense 광고를 게재할 수 있습니다.</p>
 			<p>
-				Google을 포함한 제3자 광고 사업자는 쿠키를 사용하여 이용자의 이전 방문 기록에 기반한
-				광고를 표시할 수 있습니다. 자세한 내용과 수신 거부 방법은
+				Google을 포함한 제3자 광고 사업자는 쿠키를 사용하여 이용자가 본 사이트나 다른 웹사이트를
+				방문한 기록에 기반한 광고를 표시할 수 있습니다. Google은 광고 쿠키를 사용하여 본 사이트와
+				인터넷의 다른 사이트 방문 기록을 바탕으로 이용자에게 맞춤 광고를 게재할 수 있습니다.
+			</p>
+			<p>
+				광고 게재 과정에서 제3자 광고 사업자는 이용자의 브라우저에 쿠키를 저장하거나 읽을 수
+				있고, <b>웹 비콘</b>을 사용하거나 <b>IP 주소</b>를 수집할 수 있습니다. 이 정보는 해당
+				사업자의 개인정보처리방침에 따라 처리됩니다.
+			</p>
+			<p>
+				맞춤 광고를 원하지 않으면
+				<a href="https://adssettings.google.com" rel="noopener" target="_blank">Google 광고 설정</a>에서
+				끌 수 있습니다. Google 외 제3자 사업자의 맞춤 광고 쿠키는
+				<a href="https://www.aboutads.info/choices" rel="noopener" target="_blank">www.aboutads.info</a>에서
+				거부할 수 있습니다. Google이 광고에 쿠키를 사용하는 방식은
 				<a href="https://policies.google.com/technologies/ads" rel="noopener" target="_blank"
 					>Google 광고 정책</a
 				>에서 확인할 수 있습니다.
@@ -85,8 +99,17 @@
 		<h2 class="sh"><span class="n">3</span>통계</h2>
 		<div class="box">
 			<p>
-				서비스 개선을 위해 방문 통계 도구를 사용할 수 있으며, 이 경우 수집되는 정보는 익명화된
-				이용 통계에 한합니다.
+				서비스 개선을 위해 <b>Google Analytics</b>를 사용합니다. Google Analytics는 쿠키를 사용하여
+				방문한 페이지, 머문 시간, 기기·브라우저 종류, 대략적인 지역, 유입 경로 같은 이용 통계를
+				수집하며, 딸깍은 이를 개인을 식별할 수 없는 집계 형태로만 확인합니다. 문제 풀이 시작·완주
+				같은 이용 흐름도 같은 방식으로 집계합니다.
+			</p>
+			<p>
+				수집된 정보는 Google의 개인정보처리방침에 따라 처리됩니다. 수집을 원하지 않으면 브라우저의
+				쿠키를 차단하거나
+				<a href="https://tools.google.com/dlpage/gaoptout" rel="noopener" target="_blank"
+					>Google Analytics 차단 부가기능</a
+				>을 설치할 수 있습니다.
 			</p>
 		</div>
 	</section>

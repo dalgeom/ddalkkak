@@ -52,14 +52,8 @@
 				"inLanguage": "ko"
 			}
 		</script>
-		<!-- 애드센스 사이트 연결용 스크립트. 심사를 받으려면 승인 전에도 실려 있어야 한다.
-		     이것만으로는 광고가 뜨지 않는다 — 실제 광고는 승인 후 AdSlot에 유닛을 넣을 때부터.
-		     게시자 ID는 페이지 소스에 그대로 노출되는 공개 식별자다(비밀 아님). -->
-		<script
-			async
-			src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2389523583052577"
-			crossorigin="anonymous"
-		></script>
+		<!-- 애드센스 로더 자리. 콘텐츠 페이지에만 hooks.server.ts가 채운다(빈 셸·오류 화면 제외) -->
+		%ddal.adsense%
 		<!-- Google Analytics (GA4)
 		     자동화 브라우저는 세지 않는다. 배포한 기능을 프로덕션에서 확인할 때마다 헤드리스
 		     브라우저가 실제 방문으로 잡혀 세션 수와 이탈률을 왜곡했다 — 2026-08-20에 /matchstick

@@ -374,9 +374,10 @@
 <!-- 서버 렌더 소개문 — 문제는 클라이언트에서 로드되므로 정적 HTML에 최소한의 본문을 남긴다 -->
 <p class="intro">
 	발견형 퍼즐 {data.counts.discover}개 · 상식 퀴즈 {data.counts.trivia}개 · 성냥개비
-	{data.counts.match}개 · 전개도 {CUBE_TOTAL}개 — 총
+	{data.counts.match}개 · 전개도 {CUBE_TOTAL}개, 모두
 	{(data.counts.discover + data.counts.trivia + data.counts.match + CUBE_TOTAL).toLocaleString()}문제를
-	시간·개수 제한 없이 풉니다. 전체로 두면 오늘의 딸깍과 같은 비율로 네 유형이 돌아가며 나와요.
+	시간·개수 제한 없이 풀어요. 전체로 두면 오늘의 딸깍과 같은 비율로 네 유형이 돌아가며 나와요.
+	<a href="/chosung">초성 퀴즈</a>는 여기와 따로 풀어요.
 </p>
 
 {#if loading}

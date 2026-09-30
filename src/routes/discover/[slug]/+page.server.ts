@@ -13,6 +13,8 @@ export function load({ params }) {
 	if (!field) error(404, '없는 분야입니다');
 
 	const all = PROBLEMS.filter((p) => fieldOfChip(p.chip) === field.name);
+	// 본문의 분야 전체 수는 {n}으로 적어 둔다 — 「58개 가운데」가 제목(62개)과 어긋났다(9/30)
+	const fill = (s: string) => s.replaceAll('{n}', String(all.length));
 
 	/**
 	 * 전 문제를 늘어놓던 것을 걷고 대표만 싣는다.
@@ -26,7 +28,7 @@ export function load({ params }) {
 	const items = field.featured.map(({ id, why }) => {
 		const p = all.find((x) => x.id === id);
 		if (!p) throw new Error(`${field.slug}의 featured에 없는 id: ${id}`);
-		return { problem: p, why };
+		return { problem: p, why: fill(why) };
 	});
 
 	// 그 분야 안에서 어떤 세부 유형이 많은지 — 페이지마다 다른 내용이 되고, 목차 노릇도 한다
@@ -43,5 +45,12 @@ export function load({ params }) {
 		count: PROBLEMS.filter((p) => fieldOfChip(p.chip) === f.name).length
 	}));
 
-	return { field, items, count: all.length, chips, others, total: PROBLEMS.length };
+	return {
+		field: { ...field, intro: fill(field.intro), desc: fill(field.desc), deepDive: fill(field.deepDive) },
+		items,
+		count: all.length,
+		chips,
+		others,
+		total: PROBLEMS.length
+	};
 }
