@@ -6,7 +6,7 @@ import { styleTexts, type StyleScope } from './styleTexts';
  * 해요체로 고친 범위만 여기에 넣는다. 한 번에 다 고칠 수 없어서 단계마다 늘린다(docs/문체.md).
  * 넣은 범위에서 「~다.」 문장이나 대시가 다시 나오면 CI가 깨진다.
  */
-const ENFORCED: StyleScope[] = ['fields', 'articles'];
+const ENFORCED: StyleScope[] = ['fields', 'articles', 'explains', 'stems'];
 
 describe('문체 검사기', () => {
 	it('해요체는 통과, 합니다체·한다체는 위반', () => {
@@ -39,6 +39,10 @@ describe('문체 검사기', () => {
 			expect(texts.filter((t) => t.scope === s).length, s).toBeGreaterThan(10);
 		const pending = texts.filter((t) => !ENFORCED.includes(t.scope));
 		if (pending.length) expect(pending.some((t) => styleIssues(t.text).length > 0)).toBe(true);
+		// 전 범위를 켠 뒤에는 위 대조가 빈다(9/30). 실제 글의 해요체를 한다체로 되돌려 넣으면
+		// 검사기가 잡는지로 대신 본다 — 검사기가 죽어 있으면 아래 범위 검사는 빈손으로 통과한다
+		const sample = texts.find((t) => t.scope === 'articles')!.text.replace(/요\./g, '다.');
+		expect(styleIssues(sample).length).toBeGreaterThan(0);
 	});
 });
 
