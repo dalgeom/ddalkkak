@@ -974,7 +974,7 @@
 	<title>딸깍 퍼즐 — 매일 새로 열리는 두뇌 퍼즐 10문제</title>
 	<meta
 		name="description"
-		content="하루 10문제. {compositionLong}. 매일 자정에 새로 열리고, 그날은 모두 같은 문제를 풉니다."
+		content="하루 10문제. {compositionLong}. 매일 자정에 새로 열리고, 그날은 모두 같은 문제를 풀어요."
 	/>
 	<link rel="canonical" href="https://ddalkkak.app/" />
 	<meta property="og:url" content="https://ddalkkak.app/" />
@@ -990,7 +990,7 @@
 	<section class="hero-card reveal">
 		<div class="mark"><Bulb size={44} /></div>
 		<h1 class="slogan">매일 두뇌를 깨우는<br /><b>10분의 딸깍</b></h1>
-		<p class="tagline">규칙을 발견하는 순간, 머릿속에서 딸깍 소리가 납니다.</p>
+		<p class="tagline">규칙을 발견하는 순간, 머릿속에서 딸깍 소리가 나요.</p>
 
 		<div class="date" class:solo={untouched}>{todayLabel}</div>
 
@@ -1059,7 +1059,7 @@
 					<div class="rrow"><span>고구마</span><em>→</em><b class="qm">?</b></div>
 				</div>
 				<b>발견형 {KIND_COUNT.discover}</b>
-				<span>예시에 숨은 규칙을 스스로 찾습니다. 막히면 힌트가 3단계로 열려요.</span>
+				<span>예시 속 규칙을 찾아요. 힌트는 3단계.</span>
 			</div>
 			<div class="kind">
 				<div class="kind-vis quiz">
@@ -1068,93 +1068,24 @@
 					<span class="mini-badge">C</span><span class="mini-line"></span>
 				</div>
 				<b>상식 퀴즈 {KIND_COUNT.trivia}</b>
-				<span>18개 분야, 초등부터 어른까지. 해설이 함께 나옵니다.</span>
+				<span>18개 분야, 해설과 함께.</span>
 			</div>
 			<div class="kind">
 				<div class="kind-vis">
 					<MatchstickBoard board={demoBoard} picked={null} onstick={() => {}} interactive={false} label="8 − 0 = 8" />
 				</div>
 				<b>성냥개비 {KIND_COUNT.match}</b>
-				<span>성냥 하나만 옮겨 식을 참으로. 획을 눌러 집고 빈 자리에 놓습니다.</span>
+				<span>하나만 옮겨 식을 참으로.</span>
 			</div>
 			<div class="kind">
-				<div class="kind-vis"><CubeDie view={[2, 3, 4]} size={78} /></div>
+				<div class="kind-vis"><CubeDie view={[2, 3, 4]} size={58} /></div>
 				<b>전개도 {KIND_COUNT.cube}</b>
-				<span>머릿속에서 종이를 접어 어떤 주사위가 되는지 맞힙니다. 틀리면 접히는 과정을 보여줘요.</span>
+				<span>머릿속으로 접어 주사위 맞히기.</span>
 			</div>
 		</div>
 	</section>
 
 	<div class="adwrap reveal d2"><AdSlot label="랜딩 하단" /></div>
-
-	<!-- 순서를 바꾼 이유: 오늘 것을 아직 안 푼 사람에게 전체 문제 카탈로그를 먼저
-	     들이밀고 있었다. 8/24에 /matchstick 9PV·/cubenet 6PV로 실제로 그쪽으로 샜다.
-	     「여기가 뭐 하는 곳인가」를 먼저 읽히고, 더 풀고 싶은 사람만 카탈로그로 보낸다.
-	     크롤러도 소개 본문을 더 일찍 만난다. -->
-	<!-- ⑥ 읽는 자리. 여기까지 내려온 사람은 게임보다 '이게 뭐 하는 곳인가'가 궁금한 쪽이다.
-	     홈이 시작 버튼과 문제 카드뿐이면 사이트가 아니라 앱 실행 화면으로 읽힌다 —
-	     애드센스가 '가치가 별로 없는 콘텐츠'로 두 번 반려했을 때(8/11·8/21) 홈 본문이
-	     936자였다. 매일 바뀌는 문제 아래에, 바뀌지 않는 이야기를 둔다. -->
-	<section class="sec reveal d2 about">
-		<h2 class="sec-h">딸깍은 이런 곳입니다</h2>
-
-		<h3>매일 자정에 열 문제가 바뀝니다</h3>
-		<p>
-			발견형 세 문제, 상식 두 문제, 성냥개비 두 문제, 전개도 두 문제, 그리고 그날의 보너스
-			한 문제. 순서와 조합은 날짜에서 계산되기 때문에 <b>누가 언제 들어와도 같은 열 문제</b>를
-			만납니다. 어제 푼 사람과 오늘 푼 사람이 같은 이야기를 할 수 있어야 한다고 생각해서
-			그렇게 만들었습니다.
-		</p>
-		<p>
-			10분이면 끝납니다. 매일 하는 일이 15분을 넘기면 사흘째에 그만두게 된다는 걸
-			만들면서 여러 번 확인했습니다. 그래서 스무 문제도 다섯 문제도 아닌 열 문제입니다.
-		</p>
-
-		<h3>답을 아는 문제가 아니라, 규칙을 찾는 문제</h3>
-		<p>
-			딸깍의 중심은 <a href="/discover">발견형</a>입니다. 규칙은 어디에도 적혀 있지 않고
-			예시 몇 개와 물음표만 놓여 있습니다. <b>“2, 4, 8, 16” 다음은 뭘까요?</b> 같은 것이
-			아니라, 첫 번째 가설이 한 번은 죽어야 풀리는 문제들입니다.
-		</p>
-		<p>
-			문제를 고를 때 기준이 셋 있습니다. 모국어 화자에게 3초 안에 규칙이 보이면 뺍니다.
-			검색해서 알 수 있는 지식이면 뺍니다. 규칙을 알아챈 순간 “아” 소리가 안 나오면 뺍니다.
-			이 기준으로 <b>발견형 324문제 중 52개를 갈아엎은 적이 있습니다.</b> 지금 나오는 문제들은
-			그 뒤에 남거나 새로 들어온 것입니다.
-		</p>
-		<p>
-			막히면 힌트가 세 단계로 열립니다. 첫 힌트는 어디를 보라고만 하고, 두 번째는 무엇을
-			해보라고 하고, 세 번째에 규칙의 절반이 나옵니다. <b>정답은 마지막까지 알려주지 않습니다</b> —
-			힌트를 여는 순간이 포기하는 순간이 되면 발견이 사라지기 때문입니다.
-		</p>
-
-		<h3>기록은 이 브라우저에만 남습니다</h3>
-		<p>
-			회원가입도 로그인도 없습니다. 며칠 연속으로 풀었는지, 어떤 유형에 강한지는 전부
-			<a href="/record">이 브라우저 안</a>에 저장됩니다. 서버로 가는 것은 문제별 정답률을
-			내기 위한 익명 숫자뿐입니다. 자세한 것은 <a href="/privacy">개인정보처리방침</a>에
-			적어 두었습니다.
-		</p>
-
-		<h3>혼자 만들고 있습니다</h3>
-		<p>
-			딸깍은 한 사람이 만들고 매일 손보는 사이트입니다. 문제를 만들고, 버리고, 고치는
-			과정을 <a href="/read">읽을거리</a>에 적고 있습니다. 어떤 문제가 왜 탈락했는지,
-			성냥개비 문제를 어떻게 프로그램으로 만들고 검증했는지 같은 이야기들입니다.
-		</p>
-
-		{#if data.latest?.length}
-			<div class="reads">
-				{#each data.latest as a (a.slug)}
-					<a class="read" href="/read/{a.slug}">
-						<span class="r-tag">{a.tag}</span>
-						<span class="r-t">{a.title}</span>
-						<span class="r-d">{a.description}</span>
-					</a>
-				{/each}
-			</div>
-		{/if}
-	</section>
 
 	<!-- ③ 10문제로 부족한 사람 — 유형별로 바로 들어가게 -->
 	<section class="sec reveal d2">
@@ -1180,15 +1111,17 @@
 					<span class="mb-t">전개도</span>
 					<span class="mb-n">{KIND_COUNT.cube}</span>
 				</a>
+				<!-- 초성은 /play의 유형이 아니라 따로 도는 놀이지만(매일 10문제에도 안 나온다) 고르는
+				     자리는 같아서 격자에 넣는다. 여섯째 칸이 「전부 섞기」라 3×2로 맞는다(9/30) -->
+				<a class="mbtn" href="/chosung">
+					<span class="mb-t">초성 퀴즈</span>
+					<span class="mb-n">{KIND_COUNT.chosung}</span>
+				</a>
+				<a class="mbtn all" href="/play?filter=all">
+					<span class="mb-t">전부 섞기</span>
+					<span class="mb-n">→</span>
+				</a>
 			</div>
-			<!-- 초성은 /play의 한 유형이 아니라 따로 도는 놀이라 격자에 끼우지 않고 한 줄로 둔다 -->
-			<a class="mcho" href="/chosung">
-				<span class="mc-t">초성 퀴즈 <b>{KIND_COUNT.chosung}</b></span>
-				<span class="mc-s">따로 즐기는 새 놀이 →</span>
-			</a>
-			<a class="mall" href="/play?filter=all">
-				전부 섞어서 풀기 <span class="arr" aria-hidden="true">→</span>
-			</a>
 		</div>
 	</section>
 
@@ -1209,6 +1142,24 @@
 			<a href="/guide">발견형 푸는 법</a>
 			<a href="/archive">지난 문제</a>
 		</div>
+	</section>
+
+	<!-- ⑥ 짧은 소개. 8/24에 애드센스 대응으로 소개 다섯 꼭지(2,216자)와 읽을거리 카드 3편을
+	     「더 풀고 싶다면?」 위에 두었는데, 놀러 온 사람에게는 스크롤만 길었다(9/30 사용자 지적).
+	     긴 글은 /about으로 옮기고 여기엔 두 줄과 글 제목만 남긴다. 순서도 맨 아래로. -->
+	<section class="sec reveal d2 intro">
+		<h2 class="sec-h">딸깍은 이런 곳이에요</h2>
+		<p class="intro-p">
+			매일 자정에 열 문제가 새로 열리고, 그날 들어온 사람은 모두 같은 문제를 풀어요. 가입 없이
+			10분이면 끝나요. <a href="/about">딸깍 소개 더 보기 →</a>
+		</p>
+		{#if data.latest?.length}
+			<ul class="reads">
+				{#each data.latest as a (a.slug)}
+					<li><a href="/read/{a.slug}">{a.title.split(' — ')[0]}</a></li>
+				{/each}
+			</ul>
+		{/if}
 	</section>
 {:else if phase === 'play' && current}
 	<div class="topbar">
@@ -1870,33 +1821,36 @@
 	}
 
 	/* ── 유형 소개 ── */
+	/* 2×2 — 한 줄로 늘어놓으면 카드 넷이 홈 길이의 40%를 먹었다(9/30 사용자 지적) */
 	.kinds {
-		display: flex;
-		flex-direction: column;
-		gap: 10px;
+		display: grid;
+		grid-template-columns: repeat(2, 1fr);
+		gap: 8px;
 	}
 	.kind {
 		background: var(--panel);
 		border: 1px solid var(--border-strong);
 		border-radius: 16px;
-		padding: 16px;
+		padding: 10px;
+		min-width: 0;
 	}
 	.kind-vis {
 		background: var(--panel-2);
 		border-radius: 12px;
-		padding: 12px;
-		margin-bottom: 12px;
+		padding: 8px;
+		margin-bottom: 8px;
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		min-height: 78px;
+		height: 74px;
 		overflow: hidden;
 	}
 	.kind-vis.rule {
 		flex-direction: column;
 		align-items: stretch;
-		gap: 5px;
-		padding: 14px 22px;
+		justify-content: center;
+		gap: 2px;
+		padding: 8px 4px;
 	}
 	/* 그리드로 두면 행마다 트랙 높이가 달라져(마지막 행 35px) 물음표 줄만 내려앉는다.
 	   flex + 고정폭·고정높이로 세 줄을 같은 자리에 못박는다. */
@@ -1904,33 +1858,33 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		gap: 10px;
-		height: 21px;
-		line-height: 21px;
-		font-size: 14px;
+		gap: 6px;
+		height: 18px;
+		line-height: 18px;
+		font-size: 12.5px;
 		font-weight: 700;
 	}
 	.rrow span {
-		width: 66px;
+		width: 50px;
 		text-align: right;
-		font-size: 14px;
-		line-height: 21px;
+		font-size: 12.5px;
+		line-height: 18px;
 		color: var(--text);
 	}
 	.rrow em {
-		width: 14px;
+		width: 12px;
 		text-align: center;
 		font-style: normal;
-		font-size: 14px;
-		line-height: 21px;
+		font-size: 12.5px;
+		line-height: 18px;
 		color: var(--muted-2);
 		font-weight: 400;
 	}
 	.rrow b {
-		width: 40px;
+		width: 20px;
 		text-align: left;
-		font-size: 14px;
-		line-height: 21px;
+		font-size: 12.5px;
+		line-height: 18px;
 		color: var(--muted);
 	}
 	.rrow b.qm {
@@ -1940,13 +1894,16 @@
 	.kind-vis.quiz {
 		display: grid;
 		grid-template-columns: auto 1fr;
-		gap: 7px 9px;
+		gap: 5px 7px;
 		align-content: center;
-		padding: 14px 18px;
+		align-items: center;
+		justify-content: stretch;
+		width: 100%;
+		padding: 8px 12px;
 	}
 	.mini-badge {
-		width: 20px;
-		height: 20px;
+		width: 17px;
+		height: 17px;
 		border-radius: 50%;
 		background: var(--panel);
 		border: 1px solid var(--border-strong);
@@ -1975,11 +1932,12 @@
 	   먹어 글자 크기와 여백이 뒤틀린다. */
 	.kind > b {
 		display: block;
-		font-size: 15px;
-		margin-bottom: 4px;
+		font-size: 14px;
+		margin-bottom: 2px;
 	}
 	.kind > span {
-		font-size: 13px;
+		display: block;
+		font-size: 12px;
 		color: var(--muted);
 		line-height: 1.55;
 		word-break: keep-all;
@@ -2042,123 +2000,49 @@
 		color: var(--accent-text);
 		font-variant-numeric: tabular-nums;
 	}
-	.mcho {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		gap: 8px;
-		margin-top: 8px;
-		padding: 12px 14px;
-		border-radius: 14px;
-		background: var(--panel-2);
-		border: 1px solid var(--border);
-		text-decoration: none;
-		color: inherit;
-	}
-	.mcho:hover {
-		border-color: var(--accent-text);
-	}
-	.mc-t {
-		font-size: 13px;
-		font-weight: 700;
-	}
-	.mc-t b {
-		margin-left: 4px;
-		font-size: 17px;
-		font-weight: 800;
-		color: var(--accent-text);
-		font-variant-numeric: tabular-nums;
-	}
-	.mc-s {
-		font-size: 12.5px;
-		font-weight: 700;
-		color: var(--muted-2);
-		white-space: nowrap;
-	}
-	.mall {
-		display: block;
-		margin-top: 10px;
-		padding: 14px;
-		border-radius: 14px;
+	/* 「전부 섞기」 칸 — 유형 칸과 구분되게 강조색 */
+	.mbtn.all {
 		background: var(--accent);
+		border-color: var(--accent);
 		color: #fff;
-		font-size: 15px;
-		font-weight: 800;
-		text-decoration: none;
-		box-shadow: 0 4px 0 var(--accent-press);
-		transition:
-			transform var(--dur-tap) var(--ease-out),
-			box-shadow var(--dur-tap) var(--ease-out);
 	}
-	.mall:active {
-		transform: translateY(2px);
-		box-shadow: 0 2px 0 var(--accent-press);
+	.mbtn.all .mb-n {
+		color: #fff;
 	}
-
-	/* 읽는 자리 — 문제 카드와 달리 글의 리듬으로 읽히게 여백과 줄간격을 크게 잡는다 */
-	.about h3 {
-		margin: 22px 0 8px;
-		font-size: 16px;
-		font-weight: 800;
-		line-height: 1.5;
-		word-break: keep-all;
-	}
-	.about h3:first-of-type {
-		margin-top: 14px;
-	}
-	.about p {
+	.intro-p {
 		font-size: 14px;
 		line-height: 1.85;
 		color: var(--muted);
 		word-break: keep-all;
 	}
-	.about p + p {
-		margin-top: 10px;
-	}
-	.about b {
-		color: var(--text);
-	}
-	.about a {
+	.intro-p a {
 		color: var(--accent-text);
 		font-weight: 700;
+		white-space: nowrap;
 	}
 	.reads {
-		margin-top: 20px;
+		margin: 12px 0 0;
+		padding: 0;
+		list-style: none;
 		display: flex;
 		flex-direction: column;
-		gap: 8px;
+		gap: 6px;
 	}
-	.read {
-		display: flex;
-		flex-direction: column;
-		gap: 4px;
-		background: var(--panel);
-		border: 1px solid var(--border-strong);
-		border-radius: 14px;
-		padding: 13px 15px;
-		text-decoration: none;
-	}
-	.read .r-tag {
-		font-size: 11.5px;
-		font-weight: 800;
-		color: var(--accent-text);
-		background: var(--correct-bg);
-		border-radius: 7px;
-		padding: 3px 9px;
-		align-self: flex-start;
-	}
-	.read .r-t {
-		font-size: 14.5px;
-		font-weight: 800;
+	.reads a {
+		display: block;
+		font-size: 13.5px;
+		font-weight: 700;
 		color: var(--text);
-		line-height: 1.5;
+		text-decoration: none;
+		line-height: 1.55;
 		word-break: keep-all;
 	}
-	.read .r-d {
-		font-size: 12.5px;
-		color: var(--muted);
-		line-height: 1.65;
-		word-break: keep-all;
+	.reads a::before {
+		content: '· ';
+		color: var(--accent-text);
+	}
+	.reads a:hover {
+		color: var(--accent-text);
 	}
 
 	.catgrid {
