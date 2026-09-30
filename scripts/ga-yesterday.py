@@ -234,6 +234,32 @@ INAPP = [
     ("inapp_open_external", "브라우저로 열기 누름"),
     ("inapp_skip", "그냥 인앱에서 계속"),
 ]
+# 9/29~30에 연 새 입구 — 매일 10문제와 따로 도는 하루 한 문제와 초성 퀴즈.
+# 애드센스 반려 문구가 「사용자 관심」을 조건으로 댄다(지표-기록 「애드센스 재검토는
+# 10/14~10/28에」). 재검토 전에 이 입구들이 방문·재방문을 늘리는지 여기서 본다.
+#   *_daily_seen은 그 페이지를 열면 찍힌다(카드가 맨 위라 화면에 든다). 열람 수로 읽는다.
+#   push_*_match / push_*_chosung은 PushPrompt의 slot을 붙여 만든 이름이다 — 코드를
+#   grep해도 통째로는 안 나온다(`${name}_${slot}`).
+NEW = [
+    ("match_daily_seen", "성냥개비 페이지 열람(오늘의 문제 카드)"),
+    ("match_daily_start", "오늘의 성냥개비 풀기 시작"),
+    ("match_daily_solve", "오늘의 성냥개비 맞힘"),
+    ("match_daily_reveal", "오늘의 성냥개비 정답 봄"),
+    ("push_offer_match", "성냥개비 알림 제안이 떴음"),
+    ("push_click_match", "성냥개비 알림 켜기 누름"),
+    ("push_result_match", "성냥개비 알림 설정 결과"),
+    ("chosung_daily_seen", "초성 퀴즈 페이지 열람"),
+    ("chosung_daily_start", "오늘의 초성 풀기 시작"),
+    ("chosung_daily_solve", "오늘의 초성 맞힘"),
+    ("chosung_daily_reveal", "오늘의 초성 정답 봄"),
+    ("chosung_start", "초성 분야 골라 풀기 시작"),
+    ("chosung_solve", "초성 낱말 맞힘"),
+    ("chosung_hint", "초성 힌트 열어봄"),
+    ("chosung_reveal", "초성 정답 봄"),
+    ("push_offer_chosung", "초성 알림 제안이 떴음"),
+    ("push_click_chosung", "초성 알림 켜기 누름"),
+    ("push_result_chosung", "초성 알림 설정 결과"),
+]
 ev = defaultdict(lambda: (0, 0))
 for r in rep(["eventName"], ["eventCount", "activeUsers"], limit=250):
     ev[r.dimension_values[0].value] = (int(r.metric_values[0].value), int(r.metric_values[1].value))
@@ -253,6 +279,7 @@ def block(title, items):
 
 block("무엇을 했나", LABEL)
 block("맛보기(첫 화면)", SAMPLE)
+block("새 입구 — 오늘의 성냥개비·초성 퀴즈(9/29~)", NEW)
 block("알림·설치", ALERT)
 block("목록형 페이지 → 데일리", CTA)
 block("인앱 브라우저", INAPP)
