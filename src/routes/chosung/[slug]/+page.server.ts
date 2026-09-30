@@ -34,7 +34,7 @@ export function load({ params }) {
 	}));
 
 	return {
-		category: { slug: c.slug, name: c.name, title: c.title, intro: c.intro, deepDive: c.deepDive },
+		category: { slug: c.slug, name: c.name, title: c.title, intro: c.intro, deepDive: c.deepDive, guide: c.guide },
 		count: c.words.length,
 		items,
 		lengths,

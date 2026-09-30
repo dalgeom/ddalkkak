@@ -42,6 +42,13 @@
 	</section>
 
 	<section class="sec">
+		<h2 class="sh">{data.category.guide.title}</h2>
+		{#each data.category.guide.body.split('\n\n') as para (para)}
+			<p class="deep">{para}</p>
+		{/each}
+	</section>
+
+	<section class="sec">
 		<h2 class="sh">먼저 풀어 보세요 — 대표 {data.items.length}문제</h2>
 		<p class="sub">초성을 보고 떠올린 뒤 「정답 보기」를 누르세요. 나머지 {data.count - data.items.length}문제는 위 버튼에서 풉니다.</p>
 		<ol class="list">

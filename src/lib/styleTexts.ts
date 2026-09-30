@@ -38,10 +38,12 @@ export function styleTexts(): { scope: StyleScope; key: string; text: string }[]
 		add('fields', `matchstick/${k.slug}/intro`, k.intro);
 		k.how.forEach((h, i) => add('fields', `matchstick/${k.slug}/how/${i}`, h));
 		k.featured.forEach((f) => add('fields', `matchstick/${k.slug}/why/${f.displayed}`, f.why));
+		add('fields', `matchstick/${k.slug}/extra`, k.extra.body);
 	}
 	for (const c of CHOSUNG_CATEGORIES) {
 		add('fields', `chosung/${c.slug}/intro`, c.intro);
 		add('fields', `chosung/${c.slug}/deepDive`, c.deepDive);
+		add('fields', `chosung/${c.slug}/guide`, c.guide.body);
 	}
 
 	// 2단계 — 읽을거리

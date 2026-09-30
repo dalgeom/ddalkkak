@@ -73,6 +73,14 @@
 		</p>
 	</section>
 
+	<!-- 페이지마다 다른 두 번째 글(9/30). 문제은행을 세어 본 수치나 한 문제를 처음부터 푸는 과정 -->
+	<section class="sec">
+		<h2 class="sh">{data.meta.extra.title}</h2>
+		{#each data.meta.extra.body.split('\n\n') as p, i (i)}
+			<p class="how">{p}</p>
+		{/each}
+	</section>
+
 	<!-- 전에는 이 자리에 이 유형의 문제 수백 개를 식만 한 줄씩 늘어놓았다. 읽을 것이 없는
 	     기계 출력이라 애드센스가 '가치가 별로 없는 콘텐츠'로 두 번 반려하는 근거가 됐고,
 	     사실 정보량도 없었다 — self 유형은 293개가 열 가지 변환의 반복일 뿐이다.
