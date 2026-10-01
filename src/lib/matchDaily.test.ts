@@ -1,7 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import { matchOfDay, nextStreak, shownStreak } from './matchDaily';
 import { assembleDayQueue } from './dayview';
-import { MATCH_TOTAL } from './game';
+import { MATCH_TOTAL, cursorAt, seededOrder } from './game';
+import { levelOf } from './matchstickLevels';
 import matchData from './data/matchstick-problems.json';
 
 const TODAY = 20725; // 2026-09-29
@@ -54,5 +55,34 @@ describe('오늘의 성냥개비 — 연속 기록', () => {
 		expect(shownStreak({ day: TODAY, streak: 4, best: 4 }, TODAY)).toBe(4);
 		expect(shownStreak({ day: TODAY - 2, streak: 3, best: 3 }, TODAY)).toBe(0);
 		expect(shownStreak(null, TODAY)).toBe(0);
+	});
+});
+
+describe('오늘의 성냥개비 — 어려움 건너뛰기(10/2부터)', () => {
+	const eqs = matchData as { displayed: string; solution: string }[];
+	it('10/1까지는 예전 그대로다 — 10/1 문제는 9 + 7 = 1', () => {
+		expect(eqs[matchOfDay(20727)].displayed).toBe('9 + 7 = 1');
+		expect(eqs[matchOfDay(20726)].displayed).toBe('2 + 3 = 17');
+	});
+
+	it('10/2부터 120일 동안 어려움이 안 나오고, 같은 문제가 두 번 나오지 않는다', () => {
+		const seen = new Set<number>();
+		for (let d = 20728; d < 20728 + 120; d++) {
+			const i = matchOfDay(d);
+			expect(levelOf(eqs[i].displayed, eqs[i].solution), `day ${d}`).not.toBe('hard');
+			expect(seen.has(i), `day ${d} 중복`).toBe(false);
+			seen.add(i);
+		}
+	});
+
+	// 양성 대조 — 건너뛰기를 안 했다면 이 기간에 어려움이 실제로 걸렸어야 검사가 의미 있다
+	it('건너뛰기 전 방식이었다면 그 기간에 어려움이 걸렸다', () => {
+		const order = seededOrder(MATCH_TOTAL, 20260303);
+		let hard = 0;
+		for (let d = 20728; d < 20728 + 120; d++) {
+			const i = order[(cursorAt('match', d) + 370) % MATCH_TOTAL];
+			if (levelOf(eqs[i].displayed, eqs[i].solution) === 'hard') hard++;
+		}
+		expect(hard).toBeGreaterThan(0);
 	});
 });
