@@ -17,6 +17,7 @@
 	import CubeFold from '$lib/components/CubeFold.svelte';
 	import { problemAt as cubeAt, FACES as CUBE_FACES, type CubeNetProblem } from '$lib/cubenet';
 	import { CUBE_TOTAL } from '$lib/game';
+	import SendProblem from '$lib/components/SendProblem.svelte';
 
 	/**
 	 * '전체'는 문제 수에 비례해 뽑고 있었다. 그러면 은행이 큰 유형이 화면을 다 차지한다 —
@@ -557,6 +558,13 @@
 						/>
 					</div>
 				</div>
+			{/if}
+			{#if shown && !current.eq && !current.cube}
+				<SendProblem
+					id={shown.id}
+					mark={feedback?.ok ? (hintsUsed === 0 && wrongAttempts === 0 ? 'clean' : 'hinted') : 'miss'}
+					from="play"
+				/>
 			{/if}
 			<button class="btn-primary wide" onclick={skip}>다음 문제</button>
 		{:else}

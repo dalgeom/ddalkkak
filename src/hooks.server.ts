@@ -37,8 +37,14 @@ const ADSENSE =
 	'<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2389523583052577" crossorigin="anonymous"></script>';
 const NO_ADS_PATHS = new Set(['/today', '/record', '/play']);
 
+/**
+ * /q/<id> — 친구가 보낸 문제 한 개(q/[id]/+page.server.ts). 문제 하나에 버튼뿐인 풀이 화면이라
+ * /play와 같은 이유로 광고를 안 싣고, 쪽 수만 800개라 색인도 막는다.
+ */
+const isSentProblem = (path: string) => path.startsWith('/q/');
+
 export function adsAllowed(path: string, routeId: string | null): boolean {
-	return routeId !== null && !NO_ADS_PATHS.has(path);
+	return routeId !== null && !NO_ADS_PATHS.has(path) && !isSentProblem(path);
 }
 
 export const handle: Handle = async ({ event, resolve }) => {
@@ -60,7 +66,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 		headers.delete('content-length');
 		res = new Response(html, { status: res.status, headers });
 	}
-	if (NOINDEX_PATHS.has(event.url.pathname)) {
+	if (NOINDEX_PATHS.has(event.url.pathname) || isSentProblem(event.url.pathname)) {
 		res.headers.set('x-robots-tag', 'noindex, follow');
 	}
 	return res;

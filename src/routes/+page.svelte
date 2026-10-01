@@ -55,6 +55,7 @@
 	import { shouldOfferPush, pushSkipReason } from '$lib/push';
 	import { platformOf } from '$lib/pwa';
 	import InstallHint from '$lib/components/InstallHint.svelte';
+	import SendProblem from '$lib/components/SendProblem.svelte';
 
 	let {
 		data
@@ -1364,6 +1365,9 @@
 						</div>
 						<p class="foldhint">그림을 끌면 돌려볼 수 있어요.</p>
 					</div>
+				{/if}
+				{#if current.problem}
+					<SendProblem id={current.problem.id} mark={marks[pos] ?? null} from="daily" />
 				{/if}
 				<button class="submit" onclick={next}>
 					{pos + 1 < queue.length ? '다음' : '결과 보기'}

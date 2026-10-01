@@ -260,6 +260,15 @@ NEW = [
     ("push_click_chosung", "초성 알림 켜기 누름"),
     ("push_result_chosung", "초성 알림 설정 결과"),
 ]
+# 문제 보내기(10/1~) — 푼 문제 하나를 대화방에 던지는 링크 /q/<id>. 보낸 쪽과 받은 쪽을 같이 본다.
+SEND = [
+    ("problem_send_click", "문제 보내기 누름"),
+    ("problem_send_result", "보내기 결과(공유·복사·취소)"),
+    ("q_view", "받은 문제 열어봄"),
+    ("q_result", "받은 문제 풀이 끝냄"),
+    ("q_to_daily", "받은 쪽 → 오늘의 10문제"),
+    ("q_to_play", "받은 쪽 → 무한 연습"),
+]
 ev = defaultdict(lambda: (0, 0))
 for r in rep(["eventName"], ["eventCount", "activeUsers"], limit=250):
     ev[r.dimension_values[0].value] = (int(r.metric_values[0].value), int(r.metric_values[1].value))
@@ -280,6 +289,7 @@ def block(title, items):
 block("무엇을 했나", LABEL)
 block("맛보기(첫 화면)", SAMPLE)
 block("새 입구 — 오늘의 성냥개비·초성 퀴즈(9/29~)", NEW)
+block("문제 보내기 — 보낸 쪽·받은 쪽(10/1~)", SEND)
 block("알림·설치", ALERT)
 block("목록형 페이지 → 데일리", CTA)
 block("인앱 브라우저", INAPP)
