@@ -2,7 +2,7 @@ import { error } from '@sveltejs/kit';
 import { TRIVIA } from '$lib/trivia';
 import { displayChoices } from '$lib/game';
 import { categoryBySlug, TRIVIA_CATEGORIES } from '$lib/triviaCategories';
-import type { Grade } from '$lib/problems';
+import type { Grade, Problem } from '$lib/problems';
 import type { EntryGenerator } from './$types';
 
 // 문제 데이터는 빌드에 박혀 있으니 요청마다 다시 만들 이유가 없다.
@@ -11,6 +11,17 @@ export const prerender = true;
 export const entries: EntryGenerator = () => TRIVIA_CATEGORIES.map((c) => ({ slug: c.slug }));
 
 const GRADE_ORDER: Grade[] = ['초등', '중등', '고등', '어른'];
+
+/**
+ * 전체 목록 실험(2026-10-06 시작) — 이 네 쪽만 대표 아래에 나머지 문제를 다시 싣는다.
+ *
+ * 구글 노출이 9/03 「대표 + 산문」 배포 다음 날부터 하루 18 → 0~7로 꺼졌다. 8월에 이 네 쪽이
+ * 「세계사 상식 퀴즈」 4위·「음식 상식 퀴즈」 3위·「우주 상식 퀴즈」 5.6위·「음악 상식 퀴즈」 7위였는데
+ * 지금은 노출 0이다(문학은 2위 그대로). 퀴즈를 찾는 사람에게 31문제라 써 놓고 11개만 보여 준 것이
+ * 원인인지, 네 쪽만 되돌려 나머지 14쪽과 GSC 노출을 3~4주 견준다. 색인은 정상이었다(URL 검사 49/57).
+ * 산문(deepDive·why)은 그대로 둔다 — 애드센스 대응(655b2a6)을 걷는 게 아니라 목록을 덧붙이는 것이다.
+ */
+const FULL_LIST_SLUGS = new Set(['world-history', 'food', 'space', 'music']);
 
 export function load({ params }) {
 	const category = categoryBySlug(params.slug);
@@ -31,28 +42,37 @@ export function load({ params }) {
 	 *
 	 * 없는 id를 적으면 빌드가 여기서 죽는다. 프리렌더라 배포 전에 걸린다.
 	 */
+	const byGradeOrder = (a: Problem, b: Problem) =>
+		GRADE_ORDER.indexOf(a.grade!) - GRADE_ORDER.indexOf(b.grade!);
+	const view = (raw: Problem) => {
+		// 게임 화면과 같은 시드 셔플을 태운다. 원본 순서 그대로 내보내면 정답의 74%가
+		// 첫 보기라, 공개된 문제지가 "답은 늘 A"로 보인다.
+		const t = displayChoices(raw);
+		return {
+			id: t.id,
+			grade: t.grade ?? '',
+			question: t.blocks[0]?.kind === 'text' ? t.blocks[0].html : '',
+			choices: t.choices ?? [],
+			// 객관식은 보기 중 하나, 주관식은 대표 답안 하나만 보여준다
+			answer: t.type === 'choice' ? (t.choices?.[t.answerIndex ?? 0] ?? '') : (t.answers?.[0] ?? ''),
+			explain: t.explain
+		};
+	};
+
 	const items = category.featured
 		.map(({ id, why }) => {
 			const raw = all.find((t) => t.id === id);
 			if (!raw) throw new Error(`${category.slug}의 featured에 없는 id: ${id}`);
 			return { raw, why };
 		})
-		.sort((a, b) => GRADE_ORDER.indexOf(a.raw.grade!) - GRADE_ORDER.indexOf(b.raw.grade!))
-		.map(({ raw, why }) => {
-			// 게임 화면과 같은 시드 셔플을 태운다. 원본 순서 그대로 내보내면 정답의 74%가
-			// 첫 보기라, 공개된 문제지가 "답은 늘 A"로 보인다.
-			const t = displayChoices(raw);
-			return {
-				id: t.id,
-				grade: t.grade ?? '',
-				question: t.blocks[0]?.kind === 'text' ? t.blocks[0].html : '',
-				choices: t.choices ?? [],
-				// 객관식은 보기 중 하나, 주관식은 대표 답안 하나만 보여준다
-				answer: t.type === 'choice' ? (t.choices?.[t.answerIndex ?? 0] ?? '') : (t.answers?.[0] ?? ''),
-				explain: t.explain,
-				why: fill(why)
-			};
-		});
+		.sort((a, b) => byGradeOrder(a.raw, b.raw))
+		.map(({ raw, why }) => ({ ...view(raw), why: fill(why) }));
+
+	// 실험 쪽만 대표 아래에 나머지 문제를 다시 싣는다(FULL_LIST_SLUGS 주석)
+	const featuredIds = new Set(category.featured.map((f) => f.id));
+	const rest = FULL_LIST_SLUGS.has(category.slug)
+		? all.filter((t) => !featuredIds.has(t.id)).sort(byGradeOrder).map(view)
+		: [];
 
 	// 난이도 구성은 대표가 아니라 그 분야 전체를 보여준다
 	const byGrade = GRADE_ORDER.map((g) => ({
@@ -80,6 +100,7 @@ export function load({ params }) {
 	return {
 		category: { ...category, intro: fill(category.intro), desc: fill(category.desc), deepDive: fill(category.deepDive) },
 		items,
+		rest,
 		count: all.length,
 		byGrade,
 		others,

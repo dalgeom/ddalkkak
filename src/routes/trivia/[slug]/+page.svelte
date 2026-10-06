@@ -54,7 +54,7 @@
 		<h2 class="sh">{data.category.name}, 이런 데서 틀립니다</h2>
 		<p class="sub">
 			{data.count}문제 중 서로 다른 함정을 보여주는 {data.items.length}개를 골랐습니다. 문제마다 사람들이 어디서
-			헛짚는지를 붙여 두었어요. 나머지는 아래 무한 연습에서 {data.category.name}만 골라 만날 수 있습니다.
+			헛짚는지를 붙여 두었어요. {#if data.rest.length}나머지 {data.rest.length}문제는 그 아래에 이어 실었어요.{:else}나머지는 아래 무한 연습에서 {data.category.name}만 골라 만날 수 있습니다.{/if}
 		</p>
 		<ol class="list">
 			{#each data.items as q, i (q.id)}
@@ -80,6 +80,34 @@
 			{/each}
 		</ol>
 	</section>
+
+	{#if data.rest.length}
+		<section class="sec">
+			<h2 class="sh">{data.category.name} 나머지 {data.rest.length}문제</h2>
+			<ol class="list" start={data.items.length + 1}>
+				{#each data.rest as q, i (q.id)}
+					<li class="q">
+						<div class="qhead">
+							<span class="no">{data.items.length + i + 1}</span>
+							<span class="chip">{q.grade}</span>
+						</div>
+						<p class="ask">{@html q.question}</p>
+						{#if q.choices.length}
+							<ul class="choices">
+								{#each q.choices as c, ci (ci)}
+									<li><span class="badge">{LETTERS[ci]}</span>{c}</li>
+								{/each}
+							</ul>
+						{/if}
+						<div class="sol">
+							<p class="ans">정답 <b>{q.answer}</b></p>
+							<p class="exp">{@html q.explain}</p>
+						</div>
+					</li>
+				{/each}
+			</ol>
+		</section>
+	{/if}
 
 	<section class="sec ctas">
 		<a class="cta" href="/" use:ctaTrack={'foot'}>
