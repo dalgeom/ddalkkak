@@ -1069,7 +1069,7 @@
 					<span class="mini-badge">C</span><span class="mini-line"></span>
 				</div>
 				<b>상식 퀴즈 {KIND_COUNT.trivia}</b>
-				<span>18개 분야, 해설과 함께.</span>
+				<span>19개 분야, 해설과 함께.</span>
 			</div>
 			<div class="kind">
 				<div class="kind-vis">

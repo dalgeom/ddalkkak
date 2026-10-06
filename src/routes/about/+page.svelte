@@ -69,7 +69,7 @@
 				<ExampleList text={'5+3 = 28\n9+1 = 810\n7+3 = ?'} />
 			</div>
 			<div class="card">
-				<div class="ct"><b>상식 퀴즈</b><span class="tag">18개 분야 · 4단계</span></div>
+				<div class="ct"><b>상식 퀴즈</b><span class="tag">19개 분야 · 4단계</span></div>
 				<p class="cd">
 					지리·역사·과학·속담·사자성어 등을 초등부터 어른까지 네 단계 난이도로 나눴어요.
 					시의성에 흔들리지 않는, 오래 유효한 사실만 다뤄요.

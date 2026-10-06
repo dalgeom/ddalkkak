@@ -210,7 +210,7 @@
 		<div class="others">
 			<a class="other" href="/trivia">
 				<b>상식 퀴즈</b>
-				<span>18개 분야, 초등부터 어른까지. 고르거나 짧게 답을 적고, 해설이 함께 나옵니다.</span>
+				<span>19개 분야, 초등부터 어른까지. 고르거나 짧게 답을 적고, 해설이 함께 나옵니다.</span>
 				<span class="go">분야·난이도 보기 <span aria-hidden="true">→</span></span>
 			</a>
 			<a class="other" href="/matchstick/guide">

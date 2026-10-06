@@ -21,7 +21,9 @@ const GRADE_ORDER: Grade[] = ['초등', '중등', '고등', '어른'];
  * 원인인지, 네 쪽만 되돌려 나머지 14쪽과 GSC 노출을 3~4주 견준다. 색인은 정상이었다(URL 검사 49/57).
  * 산문(deepDive·why)은 그대로 둔다 — 애드센스 대응(655b2a6)을 걷는 게 아니라 목록을 덧붙이는 것이다.
  */
-const FULL_LIST_SLUGS = new Set(['world-history', 'food', 'space', 'music']);
+const FULL_LIST_SLUGS = new Set(['world-history', 'food', 'space', 'music', 'spelling']);
+// spelling(10/6 신설)은 실험군이 아니다. 네이버 「맞춤법퀴즈」 1쪽이 전부 문제 모음이라
+// 처음부터 전체를 싣는다. 10/27 판정 때 4쪽 대 14쪽 비교에서 뺀다.
 
 export function load({ params }) {
 	const category = categoryBySlug(params.slug);

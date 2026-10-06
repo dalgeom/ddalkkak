@@ -725,7 +725,7 @@ export const TRACKS: {
 	icon: 'search' | 'book' | 'match';
 }[] = [
 	{ key: 'discover', name: '오늘의 발견', desc: '숨은 규칙을 스스로 찾아냅니다', size: 3, icon: 'search' },
-	{ key: 'trivia', name: '오늘의 상식', desc: '18개 분야 · 초등부터 어른까지', size: 5, icon: 'book' },
+	{ key: 'trivia', name: '오늘의 상식', desc: '19개 분야 · 초등부터 어른까지', size: 5, icon: 'book' },
 	{ key: 'match', name: '오늘의 성냥개비', desc: '성냥 하나만 옮겨 식을 참으로', size: 3, icon: 'match' }
 ];
 
