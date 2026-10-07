@@ -21,9 +21,21 @@ const GRADE_ORDER: Grade[] = ['초등', '중등', '고등', '어른'];
  * 원인인지, 네 쪽만 되돌려 나머지 14쪽과 GSC 노출을 3~4주 견준다. 색인은 정상이었다(URL 검사 49/57).
  * 산문(deepDive·why)은 그대로 둔다 — 애드센스 대응(655b2a6)을 걷는 게 아니라 목록을 덧붙이는 것이다.
  */
-const FULL_LIST_SLUGS = new Set(['world-history', 'food', 'space', 'music', 'spelling']);
+const FULL_LIST_SLUGS = new Set([
+	'world-history',
+	'food',
+	'space',
+	'music',
+	'spelling',
+	'general',
+	'idiom',
+	'proverb'
+]);
 // spelling(10/6 신설)은 실험군이 아니다. 네이버 「맞춤법퀴즈」 1쪽이 전부 문제 모음이라
 // 처음부터 전체를 싣는다. 10/27 판정 때 4쪽 대 14쪽 비교에서 뺀다.
+// general·idiom·proverb(10/7)도 실험군이 아니다. 네이버 월간 검색 상식퀴즈 20,940 · 사자성어퀴즈
+// 14,120 · 속담퀴즈 8,320인데 모바일 1쪽(웹문서)에 없었고, 1쪽은 전부 문제를 줄줄이 푸는 쪽이었다.
+// 판정을 기다리지 않고 수요가 큰 셋을 먼저 연다는 사용자 결정. 대조군은 11쪽이 남는다.
 
 export function load({ params }) {
 	const category = categoryBySlug(params.slug);

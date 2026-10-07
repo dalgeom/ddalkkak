@@ -36,7 +36,7 @@
 	</header>
 
 	<section class="sec">
-		<h2 class="sh">난이도 미리보기 — 한 문제씩 풀어보세요</h2>
+		<h2 class="sh">난이도별 {data.samples.length}문제 — 하나씩 풀어보세요</h2>
 		<div class="samples">
 			{#each data.samples as s (s.id)}
 				<div class="sample">

@@ -19,9 +19,22 @@ export function load() {
 		.map(([name, count]) => ({ name, count, slug: categoryByName(name)?.slug ?? '' }));
 	const grades = GRADE_ORDER.map((g) => ({ name: g, count: byGrade[g] ?? 0 }));
 
-	// 난이도별 맛보기 1문제씩 — 고정 표본(객관식만)
-	const samples = GRADE_ORDER.map((g) => TRIVIA.find((t) => t.grade === g && t.type === 'choice'))
-		.filter((t) => !!t)
+	// 난이도별 맛보기 — 고정 표본(객관식만), 난이도마다 분야가 겹치지 않게 SAMPLES_PER_GRADE개씩.
+	// 10/07에 1개 → 5개로 늘렸다. 네이버 「상식퀴즈」 월 20,940인데 모바일 1쪽은 전부 문제를 줄줄이
+	// 푸는 쪽이었고, 이 쪽은 제목에 「상식 퀴즈 471문제」라 써 놓고 문제를 넷만 보여 줬다.
+	const SAMPLES_PER_GRADE = 5;
+	const picked = GRADE_ORDER.flatMap((g) => {
+		const seen = new Set<string>();
+		const out: (typeof TRIVIA)[number][] = [];
+		for (const t of TRIVIA) {
+			if (out.length >= SAMPLES_PER_GRADE) break;
+			if (t.grade !== g || t.type !== 'choice' || seen.has(t.category ?? '')) continue;
+			seen.add(t.category ?? '');
+			out.push(t);
+		}
+		return out;
+	});
+	const samples = picked
 		.map((raw) => {
 			const t = displayChoices(raw!); // 게임 화면과 같은 시드 셔플 — 정답이 첫 보기에 몰려 보이지 않게
 			return {
