@@ -61,6 +61,8 @@
 
 	// 모드 런 상태
 	let runSolved = $state(0);
+	/** 무한 연습에서 맞힌 수. 세 번째 직후 한 번 내일 알림을 권한다(play/+page.svelte settledCount 주석) */
+	let freeWins = $state(0);
 	let runResults = $state<('win' | 'fail')[]>([]);
 	let timeLeft = $state(0);
 	let timerId: ReturnType<typeof setInterval> | undefined;
@@ -200,6 +202,7 @@
 			persist();
 
 			if (mode.type === 'today') finishToday('won');
+			if (mode.type === 'free') freeWins++;
 			if (mode.type === 'free' || mode.type === 'today') {
 				// 점수 시스템은 없다 — 있지도 않은 점수를 암시하지 말고 시도 횟수만 알려준다
 				feedback = attempts === 0 ? '딸깍! 한 번에 맞혔어요' : `딸깍! ${attempts + 1}번 만에 맞혔어요`;
@@ -560,6 +563,9 @@
 			<button class="btn wide" onclick={() => startMode({ type: 'free' })}>무한 연습 이어서 →</button>
 			<button class="btn ghost wide" onclick={toMenu}>모드 선택으로</button>
 		{:else if mode.type === 'free'}
+			{#if freeWins === 3 && solvedThis === 'won'}
+				<PushPrompt dayNum={day} tomorrow={tomorrowPeek} slot="match_free" />
+			{/if}
 			<button class="btn wide" onclick={() => nextProblem()}>다음 문제 →</button>
 			<button class="btn ghost wide" onclick={share}>기록 공유하기</button>
 			<button class="btn ghost wide" onclick={toMenu}>모드 선택으로</button>

@@ -16,8 +16,9 @@
 	import CubeDie from '$lib/components/CubeDie.svelte';
 	import CubeFold from '$lib/components/CubeFold.svelte';
 	import { problemAt as cubeAt, FACES as CUBE_FACES, type CubeNetProblem } from '$lib/cubenet';
-	import { CUBE_TOTAL } from '$lib/game';
+	import { CUBE_TOTAL, kstDayNumber } from '$lib/game';
 	import SendProblem from '$lib/components/SendProblem.svelte';
+	import PushPrompt from '$lib/components/PushPrompt.svelte';
 
 	/**
 	 * '전체'는 문제 수에 비례해 뽑고 있었다. 그러면 은행이 큰 유형이 화면을 다 차지한다 —
@@ -197,9 +198,17 @@
 
 	/* ── 판정 ── */
 
+	/**
+	 * 이 자리에서 판정한 문제 수. 세 번째 판정 직후 한 번 내일 알림을 권한다.
+	 * 10/07: 알림 권유가 데일리·오늘의 성냥·오늘의 초성을 끝낸 사람에게만 떠서, 21일 동안
+	 * 무한 연습을 한 55명은 한 번도 못 봤다(완주는 19명). 세 문제쯤 풀어 본 사람이면 재미를 본 뒤다.
+	 */
+	let settledCount = $state(0);
+
 	function settle(ok: boolean, msg: string) {
 		if (judged) return;
 		judged = true;
+		settledCount += 1;
 		feedback = { msg, ok };
 		combo = ok ? combo + 1 : 0;
 		recordSolve(ok, hintsUsed);
@@ -565,6 +574,9 @@
 					mark={feedback?.ok ? (hintsUsed === 0 && wrongAttempts === 0 ? 'clean' : 'hinted') : 'miss'}
 					from="play"
 				/>
+			{/if}
+			{#if settledCount === 3}
+				<PushPrompt dayNum={kstDayNumber(Date.now())} slot="play" />
 			{/if}
 			<button class="btn-primary wide" onclick={skip}>다음 문제</button>
 		{:else}
