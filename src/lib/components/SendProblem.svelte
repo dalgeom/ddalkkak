@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { Mark } from '$lib/game';
-	import { track } from '$lib/analytics';
+	import { track, ctaTrack } from '$lib/analytics';
 	import { sendUrl, sendText, markParam } from '$lib/sendProblem';
 
 	/**
@@ -8,6 +8,9 @@
 	 *
 	 * 휴대폰은 공유 시트(카톡이 맨 앞에 뜬다), 데스크톱은 복사. 데스크톱에서 시트를 띄우면
 	 * 대화방 앱이 없어 닫게 된다(+page.svelte의 「복사우선」과 같은 판단).
+	 *
+	 * 버튼이 화면에 들어오면 cta_send_seen을 찍는다(10/07). 10/1 이후 누른 사람 1명 · 받은 쪽 0건인데
+	 * 「본 사람」이 없으면 그 0이 버튼이 안 보여서인지 안 눌려서인지 못 가른다(디스콰이엇 로그 6 댓글).
 	 */
 	let { id, mark, from }: { id: string; mark: Mark | null; from: 'daily' | 'play' | 'q' } = $props();
 
@@ -60,7 +63,7 @@
 </script>
 
 <div class="send">
-	<button class="send-btn" onclick={send}>
+	<button class="send-btn" onclick={send} use:ctaTrack={'send'}>
 		<span aria-hidden="true">🤔</span> 친구는 풀까요? 이 문제 보내기
 	</button>
 	{#if note}<p class="send-note" role="status">{note}</p>{/if}

@@ -31,7 +31,7 @@ export function track(name: string, params?: Params): void {
  * 이름으로 나누면 등록 없이 바로 보이고, trivia냐 discover냐와 분야별 분해는 표준
  * 차원인 pagePath로 교차하면 된다.
  */
-export function ctaTrack(node: HTMLElement, slot: 'band' | 'foot' | 'share' | 'teaser') {
+export function ctaTrack(node: HTMLElement, slot: 'band' | 'foot' | 'share' | 'teaser' | 'send') {
 	const onClick = () => {
 		track(`cta_${slot}_click`);
 		// 띠·하단 버튼은 데일리로 가는 버튼이다(공유 영역·내일 예고는 아니다). 홈이 뜨면 곧장
