@@ -240,7 +240,7 @@
 
 	/** 다음 힌트가 열리기까지 남은 초. 잠긴 이유를 숫자로 보여줘야 죽은 버튼으로 안 읽힌다. */
 	let hintWaitSec = $derived.by(() => {
-		const need = hintsUsed <= 1 ? 25000 : 60000;
+		const need = hintsUsed <= 1 ? 10000 : 25000;
 		return Math.max(1, Math.ceil((need - elapsedMs) / 1000));
 	});
 

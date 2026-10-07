@@ -33,7 +33,7 @@
 	let picked = $state<number | null>(null);
 
 	let shownHints = $derived(p.hints ? p.hints.slice(0, hintsUsed) : []);
-	let hintWaitSec = $derived(Math.max(1, Math.ceil(((hintsUsed <= 1 ? 25000 : 60000) - elapsedMs) / 1000)));
+	let hintWaitSec = $derived(Math.max(1, Math.ceil(((hintsUsed <= 1 ? 10000 : 25000) - elapsedMs) / 1000)));
 	let versus = $derived(mine ? compareLine(data.friend, mine) : null);
 
 	let title = $derived(previewTitle(data.friend));

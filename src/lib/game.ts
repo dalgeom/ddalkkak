@@ -172,8 +172,8 @@ export function puzzleNumber(dayNum: number): number {
 export function hintUnlocked(hintIndex: number, elapsedMs: number, wrongAttempts: number): boolean {
 	if (hintIndex <= 0) return true;
 	if (wrongAttempts >= 3) return true;
-	if (hintIndex === 1) return elapsedMs >= 25000 || wrongAttempts >= 1;
-	return elapsedMs >= 60000 || wrongAttempts >= 2;
+	if (hintIndex === 1) return elapsedMs >= 10000 || wrongAttempts >= 1;
+	return elapsedMs >= 25000 || wrongAttempts >= 2;
 }
 
 /** 편집 거리(레벤슈타인) */

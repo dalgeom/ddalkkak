@@ -235,13 +235,14 @@ describe('연속 모드', () => {
 });
 
 describe('힌트 게이팅 · 근접 피드백', () => {
-	it('힌트1은 항상 열림, 힌트2는 25초 또는 오답1회, 힌트3은 60초 또는 오답2회', () => {
+	it('힌트1은 항상 열림, 힌트2는 10초 또는 오답1회, 힌트3은 25초 또는 오답2회', () => {
 		expect(hintUnlocked(0, 0, 0)).toBe(true);
 		expect(hintUnlocked(1, 0, 0)).toBe(false);
-		expect(hintUnlocked(1, 25000, 0)).toBe(true);
+		expect(hintUnlocked(1, 9999, 0)).toBe(false);
+		expect(hintUnlocked(1, 10000, 0)).toBe(true);
 		expect(hintUnlocked(1, 0, 1)).toBe(true);
-		expect(hintUnlocked(2, 25000, 1)).toBe(false);
-		expect(hintUnlocked(2, 60000, 0)).toBe(true);
+		expect(hintUnlocked(2, 24999, 1)).toBe(false);
+		expect(hintUnlocked(2, 25000, 0)).toBe(true);
 		expect(hintUnlocked(2, 0, 2)).toBe(true);
 	});
 	it('오답 3회면 모든 단계 무료 해금', () => {
