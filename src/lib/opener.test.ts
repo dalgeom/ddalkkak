@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { isOpener, openerMetrics } from './opener';
+import { isOpener, openerMetrics, OPENER_EASY_START_DAY } from './opener';
+import { OPENER_SCORES } from './openerScores';
 import { PROBLEMS } from './problems';
 import { buildDailySetStable, MATCH_TOTAL, OPENER_START_DAY, PICK_V2_START_DAY } from './game';
 import { fieldOfChip } from './problems';
@@ -149,6 +150,58 @@ describe('1번 자리는 예시가 보이는 문제로 연다', () => {
 				() => false
 			);
 			expect(now, `day ${day}`).toEqual(old);
+		}
+	});
+});
+
+describe('쉬운 문지기 — 그날 세 문제 중 가장 쉬운 것이 1번 (10/8~)', () => {
+	const set = (day: number, openerOf: Parameters<typeof buildDailySetStable>[7] = isOpener) =>
+		buildDailySetStable(
+			PROBLEMS,
+			TRIVIA,
+			MATCH_TOTAL,
+			day,
+			(x) => fieldOfChip(x.chip),
+			(x) => x.category ?? '기타',
+			bankSizesAt,
+			openerOf
+		);
+
+	// 양성 대조 — 점수표를 실제로 읽는지. 10/3에 1번에 서서 셋이 모두 떠난 문제다
+	it('color-alpha는 5점이라 시작일부터 문지기에서 빠진다', () => {
+		const ca = PROBLEMS.find((p) => p.id === 'color-alpha');
+		expect(ca, 'color-alpha가 은행에 없다 — 테스트가 헛돌고 있다').toBeTruthy();
+		expect(OPENER_SCORES['color-alpha']).toBe(5);
+		expect(isOpener(ca!)).toBe(true);
+		expect(isOpener(ca!, OPENER_EASY_START_DAY, 4)).toBe(false);
+		expect(isOpener(ca!, OPENER_EASY_START_DAY - 1, 1)).toBe(true);
+	});
+
+	it('점수표의 id는 모두 은행에 있고 모양 규칙을 통과한다', () => {
+		const byId = new Map(PROBLEMS.map((p) => [p.id, p]));
+		const 없음 = Object.keys(OPENER_SCORES).filter((id) => !byId.has(id));
+		const 모양X = Object.keys(OPENER_SCORES).filter((id) => byId.has(id) && !isOpener(byId.get(id)!));
+		expect(없음).toEqual([]);
+		expect(모양X).toEqual([]);
+	});
+
+	it('시작일부터 60일간 1번은 그날 문지기 중 점수가 가장 낮다', () => {
+		const 실패: string[] = [];
+		for (let day = OPENER_EASY_START_DAY; day < OPENER_EASY_START_DAY + 60; day++) {
+			const picks = set(day);
+			const disc = picks.filter((p) => p.kind === 'discover' && !p.bonus).map((p) => PROBLEMS[p.index]);
+			const scored = disc.filter((p) => isOpener(p) && OPENER_SCORES[p.id] !== undefined);
+			if (!scored.length) continue;
+			const best = Math.min(...scored.map((p) => OPENER_SCORES[p.id]));
+			const first = PROBLEMS[picks[0].index];
+			if (OPENER_SCORES[first.id] !== best) 실패.push(`${day}: ${first.id}(${OPENER_SCORES[first.id]}) 최저 ${best}`);
+		}
+		expect(실패, 실패.join(', ')).toEqual([]);
+	});
+
+	it('시작일 전날까지는 점수를 안 봐서 순서가 그대로다 — 아카이브 불변', () => {
+		for (let day = OPENER_START_DAY; day < OPENER_EASY_START_DAY; day++) {
+			expect(set(day), `day ${day}`).toEqual(set(day, (p) => isOpener(p)));
 		}
 	});
 });

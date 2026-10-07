@@ -1,4 +1,5 @@
 import type { Problem } from './problems';
+import { OPENER_SCORES } from './openerScores';
 
 /**
  * 문지기 — 그날 **1번 자리**에 세울 수 있는 발견형인가.
@@ -43,7 +44,24 @@ export function openerMetrics(p: Problem): { lines: number; prose: number } {
 	return { lines, prose };
 }
 
-export function isOpener(p: Problem): boolean {
+/**
+ * 쉬운 문지기가 서는 날 — 2026-10-08(KST)부터. 오늘(20733) 세트는 건드리지 않는다.
+ *
+ * 왜: 모양만 보는 위 규칙은 난이도를 안 본다. 10/3의 1번 color-alpha(색 → 영어 이름
+ * 알파벳 순 → 두 자리 덧셈)는 시작한 3명이 모두 1번을 보자마자 떠났고, 사이트가 열린
+ * 뒤 답이 한 번도 안 들어온 문제였다. 9/14~10/6 데일리 이탈 82건 중 58건이 「아무것도
+ * 안 해 보고」였고 그중 49건이 1번이었다.
+ *
+ * 이 날부터 day와 maxScore를 함께 받으면 OPENER_SCORES가 maxScore 이하인 문제만 문지기로
+ * 본다. game.ts가 1점 → 2점 → 3점 → 4점 순으로 찾고, 없으면 day 없이 모양 규칙으로 한 번 더 찾는다.
+ * 그래서 그날 세 문제 중 가장 쉬운 문지기가 1번에 선다.
+ */
+export const OPENER_EASY_START_DAY = 20734;
+
+export function isOpener(p: Problem, day?: number, maxScore = 2): boolean {
 	const { lines, prose } = openerMetrics(p);
-	return lines >= MIN_LINES && lines <= MAX_LINES && prose <= MAX_PROSE;
+	const shaped = lines >= MIN_LINES && lines <= MAX_LINES && prose <= MAX_PROSE;
+	if (day === undefined || day < OPENER_EASY_START_DAY) return shaped;
+	const score = OPENER_SCORES[p.id];
+	return shaped && score !== undefined && score <= maxScore;
 }

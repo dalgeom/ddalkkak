@@ -634,7 +634,7 @@ export function buildDailySetStable<D, T>(
 	fieldOf: (d: D) => string,
 	catOf: (t: T) => string,
 	sizesAt: BankSizesAt,
-	openerOf: (d: D) => boolean
+	openerOf: (d: D, day?: number, maxScore?: number) => boolean
 ): DailyPick[] {
 	const sizes = sizesAt(dayNum);
 	if (dayNum < PICK_V2_START_DAY) {
@@ -659,7 +659,13 @@ export function buildDailySetStable<D, T>(
 	// 셋 다 산문이면 그대로 둔다 — 그런 날은 두 달에 이틀쯤이고, 억지로 바꾸면 뽑기가 흔들린다.
 	if (d >= OPENER_START_DAY) {
 		const head = dAll.slice(0, counts.discover);
-		const at = head.findIndex((i) => openerOf(discoverAll[i]));
+		// day를 넘기면 쉬운 문지기부터 찾는다(opener.ts OPENER_EASY_START_DAY). 없으면 모양만 본다.
+		let at = -1;
+		for (const maxScore of [1, 2, 3, 4]) {
+			at = head.findIndex((i) => openerOf(discoverAll[i], d, maxScore));
+			if (at >= 0) break;
+		}
+		if (at < 0) at = head.findIndex((i) => openerOf(discoverAll[i]));
 		if (at > 0) {
 			const [opener] = head.splice(at, 1);
 			head.unshift(opener);
