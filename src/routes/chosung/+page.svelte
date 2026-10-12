@@ -25,6 +25,8 @@
 	let tries = $state(0);
 	let hintOpen = $state(false);
 	let status = $state<'no' | 'won' | 'revealed'>('no');
+	/** 분야 골라 풀기에서 맞힌 수. 세 번째 직후 한 번 내일 알림을 권한다(matchstick freeWins와 같다) */
+	let freeWins = $state(0);
 	let feedback = $state('');
 	let shaking = $state(false);
 	let inputEl = $state<HTMLInputElement | null>(null);
@@ -107,6 +109,7 @@
 		if (isCorrect(cur, input)) {
 			status = 'won';
 			solved++;
+			if (mode.type === 'free') freeWins++;
 			if (!done.includes(idx)) done = [...done, idx];
 			if (mode.type === 'today') finishToday('won');
 			persist();
@@ -303,6 +306,9 @@
 				</button>
 				<button class="btn ghost wide" onclick={toMenu}>분야 선택으로</button>
 			{:else}
+				{#if freeWins === 3 && status === 'won'}
+					<PushPrompt dayNum={day} tomorrow={tomorrowPeek} slot="chosung_free" />
+				{/if}
 				<button class="btn wide" onclick={next}>다음 문제 →</button>
 				<button class="btn ghost wide" onclick={toMenu}>분야 선택으로</button>
 			{/if}

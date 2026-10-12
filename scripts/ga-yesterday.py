@@ -248,6 +248,9 @@ NEW = [
     ("push_offer_match", "성냥개비 알림 제안이 떴음"),
     ("push_click_match", "성냥개비 알림 켜기 누름"),
     ("push_result_match", "성냥개비 알림 설정 결과"),
+    ("push_offer_match_free", "성냥 무한 연습 알림 제안이 떴음"),
+    ("push_click_match_free", "성냥 무한 연습 알림 켜기 누름"),
+    ("push_result_match_free", "성냥 무한 연습 알림 설정 결과"),
     ("chosung_daily_seen", "초성 퀴즈 페이지 열람"),
     ("chosung_daily_start", "오늘의 초성 풀기 시작"),
     ("chosung_daily_solve", "오늘의 초성 맞힘"),
@@ -259,6 +262,12 @@ NEW = [
     ("push_offer_chosung", "초성 알림 제안이 떴음"),
     ("push_click_chosung", "초성 알림 켜기 누름"),
     ("push_result_chosung", "초성 알림 설정 결과"),
+    ("push_offer_chosung_free", "초성 분야 풀기 알림 제안이 떴음"),
+    ("push_click_chosung_free", "초성 분야 풀기 알림 켜기 누름"),
+    ("push_result_chosung_free", "초성 분야 풀기 알림 설정 결과"),
+    ("push_offer_play", "무한 연습(/play) 알림 제안이 떴음"),
+    ("push_click_play", "무한 연습(/play) 알림 켜기 누름"),
+    ("push_result_play", "무한 연습(/play) 알림 설정 결과"),
 ]
 # 문제 보내기(10/1~) — 푼 문제 하나를 대화방에 던지는 링크 /q/<id>. 보낸 쪽과 받은 쪽을 같이 본다.
 SEND = [
