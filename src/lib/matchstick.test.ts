@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { parseEq, isTrue, isSolved, eqString, moveDiff } from './matchstick';
+import { parseEq, isTrue, isSolved, eqString, moveDiff, moveHints } from './matchstick';
 import problems from './data/matchstick-problems.json';
 import { MATCH_TOTAL } from './game';
 
@@ -127,5 +127,34 @@ describe('유일해 (독립 구현 재검산)', () => {
 	it('game.ts의 MATCH_TOTAL이 실제 데이터 개수와 같다', () => {
 		// 홈은 45KB JSON을 import하지 않고 이 상수만 쓴다 — 어긋나면 화면에 틀린 수가 뜬다
 		expect(MATCH_TOTAL).toBe(problems.length);
+	});
+});
+
+describe('moveHints — 빼는 곳·꽂는 곳', () => {
+	it('숫자 사이로 옮기는 문제', () => {
+		// 0 + 0 = 8 → 8 - 0 = 8 : + 의 세로 성냥을 빼서 맨 앞 0에 꽂는다
+		expect(moveHints({ displayed: '0 + 0 = 8', solution: '8 - 0 = 8' })).toEqual([
+			'성냥을 빼는 곳: 기호 「+」',
+			'꽂는 곳: 맨 앞 숫자 「0」'
+		]);
+	});
+	it('같은 숫자 안에서 옮기는 문제', () => {
+		// 3 → 2 는 같은 칸 안에서 하나를 옮긴다
+		expect(moveHints({ displayed: '1 + 1 = 3', solution: '1 + 1 = 2' })).toEqual([
+			'성냥을 빼는 곳: = 뒤 숫자 「3」',
+			'뺀 성냥을 같은 숫자 안에 다시 꽂아요'
+		]);
+	});
+	it('두 자리 답은 앞자리·뒷자리로 가른다', () => {
+		const [a, b] = moveHints({ displayed: '1 + 9 = 16', solution: '1 + 9 = 10' });
+		expect(a).toBe('성냥을 빼는 곳: = 뒤 「16」의 뒷자리 「6」');
+		expect(b).toBe('뺀 성냥을 같은 숫자 안에 다시 꽂아요');
+	});
+	it('모든 문제에 빼는 곳·꽂는 곳이 정확히 하나씩 있다', () => {
+		for (const p of problems as { displayed: string; solution: string }[]) {
+			// 둘 다 정확히 하나여야 findIndex가 엉뚱한 칸(-1)을 짚지 않는다
+			expect(moveDiff(parseEq(p.displayed), parseEq(p.solution)), p.displayed).toEqual({ removed: 1, added: 1 });
+			expect(moveHints(p).join(' '), p.displayed).not.toMatch(/undefined/);
+		}
 	});
 });

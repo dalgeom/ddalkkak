@@ -4,7 +4,7 @@
 	import { browser } from '$app/environment';
 	import { page } from '$app/state';
 	import problems from '$lib/data/matchstick-problems.json';
-	import { parseEq, cloneBoard, isSolved, bit, type Board } from '$lib/matchstick';
+	import { parseEq, cloneBoard, isSolved, bit, moveHints, type Board } from '$lib/matchstick';
 	import { MATCH_KINDS } from '$lib/matchstickKinds';
 	import { MATCH_LEVELS, levelOf, type MatchLevel } from '$lib/matchstickLevels';
 	import { kstDayNumber } from '$lib/game';
@@ -55,6 +55,8 @@
 	let picked = $state<PickLoc | null>(null);
 	let attempts = $state(0);
 	let solvedThis = $state<'no' | 'won' | 'revealed'>('no');
+	/** 연 힌트 수(0~2) — 빼는 곳, 꽂는 곳(matchstick.ts moveHints) */
+	let hintStep = $state(0);
 	let feedback = $state('');
 	let shaking = $state(false);
 	let toastMsg = $state('');
@@ -164,6 +166,7 @@
 		picked = null;
 		attempts = 0;
 		solvedThis = 'no';
+		hintStep = 0;
 		feedback = '';
 		animFrom = null;
 	}
@@ -271,6 +274,12 @@
 				else nextProblem();
 			}, 1400);
 		}
+	}
+
+	function showHint() {
+		if (solvedThis !== 'no' || hintStep >= 2) return;
+		hintStep++;
+		track('match_hint', { step: hintStep, mode: mode.type });
 	}
 
 	function finishToday(result: 'won' | 'revealed') {
@@ -543,13 +552,22 @@
 			<div class="feedback" class:ok={solvedThis === 'won'} role="alert" aria-live="assertive">{feedback}</div>
 		{/if}
 
+		{#if solvedThis === 'no' && hintStep > 0}
+			{#each moveHints(problems[pIdx]).slice(0, hintStep) as h}
+				<p class="hint"><span>힌트</span>{h}</p>
+			{/each}
+		{/if}
+
 		{#if solvedThis === 'no'}
-			<div class="controls">
+			<div class="controls" class:four={mode.type !== 'time' && hintStep < 2}>
 				<button class="btn ghost" onclick={revert}>처음부터</button>
 				{#if mode.type === 'time'}
 					<button class="btn ghost" onclick={skip}>건너뛰기</button>
 					<button class="btn ghost" onclick={endRun}>끝내기</button>
 				{:else}
+					{#if hintStep < 2}
+						<button class="btn ghost" onclick={showHint}>{hintStep === 0 ? '힌트 보기' : '힌트 하나 더'}</button>
+					{/if}
 					<button class="btn ghost" onclick={reveal}>정답 보기</button>
 					<!-- 무한 연습도 풀지 않고 모드 화면으로 돌아갈 길이 있어야 한다 -->
 					<button class="btn ghost" onclick={toMenu}>나가기</button>
@@ -1008,6 +1026,29 @@
 		flex: 1;
 		font-size: 14px;
 		padding: 12px 6px;
+	}
+	/* 힌트 버튼까지 넷이면 휴대폰 폭에서 글자가 끼므로 2×2로 */
+	.controls.four {
+		flex-wrap: wrap;
+	}
+	.controls.four .btn {
+		flex: 1 1 calc(50% - 5px);
+	}
+	.hint {
+		margin: 10px 0 0;
+		padding: 10px 13px;
+		background: var(--panel-2);
+		border-left: 3px solid var(--accent);
+		border-radius: 0 12px 12px 0;
+		font-size: 14px;
+		line-height: 1.7;
+		word-break: keep-all;
+	}
+	.hint span {
+		margin-right: 8px;
+		font-size: 12px;
+		font-weight: 800;
+		color: var(--accent-text);
 	}
 	.btn {
 		background: var(--accent);

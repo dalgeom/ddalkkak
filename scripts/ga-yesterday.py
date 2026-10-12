@@ -245,6 +245,7 @@ NEW = [
     ("match_daily_start", "오늘의 성냥개비 풀기 시작"),
     ("match_daily_solve", "오늘의 성냥개비 맞힘"),
     ("match_daily_reveal", "오늘의 성냥개비 정답 봄"),
+    ("match_hint", "성냥개비 힌트 열어봄(오늘·무한·개수)"),
     ("push_offer_match", "성냥개비 알림 제안이 떴음"),
     ("push_click_match", "성냥개비 알림 켜기 누름"),
     ("push_result_match", "성냥개비 알림 설정 결과"),

@@ -86,6 +86,27 @@ export function moveDiff(orig: Board, cur: Board): { removed: number; added: num
 	return { removed, added };
 }
 
+/**
+ * 힌트 두 단계 — 성냥을 빼는 곳, 꽂는 곳. 준비한 풀이(solution) 기준이다.
+ * 오늘의 성냥개비는 10/2~10/11 시작 30명 중 19명이 정답 보기로 끝났는데, 막혔을 때 잡을 단계가
+ * 정답 보기뿐이었다(오늘의 초성은 힌트가 있고 10명 중 7명이 맞혔다).
+ */
+export function moveHints(p: MatchProblem): [string, string] {
+	const o = parseEq(p.displayed);
+	const s = parseEq(p.solution);
+	const d = digitsOf(o);
+	const where = (gi: number) => {
+		if (gi === 0) return `맨 앞 숫자 「${d[0]}」`;
+		if (gi === 1) return `기호 뒤 숫자 「${d[1]}」`;
+		if (o.cLen === 1) return `= 뒤 숫자 「${d[2]}」`;
+		return `= 뒤 「${d[2]}${d[3]}」의 ${gi === 2 ? '앞자리' : '뒷자리'} 「${d[gi]}」`;
+	};
+	const op = `기호 「${o.opPlus ? '+' : '−'}」`;
+	const from = o.opPlus && !s.opPlus ? op : where(o.glyphs.findIndex((m, i) => m & ~s.glyphs[i]));
+	const to = !o.opPlus && s.opPlus ? op : where(o.glyphs.findIndex((m, i) => s.glyphs[i] & ~m));
+	return [`성냥을 빼는 곳: ${from}`, from === to ? '뺀 성냥을 같은 숫자 안에 다시 꽂아요' : `꽂는 곳: ${to}`];
+}
+
 /** 정확히 성냥 하나를 옮겨 참이 되었는가 */
 export function isSolved(orig: Board, cur: Board): boolean {
 	const { removed, added } = moveDiff(orig, cur);
