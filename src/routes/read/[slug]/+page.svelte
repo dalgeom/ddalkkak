@@ -1,8 +1,16 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 	import DailyBand from '$lib/components/DailyBand.svelte';
+	import { ctaTrack } from '$lib/analytics';
 
 	let { data }: { data: PageData } = $props();
+
+	/* 글의 분야로 가는 버튼이 글 맨 끝에만 있었다. 9/29~10/12 /read/clock-angle로 들어온 18세션
+	   (전부 네이버 검색)이 세션당 1.33쪽만 보고 나갔고, 모바일은 세션당 17초였다 — 첫머리에서
+	   답을 읽고 떠나는 사람은 끝 버튼을 못 본다. 첫 소제목 앞(답이 나온 도입부 뒤)에 한 번 더 둔다. */
+	const cut = $derived(data.article.body.indexOf('<h2'));
+	const lead = $derived(cut > 0 ? data.article.body.slice(0, cut) : '');
+	const rest = $derived(cut > 0 ? data.article.body.slice(cut) : data.article.body);
 
 	const url = $derived(`https://ddalkkak.app/read/${data.article.slug}`);
 
@@ -65,12 +73,23 @@
 	<DailyBand>읽는 김에, 오늘의 <b>10문제</b>도 열려 있어요</DailyBand>
 
 	<div class="body">
+		{#if lead}
+			<!-- eslint-disable-next-line svelte/no-at-html-tags -- 본문은 articles.ts에 빌드 시점에 박힌 우리 글이다 -->
+			{@html lead}
+			<div class="ctas mid">
+				<a class="cta" href={data.article.cta.href} use:ctaTrack={'read_top'}
+					>{data.article.cta.label} <span aria-hidden="true">→</span></a
+				>
+			</div>
+		{/if}
 		<!-- eslint-disable-next-line svelte/no-at-html-tags -- 본문은 articles.ts에 빌드 시점에 박힌 우리 글이다 -->
-		{@html data.article.body}
+		{@html rest}
 	</div>
 
 	<section class="sec ctas">
-		<a class="cta" href={data.article.cta.href}>{data.article.cta.label} <span aria-hidden="true">→</span></a>
+		<a class="cta" href={data.article.cta.href} use:ctaTrack={'read_end'}
+			>{data.article.cta.label} <span aria-hidden="true">→</span></a
+		>
 	</section>
 
 	<section class="sec">
@@ -306,6 +325,9 @@
 
 	.ctas {
 		display: flex;
+	}
+	.ctas.mid {
+		margin: 22px 0 26px;
 	}
 	.cta {
 		flex: 1;
