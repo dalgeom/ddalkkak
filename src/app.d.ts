@@ -3,7 +3,10 @@ declare global {
 		// interface Error {}
 		// interface Locals {}
 		// interface PageData {}
-		// interface PageState {}
+		/** 시트가 열려 있으면 그 이름(BottomSheet — 뒤로가기로 닫기) */
+		interface PageState {
+			sheet?: string;
+		}
 
 		/**
 		 * Cloudflare Pages가 넘겨주는 실행 환경.

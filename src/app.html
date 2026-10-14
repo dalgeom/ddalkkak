@@ -8,11 +8,11 @@
 		<meta name="theme-color" content="#efe7d8" />
 		<!-- /favicon.ico는 링크가 없어도 브라우저와 크롤러가 무조건 찾아간다.
 		     없으면 404가 쌓여 Search Console에 잡히므로 파일을 두고 함께 건다. -->
-		<link rel="icon" href="%sveltekit.assets%/favicon.svg" type="image/svg+xml" />
-		<link rel="alternate icon" href="%sveltekit.assets%/favicon.ico" sizes="any" />
-		<link rel="manifest" href="%sveltekit.assets%/manifest.json" />
+		<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+		<link rel="alternate icon" href="/favicon.ico" sizes="any" />
+		<link rel="manifest" href="/manifest.json" />
 		<!-- iOS 홈 화면 추가(서비스워커 없이도 동작) -->
-		<link rel="apple-touch-icon" href="%sveltekit.assets%/icon-192.png" />
+		<link rel="apple-touch-icon" href="/icon-192.png" />
 		<meta name="apple-mobile-web-app-capable" content="yes" />
 		<meta name="apple-mobile-web-app-title" content="딸깍" />
 		<meta name="apple-mobile-web-app-status-bar-style" content="default" />
@@ -100,6 +100,8 @@
 				line-gap-override: 0%;
 			}
 		</style>
+		<!-- 이 탭에서 스플래시를 이미 봤으면 새로고침 순간에도 그리지 않는다(Splash.svelte) -->
+		<script>try{if(sessionStorage.getItem('ddal.splash'))document.documentElement.classList.add('nosplash')}catch(e){}</script>
 		%sveltekit.head%
 	</head>
 	<body data-sveltekit-preload-data="hover">

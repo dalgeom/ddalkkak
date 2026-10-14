@@ -2,17 +2,19 @@
 	import { onMount } from 'svelte';
 	import { freshNotices, loadSeen, markSeen, isReturning, type Notice } from '$lib/notices';
 	import { track } from '$lib/analytics';
+	import BottomSheet from './BottomSheet.svelte';
 
 	/**
 	 * 다시 온 사람에게만, 안 본 새 소식이 있으면 메인에서 한 번 올라오는 시트(notices.ts).
 	 * 처음 온 사람에게는 띄우지 않는다 — 무엇이 「새」 것인지 모르는 사람에게는 가림막일 뿐이다.
-	 * 스플래시가 걷힌 뒤에 올라오도록 조금 늦게 연다.
+	 * 스플래시가 걷힌 뒤에 올라오도록 조금 늦게 연다. 시트 동작(끌어 닫기 · 뒤로가기)은 BottomSheet.
 	 */
 	let list = $state<Notice[]>([]);
 	/** 안 본 새 소식 전부. 시트에는 3개까지만 보이지만, 닫으면 전부 본 것으로 둔다 —
 	    보인 3개만 표시했더니 4번째 때문에 다음 방문에 시트가 또 떴다(10/14 점검) */
 	let unseen: Notice[] = [];
 	let open = $state(false);
+	let sheet = $state<BottomSheet>();
 
 	onMount(() => {
 		if (!isReturning()) return;
@@ -27,77 +29,39 @@
 		return () => clearTimeout(t);
 	});
 
-	function close() {
+	function seenAll() {
 		markSeen(unseen.map((n) => n.id));
-		open = false;
 	}
-	function go(n: Notice) {
-		markSeen(unseen.map((x) => x.id));
+	function go(e: MouseEvent, n: Notice) {
+		e.preventDefault();
+		seenAll();
 		track('news_sheet_click', { id: n.id });
+		sheet?.leave(n.href);
 	}
 </script>
 
-{#if open}
-	<div class="dim" role="presentation" onclick={close}></div>
-	<div class="sheet" role="dialog" aria-modal="true" aria-labelledby="news-h">
-		<div class="grip" aria-hidden="true"></div>
-		<h2 id="news-h">새로 나왔어요</h2>
-		<ul>
-			{#each list as n (n.id)}
-				<li>
-					<a href={n.href} onclick={() => go(n)}>
-						<b>{n.title}</b>
-						<span>{n.body}</span>
-						<em>{n.cta} →</em>
-					</a>
-				</li>
-			{/each}
-		</ul>
-		<button class="ok" onclick={close}>확인</button>
-	</div>
-{/if}
+<BottomSheet bind:this={sheet} bind:open id="news" title="새로 나왔어요" onclose={seenAll}>
+	<ul>
+		{#each list as n (n.id)}
+			<li>
+				<a href={n.href} onclick={(e) => go(e, n)}>
+					<b>{n.title}</b>
+					<span>{n.body}</span>
+					<em>{n.cta} →</em>
+				</a>
+			</li>
+		{/each}
+	</ul>
+	<button class="ok" onclick={() => sheet?.close()}>확인</button>
+</BottomSheet>
 
 <style>
-	.dim {
-		position: fixed;
-		inset: 0;
-		z-index: 60;
-		background: rgba(30, 26, 20, 0.36);
-		animation: fade 0.2s ease-out;
-	}
-	.sheet {
-		position: fixed;
-		left: 0;
-		right: 0;
-		bottom: 0;
-		z-index: 61;
-		max-width: 520px;
-		margin: 0 auto;
-		background: var(--panel);
-		border-radius: 22px 22px 0 0;
-		padding: 10px 18px calc(18px + env(safe-area-inset-bottom));
-		box-shadow: 0 -10px 30px rgba(30, 26, 20, 0.18);
-		animation: up 0.28s cubic-bezier(0.2, 0.8, 0.2, 1);
-		max-height: 80dvh;
-		overflow-y: auto;
-	}
-	.grip {
-		width: 40px;
-		height: 4px;
-		border-radius: 3px;
-		background: var(--border-strong);
-		margin: 0 auto 12px;
-	}
-	h2 {
-		font-size: 19px;
-		font-weight: 900;
-		margin-bottom: 12px;
-	}
 	ul {
 		list-style: none;
 		display: flex;
 		flex-direction: column;
 		gap: 8px;
+		margin-top: 4px;
 	}
 	li a {
 		display: flex;
@@ -139,15 +103,6 @@
 		font-weight: 800;
 		font-family: inherit;
 		cursor: pointer;
-	}
-	@keyframes up {
-		from {
-			transform: translateY(100%);
-		}
-	}
-	@keyframes fade {
-		from {
-			opacity: 0;
-		}
+		box-shadow: 0 4px 0 var(--accent-press);
 	}
 </style>

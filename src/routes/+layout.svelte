@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte';
 	import '$lib/styles/v2.css';
 	import AdSlot from '$lib/components/AdSlot.svelte';
-	import Splash from '$lib/components/Splash.svelte';
+	import Splash, { markBooted } from '$lib/components/Splash.svelte';
 	import InAppGate from '$lib/components/InAppGate.svelte';
 	import { logoClicks, focusMode } from '$lib/nav';
 	import TabBar from '$lib/components/TabBar.svelte';
@@ -32,6 +32,8 @@
 		// 설치 가능 이벤트는 한 번만 오고 다시 안 온다 — 앱 시작 시 붙잡아 뒀다가
 		// 10문제를 끝낸 순간에 쓴다(InstallPrompt).
 		captureInstallPrompt();
+		// 첫 화면이 떴다 — 이 뒤로 메인에 와도 스플래시는 없다
+		markBooted();
 		const seen = new Set(loadSeen());
 		newsDot = freshNotices(Date.now()).some((n) => !seen.has(n.id));
 	});
