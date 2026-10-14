@@ -33,7 +33,6 @@
 	import { parseChallenge, judgeChallenge, type Challenge } from '$lib/challenge';
 	import { teaserOf, type Teaser } from '$lib/teaser';
 	import { isOpener } from '$lib/opener';
-	import { weekOf, readDayRecord } from '$lib/record';
 	import { bankSizesAt } from '$lib/bankHistory';
 	import { logoClicks, focusMode } from '$lib/nav';
 	import { track } from '$lib/analytics';
@@ -856,17 +855,6 @@
 		};
 	});
 
-	/* ── 결과 화면 주간 스트립: 이번 주(월~일) 완주 기록 — /record로 이어진다 ── */
-	const WEEK_LABELS = ['월', '화', '수', '목', '금', '토', '일'];
-	let weekCells = $state<{ label: string; correct: number; isToday: boolean }[]>([]);
-	$effect(() => {
-		if (phase !== 'done' || !browser) return;
-		weekCells = weekOf(dayNum).map((d, i) => {
-			const r = readDayRecord(d);
-			return { label: WEEK_LABELS[i], correct: r ? r.correct : -1, isToday: d === dayNum };
-		});
-	});
-
 	/* 걸린 시간 표시. 기록이 없던 시절에 완주한 날은 0이라 아예 감춘다. */
 	let timeLabel = $derived(sessionMs > 0 ? formatDuration(sessionMs) : '');
 	let timeNote = $derived.by(() => {
@@ -1383,44 +1371,10 @@
 		<InstallPrompt {dayNum} streak={doneStats.streak} />
 	{/if}
 
-	<!-- 기록: 결과만 덜렁 있으면 다 푼 사람이 볼 게 없다 — 연속·누적·어제 대비를 보여준다 -->
-	<div class="stats">
-		<div class="stat">
-			<b>{doneStats.streak}일</b>
-			<span>연속 딸깍</span>
-		</div>
-		<div class="stat">
-			<b>{doneStats.played}일</b>
-			<span>누적 참여</span>
-		</div>
-		<div class="stat">
-			{#if doneStats.yesterday >= 0}
-				<b class:up={correctCount > doneStats.yesterday} class:down={correctCount < doneStats.yesterday}>
-					{doneStats.yesterday} → {correctCount}
-				</b>
-				<span>어제 → 오늘</span>
-			{:else}
-				<b>첫 기록</b>
-				<span>내일부터 비교돼요</span>
-			{/if}
-		</div>
-	</div>
-
-	<!-- 이번 주 잔디: 매일의 완주가 칸으로 쌓이는 걸 보여주고 전체 달력으로 이어준다 -->
-	<a class="week" href="/record">
-		{#each weekCells as c (c.label)}
-			<span class="wcell" class:done={c.correct >= 0} class:tod={c.isToday}>
-				<i>{c.label}</i>
-				<b>{c.correct >= 0 ? c.correct : "·"}</b>
-			</span>
-		{/each}
-		<span class="wmore">전체<br />기록<span class="arr" aria-hidden="true">→</span></span>
-	</a>
-
-	<!-- GN 피드백(8/11): 완주하고 나면 오늘 문제를 다시 볼 길이 없었다 -->
-	<a class="review-link" href="/today">오늘 문제 다시 보기 <span aria-hidden="true">→</span></a>
-
-
+	<!-- v2(10/14 저녁): 결과 화면이 11가지였다(점수 · 정오표 · 알림 · 통계 3칸 · 주간 잔디 · 다시 보기 · 공유 ·
+	     카운트다운 · 예고 · 다음 놀이 · 연습 권유). 알림 카드는 접히는 선 위라는 실측 근거로 그 자리에 두고,
+	     공유를 바로 아래로 올린다. 통계 · 잔디 · 다시 보기 · 카운트다운은 「내 기록」 카드 하나로,
+	     연습 권유는 「다음 놀이」 안 한 줄로. 주간 잔디는 /record에 그대로 있다. -->
 	<!-- 공유될 것을 먼저 보여 준다.
 	     여기까지 온 사람은 자기 점수만 봤지 무엇이 전달되는지는 한 번도 못 봤다 —
 	     gridRow가 공유 카드 이미지에만 쓰이고 화면엔 안 그려지고 있었다(9/07 확인).
@@ -1470,56 +1424,54 @@
 	</div>
 	</div>
 
-	<!-- 내일의 갈고리: 예고 + 알림. 카운트다운만으로는 아무도 돌아오지 않는다.
-	     9/14에 연습 권유보다 위로 올렸다 — 맨 아래라 스크롤 끝까지 간 사람만 봤다. 예고도 유형
-	     이름 셋에서 내일 문제의 첫 예시 한 줄로 바꿨다(teaser.ts). 보였는지는 cta_teaser_seen으로 잰다. -->
-	<div class="tomorrow" use:ctaTrack={'teaser'}>
-		<p class="next-day">내일 10문제까지 {countdown || '--:--:--'}</p>
-		<!-- 알림 카드가 떴으면 예고는 그 카드 안에 이미 있다(9/15) — 같은 줄을 두 번 보이지 않는다 -->
-		{#if tomorrow && !offerPush}
-			<div class="peek">
-				<p class="peek-h">내일의 발견형 미리보기 · <b>{tomorrow.chip}</b></p>
-				{#if tomorrow.line}
-					<p class="peek-line">{tomorrow.line}</p>
-					<p class="peek-more">다음 줄과 물음표는 자정에 열려요</p>
-				{/if}
-			</div>
-		{/if}
-		<!-- 알림 카드(웹 알림, 8시)가 떴으면 달력 파일(9시)은 숨긴다 — 같은 화면에 알림이 둘이었다(10/14 점검) -->
-		{#if !offerPush}
-		<button class="remind" onclick={downloadReminder}>
-			<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
-				<rect x="3" y="5" width="18" height="16" rx="2" />
-				<path d="M8 3v4M16 3v4M3 10h18" />
-			</svg>
-			달력에 매일 알림 추가
-		</button>
-		{/if}
+	<div class="myrec">
+		<p class="mr-line">
+			<b>{doneStats.streak}일</b> 연속 · 누적 <b>{doneStats.played}일</b>
+			{#if doneStats.yesterday >= 0}
+				· 어제 {doneStats.yesterday} →
+				<b class:up={correctCount > doneStats.yesterday} class:down={correctCount < doneStats.yesterday}>오늘 {correctCount}</b>
+			{/if}
+		</p>
+		<p class="mr-next">다음 10문제까지 {countdown || '--:--:--'}</p>
+		<div class="mr-links">
+			<a href="/today">오늘 문제 다시 보기</a>
+			<a href="/record">내 기록 달력</a>
+		</div>
 	</div>
 
-	<!-- v2(10/14): 다 푼 사람이 갈 곳이 약한 유형 연습 하나뿐이었다. 오늘의 성냥·초성과 다른 놀이를 먼저 보인다 -->
+	<!-- 알림 카드가 없을 때만 — 그 카드 안에 이미 예고가 있다(9/15). 웹 알림이 안 되는 기기는 달력 파일로(10/14) -->
+	{#if !offerPush}
+		<div class="tomorrow" use:ctaTrack={'teaser'}>
+			{#if tomorrow}
+				<div class="peek">
+					<p class="peek-h">내일의 발견형 미리보기 · <b>{tomorrow.chip}</b></p>
+					{#if tomorrow.line}
+						<p class="peek-line">{tomorrow.line}</p>
+						<p class="peek-more">다음 줄과 물음표는 자정에 열려요</p>
+					{/if}
+				</div>
+			{/if}
+			<button class="remind" onclick={downloadReminder}>
+				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+					<rect x="3" y="5" width="18" height="16" rx="2" />
+					<path d="M8 3v4M16 3v4M3 10h18" />
+				</svg>
+				달력에 매일 알림 추가
+			</button>
+		</div>
+	{/if}
+
+	<!-- 다 푼 사람이 갈 곳 — 오늘의 성냥 · 초성과 다른 놀이, 그리고 약했던 유형 연습 한 줄 -->
 	<section class="nextplay">
 		<h2 class="np-h">다음 놀이</h2>
 		<Missions />
-		<a class="np-all" href="/games">놀이 전체 보기 <span aria-hidden="true">→</span></a>
-	</section>
-
-	<!-- 다음 행동: 가장 약했던 유형의 연습으로 이어준다 -->
-	<div class="nudge">
 		{#if weakest}
-			<p class="nudge-t">
-				오늘 <b>{weakest.label} {weakest.ok}/{weakest.total}</b> — 연습으로 감을 잡아볼까요?
-			</p>
-			<a class="nudge-btn" href="/play?filter={FILTER_OF[weakest.label]}">
-				{weakest.label} 연습하러 가기 <span class="arr" aria-hidden="true">→</span>
-			</a>
-		{:else}
-			<p class="nudge-t">오늘 감이 좋은데요? 이 기세로 계속 풀어봐요.</p>
-			<a class="nudge-btn" href="/play?filter=all">
-				무한 연습하러 가기 <span class="arr" aria-hidden="true">→</span>
+			<a class="np-practice" href="/play?filter={FILTER_OF[weakest.label]}">
+				오늘 {weakest.label} <b>{weakest.ok}/{weakest.total}</b> — {weakest.label} 연습하러 가기 <span aria-hidden="true">→</span>
 			</a>
 		{/if}
-	</div>
+		<a class="np-all" href="/games">놀이 전체 보기 <span aria-hidden="true">→</span></a>
+	</section>
 {/if}
 
 {#if toastMsg}
@@ -2452,6 +2404,71 @@
 	.row.ok b {
 		color: var(--accent-text);
 	}
+	/* 내 기록 한 줄 — 연속 · 누적 · 어제 비교, 다음 문제까지, 다시 보기 · 달력(v2 10/14 저녁) */
+	.myrec {
+		margin-top: 14px;
+		padding: 14px 16px;
+		border-radius: 16px;
+		background: var(--panel);
+		border: 1px solid var(--border-strong);
+		text-align: center;
+	}
+	.mr-line {
+		font-size: 14.5px;
+		color: var(--muted);
+		word-break: keep-all;
+	}
+	.mr-line b {
+		color: var(--text);
+		font-weight: 800;
+		font-variant-numeric: tabular-nums;
+	}
+	.mr-line b.up {
+		color: var(--accent-text);
+	}
+	.mr-line b.down {
+		color: var(--accent-2);
+	}
+	.mr-next {
+		margin-top: 4px;
+		font-size: 12.5px;
+		color: var(--muted-2);
+		font-variant-numeric: tabular-nums;
+	}
+	.mr-links {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 8px;
+		margin-top: 12px;
+	}
+	.mr-links a {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		min-height: 42px;
+		border-radius: 12px;
+		background: var(--panel-2);
+		border: 1px solid var(--border);
+		font-size: 13.5px;
+		font-weight: 700;
+		color: var(--text);
+		text-decoration: none;
+	}
+	.np-practice {
+		display: block;
+		margin-top: 10px;
+		padding: 12px 14px;
+		border-radius: 14px;
+		border: 1px dashed var(--border-strong);
+		font-size: 13.5px;
+		color: var(--muted);
+		text-decoration: none;
+		text-align: center;
+		word-break: keep-all;
+	}
+	.np-practice b {
+		color: var(--text);
+	}
 	.nextplay {
 		margin-top: 22px;
 	}
@@ -2470,127 +2487,8 @@
 		text-decoration: none;
 		padding: 8px;
 	}
-	/* 기록 3칸 — 연속·누적·어제 대비 */
-	.stats {
-		display: grid;
-		grid-template-columns: repeat(3, 1fr);
-		gap: 8px;
-		margin-top: 8px;
-	}
-	.stat {
-		background: var(--panel);
-		border: 1px solid var(--border-strong);
-		border-radius: 12px;
-		padding: 13px 6px 11px;
-		text-align: center;
-	}
-	.stat b {
-		display: block;
-		font-size: 17px;
-		font-weight: 800;
-		font-variant-numeric: tabular-nums;
-		letter-spacing: -0.2px;
-	}
-	.stat b.up {
-		color: var(--accent-text);
-	}
-	.stat b.down {
-		color: var(--accent-2);
-	}
-	.stat span {
-		display: block;
-		margin-top: 3px;
-		font-size: 11.5px;
-		color: var(--muted-2);
-		font-weight: 600;
-	}
 
-	/* 이번 주 잔디 스트립 */
-	.week {
-		display: flex;
-		align-items: stretch;
-		gap: 5px;
-		margin-top: 8px;
-		text-decoration: none;
-	}
-	.wcell {
-		flex: 1;
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		gap: 2px;
-		background: var(--panel);
-		border: 1px solid var(--border);
-		border-radius: 10px;
-		padding: 8px 0 7px;
-	}
-	.wcell.done {
-		background: var(--accent-soft);
-		border-color: #cfe6d8;
-	}
-	.wcell.tod {
-		outline: 2px solid var(--accent);
-		outline-offset: -1px;
-	}
-	.wcell i {
-		font-style: normal;
-		font-size: 10.5px;
-		font-weight: 700;
-		color: var(--muted-2);
-	}
-	.wcell b {
-		font-size: 14px;
-		font-weight: 800;
-		color: var(--text);
-		font-variant-numeric: tabular-nums;
-		line-height: 1;
-	}
-	.wcell.done b {
-		color: #1f6b41;
-	}
-	.wmore {
-		flex: none;
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		justify-content: center;
-		gap: 1px;
-		padding: 0 10px;
-		border: 1px solid var(--border-strong);
-		border-radius: 10px;
-		background: var(--panel);
-		font-size: 10.5px;
-		font-weight: 700;
-		color: var(--muted);
-		line-height: 1.35;
-		text-align: center;
-	}
-	.wmore .arr {
-		color: var(--accent-text);
-		font-size: 12px;
-	}
-	.week:hover .wmore {
-		background: var(--panel-2);
-	}
 
-	.review-link {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		gap: 6px;
-		margin-top: 8px;
-		min-height: 46px;
-		border-radius: 12px;
-		background: var(--panel);
-		border: 1px solid var(--border-strong);
-		font-size: 14px;
-		font-weight: 700;
-		color: var(--text);
-		text-decoration: none;
-	}
-	.review-link:hover {
-		background: var(--panel-2);
-	}
 
 	.share-label {
 		font-size: 13px;
@@ -2665,52 +2563,6 @@
 		box-shadow: 0 2px 0 var(--accent-press);
 	}
 
-	/* 약점 유형 연습 유도 */
-	.nudge {
-		margin-top: 18px;
-		background: var(--panel);
-		border: 1px solid var(--border-strong);
-		border-radius: 16px;
-		padding: 16px;
-		text-align: center;
-	}
-	.nudge-t {
-		font-size: 13.5px;
-		color: var(--muted);
-		margin: 0 0 12px;
-		word-break: keep-all;
-	}
-	.nudge-t b {
-		color: var(--text);
-	}
-	.nudge-btn {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		gap: 6px;
-		min-height: 50px;
-		border-radius: 14px;
-		background: var(--panel);
-		border: 1.5px solid var(--accent);
-		color: var(--accent-text);
-		font-size: 15px;
-		font-weight: 800;
-		text-decoration: none;
-		transition:
-			transform var(--dur-tap) var(--ease-out),
-			box-shadow var(--dur-tap) var(--ease-out);
-	}
-	.nudge-btn:active {
-		transform: translateY(3px);
-		box-shadow: 0 2px 0 var(--accent-press);
-	}
-	.next-day {
-		text-align: center;
-		margin-top: 12px;
-		font-size: 12px;
-		color: var(--muted-2);
-		font-variant-numeric: tabular-nums;
-	}
 
 	.toast {
 		position: fixed;
