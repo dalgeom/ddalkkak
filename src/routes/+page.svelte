@@ -2714,7 +2714,8 @@
 
 	.toast {
 		position: fixed;
-		bottom: 24px;
+		/* 휴대폰은 하단 탭 위(--tab-h, 레이아웃) */
+		bottom: calc(24px + var(--tab-h, 0px));
 		left: 50%;
 		transform: translateX(-50%);
 		background: var(--text);

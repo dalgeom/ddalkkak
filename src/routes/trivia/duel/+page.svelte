@@ -428,7 +428,7 @@
 	.toast {
 		position: fixed;
 		left: 50%;
-		bottom: calc(90px + env(safe-area-inset-bottom));
+		bottom: calc(24px + var(--tab-h, 0px));
 		transform: translateX(-50%);
 		background: #2c2822;
 		color: #fff;

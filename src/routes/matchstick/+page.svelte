@@ -1220,7 +1220,8 @@
 	/* 구 다크 테마의 남색 배경 + 어두운 글자 조합이 남아 글자가 안 보였다 — 현 토큰으로 교체 */
 	.toast {
 		position: fixed;
-		bottom: 32px;
+		/* 휴대폰은 하단 탭 위(--tab-h, 레이아웃) — 탭 아래 층이라 가려졌다 */
+		bottom: calc(24px + var(--tab-h, 0px));
 		left: 50%;
 		transform: translateX(-50%);
 		background: var(--text);

@@ -1,20 +1,24 @@
 <script lang="ts">
 	import { untrack, type Snippet } from 'svelte';
-	import { fly, fade } from 'svelte/transition';
-	import { cubicOut } from 'svelte/easing';
 	import { goto, pushState } from '$app/navigation';
 
 	/**
 	 * 아래에서 올라오는 시트 — 딸깍의 모든 시트가 이것 하나를 쓴다(새 소식 · 의견 보내기).
 	 *
-	 * 2026-10-14 사용자 지적: 시트마다 따로 만들어 「스르륵 올라오는 느낌도 없고, 끌어내려 닫기도 안 된다」.
-	 * 휴대폰 시트가 당연히 해야 하는 것을 여기서 한 번에 한다.
+	 * 닫기는 휴대폰에서 사람들이 실제로 하는 방법만: 끌어 내리기 · 바깥 누르기 · 뒤로가기(키보드는 Esc).
+	 * ✕ 버튼은 두지 않는다(2026-10-14 사용자: 「아래 모달을 누가 X를 눌러서 꺼?」).
 	 *   - 올라올 때 미끄러져 올라오고(0.34초), 닫힐 때 내려가며 사라진다. 뒤는 서서히 어두워진다
 	 *   - 손잡이·제목을 끌어 내리면 따라 내려오고, 충분히 내리거나 빠르게 튕기면 닫힌다. 덜 내리면 제자리
 	 *   - 끌어 올리면 화면 높이까지 커진다(expandable). 커진 상태에서 내리면 먼저 작아진다
 	 *   - 내용이 맨 위일 때는 내용을 끌어 내려도 닫힌다(글 칸 안에서는 끌지 않는다)
-	 *   - 휴대폰 뒤로가기로 닫힌다(열 때 기록을 한 칸 쌓는다). 바깥 · ✕ · Esc로도 닫힌다
+	 *   - 휴대폰 뒤로가기로 닫힌다(열 때 기록을 한 칸 쌓는다)
 	 *   - 열린 동안 뒤 화면은 스크롤되지 않는다
+	 *
+	 * 아이폰 사파리에서 닫는 순간 검은 막이 깜빡였다(10/14 사용자). 그래서
+	 *   - 막과 시트를 「떼어내는 애니메이션」(svelte transition)으로 지우지 않는다. 클래스 하나로 CSS 전환을
+	 *     걸고, 다 투명해진 뒤에 지운다 — 지우는 순간 이미 투명이라 마지막 한 프레임이 다시 그려질 일이 없다
+	 *   - 스크롤 잠금에 html overflow를 쓰지 않는다(사파리는 주소창 크기가 바뀌며 화면을 다시 그린다).
+	 *     시트 밖 터치·휠만 막는다
 	 */
 	let {
 		open = $bindable(false),
@@ -33,6 +37,9 @@
 		children: Snippet;
 	} = $props();
 
+	const DUR = 340;
+	let mounted = $state(false);
+	let shown = $state(false);
 	let panel = $state<HTMLDivElement>();
 	let body = $state<HTMLDivElement>();
 	let dy = $state(0);
@@ -40,24 +47,49 @@
 	let expanded = $state(false);
 	let pushed = false;
 	let returnFocus: Element | null = null;
+	let hideTimer: ReturnType<typeof setTimeout> | undefined;
 
-	// 뒤로가기 — 열 때 기록 한 칸, 화면 안에서 닫으면 그 칸을 되돌린다
 	$effect(() => {
 		const o = open;
 		untrack(() => {
-			if (o && !pushed) {
-				pushed = true;
-				returnFocus = document.activeElement;
-				pushState('', { sheet: id });
-				dy = 0;
-				expanded = false;
-				queueMicrotask(() => panel?.focus({ preventScroll: true }));
-			} else if (!o && pushed) {
-				pushed = false;
-				history.back();
+			clearTimeout(hideTimer);
+			if (o) {
+				if (!pushed) {
+					pushed = true;
+					returnFocus = document.activeElement;
+					pushState('', { sheet: id });
+				}
+				if (!mounted) {
+					dy = 0;
+					expanded = false;
+					mounted = true;
+				}
+				// 처음 그린 자리(아래 · 투명)를 브라우저가 한 번 칠한 뒤에 올린다 — 그래야 전환이 보인다
+				requestAnimationFrame(() =>
+					requestAnimationFrame(() => {
+						if (open) {
+							shown = true;
+							panel?.focus({ preventScroll: true });
+						}
+					})
+				);
+			} else {
+				if (pushed) {
+					pushed = false;
+					history.back();
+				}
+				shown = false;
+				hideTimer = setTimeout(() => {
+					if (!open) {
+						mounted = false;
+						dy = 0;
+						if (returnFocus instanceof HTMLElement) returnFocus.focus({ preventScroll: true });
+					}
+				}, DUR + 60);
 			}
 		});
 	});
+
 	function onPop() {
 		if (!open || !pushed) return;
 		pushed = false;
@@ -65,15 +97,36 @@
 		onclose?.();
 	}
 
-	// 뒤 화면 스크롤 잠금
+	// 스크롤 잠금 — 시트 밖으로 가는 터치·휠은 막고, 시트 안 내용이 스크롤될 수 있을 때만 통과
 	$effect(() => {
-		if (!open) return;
-		const el = document.documentElement;
-		const prev = el.style.overflow;
-		el.style.overflow = 'hidden';
+		if (!mounted) return;
+		const canScroll = (t: EventTarget | null, delta: number) => {
+			const el = t as Element | null;
+			if (!body || !el || !body.contains(el)) return false;
+			if (body.scrollHeight <= body.clientHeight + 1) return false;
+			if (delta < 0) return body.scrollTop > 0;
+			return body.scrollTop + body.clientHeight < body.scrollHeight - 1;
+		};
+		let lastY = 0;
+		const ts = (e: TouchEvent) => (lastY = e.touches[0]?.clientY ?? 0);
+		const tm = (e: TouchEvent) => {
+			const y = e.touches[0]?.clientY ?? lastY;
+			const delta = lastY - y;
+			lastY = y;
+			const field = (e.target as Element | null)?.closest?.('textarea');
+			if (field && panel?.contains(field)) return;
+			if (!canScroll(e.target, delta) && e.cancelable) e.preventDefault();
+		};
+		const wh = (e: WheelEvent) => {
+			if (!canScroll(e.target, e.deltaY)) e.preventDefault();
+		};
+		document.addEventListener('touchstart', ts, { passive: true });
+		document.addEventListener('touchmove', tm, { passive: false });
+		document.addEventListener('wheel', wh, { passive: false });
 		return () => {
-			el.style.overflow = prev;
-			if (returnFocus instanceof HTMLElement) returnFocus.focus({ preventScroll: true });
+			document.removeEventListener('touchstart', ts);
+			document.removeEventListener('touchmove', tm);
+			document.removeEventListener('wheel', wh);
 		};
 	});
 
@@ -159,7 +212,6 @@
 	// 마우스는 손잡이에서만
 	function onMouseDown(e: PointerEvent) {
 		if (e.pointerType !== 'mouse' || e.button !== 0 || !(e.target as Element).closest('.handle')) return;
-		if ((e.target as Element).closest('button')) return;
 		begin(e.clientY, e.target);
 		const pm = (ev: PointerEvent) => void move(ev.clientY);
 		const pu = () => {
@@ -183,9 +235,9 @@
 
 <svelte:window onpopstate={onPop} onkeydown={onKey} />
 
-{#if open}
-	<div class="dim" role="presentation" onclick={close} transition:fade={{ duration: 240 }}></div>
-	<div class="sheet" transition:fly={{ y: '100%', duration: 340, easing: cubicOut, opacity: 1 }}>
+{#if mounted}
+	<div class="dim" class:show={shown} role="presentation" onclick={close}></div>
+	<div class="sheet" class:show={shown}>
 		<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 		<div
 			class="panel"
@@ -204,7 +256,6 @@
 			<div class="handle">
 				<span class="grip" aria-hidden="true"></span>
 				{#if title}<h2 class="title">{title}</h2>{/if}
-				<button class="x" aria-label="닫기" onclick={close}>✕</button>
 			</div>
 			<div class="body" bind:this={body}>
 				{@render children()}
@@ -219,6 +270,11 @@
 		inset: 0;
 		z-index: 60;
 		background: rgba(30, 26, 20, 0.4);
+		opacity: 0;
+		transition: opacity 0.3s ease;
+	}
+	.dim.show {
+		opacity: 1;
 	}
 	.sheet {
 		position: fixed;
@@ -229,6 +285,11 @@
 		max-width: 520px;
 		margin: 0 auto;
 		pointer-events: none;
+		transform: translateY(100%);
+		transition: transform 0.34s cubic-bezier(0.22, 1, 0.36, 1);
+	}
+	.sheet.show {
+		transform: translateY(0);
 	}
 	.panel {
 		pointer-events: auto;
@@ -251,10 +312,10 @@
 		height: 94dvh;
 		max-height: 94dvh;
 	}
+	/* 손잡이 줄 — 손가락으로 잡기 쉽게 넉넉히 */
 	.handle {
-		position: relative;
 		flex: none;
-		padding: 10px 56px 8px 18px;
+		padding: 10px 18px 8px;
 		touch-action: none;
 		cursor: grab;
 		user-select: none;
@@ -268,27 +329,13 @@
 		height: 5px;
 		border-radius: 3px;
 		background: var(--border-strong);
-		margin: 0 auto 10px;
-		transform: translateX(19px);
+		margin: 0 auto 12px;
 	}
 	.title {
 		font-size: 19px;
 		font-weight: 900;
 		line-height: 1.35;
 		word-break: keep-all;
-	}
-	.x {
-		position: absolute;
-		top: 10px;
-		right: 10px;
-		width: 40px;
-		height: 40px;
-		border-radius: 12px;
-		border: none;
-		background: none;
-		color: var(--muted);
-		font-size: 17px;
-		cursor: pointer;
 	}
 	.body {
 		flex: 1;

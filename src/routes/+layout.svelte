@@ -218,6 +218,9 @@
 		max-width: var(--maxw);
 		margin: 0 auto;
 		padding: 20px 20px 0;
+		/* 가로로 눕힌 아이폰 — 노치 · 둥근 모서리에 걸리지 않게 */
+		padding-left: max(20px, env(safe-area-inset-left));
+		padding-right: max(20px, env(safe-area-inset-right));
 		min-height: 100dvh;
 		display: flex;
 		flex-direction: column;
@@ -303,10 +306,13 @@
 	.page {
 		padding-bottom: 20px;
 	}
-	/* 휴대폰 — 하단 탭(약 62px + 안전 영역)에 마지막 줄이 가리지 않게 */
+	/* 휴대폰 — 하단 탭 높이(TabBar: 위 6 + 버튼 50 + 아래 여백). 토스트 등 화면 아래 것은 이 위에 띄운다 */
 	@media (max-width: 767px) {
+		:global(:root) {
+			--tab-h: calc(56px + max(14px, calc(env(safe-area-inset-bottom) + 6px)));
+		}
 		.wrap {
-			padding-bottom: calc(70px + env(safe-area-inset-bottom));
+			padding-bottom: calc(var(--tab-h) + 14px);
 		}
 		.wrap.focus {
 			padding-bottom: 0;

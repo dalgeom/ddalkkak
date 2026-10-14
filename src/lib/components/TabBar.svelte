@@ -69,10 +69,13 @@
 		z-index: 40;
 		display: grid;
 		grid-template-columns: repeat(3, 1fr);
-		background: color-mix(in srgb, var(--panel) 94%, transparent);
-		backdrop-filter: blur(10px);
+		/* 불투명 배경. 흐림(backdrop-filter)은 아이폰 사파리에서 다른 층이 움직일 때 검게 번쩍인다 */
+		background: var(--panel);
 		border-top: 1px solid var(--border);
-		padding: 6px 8px calc(6px + env(safe-area-inset-bottom));
+		/* 아이폰 홈 바(쓸어 올리기) 위로 띄운다 — viewport-fit=cover라 env()가 홈 바 높이를 준다.
+		   홈 바가 없는 화면(사파리 아래 도구 막대 · 안드로이드)에서도 바닥에서 14px는 띄운다 */
+		padding: 6px max(8px, env(safe-area-inset-right)) max(14px, calc(env(safe-area-inset-bottom) + 6px))
+			max(8px, env(safe-area-inset-left));
 	}
 	.bottom a {
 		flex-direction: column;
