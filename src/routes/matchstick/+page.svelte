@@ -4,7 +4,19 @@
 	import { browser } from '$app/environment';
 	import { page } from '$app/state';
 	import problems from '$lib/data/matchstick-problems.json';
-	import { parseEq, cloneBoard, isSolved, bit, moveHints, type Board } from '$lib/matchstick';
+	import { parseEq, cloneBoard, bit, judgeRule, ruleHints, type Board } from '$lib/matchstick';
+	import {
+		STAGES,
+		RULE_LABEL,
+		starsFor,
+		isUnlocked,
+		nextStage,
+		loadStages,
+		saveStages,
+		type StageProblem,
+		type StageProgress,
+		type StageResult
+	} from '$lib/matchStages';
 	import { MATCH_KINDS } from '$lib/matchstickKinds';
 	import { MATCH_LEVELS, levelOf, type MatchLevel } from '$lib/matchstickLevels';
 	import { kstDayNumber } from '$lib/game';
@@ -20,7 +32,8 @@
 		| { type: 'free' }
 		| { type: 'time'; seconds: number }
 		| { type: 'count'; total: number }
-		| { type: 'today' };
+		| { type: 'today' }
+		| { type: 'stage'; no: number };
 
 	let screen = $state<'menu' | 'play' | 'result'>('menu');
 	let mode = $state<Mode>({ type: 'free' });
@@ -47,6 +60,14 @@
 	let tomorrowPeek = $derived(day ? { chip: '성냥개비', line: problems[matchOfDay(day + 1)].displayed } : null);
 
 	let pIdx = $state(-1);
+	/** 지금 판의 문제. 은행 문제는 move1, 단계 문제(matchStages.ts)는 자기 규칙을 갖는다 */
+	let prob = $state<StageProblem>({ displayed: '', solution: '', rule: 'move1' });
+	let hintMax = $derived(prob.displayed ? ruleHints(prob, prob.rule).length : 0);
+	// 단계 도전 — 진행은 기기에 남는다(matchStages.ts loadStages)
+	let stageProgress = $state<StageProgress>({});
+	let stageIdx = $state(0);
+	let stageResults = $state<StageResult[]>([]);
+	let nextNo = $derived(nextStage(stageProgress));
 	let orig = $state<Board | null>(null);
 	let cur = $state<Board | null>(null);
 	/** 정답 공개 시 원래 배치 — 성냥이 집혔다 날아가 안착하는 연출에 쓴다.
@@ -144,7 +165,24 @@
 		screen = 'menu';
 	}
 
+	function resetBoard() {
+		orig = parseEq(prob.displayed);
+		cur = cloneBoard(orig);
+		picked = null;
+		attempts = 0;
+		solvedThis = 'no';
+		hintStep = 0;
+		feedback = '';
+		animFrom = null;
+	}
+
 	function nextProblem(first = false) {
+		if (mode.type === 'stage') {
+			prob = STAGES[mode.no - 1][stageIdx];
+			pIdx = -1;
+			resetBoard();
+			return;
+		}
 		const forced = Number(page.url.searchParams.get('p'));
 		let idx: number;
 		if (mode.type === 'today') {
@@ -161,14 +199,8 @@
 			idx = pool[Math.floor(Math.random() * pool.length)];
 		}
 		pIdx = idx;
-		orig = parseEq(problems[idx].displayed);
-		cur = cloneBoard(orig);
-		picked = null;
-		attempts = 0;
-		solvedThis = 'no';
-		hintStep = 0;
-		feedback = '';
-		animFrom = null;
+		prob = { ...problems[idx], rule: 'move1' };
+		resetBoard();
 	}
 
 	function revert() {
@@ -180,6 +212,17 @@
 	function handleStick(loc: PickLoc, lit: boolean) {
 		if (screen !== 'play' || solvedThis !== 'no' || !cur || !orig) return;
 
+		// 빼기·더하기 문제는 손에 들지 않는다 — 누르는 즉시 빠지거나 꽂히고 바로 판정한다
+		if (prob.rule === 'remove1') {
+			if (!lit) return;
+			applyRemove(loc);
+			return judge();
+		}
+		if (prob.rule === 'add1') {
+			if (lit) return;
+			applyAdd(loc);
+			return judge();
+		}
 		if (!picked) {
 			if (!lit) return;
 			picked = loc;
@@ -195,41 +238,57 @@
 
 		applyAdd(loc);
 		picked = null;
+		judge();
+	}
 
-		if (isSolved(orig, cur)) {
-			solvedThis = 'won';
-			stats.solved++;
-			stats.streak++;
-			if (stats.streak > stats.best) stats.best = stats.streak;
-			markDone();
-			persist();
+	/** 손을 하나 쓴 뒤. 2개 옮기기는 첫 번째를 옮긴 뒤 'more'라 되돌리지 않고 다음 손을 받는다 */
+	function judge() {
+		const r = judgeRule(orig!, cur!, prob.rule);
+		if (r === 'more') {
+			feedback = '하나 더 옮겨요';
+			return;
+		}
+		if (r === 'solved') return win();
+		attempts++;
+		feedback = '아직 아니에요!';
+		shaking = true;
+		setTimeout(() => {
+			shaking = false;
+			revert();
+		}, 420);
+	}
 
-			if (mode.type === 'today') finishToday('won');
-			if (mode.type === 'free') freeWins++;
-			if (mode.type === 'free' || mode.type === 'today') {
-				// 점수 시스템은 없다 — 있지도 않은 점수를 암시하지 말고 시도 횟수만 알려준다
-				feedback = attempts === 0 ? '딸깍! 한 번에 맞혔어요' : `딸깍! ${attempts + 1}번 만에 맞혔어요`;
-			} else {
-				runSolved++;
-				if (mode.type === 'count') runResults = [...runResults, 'win'];
-				feedback = '딸깍!';
-				setTimeout(() => {
-					if (screen !== 'play') return;
-					if (
-						mode.type === 'count' && runResults.length >= mode.total
-					)
-						endRun();
-					else nextProblem();
-				}, 650);
-			}
+	function win() {
+		solvedThis = 'won';
+		stats.solved++;
+		stats.streak++;
+		if (stats.streak > stats.best) stats.best = stats.streak;
+		if (mode.type !== 'stage') markDone();
+		persist();
+
+		if (mode.type === 'stage') {
+			stageResults = [...stageResults, hintStep > 0 ? 'hinted' : 'clean'];
+			feedback = attempts === 0 ? '딸깍! 한 번에 맞혔어요' : `딸깍! ${attempts + 1}번 만에 맞혔어요`;
+			return;
+		}
+
+		if (mode.type === 'today') finishToday('won');
+		if (mode.type === 'free') freeWins++;
+		if (mode.type === 'free' || mode.type === 'today') {
+			// 점수 시스템은 없다 — 있지도 않은 점수를 암시하지 말고 시도 횟수만 알려준다
+			feedback = attempts === 0 ? '딸깍! 한 번에 맞혔어요' : `딸깍! ${attempts + 1}번 만에 맞혔어요`;
 		} else {
-			attempts++;
-			feedback = '아직 아니에요!';
-			shaking = true;
+			runSolved++;
+			if (mode.type === 'count') runResults = [...runResults, 'win'];
+			feedback = '딸깍!';
 			setTimeout(() => {
-				shaking = false;
-				revert();
-			}, 420);
+				if (screen !== 'play') return;
+				if (
+					mode.type === 'count' && runResults.length >= mode.total
+				)
+					endRun();
+				else nextProblem();
+			}, 650);
 		}
 	}
 
@@ -258,14 +317,15 @@
 		if (solvedThis !== 'no') return;
 		// 원래 배치에서 성냥이 날아가 정답 자리에 안착하는 연출로 보여준다
 		if (orig) animFrom = cloneBoard(orig);
-		cur = parseEq(problems[pIdx].solution);
+		cur = parseEq(prob.solution);
 		picked = null;
 		solvedThis = 'revealed';
 		stats.streak = 0;
-		markDone();
+		if (mode.type === 'stage') stageResults = [...stageResults, 'revealed'];
+		else markDone();
 		if (mode.type === 'today') finishToday('revealed');
 		persist();
-		feedback = `정답: ${problems[pIdx].solution.replace('-', '−')}`;
+		feedback = `정답: ${prob.solution.replace('-', '−')}`;
 		if (mode.type === 'count') {
 			runResults = [...runResults, 'fail'];
 			setTimeout(() => {
@@ -277,7 +337,7 @@
 	}
 
 	function showHint() {
-		if (solvedThis !== 'no' || hintStep >= 2) return;
+		if (solvedThis !== 'no' || hintStep >= hintMax) return;
 		hintStep++;
 		track('match_hint', { step: hintStep, mode: mode.type });
 	}
@@ -287,6 +347,30 @@
 		daily = nextStreak(daily, day, result);
 		persist();
 		track(result === 'won' ? 'match_daily_solve' : 'match_daily_reveal', { streak: daily.streak });
+	}
+
+	function startStage(no: number) {
+		if (!isUnlocked(stageProgress, no)) return;
+		stageIdx = 0;
+		stageResults = [];
+		track('match_stage_start', { stage: no });
+		startMode({ type: 'stage', no });
+	}
+
+	function nextInStage() {
+		if (mode.type !== 'stage') return;
+		if (stageIdx + 1 < STAGES[mode.no - 1].length) {
+			stageIdx++;
+			nextProblem();
+			return;
+		}
+		const stars = starsFor(stageResults);
+		if (stars > (stageProgress[mode.no] ?? 0)) {
+			stageProgress = { ...stageProgress, [mode.no]: stars };
+			saveStages(stageProgress);
+		}
+		track(stars ? 'match_stage_clear' : 'match_stage_fail', { stage: mode.no, stars });
+		screen = 'result';
 	}
 
 	function startToday() {
@@ -342,6 +426,7 @@
 
 	onMount(() => {
 		load();
+		stageProgress = loadStages();
 		day = kstDayNumber(Date.now());
 		track('match_daily_seen', { done: todayDone, streak: dailyStreak });
 		const lv = page.url.searchParams.get('level');
@@ -415,6 +500,31 @@
 				{/if}
 			</section>
 		{/if}
+
+		<!-- 단계 도전(matchStages.ts) — 검색으로 온 사람에게 다시 올 이유(목표·진행도)를 준다 -->
+		<section class="msec">
+			<h2 class="mh">단계 도전</h2>
+			<p class="mp">60단계. 뒤로 갈수록 성냥 2개 옮기기, 빼기, 더하기 문제가 나와요.</p>
+			<button class="big" onclick={() => startStage(nextNo)}>
+				{nextNo}단계 {Object.keys(stageProgress).length ? '이어하기' : '시작하기'}
+				<span class="arr" aria-hidden="true">→</span>
+			</button>
+			<div class="sgrid">
+				{#each STAGES as _, i (i)}
+					{@const no = i + 1}
+					{@const st = stageProgress[no] ?? 0}
+					<button
+						class="stile"
+						class:cleared={st > 0}
+						disabled={!isUnlocked(stageProgress, no)}
+						onclick={() => startStage(no)}
+						aria-label={st ? `${no}단계 별 ${st}개` : `${no}단계`}
+					>
+						<b>{no}</b><span>{'★'.repeat(st)}</span>
+					</button>
+				{/each}
+			</div>
+		</section>
 
 		<!-- 처음 온 사람이 푸는 법을 찾을 수 있어야 한다(문장 속 링크는 눈에 안 띈다) -->
 		<a class="gbanner" href="/matchstick/guide">
@@ -526,6 +636,9 @@
 		{:else if mode.type === 'count'}
 			<div class="run-score">문제 {runResults.length + 1} / {mode.total}</div>
 			<div class="emoji-mini">{runResults.map((r) => (r === 'win' ? '✅' : '🔓')).join('')}</div>
+		{:else if mode.type === 'stage'}
+			<div class="run-score">{mode.no}단계 · {stageIdx + 1} / {STAGES[mode.no - 1].length}</div>
+			<div class="rule">{RULE_LABEL[prob.rule]}</div>
 		{:else}
 			<div class="stats">
 				{#if level}<div class="stat-box"><span>난이도</span><b>{level === 'easy' ? '쉬움' : '어려움'}</b></div>{/if}
@@ -543,7 +656,7 @@
 					{picked}
 					onstick={handleStick}
 					animateFrom={animFrom}
-					label={pIdx >= 0 ? problems[pIdx].displayed : undefined}
+					label={prob.displayed || undefined}
 				/>
 			</div>
 		{/if}
@@ -553,19 +666,19 @@
 		{/if}
 
 		{#if solvedThis === 'no' && hintStep > 0}
-			{#each moveHints(problems[pIdx]).slice(0, hintStep) as h}
+			{#each ruleHints(prob, prob.rule).slice(0, hintStep) as h}
 				<p class="hint"><span>힌트</span>{h}</p>
 			{/each}
 		{/if}
 
 		{#if solvedThis === 'no'}
-			<div class="controls" class:four={mode.type !== 'time' && hintStep < 2}>
+			<div class="controls" class:four={mode.type !== 'time' && hintStep < hintMax}>
 				<button class="btn ghost" onclick={revert}>처음부터</button>
 				{#if mode.type === 'time'}
 					<button class="btn ghost" onclick={skip}>건너뛰기</button>
 					<button class="btn ghost" onclick={endRun}>끝내기</button>
 				{:else}
-					{#if hintStep < 2}
+					{#if hintStep < hintMax}
 						<button class="btn ghost" onclick={showHint}>{hintStep === 0 ? '힌트 보기' : '힌트 하나 더'}</button>
 					{/if}
 					<button class="btn ghost" onclick={reveal}>정답 보기</button>
@@ -587,7 +700,28 @@
 			<button class="btn wide" onclick={() => nextProblem()}>다음 문제 →</button>
 			<button class="btn ghost wide" onclick={share}>기록 공유하기</button>
 			<button class="btn ghost wide" onclick={toMenu}>모드 선택으로</button>
+		{:else if mode.type === 'stage'}
+			<button class="btn wide" onclick={nextInStage}>
+				{stageIdx + 1 < STAGES[mode.no - 1].length ? '다음 문제 →' : '단계 결과 보기 →'}
+			</button>
+			<button class="btn ghost wide" onclick={toMenu}>모드 선택으로</button>
 		{/if}
+	</div>
+{:else if mode.type === 'stage'}
+	{@const stars = starsFor(stageResults)}
+	{@const sno = mode.no}
+	<div class="card result">
+		<h2>{mode.no}단계 {stars ? '통과!' : '아쉬워요'}</h2>
+		<div class="big-score">{stars ? '★'.repeat(stars) : '☆'}</div>
+		<div class="emoji-row">
+			{stageResults.map((r) => (r === 'clean' ? '🟩' : r === 'hinted' ? '🟨' : '⬜')).join(' ')}
+		</div>
+		{#if !stars}<p class="best-line">5문제 중 3문제 이상 풀면 다음 단계가 열려요</p>{/if}
+		{#if stars && mode.no < STAGES.length}
+			<button class="btn wide" onclick={() => startStage(sno + 1)}>{sno + 1}단계로 →</button>
+		{/if}
+		<button class="btn ghost wide" onclick={() => startStage(sno)}>이 단계 다시 하기</button>
+		<button class="btn ghost wide" onclick={toMenu}>모드 선택으로</button>
 	</div>
 {:else}
 	<div class="card result">
@@ -1015,6 +1149,48 @@
 		color: var(--danger);
 	}
 	.feedback.ok {
+		color: var(--accent-text);
+	}
+	.sgrid {
+		display: grid;
+		grid-template-columns: repeat(6, 1fr);
+		gap: 6px;
+		margin-top: 12px;
+	}
+	.stile {
+		min-height: 48px;
+		border-radius: 10px;
+		border: 1px solid var(--border);
+		background: var(--panel);
+		color: var(--text);
+		font-family: inherit;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		gap: 2px;
+		cursor: pointer;
+	}
+	.stile b {
+		font-size: 14px;
+		font-weight: 800;
+	}
+	.stile span {
+		font-size: 10px;
+		line-height: 1;
+		min-height: 10px;
+		color: var(--accent-text);
+	}
+	.stile.cleared {
+		border-color: var(--accent);
+	}
+	.stile:disabled {
+		opacity: 0.35;
+		cursor: default;
+	}
+	.rule {
+		font-size: 13px;
+		font-weight: 800;
 		color: var(--accent-text);
 	}
 	.controls {
