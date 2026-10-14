@@ -1,7 +1,6 @@
 <script lang="ts">
-	import { untrack } from 'svelte';
 	import { page } from '$app/state';
-	import { replaceState } from '$app/navigation';
+	import { afterNavigate, replaceState } from '$app/navigation';
 	import { track } from '$lib/analytics';
 	import { kstDayNumber } from '$lib/game';
 	import { FEEDBACK_KINDS, FEEDBACK_MAX, FEEDBACK_MIN, type FeedbackKind } from '$lib/feedback';
@@ -54,15 +53,14 @@
 		}
 	}
 
-	// 새 소식 「의견 보내러 가기」(?feedback=1)로 들어오면 바로 연다. 주소에서는 지워 새로고침 때 또 열리지 않게
-	$effect(() => {
-		if (page.url.searchParams.get('feedback') !== '1') return;
-		const u = new URL(page.url);
+	// 새 소식 「의견 보내러 가기」(?feedback=1)로 들어오면 바로 연다. 주소에서는 지워 새로고침 때 또 열리지 않게.
+	// afterNavigate — 첫 진입과 사이트 안 이동 둘 다, 라우터가 준비된 뒤에 돈다(그 전에 replaceState를 부르면 예외)
+	afterNavigate(({ to }) => {
+		if (to?.url.searchParams.get('feedback') !== '1') return;
+		const u = new URL(to.url);
 		u.searchParams.delete('feedback');
-		untrack(() => {
-			replaceState(u.pathname + u.search, {});
-			show();
-		});
+		replaceState(u.pathname + u.search, {});
+		show();
 	});
 
 	function onKey(e: KeyboardEvent) {
