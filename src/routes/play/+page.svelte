@@ -333,7 +333,7 @@
 
 	onMount(() => {
 		const f = page.url.searchParams.get('filter');
-		if (f === 'all' || f === 'puzzle' || f === 'trivia' || f === 'match') filter = f;
+		if (f === 'all' || f === 'puzzle' || f === 'trivia' || f === 'match' || f === 'cube') filter = f;
 		loadBank()
 			.then(() => {
 				loading = false;
@@ -387,7 +387,7 @@
 	{data.counts.match}개 · 전개도 {CUBE_TOTAL}개, 모두
 	{(data.counts.discover + data.counts.trivia + data.counts.match + CUBE_TOTAL).toLocaleString()}문제를
 	시간·개수 제한 없이 풀어요. 전체로 두면 오늘의 딸깍과 같은 비율로 네 유형이 돌아가며 나와요.
-	<a href="/chosung">초성 퀴즈</a>는 여기와 따로 풀어요.
+	<a class="ilink" href="/chosung">초성 퀴즈</a>는 여기와 따로 풀어요.
 </p>
 
 {#if loading}
@@ -651,6 +651,11 @@
 		background: var(--panel);
 		border-radius: 18px;
 		padding: 18px;
+	}
+	.ilink {
+		color: var(--accent-text);
+		font-weight: 700;
+		text-decoration: none;
 	}
 	.intro {
 		font-size: 12.5px;

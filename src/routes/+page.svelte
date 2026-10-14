@@ -865,7 +865,7 @@
 	});
 
 	/** 가장 약했던 유형 — 결과 화면에서 그 유형 연습으로 이어준다(전부 맞았으면 null) */
-	const FILTER_OF: Record<string, string> = { 발견형: 'puzzle', 상식: 'trivia', 성냥개비: 'match' };
+	const FILTER_OF: Record<string, string> = { 발견형: 'puzzle', 상식: 'trivia', 성냥개비: 'match', 전개도: 'cube' };
 	let weakest = $derived.by(() => {
 		const rows = resultRows.filter((r) => FILTER_OF[r.label]);
 		let w: (typeof rows)[0] | null = null;
@@ -1053,7 +1053,7 @@
 	<section class="sec reveal d1">
 		<h2 class="sec-h">네 가지가 매일 섞여 나와요</h2>
 		<div class="kinds">
-			<div class="kind">
+			<a class="kind" href="/discover">
 				<div class="kind-vis rule">
 					<div class="rrow"><span>나무</span><em>→</em><b>2</b></div>
 					<div class="rrow"><span>가나다</span><em>→</em><b>1</b></div>
@@ -1061,8 +1061,8 @@
 				</div>
 				<b>발견형 {KIND_COUNT.discover}</b>
 				<span>예시 속 규칙을 찾아요. 힌트는 3단계.</span>
-			</div>
-			<div class="kind">
+			</a>
+			<a class="kind" href="/trivia">
 				<div class="kind-vis quiz">
 					<span class="mini-badge">A</span><span class="mini-line"></span>
 					<span class="mini-badge on">B</span><span class="mini-line on"></span>
@@ -1070,19 +1070,19 @@
 				</div>
 				<b>상식 퀴즈 {KIND_COUNT.trivia}</b>
 				<span>19개 분야, 해설과 함께.</span>
-			</div>
-			<div class="kind">
+			</a>
+			<a class="kind" href="/matchstick">
 				<div class="kind-vis">
 					<MatchstickBoard board={demoBoard} picked={null} onstick={() => {}} interactive={false} label="8 − 0 = 8" />
 				</div>
 				<b>성냥개비 {KIND_COUNT.match}</b>
 				<span>하나만 옮겨 식을 참으로.</span>
-			</div>
-			<div class="kind">
+			</a>
+			<a class="kind" href="/cubenet">
 				<div class="kind-vis"><CubeDie view={[2, 3, 4]} size={58} /></div>
 				<b>전개도 {KIND_COUNT.cube}</b>
 				<span>머릿속으로 접어 주사위 맞히기.</span>
-			</div>
+			</a>
 		</div>
 	</section>
 
@@ -1197,8 +1197,6 @@
 		>
 			{#if current.problem?.chip && !current.bonus}
 				<span class="cat-chip">{current.problem.chip}</span>
-			{:else if current.bonus}
-				<span class="cat-chip gold">마지막 한 문제예요</span>
 			{/if}
 
 			<div class="q">
@@ -1417,7 +1415,7 @@
 				<path d="M12 9v4l2.5 2M9 2h6" />
 			</svg>
 			<b>{timeLabel}</b>
-			<span>만에 완주</span>
+			<span>걸렸어요</span>
 		</div>
 		{#if timeNote}
 			<p class="took-note" class:record={doneStats.best > sessionMs}>{timeNote}</p>
@@ -1568,13 +1566,16 @@
 				{/if}
 			</div>
 		{/if}
+		<!-- 알림 카드(웹 알림, 8시)가 떴으면 달력 파일(9시)은 숨긴다 — 같은 화면에 알림이 둘이었다(10/14 점검) -->
+		{#if !offerPush}
 		<button class="remind" onclick={downloadReminder}>
 			<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
 				<rect x="3" y="5" width="18" height="16" rx="2" />
 				<path d="M8 3v4M16 3v4M3 10h18" />
 			</svg>
-			매일 아침 알림 받기
+			달력에 매일 알림 추가
 		</button>
+		{/if}
 	</div>
 
 	<!-- 다음 행동: 가장 약했던 유형의 연습으로 이어준다 -->
@@ -1846,6 +1847,8 @@
 		gap: 8px;
 	}
 	.kind {
+		text-decoration: none;
+		color: inherit;
 		background: var(--panel);
 		border: 1px solid var(--border-strong);
 		border-radius: 16px;
@@ -2296,10 +2299,6 @@
 		color: var(--muted);
 		padding: 3px 9px;
 		border-radius: 7px;
-	}
-	.cat-chip.gold {
-		background: var(--gold-bg);
-		color: var(--gold-text);
 	}
 	.q {
 		margin-top: 14px;

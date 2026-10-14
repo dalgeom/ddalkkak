@@ -192,6 +192,8 @@
 			{:else}
 				{#if idx + 1 < GRID_PUZZLES.length}
 					<button class="btn wide" onclick={next}>다음 문제 →</button>
+				{:else}
+					<a class="btn wide alink" href="/matchstick#stages">성냥개비 단계 도전하러 가기 →</a>
 				{/if}
 				<button class="btn ghost wide" onclick={() => (cur = null)}>목록으로</button>
 			{/if}
@@ -392,6 +394,12 @@
 	.btn.wide {
 		width: 100%;
 		margin-top: 12px;
+	}
+	.alink {
+		display: block;
+		box-sizing: border-box;
+		text-align: center;
+		text-decoration: none;
 	}
 	.shaking {
 		animation: shake 0.42s;

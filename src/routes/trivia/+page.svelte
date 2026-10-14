@@ -2,6 +2,10 @@
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
+
+	/* 견본 문제를 눌러서 바로 맞혀 본다(10/14 점검: 버튼 모양인데 안 눌렸다). 정답·해설 글은
+	   그대로 HTML에 남아 있다 — 고르면 펼쳐질 뿐이다. */
+	let picked = $state<Record<string, number>>({});
 </script>
 
 <svelte:head>
@@ -33,6 +37,7 @@
 			<div class="fact"><b>{data.categories.length}개</b><span>분야</span></div>
 			<div class="fact"><b>4단계</b><span>난이도</span></div>
 		</div>
+		<a class="cta top" href="/play?filter=trivia">상식 퀴즈 풀기 <span aria-hidden="true">→</span></a>
 	</header>
 
 	<section class="sec">
@@ -44,10 +49,26 @@
 					<div class="q">{@html s.question}</div>
 					<ul class="choices">
 						{#each s.choices as c, i (i)}
-							<li><span class="badge">{['A', 'B', 'C', 'D', 'E'][i]}</span>{c}</li>
+							{@const done = picked[s.id] !== undefined}
+							<li>
+								<button
+									class="choice"
+									class:ok={done && c === s.answer}
+									class:no={done && picked[s.id] === i && c !== s.answer}
+									disabled={done}
+									onclick={() => (picked[s.id] = i)}
+								>
+									<span class="badge">{['A', 'B', 'C', 'D', 'E'][i]}</span>{c}
+								</button>
+							</li>
 						{/each}
 					</ul>
-					<details>
+					{#if picked[s.id] !== undefined}
+						<p class="verdict" class:right={s.choices[picked[s.id]] === s.answer}>
+							{s.choices[picked[s.id]] === s.answer ? '딸깍! 맞혔어요' : '아쉬워요'}
+						</p>
+					{/if}
+					<details open={picked[s.id] !== undefined}>
 						<summary>정답 보기</summary>
 						<p class="ans">정답은 <b>{s.answer}</b></p>
 						<p class="exp">{@html s.explain}</p>
@@ -216,15 +237,42 @@
 		flex-direction: column;
 		gap: 6px;
 	}
-	.choices li {
+	.choice {
+		width: 100%;
 		display: flex;
 		align-items: center;
 		gap: 8px;
 		font-size: 14px;
 		color: var(--text);
 		background: var(--panel-2);
+		border: 1.5px solid transparent;
 		border-radius: 10px;
-		padding: 8px 12px;
+		padding: 9px 12px;
+		text-align: left;
+		font-family: inherit;
+		cursor: pointer;
+	}
+	.choice:disabled {
+		cursor: default;
+	}
+	.choice.ok {
+		border-color: var(--accent);
+		background: color-mix(in srgb, var(--accent) 12%, var(--panel));
+	}
+	.choice.no {
+		border-color: var(--danger);
+	}
+	.verdict {
+		margin: 10px 0 0;
+		font-size: 14px;
+		font-weight: 800;
+		color: var(--danger);
+	}
+	.verdict.right {
+		color: var(--accent-text);
+	}
+	.cta.top {
+		margin-top: 16px;
 	}
 	.badge {
 		width: 22px;
