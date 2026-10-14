@@ -42,7 +42,22 @@ export function ctaTrack(
 		if (slot === 'band' || slot === 'foot') markGoDaily();
 	};
 	node.addEventListener('click', onClick);
+	const seen = seenOnce(node, `cta_${slot}_seen`);
 
+	return {
+		destroy() {
+			seen.destroy();
+			node.removeEventListener('click', onClick);
+		}
+	};
+}
+
+/**
+ * 노드가 처음으로 절반 이상 화면에 들어온 순간 이벤트를 한 번 찍는다(ctaTrack·PushPrompt가 쓴다).
+ * PushPrompt의 push_offer는 그려질 때 찍혀서, 성냥개비 자리가 9/29~10/12에 16명 노출 · 켜기 0 · 닫기 0이었는데
+ * 못 본 것인지 보고도 안 켠 것인지 가를 수 없었다.
+ */
+export function seenOnce(node: HTMLElement, name: string) {
 	/** 콜백을 믿지 않고 좌표로 다시 본다 — 절반 이상이 화면 안에 들어와 있는가 */
 	const 보이나 = () => {
 		const r = node.getBoundingClientRect();
@@ -61,7 +76,7 @@ export function ctaTrack(
 	function 확인() {
 		if (done || !보이나()) return;
 		done = true;
-		track(`cta_${slot}_seen`);
+		track(name);
 		끝내기();
 	}
 
@@ -77,7 +92,6 @@ export function ctaTrack(
 	return {
 		destroy() {
 			끝내기();
-			node.removeEventListener('click', onClick);
 		}
 	};
 }

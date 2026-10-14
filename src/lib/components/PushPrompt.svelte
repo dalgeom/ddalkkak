@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { shouldOfferPush, notePushDismissed, stopOfferingPush, enablePush } from '$lib/push';
-	import { track } from '$lib/analytics';
+	import { track, seenOnce } from '$lib/analytics';
 	import type { Teaser } from '$lib/teaser';
 
 	/**
@@ -71,7 +71,7 @@
 </script>
 
 {#if show}
-	<section class="push" class:ok={done}>
+	<section class="push" class:ok={done} use:seenOnce={ev('push_seen')}>
 		{#if done}
 			<p class="ok-msg">내일 아침 8시에 알려드릴게요. 오늘 기록은 이어집니다.</p>
 		{:else}
