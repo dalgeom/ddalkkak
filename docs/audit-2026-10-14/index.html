@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>딸깍 구조·디자인 점검 보고서 (2026-10-14)</title>
+<style>
+	:root {
+		--bg: #f6f1e7;
+		--panel: #fffdf8;
+		--text: #2a2620;
+		--muted: #6e665a;
+		--line: #e3dccd;
+		--accent: #2e8f5a;
+		--red: #c2452d;
+		--amber: #b07a12;
+		--blue: #2f6db0;
+	}
+	* { box-sizing: border-box; }
+	body {
+		margin: 0;
+		background: var(--bg);
+		color: var(--text);
+		font-family: 'Pretendard', -apple-system, 'Malgun Gothic', sans-serif;
+		line-height: 1.7;
+		word-break: keep-all;
+	}
+	.wrap { max-width: 980px; margin: 0 auto; padding: 28px 16px 80px; }
+	h1 { font-size: 28px; margin: 0 0 4px; }
+	.sub { color: var(--muted); margin: 0 0 24px; }
+	h2 { font-size: 21px; margin: 44px 0 12px; padding-top: 14px; border-top: 2px solid var(--line); }
+	h3 { font-size: 17px; margin: 26px 0 8px; }
+	.card { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 16px 18px; margin: 12px 0; }
+	.summary { border: 2px solid var(--accent); }
+	table { width: 100%; border-collapse: collapse; font-size: 14px; margin: 10px 0; background: var(--panel); }
+	th, td { border: 1px solid var(--line); padding: 7px 9px; text-align: left; vertical-align: top; }
+	th { background: #efe8da; }
+	.sev { font-weight: 800; white-space: nowrap; }
+	.s1 { color: var(--red); }
+	.s2 { color: var(--amber); }
+	.s3 { color: var(--blue); }
+	code { background: #efe8da; padding: 1px 5px; border-radius: 5px; font-size: 13px; }
+	.shots { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 12px; }
+	.shots figure { margin: 0; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 8px; }
+	.shots img { width: 100%; border-radius: 8px; display: block; }
+	.shots figcaption { font-size: 12.5px; color: var(--muted); margin-top: 6px; }
+	.tall img { max-height: 520px; object-fit: cover; object-position: top; }
+	ul { padding-left: 20px; }
+	li { margin: 3px 0; }
+	.wire { font-family: Consolas, monospace; font-size: 13px; background: #fff; border: 1px dashed #c9bfa9; border-radius: 10px; padding: 12px; white-space: pre; overflow-x: auto; line-height: 1.5; }
+	.two { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+	@media (max-width: 720px) { .two { grid-template-columns: 1fr; } }
+	.tag { display: inline-block; font-size: 12px; font-weight: 800; padding: 1px 7px; border-radius: 6px; background: #e7f2ea; color: var(--accent); }
+	.toc a { color: var(--accent); }
+</style>
+</head>
+<body>
+<div class="wrap">
+	<h1>딸깍 구조·디자인 점검 보고서</h1>
+	<p class="sub">2026-10-14 · 조사 범위: 사이트 전체 22개 화면, 실제 화면(휴대폰 390×844), 코드, GA 4주(9/16~10/13, 한국)</p>
+
+	<div class="card summary">
+		<h3 style="margin-top:0">요약</h3>
+		<ul>
+			<li><b>첫 화면은 괜찮습니다.</b> 시작 버튼 하나가 분명하고 깔끔합니다. 문제는 그 아래와 다른 화면들입니다.</li>
+			<li><b>눌러질 것처럼 생겼는데 안 눌리는 것이 두 곳</b> 있습니다. 메인 「네 가지가 매일 섞여 나와요」 카드 4장, 상식 허브의 견본 20문제 보기 버튼입니다.</li>
+			<li><b>실제 버그가 하나</b> 있습니다. 메인 「전개도」 칸이 전개도 대신 전체 문제를 엽니다.</li>
+			<li><b>같은 것을 여러 이름으로 부르고, 같은 이름이 다른 곳으로 갑니다.</b> 「연습·무한 연습·전부 섞기·전체」, 「발견형」은 메인에서는 연습으로, 푸터에서는 설명 페이지로 갑니다.</li>
+			<li><b>결과 화면에 할 일이 11가지</b>이고, 알림을 두 번(웹 알림 8시, 달력 파일 9시) 권합니다.</li>
+			<li><b>데일리는 1번 문제에서 끊깁니다.</b> 시작 128명 중 약 49명이 1번을 건드리지도 않고 떠났습니다. 오늘 1번은 검수 기준이 금지하는 「×11 패턴」류(1111×1111)였습니다.</li>
+			<li><b>초성은 섬입니다.</b> 초성으로 들어온 62세션 중 홈까지 간 세션은 1개입니다.</li>
+			<li><b>공지·새 소식 장치가 없습니다.</b> 오늘 메인에 고정으로 넣은 「새로 나왔어요」 칸 하나뿐입니다.</li>
+			<li><b>오늘 만든 그림 퍼즐은 그림이 그림으로 안 보입니다.</b> 강아지가 강아지로 읽히지 않습니다.</li>
+			<li><b>추천:</b> 버그·안 눌리는 카드·알림 중복은 바로 고치고, 「오늘 · 놀이 · 기록」 세 갈래로 정보 구조와 메인을 다시 짜는 개편 시안을 먼저 만들어 보여 드린 뒤 적용합니다(10절).</li>
+		</ul>
+	</div>
+
+	<p class="toc"><a href="#n1">1 숫자</a> · <a href="#n2">2 메인</a> · <a href="#n3">3 10문제</a> · <a href="#n4">4 진입 경로</a> · <a href="#n5">5 이동</a> · <a href="#n6">6 UI/UX 문제 목록</a> · <a href="#n7">7 메인 복잡도</a> · <a href="#n8">8 유형 화면</a> · <a href="#n9">9 새 기능 아이디어</a> · <a href="#n10">10 개편안·순서</a> · <a href="#n11">11 스크린샷</a></p>
+
+	<h2 id="n1">1. 숫자로 본 현황 (9/16~10/13, 한국)</h2>
+	<table>
+		<tr><th>항목</th><th>값</th></tr>
+		<tr><td>세션 · 사용자 · 페이지뷰</td><td>692 · 496 · 1,414 (이탈률 40%)</td></tr>
+		<tr><td>기기</td><td>휴대폰 68% · PC 29% · 태블릿 3%. 휴대폰 가로폭은 360~412가 대부분, 320폭도 37세션</td></tr>
+		<tr><td>들어온 곳 상위</td><td>/matchstick 212 · / 179 · /play 37 · /read/clock-angle 35 · /cubenet 22 · /chosung/과일채소 18</td></tr>
+		<tr><td>데일리 깔때기</td><td>시작 128명 → 답을 하나라도 낸 사람 70명(55%) → 완주 29명(23%)</td></tr>
+		<tr><td>이탈 위치</td><td>1번 문제를 건드리지도 않고 떠남 약 49명. 2번 이후는 한 자리 수</td></tr>
+		<tr><td>본문 중간 띠(오늘 문제 풀기)</td><td>617번 보임 · 18번 눌림(2.9%)</td></tr>
+		<tr><td>맨 아래 버튼(오늘 문제 풀러 가기)</td><td>225번 보임 · 32번 눌림(14.2%)</td></tr>
+		<tr><td>공유 · 문제 보내기</td><td>53번 보임 · 1번 눌림 / 212번 보임 · 1번 눌림</td></tr>
+	</table>
+
+	<h2 id="n2">2. 메인(랜딩) 구조와 디자인</h2>
+	<p>위에서 아래로: ① 히어로(날짜, 「오늘의 10문제 시작하기」, 구성 한 줄) → 광고 → ② 「네 가지가 매일 섞여 나와요」 카드 4장 → 광고 → ③ 「더 풀고 싶다면?」(새로 나왔어요 2칸 + 유형 6칸) → ⑤ 「분야별로 골라 보기」(상식 19칩 + 깊은 링크 6개) → ⑥ 「딸깍은 이런 곳이에요」(소개 두 줄 + 글 3편) → 푸터 13개 링크.</p>
+	<div class="two">
+		<div class="card">
+			<h3 style="margin-top:0">좋은 점</h3>
+			<ul>
+				<li>첫 화면에 할 일이 하나(초록 큰 버튼)라 누구나 알아봅니다.</li>
+				<li>상태에 따라 버튼 문구가 바뀝니다(이어서 풀기, 오늘의 결과 보기, 도전장).</li>
+				<li>메인 랜딩 세션의 60%가 데일리를 시작하고, 체류가 세션당 223초로 가장 깁니다.</li>
+			</ul>
+		</div>
+		<div class="card">
+			<h3 style="margin-top:0">문제</h3>
+			<ul>
+				<li><b>② 카드 4장이 안 눌립니다.</b> 미리보기 그림까지 있는 큰 카드인데 링크가 없습니다. 성냥개비 카드를 누른 사람은 아무 반응을 못 받습니다.</li>
+				<li><b>같은 일을 하는 묶음이 셋입니다.</b> ② 카드(죽음), ③ 유형 6칸, ⑤ 분야 칩. 「유형별로 들어가기」가 세 번 나옵니다.</li>
+				<li><b>목적지가 제각각입니다.</b> ③에서 성냥개비·초성은 유형 홈으로, 발견형·상식·전개도는 무한 연습으로 갑니다. 전개도는 버그로 전체가 열립니다.</li>
+				<li>상식 허브 /trivia와 전개도 허브 /cubenet은 메인에서 바로 닿는 길이 없습니다.</li>
+				<li>⑤의 깊은 링크 6개와 ⑥의 글 3편이 비슷한 일을 합니다.</li>
+			</ul>
+		</div>
+	</div>
+
+	<h2 id="n3">3. 「오늘의 10문제」를 시작했을 때</h2>
+	<p>시작 → 문제(유형 칩 「발견 · 1/3」, 진행 점 10개, 분야 칩, 문제, 입력 또는 보기, 힌트·모르겠어요·확인) → 판정(맞힘/오답 문구, 해설, 친구에게 보내기, 다음) → 10번째 「보너스」 → 결과.</p>
+	<table>
+		<tr><th>무엇</th><th>지금</th><th>개선</th></tr>
+		<tr><td>화면 위치</td><td>문제 카드를 세로 가운데에 둬서 「나가기」 높이가 문제마다 150 → 142 → 185px로 바뀝니다. 넘길 때마다 화면이 위아래로 뜁니다</td><td>위쪽 고정. 헤더 바로 아래에서 시작</td></tr>
+		<tr><td>집중</td><td>푸는 중에도 상단 메뉴와 푸터 링크 13개가 보입니다</td><td>푸는 동안은 「나가기 · 진행 막대」만 남기는 집중 화면</td></tr>
+		<tr><td>진행 표시</td><td>「상식 · 1/2」처럼 유형별 순번이 나와 지금이 10문제 중 몇 번째인지는 막대로만 압니다</td><td>「3 / 10 · 상식」으로 전체 순번을 먼저</td></tr>
+		<tr><td>힌트</td><td>발견형·상식만 힌트가 있고, 데일리의 성냥개비·전개도에는 없습니다(/matchstick에는 있음)</td><td>모든 유형에 힌트 1단계 이상</td></tr>
+		<tr><td>1번 문제</td><td>오늘 1번 1111×1111. 검수 기준 9번(수학 패턴 감상형, ×11 트릭)에 걸리는 유형이고 널리 알려진 문제</td><td>1번 자동 선정에서 「수학 패턴」 chip 제외, 1번 전용 쉬운 문제 풀</td></tr>
+		<tr><td>보너스</td><td>「보너스 · 마지막 문제」와 「마지막 한 문제예요」가 같은 말을 두 번</td><td>하나만</td></tr>
+		<tr><td>결과 화면</td><td>점수, 시간, 유형별 5줄, 알림 카드, 통계 3칸, 주간 잔디, 다시 보기, 공유, 카운트다운, 달력 알림, 연습 권유 · 11가지. 초록 큰 버튼 3개(알림·공유·연습)</td><td>주인공 하나(공유) + 알림 하나 + 다음 놀이 하나. 나머지는 접기</td></tr>
+		<tr><td>알림 두 개</td><td>「내일 아침에 알림 받기」(웹 알림, 8시)와 「매일 아침 알림 받기」(달력 파일, 9시)가 한 화면에 나올 수 있습니다</td><td>하나로. 웹 알림이 안 되는 기기에서만 달력 파일</td></tr>
+		<tr><td>「완주」</td><td>10문제를 전부 「모르겠어요」로 넘겨도 「1분 32초 만에 완주」</td><td>「끝까지 봤어요」 등 사실대로</td></tr>
+		<tr><td>다 푼 뒤</td><td>가장 약한 유형 연습 하나만 권합니다(전개도는 빠짐). 초성·성냥 단계·그림 퍼즐 같은 다른 놀이로 가는 길이 없습니다</td><td>「다른 놀이」 카드 2~3개</td></tr>
+	</table>
+
+	<h2 id="n4">4. 모든 페이지의 진입 경로</h2>
+	<table>
+		<tr><th>페이지</th><th>들어오는 길</th><th>문제</th></tr>
+		<tr><td>/ (메인)</td><td>로고, 헤더 「오늘 문제」, 모든 페이지의 CTA</td><td>같은 곳으로 가는 문구가 7가지 이상(오늘 문제, 오늘의 10문제, 오늘의 딸깍 …). 어떤 링크는 바로 풀이가 시작되고 어떤 링크는 첫 화면에 내림</td></tr>
+		<tr><td>/play 무한 연습</td><td>헤더 「무한 연습」, 푸터 「연습」, 메인 유형 칸, 각 허브의 「무한으로 풀기」</td><td>본문에 오늘 문제·다른 놀이로 가는 길이 없음. 설명 문단에 기본 파란 밑줄 링크(스타일 빠짐)</td></tr>
+		<tr><td>/matchstick</td><td>메인 「성냥개비」 칸·새로 나왔어요, 푸터</td><td>헤더에 없음. 페이지 안 9블록·3,200px</td></tr>
+		<tr><td>/matchstick/picture</td><td>메인 새로 나왔어요, /matchstick</td><td>마지막 문제 뒤 「목록으로」만 있는 막다른 곳</td></tr>
+		<tr><td>/chosung</td><td>헤더, 메인 칸, 푸터</td><td>나가는 길이 거의 안 쓰임(홈 도달 2%)</td></tr>
+		<tr><td>/trivia 상식 허브</td><td>푸터, /guide 안 링크</td><td><b>메인에서 직접 못 감</b>(분야 칩은 /trivia/분야로 바로 감)</td></tr>
+		<tr><td>/cubenet 전개도</td><td>푸터, 글 2편</td><td><b>메인에서 직접 못 감</b>(전개도 칸은 /play로 가고 버그)</td></tr>
+		<tr><td>/discover 발견형 소개</td><td>푸터 「발견형」, 메인 깊은 링크</td><td>푸터 「발견형」은 소개로, 메인 「발견형」은 연습으로</td></tr>
+		<tr><td>/guide 「가이드」</td><td>헤더(메인에서만), 푸터</td><td>이름은 「가이드」인데 내용은 「발견형 푸는 법」</td></tr>
+		<tr><td>/record 내 기록</td><td>결과 화면 잔디, 푸터</td><td>메인 첫 화면에서는 안 보임</td></tr>
+		<tr><td>/archive 지난 문제</td><td>메인 깊은 링크, 푸터</td><td>목록에 오늘 문제로 가는 길 없음</td></tr>
+		<tr><td>/read 읽을거리</td><td>메인, 푸터</td><td>목록에 오늘 문제로 가는 길 없음</td></tr>
+		<tr><td>/today · /q/[id]</td><td>결과 화면 / 친구가 보낸 링크</td><td>의도된 설계</td></tr>
+	</table>
+
+	<h2 id="n5">5. 사람들의 실제 이동 (GA)</h2>
+	<table>
+		<tr><th>들어온 곳</th><th>세션</th><th>한 화면만 보고 끝</th><th>홈까지 감</th><th>다른 유형으로 감</th></tr>
+		<tr><td>/matchstick*</td><td>241</td><td>73% (/matchstick 기준)</td><td>13%</td><td>14%</td></tr>
+		<tr><td>/chosung*</td><td>62</td><td>과일채소 83%</td><td><b>2%</b></td><td>6%</td></tr>
+		<tr><td>/trivia*</td><td>51</td><td>/trivia 36%</td><td>22%</td><td>27%</td></tr>
+		<tr><td>/read/*</td><td>63</td><td>clock-angle 91%</td><td>11%</td><td>16%</td></tr>
+		<tr><td>/play</td><td>37</td><td>86%</td><td>8%</td><td>11%</td></tr>
+	</table>
+	<p>내부 이동 상위: 메인 → /play 45 · /matchstick → 성냥 푸는 법 29 · /matchstick → 메인 27 · 메인 → /chosung 24 · /play → 메인 22. 메인이 허브 역할을 하고, 다른 페이지끼리는 거의 이어지지 않습니다.</p>
+
+	<h2 id="n6">6. UI/UX 문제 목록 (심각도 순)</h2>
+	<table>
+		<tr><th>심각도</th><th>문제</th><th>근거</th><th>고치는 법</th></tr>
+		<tr><td class="sev s1">큼</td><td>메인 「전개도」 칸이 전체 문제를 엶</td><td><code>play/+page.svelte:336</code>이 cube 값을 안 받음</td><td>한 줄 수정</td></tr>
+		<tr><td class="sev s1">큼</td><td>메인 카드 4장이 눌러지는 모양인데 링크 없음</td><td>화면·접근성 트리에서 링크 0개</td><td>유형 홈으로 가는 링크로</td></tr>
+		<tr><td class="sev s1">큼</td><td>상식 허브 견본 20문제의 보기가 버튼 모양인데 안 눌림. 「풀러 가기」는 8,000px 페이지 맨 아래</td><td>스크린샷 12, 링크 21개 중 풀기 버튼은 끝에 1개</td><td>보기를 눌러 바로 맞혀 보게 하거나 버튼 모양을 없앰. 「상식 퀴즈 풀기」를 맨 위로</td></tr>
+		<tr><td class="sev s1">큼</td><td>데일리 1번에서 약 38% 이탈</td><td>시작 128명 중 약 49명이 1번을 안 건드리고 떠남</td><td>1번 전용 쉬운 문제 풀, 패턴 감상형 제외(10/29 판정과 함께)</td></tr>
+		<tr><td class="sev s1">큼</td><td>결과 화면 알림 두 개, 시각도 다름</td><td>웹 알림 8시 / 달력 파일 9시</td><td>하나로</td></tr>
+		<tr><td class="sev s2">중간</td><td>문제마다 화면 시작 위치가 바뀜</td><td>「나가기」 높이 150 / 142 / 185px</td><td>위쪽 고정</td></tr>
+		<tr><td class="sev s2">중간</td><td>이름이 제각각</td><td>연습·무한 연습·전부 섞기·전체 / 가이드=발견형 / 초성퀴즈·초성 퀴즈 / 오늘 문제·오늘의 10문제·오늘의 딸깍</td><td>이름 표 하나로 통일(10절)</td></tr>
+		<tr><td class="sev s2">중간</td><td>같은 이름이 다른 곳으로 감</td><td>「발견형」 메인=연습, 푸터=소개 / 「성냥개비」 결과=연습, 메인=허브</td><td>유형 이름은 항상 그 유형의 홈으로</td></tr>
+		<tr><td class="sev s2">중간</td><td>/matchstick 9블록, 59칸 잠긴 단계판</td><td>스크린샷 10, 3,200px</td><td>모드 고르기 타일 6개 + 단계판은 접어서 「12단계 이어하기」만</td></tr>
+		<tr><td class="sev s2">중간</td><td>그림 퍼즐 그림이 안 읽힘</td><td>강아지가 「ㄱ+ㅓ」처럼 보임, 판 전체에 빈 자리</td><td>그림 다시 그리기, 빈 자리는 성냥 근처만</td></tr>
+		<tr><td class="sev s2">중간</td><td>초성은 섬</td><td>홈 도달 2%</td><td>초성 결과·분야 끝에 다른 놀이 카드</td></tr>
+		<tr><td class="sev s2">중간</td><td>결과 화면 과밀</td><td>11가지, 초록 큰 버튼 3개</td><td>주인공 하나</td></tr>
+		<tr><td class="sev s2">중간</td><td>본문 중간 띠가 거의 안 눌림</td><td>2.9%(맨 아래 버튼은 14.2%)</td><td>띠를 줄이고 맨 아래 버튼 방식으로</td></tr>
+		<tr><td class="sev s2">중간</td><td>공지·새 소식 장치 없음</td><td>코드에 공지 UI 0개</td><td>9절</td></tr>
+		<tr><td class="sev s3">작음</td><td>「완주」 문구가 사실과 다름</td><td>전부 넘겨도 완주</td><td>문구</td></tr>
+		<tr><td class="sev s3">작음</td><td>/play 설명 문단의 파란 밑줄 링크</td><td>스크린샷 9</td><td>스타일</td></tr>
+		<tr><td class="sev s3">작음</td><td>보너스 문구 중복</td><td>스크린샷(보너스)</td><td>하나 지움</td></tr>
+		<tr><td class="sev s3">작음</td><td>글 안 낡은 숫자 「발견형 312문제」</td><td><code>lib/articles.ts:682</code></td><td>상수로</td></tr>
+		<tr><td class="sev s3">작음</td><td>쓰이지 않는 컴포넌트 3개, 맞지 않는 주석</td><td>StatsModal·Logo·SegNumber</td><td>정리</td></tr>
+	</table>
+
+	<h2 id="n7">7. 메인이 복잡해 보이는가</h2>
+	<p><b>첫 화면은 아닙니다. 스크롤을 내리면 그렇습니다.</b> 첫 화면은 버튼 하나로 단순합니다. 그런데 아래로 내려가면 유형으로 들어가는 묶음이 세 번 겹치고(그중 하나는 안 눌림), 칩 19개와 링크 6개, 글 3편이 이어집니다. 휴대폰에서 메인 전체 길이는 약 1,900px입니다. 처음 온 사람이 「여기서 뭘 할 수 있지?」를 한눈에 보기 어렵습니다. 「오늘의 10문제」 말고 무엇이 있는지는 ③까지 내려가야 알 수 있습니다.</p>
+
+	<h2 id="n8">8. 유형별 화면</h2>
+	<ul>
+		<li><b>/play 무한 연습:</b> 필터 5개와 설명 문단, 문제 카드. 들어온 사람의 86%가 이 화면만 보고 끝납니다. 다른 놀이로 가는 길이 없습니다.</li>
+		<li><b>/matchstick:</b> 오늘의 성냥개비, 단계 도전, 그림 퍼즐, 무한·타임어택·개수가 한 줄로 쌓여 있어 고르기 어렵습니다.</li>
+		<li><b>/chosung:</b> 구조가 가장 깔끔합니다(오늘의 초성 → 분야 고르기). 다만 끝나도 다른 곳으로 이어지지 않습니다.</li>
+		<li><b>/trivia:</b> 검색(월 2만)으로 들어오는 상식 사람의 첫 화면인데 「풀기」가 맨 아래에 있습니다. 견본 문제는 읽기만 됩니다.</li>
+		<li><b>유형 홈마다 틀이 다릅니다.</b> 성냥·초성은 「오늘의 1문제 + 모드」, 상식·발견형은 「설명 + 견본 + 분야 목록」, 전개도는 「연습 시작하기 + 설명」입니다.</li>
+	</ul>
+
+	<h2 id="n9">9. 새 메뉴·새 기능 아이디어</h2>
+	<table>
+		<tr><th>아이디어</th><th>무엇</th><th>왜</th><th>크기</th></tr>
+		<tr><td><b>새 소식(공지)</b></td><td>공지 데이터 파일 하나(날짜·제목·한 줄·링크). 메인 맨 위에 한 줄 띠 「새로 나왔어요: 성냥개비 그림 퍼즐 →」(닫으면 안 보임). 재방문자에게 새 공지가 있으면 화면 아래에서 올라오는 작은 시트로 한 번만. 처음 온 사람에게는 띄우지 않음. /news 목록 페이지</td><td>오늘처럼 새 유형을 만들어도 알릴 방법이 없음. 재방문자가 새 놀이를 발견하는 통로</td><td>작음</td></tr>
+		<tr><td><b>상식 대결 모드</b></td><td>같은 10문제를 친구와 풀고 점수 비교, 결과 카드 공유</td><td>공유가 사실상 0. 점수 비교가 가장 강한 공유 동기</td><td>중간 (10/27 뒤)</td></tr>
+		<tr><td><b>「놀이」 허브</b></td><td>모든 놀이를 카드로 한 화면에(오늘의 10문제 · 성냥개비 · 초성 · 상식 · 발견형 · 전개도), 카드마다 「오늘의 1문제」와 진행도</td><td>지금은 놀이가 흩어져 있고 메인에서 못 찾음</td><td>중간</td></tr>
+		<tr><td><b>오늘의 미션</b></td><td>「오늘의 10문제 + 오늘의 성냥 + 오늘의 초성」 세 개를 한 줄 체크로</td><td>하루 1문제 놀이가 셋인데 따로 놂. 하나로 묶으면 재방문 이유가 커짐</td><td>작음</td></tr>
+		<tr><td><b>집중 풀이 화면</b></td><td>푸는 동안 메뉴·푸터 숨김, 위치 고정</td><td>3절</td><td>작음</td></tr>
+		<tr><td><b>하단 탭 막대(휴대폰)</b></td><td>「오늘 · 놀이 · 기록」 세 칸 아이콘 탭</td><td>휴대폰이 68%. 헤더 링크 3개로는 놀이를 다 못 보여 줌</td><td>중간</td></tr>
+		<tr><td>초성 키우기</td><td>분야 추가, 연속 정답 기록, 끝나면 다른 놀이 카드</td><td>소수가 깊게 놀고(4주 573개) 밖으로 안 나감</td><td>중간</td></tr>
+		<tr><td>성냥 그림 퍼즐 손보기</td><td>알아볼 수 있는 그림, 빈 자리 줄이기, 삼각 격자(물고기)</td><td>6절</td><td>중간</td></tr>
+	</table>
+
+	<h2 id="n10">10. 개편안과 순서</h2>
+	<h3>정보 구조: 「오늘 · 놀이 · 기록」</h3>
+	<div class="wire">오늘 (/)            놀이 (/play → 허브로)          기록 (/record)
+├ 오늘의 10문제     ├ 성냥개비  (오늘의 1문제 · 단계 · 그림 · 무한)   ├ 달력·연속
+├ 오늘의 미션 3개   ├ 초성 퀴즈 (오늘의 1문제 · 분야)              ├ 유형별 기록
+└ 새 소식 한 줄     ├ 상식 퀴즈 (분야 · 대결)                     └ 지난 문제
+                    ├ 발견형    (분야 · 무한)
+                    └ 전개도    (무한)
+모든 유형 홈은 같은 틀: [오늘의 1문제] → [계속 풀기] → [도전 모드] → [푸는 법·읽을거리]</div>
+
+	<h3>메인 시안 (휴대폰)</h3>
+	<div class="wire">┌ 딸깍                              오늘 · 놀이 · 기록 ┐
+│ [새로 나왔어요] 성냥개비 그림 퍼즐 →          ✕      │
+│                                                     │
+│   10월 14일 수요일                                  │
+│   매일 두뇌를 깨우는 10분의 딸깍                    │
+│   [ 오늘의 10문제 시작하기 → ]                      │
+│   오늘의 미션  ☐ 10문제  ☐ 오늘의 성냥  ☐ 오늘의 초성 │
+│                                                     │
+│ 놀이 고르기                                         │
+│ [성냥개비 741 · 단계·그림]  [초성 퀴즈 224]          │
+│ [상식 퀴즈 471 · 19분야]    [발견형 373]             │
+│ [전개도 700]                [전부 섞어 풀기]          │
+│                                                     │
+│ 딸깍은 이런 곳이에요 (두 줄) · 읽을거리              │
+└ 푸터 (짧게)                                         ┘</div>
+	<p>바뀌는 점: 안 눌리는 카드 4장과 「더 풀고 싶다면?」 6칸을 「놀이 고르기」 카드 6장 하나로 합칩니다. 카드는 전부 그 유형의 홈으로 갑니다. 분야 칩 19개는 상식 홈 안으로 옮깁니다.</p>
+
+	<h3>이름 표 (통일안)</h3>
+	<table>
+		<tr><th>지금 이름들</th><th>하나로</th></tr>
+		<tr><td>오늘 문제 · 오늘의 10문제 · 오늘의 딸깍</td><td>오늘의 10문제</td></tr>
+		<tr><td>연습 · 무한 연습 · 전부 섞기 · 전체 · 무한으로 풀기</td><td>계속 풀기 (섞어서 계속 풀기)</td></tr>
+		<tr><td>가이드 · 발견형 푸는 법 · 풀이 가이드</td><td>발견형 푸는 법 (유형마다 「○○ 푸는 법」)</td></tr>
+		<tr><td>초성퀴즈 · 상식퀴즈</td><td>초성 퀴즈 · 상식 퀴즈 (띄어 씀)</td></tr>
+		<tr><td>발견 · 발견형 · 발견형 퍼즐</td><td>발견형</td></tr>
+	</table>
+
+	<h3>순서 (추천)</h3>
+	<table>
+		<tr><th>단계</th><th>무엇</th><th>언제</th></tr>
+		<tr><td><span class="tag">0</span> 바로</td><td>전개도 버그 · 안 눌리는 메인 카드 4장을 링크로 · 상식 허브 「풀기」 맨 위로 · 결과 화면 알림 하나로 · 「완주」·보너스 문구 · /play 파란 링크 · 그림 퍼즐 막다른 곳</td><td>오늘~내일. 실험이 아니라 고장이라 판정과 무관</td></tr>
+		<tr><td><span class="tag">1</span> 이번 주</td><td>새 소식 장치 · 집중 풀이 화면(위치 고정) · 이름 통일 · /matchstick 모드 타일 정리 · 그림 퍼즐 그림 다시 그리기 · 초성 끝에 다른 놀이 카드</td><td>10/21 판정 전후</td></tr>
+		<tr><td><span class="tag">2</span> 개편</td><td>「오늘 · 놀이 · 기록」 구조, 메인 재설계, 유형 홈 공통 틀, 휴대폰 하단 탭, 결과 화면 재설계</td><td>시안(로컬 HTML)을 먼저 보여 드리고 확정 뒤 적용. 1번 문제 판정(10/29) 뒤에 적용하면 판정이 섞이지 않음</td></tr>
+		<tr><td><span class="tag">3</span> 새 놀이</td><td>상식 대결 모드 · 오늘의 미션 · 초성 분야 추가 · 삼각 격자 그림 퍼즐</td><td>10/27 상식 판정 뒤</td></tr>
+	</table>
+	<p>판정 일정과의 관계: 개편은 1번 문제(10/29)·성냥 새 놀이(11/4) 판정과 겹칩니다. 판정을 깨끗하게 보려면 2단계 적용을 10/29 뒤로 미루는 게 맞습니다. 다만 사용자가 원하시면 판정보다 개편을 먼저 할 수 있고, 그 경우 개편 전후 비교로 판정을 대신합니다.</p>
+
+	<h2 id="n11">11. 스크린샷 (휴대폰 390×844)</h2>
+	<div class="shots">
+		<figure><img src="img/01-home-first.jpg" alt="" /><figcaption>메인 첫 화면</figcaption></figure>
+		<figure class="tall"><img src="img/02-home-full.jpg" alt="" /><figcaption>메인 전체(카드 4장은 링크 없음)</figcaption></figure>
+		<figure><img src="img/03-daily-q1.jpg" alt="" /><figcaption>1번 문제(1111×1111)</figcaption></figure>
+		<figure><img src="img/04-daily-correct.jpg" alt="" /><figcaption>맞힌 뒤</figcaption></figure>
+		<figure><img src="img/05-daily-q2.jpg" alt="" /><figcaption>상식 문제(「상식 · 1/2」)</figcaption></figure>
+		<figure><img src="img/06-daily-match.jpg" alt="" /><figcaption>성냥 문제(위 여백, 힌트 없음)</figcaption></figure>
+		<figure><img src="img/07-daily-result.jpg" alt="" /><figcaption>보너스(문구 중복)</figcaption></figure>
+		<figure class="tall"><img src="img/08-result-full.jpg" alt="" /><figcaption>결과 화면(알림 두 번, 초록 버튼 셋)</figcaption></figure>
+		<figure><img src="img/09-play.jpg" alt="" /><figcaption>/play(설명 문단, 파란 링크)</figcaption></figure>
+		<figure class="tall"><img src="img/10-matchstick.jpg" alt="" /><figcaption>/matchstick 전체</figcaption></figure>
+		<figure class="tall"><img src="img/11-chosung.jpg" alt="" /><figcaption>/chosung</figcaption></figure>
+		<figure class="tall"><img src="img/12-trivia.jpg" alt="" /><figcaption>/trivia(견본 보기가 안 눌림)</figcaption></figure>
+		<figure><img src="img/13-picture-list.jpg" alt="" /><figcaption>그림 퍼즐 목록</figcaption></figure>
+		<figure><img src="img/14-picture-play.jpg" alt="" /><figcaption>그림 퍼즐(강아지가 안 읽힘)</figcaption></figure>
+	</div>
+
+	<p class="sub" style="margin-top:30px">조사 방법: 실제 사이트를 새 브라우저(기록 없음)로 열어 휴대폰 크기로 처음 온 사람처럼 따라감 · 코드 전수(라우트 22개, 링크 지도) · GA4 Data API(랜딩·내부 이동·이벤트). 표본이 작은 행(10세션 미만)은 한두 세션에 크게 흔들립니다.</p>
+</div>
+</body>
+</html>
