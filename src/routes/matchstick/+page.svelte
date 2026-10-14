@@ -526,6 +526,13 @@
 			</div>
 		</section>
 
+		<!-- 그림 성냥(/matchstick/picture) — 등식이 아닌 격자 그림 문제. 2026-10-14 -->
+		<section class="msec">
+			<h2 class="mh">그림 퍼즐</h2>
+			<p class="mp">성냥을 옮겨 정사각형을 만들고, 강아지를 돌려세우고, ㅁ을 ㄹ로 바꿔요.</p>
+			<a class="big plink" href="/matchstick/picture">그림 퍼즐 풀기 <span class="arr" aria-hidden="true">→</span></a>
+		</section>
+
 		<!-- 처음 온 사람이 푸는 법을 찾을 수 있어야 한다(문장 속 링크는 눈에 안 띈다) -->
 		<a class="gbanner" href="/matchstick/guide">
 			<span class="gb-txt">
@@ -1150,6 +1157,12 @@
 	}
 	.feedback.ok {
 		color: var(--accent-text);
+	}
+	.plink {
+		display: block;
+		box-sizing: border-box;
+		text-align: center;
+		text-decoration: none;
 	}
 	.sgrid {
 		display: grid;
