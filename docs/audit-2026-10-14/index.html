@@ -67,13 +67,13 @@
 	figure.wide img { width: 100%; border-radius: 8px; display: block; }
 	figure.wide figcaption { font-size: 12.5px; color: var(--muted); margin-top: 6px; }
 	td code { white-space: nowrap; }
-	.wrap > table { display: block; overflow-x: auto; }
+	@media (max-width: 720px) { .wrap > table { display: block; overflow-x: auto; } }
 </style>
 </head>
 <body>
 <div class="wrap">
 	<h1>딸깍 구조·디자인 점검 보고서 <span style="font-size:15px;color:var(--muted)">(v2 반영)</span></h1>
-	<p class="sub">2026-10-14 · 같은 날 오전 점검(v1) → 개편(v2) 적용 → 운영 사이트 재점검. 개편 전 원본은 <a href="v1.html">v1.html</a>에 그대로 있습니다.</p>
+	<p class="sub">2026-10-14 · 같은 날 오전 점검(v1) → 개편(v2) 적용 → 운영 사이트 재점검 → 저녁 사용자 지적 반영. 개편 전 원본은 <a href="v1.html">v1.html</a>에 그대로 있습니다.</p>
 
 	<div class="card summary">
 		<h3 style="margin-top:0">요약</h3>
@@ -81,13 +81,14 @@
 			<li>v1 보고서가 지적한 문제는 모두 손댔습니다. 고장 4개(전개도 링크, 안 눌리는 카드, 상식 견본, 알림 중복)는 고쳐졌고 운영에서 확인했습니다.</li>
 			<li>화면 틀을 하나로 맞췄습니다. 안내 화면 22개가 같은 머리를 쓰고, 유형 홈은 모두 「어떻게 풀까요?」로 시작합니다. 상식 홈은 8,745px에서 2,953px로 줄었습니다.</li>
 			<li>「오늘 · 놀이 · 기록」 하단 탭, 놀이 허브, 새 소식, 오늘의 미션, 집중 풀이 화면, 상식 대결을 새로 열었습니다.</li>
-			<li>덜 풀린 것도 있습니다. 결과 화면은 초록 버튼과 알림만 줄었고 항목 수는 여전히 11가지입니다. 1번 문제 이탈은 수학 패턴류 5문제를 1번에서 뺀 것까지만 했습니다.</li>
+			<li>결과 화면은 11가지에서 다섯 덩어리(점수 · 알림 · 공유 · 내 기록 · 다음 놀이)로 줄었습니다. 1번 문제 이탈은 수학 패턴류 5문제를 1번에서 뺀 것까지만 했습니다.</li>
 			<li>재점검에서 운영에 나가 있던 문제 2개를 고쳤습니다. 새 소식이 닫아도 다시 뜨던 버그, 그리고 57개 화면에서 구역 사이 여백이 사라져 카드가 붙고 카드 속 카드가 된 것입니다. 뒤의 것은 사용자가 기록 화면에서 먼저 찾았고, 제 점검은 화면을 보면서도 간격을 재지 않아 놓쳤습니다.</li>
+			<li>저녁에 사용자가 다섯 가지를 더 찾았습니다(구역 붙음 · 시트 ✕와 끌어 닫기 · 닫을 때 깜빡임 · 하단 탭이 아이폰 홈 바에 걸림 · 스플래시 반복). 모두 고쳤고, 같은 일이 되풀이되지 않도록 점검 묶음 <code>npm run qa</code>를 만들어 화면을 바꾸면 통과 전에는 완료 보고를 하지 않기로 했습니다(9절).</li>
 			<li>효과는 아직 숫자로 확인되지 않았습니다. 오늘 배포했고, 10/21부터 11/4까지 판정합니다. 한꺼번에 바꿔서 항목별 효과는 나눠 볼 수 없습니다.</li>
 		</ul>
 	</div>
 
-	<p class="toc"><a href="#c1">1 배포 이력</a> · <a href="#c2">2 지적 사항 대조</a> · <a href="#c3">3 화면 길이</a> · <a href="#c4">4 재점검 결과</a> · <a href="#c5">5 남은 일</a> · <a href="#c6">6 기대 효과·판정</a> · <a href="#c7">7 지금 구조</a> · <a href="#c8">8 스크린샷 비교</a></p>
+	<p class="toc"><a href="#c1">1 배포 이력</a> · <a href="#c2">2 지적 사항 대조</a> · <a href="#c3">3 화면 길이</a> · <a href="#c4">4 재점검 결과</a> · <a href="#c5">5 남은 일</a> · <a href="#c6">6 기대 효과·판정</a> · <a href="#c7">7 지금 구조</a> · <a href="#c8">8 스크린샷 비교</a> · <a href="#c9">9 저녁 지적과 점검 묶음</a></p>
 
 	<h2 id="c1">1. 배포 이력 (모두 2026-10-14, main → Cloudflare Pages)</h2>
 	<table>
@@ -102,6 +103,13 @@
 		<tr><td><code>7a20962</code></td><td>재점검 수정</td><td>새 소식을 닫아도 다음 방문에 다시 뜨던 버그</td></tr>
 		<tr><td><code>ea6c0d4</code></td><td>재점검 수정</td><td>「오늘의 딸깍」 → 「오늘의 10문제」, 낡은 「발견형 312문제」, 안 쓰는 컴포넌트 4개 삭제</td></tr>
 		<tr><td><code>aedae6d</code></td><td>재점검 수정</td><td>구역 사이 여백 26px 복구(57개 화면), 구역은 평평하게 · 초성 홈 · 성냥 홈만 카드</td></tr>
+		<tr><td><code>96b5441</code> <code>bf88ff5</code> <code>9462692</code></td><td>새 기능</td><td>의견 보내기 — 헤더 「의견」 말풍선, 주제 7가지 + 글, KV 저장, 개인정보처리방침 · 아침 보고에 확인 추가</td></tr>
+		<tr><td><code>c8eddae</code></td><td>저녁 지적</td><td>아래 시트 공통 부품(BottomSheet) — 끌어 닫기 · 끌어 올리기 · 뒤로가기 · 스크롤 잠금. 스플래시는 처음 한 번만</td></tr>
+		<tr><td><code>8cd1e26</code></td><td>저녁 지적</td><td>시트 ✕ 없앰, 닫을 때 깜빡임 원인 셋 제거, 하단 탭을 아이폰 홈 바 위로(viewport-fit=cover), 토스트를 탭 위로</td></tr>
+		<tr><td><code>1630fbe</code></td><td>점검 묶음</td><td><code>npm run qa</code> 6종 · <code>docs/qa-checklist.md</code></td></tr>
+		<tr><td><code>2cf02e0</code></td><td>마무리</td><td>새 소식: 시트가 뜨면 위 띠는 숨김, 닫으면 띠 · 종의 점이 바로 사라짐</td></tr>
+		<tr><td><code>132dbfa</code></td><td>마무리</td><td>결과 화면 11가지 → 다섯 덩어리(약 2,000 → 1,449px)</td></tr>
+		<tr><td><code>34dce70</code></td><td>마무리</td><td>안 쓰는 /api/teaser 삭제</td></tr>
 	</table>
 
 	<h2 id="c2">2. v1 지적 사항 → v2</h2>
@@ -112,7 +120,7 @@
 		<tr><td>메인 카드 4장이 눌리는 모양인데 링크 없음</td><td>「놀이 고르기」 카드 6장, 모두 그 유형의 홈으로</td><td><span class="st ok">해결</span></td><td>링크 6개: /matchstick /chosung /trivia /discover /cubenet /play</td></tr>
 		<tr><td>상식 견본 보기가 안 눌림, 「풀기」가 8,000px 아래</td><td>보기를 누르면 정답·해설이 펼쳐짐. 맨 위 「어떻게 풀까요?」 타일에 바로 풀기·대결·분야·오늘의 10문제</td><td><span class="st ok">해결</span></td><td>눌러 봄, 타일 4개</td></tr>
 		<tr><td>결과 화면 알림 두 개(8시·9시)</td><td>웹 알림 카드가 뜨면 달력 파일 알림은 숨김</td><td><span class="st ok">해결</span></td><td>결과 화면 알림 버튼 1개</td></tr>
-		<tr><td>결과 화면 과밀(11가지, 초록 큰 버튼 3개)</td><td>초록 큰 버튼 1개, 정오표 한 줄, 「다음 놀이」. 항목 수는 그대로 11가지 안팎</td><td><span class="st part">부분</span></td><td>스크린샷 8 비교</td></tr>
+		<tr><td>결과 화면 과밀(11가지, 초록 큰 버튼 3개)</td><td>점수 · 정오표 → 알림 → 공유 → 「내 기록」 한 줄(연속 · 누적 · 다음 문제까지 · 다시 보기 · 달력) → 「다음 놀이」(연습 권유 한 줄 포함). 초록 큰 버튼 1개</td><td><span class="st ok">해결</span></td><td>스크린샷 8 비교, 1,449px</td></tr>
 		<tr><td>다 넘겨도 「1분 32초 만에 완주」</td><td>「16초 걸렸어요」</td><td><span class="st ok">해결</span></td><td>10문제 전부 「모르겠어요」로 넘겨 봄</td></tr>
 		<tr><td>보너스 문구 중복</td><td>「10 / 10 · 보너스」 한 번</td><td><span class="st ok">해결</span></td><td>진행 표시 10개 기록</td></tr>
 		<tr><td>문제마다 「나가기」 높이가 150 / 142 / 185px</td><td>위쪽 고정, 10문제 모두 69px</td><td><span class="st ok">해결</span></td><td>실측</td></tr>
@@ -195,12 +203,10 @@
 	<h2 id="c5">5. 남은 일</h2>
 	<table>
 		<tr><th>무엇</th><th>지금</th><th>다음</th></tr>
-		<tr><td>결과 화면 과밀</td><td>초록 버튼 1개·알림 1개로 줄었지만 항목은 점수 · 유형 칩 · 알림 카드 · 통계 3칸 · 주간 잔디 · 다시 보기 · 공유 · 카운트다운 · 오늘의 미션 · 놀이 전체 · 연습 권유로 11가지</td><td>공유를 주인공으로 올리고 통계·잔디·다시 보기를 「내 기록」 한 줄로 접기</td></tr>
-		<tr><td>새 소식이 두 번 보임</td><td>다시 온 사람의 메인에서 위 띠와 시트가 같은 소식을 동시에 보여 줌(스크린샷 20)</td><td>시트가 뜨면 띠는 숨김</td></tr>
 		<tr><td>1번 문제 이탈</td><td>패턴류 5문제만 뺌</td><td>10/29 판정 뒤 1번 전용 쉬운 문제 풀</td></tr>
 		<tr><td>상식 접기와 검색</td><td>접은 글도 페이지에 있지만 구글이 덜 무겁게 볼 수 있음. 10/6부터 상식 검색 실험 중</td><td>10/27에 상식 노출이 떨어지면 접기부터 의심</td></tr>
 		<tr><td>초성 분야 추가 · 삼각 격자 그림 퍼즐</td><td>안 함</td><td>v1 순서대로 10/27·11/4 판정 뒤</td></tr>
-		<tr><td>/api/teaser</td><td>쓰던 띠(DailyBand)를 지워 서버 주소만 남음</td><td>지울지 결정</td></tr>
+		<tr><td>실제 아이폰 · 안드로이드 기기 확인</td><td>크롬 휴대폰 흉내 + 아이폰 엔진(WebKit)으로만 시험</td><td>사용자 기기에서 걸리는 것이 나오면 그 항목을 점검 묶음에 더한다</td></tr>
 	</table>
 
 	<h2 id="c6">6. 기대 효과와 판정</h2>
@@ -243,7 +249,7 @@
 		<div class="pair"><figure><img src="img/05-daily-q2.jpg" alt=""><figcaption>v1 「상식 · 1/2」</figcaption></figure><figure><img src="img/v2-05-daily-q2.jpg" alt=""><figcaption>v2 「2 / 10 · 상식」</figcaption></figure></div>
 		<div class="pair"><figure><img src="img/06-daily-match.jpg" alt=""><figcaption>v1 성냥 — 힌트 없음</figcaption></figure><figure><img src="img/v2-06-daily-match.jpg" alt=""><figcaption>v2 「힌트 보기 (1/2)」</figcaption></figure></div>
 		<div class="pair"><figure><img src="img/07-daily-result.jpg" alt=""><figcaption>v1 결과</figcaption></figure><figure><img src="img/v2-07-daily-result.jpg" alt=""><figcaption>v2 결과 — 「걸렸어요」, 정오표 한 줄</figcaption></figure></div>
-		<div class="pair tall"><figure><img src="img/08-result-full.jpg" alt=""><figcaption>v1 결과 전체 — 알림 두 번, 초록 버튼 셋</figcaption></figure><figure><img src="img/v2-08-result-full.jpg" alt=""><figcaption>v2 알림 하나, 초록 하나, 다음 놀이. 항목 수는 그대로(5절)</figcaption></figure></div>
+		<div class="pair tall"><figure><img src="img/08-result-full.jpg" alt=""><figcaption>v1 결과 전체 — 알림 두 번, 초록 버튼 셋</figcaption></figure><figure><img src="img/v2-08-result-full.jpg" alt=""><figcaption>v2 점수 · 알림 · 공유 · 내 기록 · 다음 놀이(저녁 정리 뒤)</figcaption></figure></div>
 		<div class="pair"><figure><img src="img/09-play.jpg" alt=""><figcaption>v1 /play — 파란 링크</figcaption></figure><figure><img src="img/v2-09-play.jpg" alt=""><figcaption>v2 /play</figcaption></figure></div>
 		<div class="pair tall"><figure><img src="img/10-matchstick.jpg" alt=""><figcaption>v1 /matchstick 9블록</figcaption></figure><figure><img src="img/v2-10-matchstick.jpg" alt=""><figcaption>v2 모드 타일, 단계판 접기</figcaption></figure></div>
 		<div class="pair tall"><figure><img src="img/11-chosung.jpg" alt=""><figcaption>v1 /chosung</figcaption></figure><figure><img src="img/v2-11-chosung.jpg" alt=""><figcaption>v2 공통 머리, 끝에 다른 놀이</figcaption></figure></div>
@@ -258,10 +264,39 @@
 		<figure><img src="img/v2-17-cubenet.jpg" alt=""><figcaption>/cubenet 「어떻게 풀까요?」</figcaption></figure>
 		<figure><img src="img/v2-18-trivia-field.jpg" alt=""><figcaption>상식 분야 — 「바로 풀기」 위로</figcaption></figure>
 		<figure><img src="img/v2-19-news.jpg" alt=""><figcaption>/news 새 소식</figcaption></figure>
-		<figure><img src="img/v2-20-news-sheet.jpg" alt=""><figcaption>다시 온 사람에게 한 번 — 위 띠와 겹침(5절)</figcaption></figure>
+		<figure><img src="img/v2-20-news-sheet.jpg" alt=""><figcaption>다시 온 사람에게 한 번 — 위 띠는 숨김</figcaption></figure>
 		<figure class="tall"><img src="img/v2-22-record.jpg" alt=""><figcaption>/record — 구역 사이 여백 복구 뒤</figcaption></figure>
 	</div>
 	<figure class="wide"><img src="img/v2-21-desktop-trivia.jpg" alt=""><figcaption>넓은 화면(1280) — 헤더에 오늘·놀이·기록</figcaption></figure>
+
+	<h2 id="c9">9. 저녁 지적과 점검 묶음</h2>
+	<p>재점검 뒤에도 사용자가 휴대폰에서 직접 써 보고 아래를 먼저 찾았습니다. 공통 원인은 하나입니다 — 「동작한다」만 시험하고 「사람이 휴대폰으로 써도 괜찮다」는 기준 없이 완료라고 보고했습니다.</p>
+	<table>
+		<tr><th>사용자가 찾은 것</th><th>원인</th><th>고침</th></tr>
+		<tr><td>기록 화면 등 구역이 다닥다닥 붙음</td><td>공통 틀로 옮기며 화면별 .sec 여백 규칙을 지움(57개 화면)</td><td><code>aedae6d</code></td></tr>
+		<tr><td>아래 시트에 ✕, 끌어 닫기 · 올리기 없음, 스르륵 올라오지 않음</td><td>시트마다 CSS 애니메이션 한 줄로 따로 만듦</td><td><code>c8eddae</code> <code>8cd1e26</code> 공통 BottomSheet</td></tr>
+		<tr><td>시트를 닫는 순간 검은 막이 깜빡임(아이폰)</td><td>떼어내는 애니메이션 끝 한 프레임 · 하단 탭 흐림(backdrop-filter) · html overflow 잠금</td><td><code>8cd1e26</code> — WebKit 3회 측정에서 다시 진해지는 프레임 0</td></tr>
+		<tr><td>하단 탭이 아이폰 홈 바에 걸림</td><td>viewport-fit=cover가 없어 홈 바 높이가 늘 0</td><td><code>8cd1e26</code> — 탭 버튼이 바닥에서 40px</td></tr>
+		<tr><td>메인에 돌아올 때마다 스플래시</td><td>레이아웃이 메인에서만 스플래시를 그려 다시 만들어짐</td><td><code>c8eddae</code> — 탭 · 새로고침에서 안 뜸</td></tr>
+	</table>
+	<h3>점검 묶음 — <code>npm run qa</code></h3>
+	<p>위 실수 하나하나가 시험 항목이 됐습니다. 화면을 바꾸면 이것과 <code>docs/qa-checklist.md</code>(눈으로 볼 것)를 통과하기 전에는 완료라고 보고하지 않습니다(저장소 CLAUDE.md 규칙).</p>
+	<table>
+		<tr><th>시험</th><th>무엇</th></tr>
+		<tr><td>sweep</td><td>사이트맵 전 화면 390 · 320px — 콘솔 오류 · 가로 넘침 · 깨진 이미지 · 내부 링크</td></tr>
+		<tr><td>gaps</td><td>상자 사이 간격 실측 — 붙음 · 겹친 여백</td></tr>
+		<tr><td>flow</td><td>흐름 37개 — 데일리 완주 · 결과 · 재방문 · 유형별 · 기록 · 탭</td></tr>
+		<tr><td>sheet</td><td>실제 터치로 시트 끌기 · 튕기기 · 뒤로가기, ✕ 없음, 깜빡임, 홈 바, 스플래시, 새 소식 중복</td></tr>
+		<tr><td>lock</td><td>시트 열린 동안 뒤 화면 스크롤 잠금</td></tr>
+		<tr><td>webkit</td><td>아이폰 엔진 — 깜빡임 · 스플래시 · 아이폰 SE · 13 넘침</td></tr>
+	</table>
+	<h3>그날의 발견형 문제</h3>
+	<p>후보 7개를 만들어 검수에 넘겼고 5개가 반려됐습니다(엑셀 열 번호 — 3초 룰, 연속 세 글자 클럽 — adjacent-letters와 중복, 전자레인지 — hidden-clock-add와 중복, 가위바위보 — 연립식으로 풀림, 자판 위 숫자 — 자판 계열 중복). 통과 1(<code>en-letter-names</code>: XL → EXCEL … AT → EIGHTY)과 조건부 1(<code>en-multitap</code>: CAT → 5 … YES → 9, 예시 ASK · ZOO를 더해 옛 배열 대안을 막음)을 넣었습니다(<code>9605326</code>, 10/15부터 출제). 셋째는 억지로 채우지 않았습니다.</p>
+	<div class="shots">
+		<figure class="tall"><img src="img/v2-08-result-full.jpg" alt=""><figcaption>결과 화면 — 다섯 덩어리</figcaption></figure>
+		<figure><img src="img/v2-23-feedback.jpg" alt=""><figcaption>의견 보내기 — ✕ 없는 시트</figcaption></figure>
+		<figure><img src="img/v2-20-news-sheet.jpg" alt=""><figcaption>새 소식 시트 — 위 띠 숨김</figcaption></figure>
+	</div>
 
 	<p class="sub" style="margin-top:40px">조사 방법: v1은 오전 점검(<a href="v1.html">v1.html</a>). v2는 운영 사이트를 GA·광고·서버 기록을 막은 새 브라우저로 열어 처음 온 사람과 다시 온 사람으로 따라감 · 사이트맵 전수와 링크 지도 · 상자 사이 간격 실측 · 코드 검색 · svelte-check · vitest · 빌드. 숫자 판정은 GA4 한국 기준, 개편 전 4주와 비교.</p>
 </div>
