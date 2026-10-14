@@ -41,6 +41,9 @@
 	import MatchstickBoard, { type PickLoc } from '$lib/components/MatchstickBoard.svelte';
 	import CubeNetFigure from '$lib/components/CubeNetFigure.svelte';
 	import CubeDie from '$lib/components/CubeDie.svelte';
+	import GameCards from '$lib/components/GameCards.svelte';
+	import Missions from '$lib/components/Missions.svelte';
+	import NewsBar from '$lib/components/NewsBar.svelte';
 	import CubeFold from '$lib/components/CubeFold.svelte';
 	import { FACES as CUBE_FACES, type CubeNetProblem } from '$lib/cubenet';
 	import SevenSeg from '$lib/components/SevenSeg.svelte';
@@ -992,6 +995,7 @@
 </svelte:head>
 
 {#if phase === 'home'}
+	<NewsBar />
 	<!-- ① 히어로 -->
 	<section class="hero-card reveal">
 		<div class="mark"><Bulb size={44} /></div>
@@ -1052,117 +1056,22 @@
 		<InstallHint {dayNum} returning={returningVisitor} />
 	</section>
 
+
+	<!-- v2(10/14): ② 「네 가지」 카드(링크 없음) · ③ 「더 풀고 싶다면?」 6칸 · ⑤ 분야 칩 19개가 모두
+	     「유형으로 들어가기」였다. 오늘의 미션 + 놀이 고르기 카드 6장 하나로 합친다. 카드는 어디서 눌러도
+	     그 유형의 홈으로 간다(GameCards). 상식 분야 19개는 상식 홈(/trivia#fields)에 있다. -->
+	<section class="sec reveal d1">
+		<Missions />
+	</section>
+
 	<div class="adwrap reveal d1"><AdSlot label="랜딩 중단" /></div>
 
-	<!-- ② 어떤 문제가 나오나 — 설명이 아니라 실제 생김새로 -->
-	<section class="sec reveal d1">
-		<h2 class="sec-h">네 가지가 매일 섞여 나와요</h2>
-		<div class="kinds">
-			<a class="kind" href="/discover">
-				<div class="kind-vis rule">
-					<div class="rrow"><span>나무</span><em>→</em><b>2</b></div>
-					<div class="rrow"><span>가나다</span><em>→</em><b>1</b></div>
-					<div class="rrow"><span>고구마</span><em>→</em><b class="qm">?</b></div>
-				</div>
-				<b>발견형 {KIND_COUNT.discover}</b>
-				<span>예시 속 규칙을 찾아요. 힌트는 3단계.</span>
-			</a>
-			<a class="kind" href="/trivia">
-				<div class="kind-vis quiz">
-					<span class="mini-badge">A</span><span class="mini-line"></span>
-					<span class="mini-badge on">B</span><span class="mini-line on"></span>
-					<span class="mini-badge">C</span><span class="mini-line"></span>
-				</div>
-				<b>상식 퀴즈 {KIND_COUNT.trivia}</b>
-				<span>19개 분야, 해설과 함께.</span>
-			</a>
-			<a class="kind" href="/matchstick">
-				<div class="kind-vis">
-					<MatchstickBoard board={demoBoard} picked={null} onstick={() => {}} interactive={false} label="8 − 0 = 8" />
-				</div>
-				<b>성냥개비 {KIND_COUNT.match}</b>
-				<span>하나만 옮겨 식을 참으로.</span>
-			</a>
-			<a class="kind" href="/cubenet">
-				<div class="kind-vis"><CubeDie view={[2, 3, 4]} size={58} /></div>
-				<b>전개도 {KIND_COUNT.cube}</b>
-				<span>머릿속으로 접어 주사위 맞히기.</span>
-			</a>
-		</div>
+	<section class="sec reveal d2">
+		<h2 class="sec-h">놀이 고르기</h2>
+		<GameCards counts={KIND_COUNT} />
 	</section>
 
 	<div class="adwrap reveal d2"><AdSlot label="랜딩 하단" /></div>
-
-	<!-- ③ 10문제로 부족한 사람 — 유형별로 바로 들어가게 -->
-	<section class="sec reveal d2">
-		<div class="more">
-			<p class="more-h">더 풀고 싶다면?</p>
-			<p class="more-s">
-				딸깍이 준비한 <b>{TOTAL_PROBLEMS.toLocaleString()}</b>문제! 유형별로 계속 풀어봐요
-			</p>
-			<!-- 10/14에 /matchstick에 단계 도전·그림 퍼즐을 만들었는데 메인에서 닿는 길이 푸터 링크뿐이었다
-			     (사용자 지적). 성냥개비는 검색 입구 1위라 메인에서도 새 놀이를 바로 보여 준다. -->
-			<div class="newbox">
-				<p class="new-h">새로 나왔어요 · 성냥개비</p>
-				<div class="new-grid">
-					<a class="nbtn" href="/matchstick#stages" use:ctaTrack={'new_stage'}>
-						<b>단계 도전</b><span>60단계, 2개 옮기기까지</span>
-					</a>
-					<a class="nbtn" href="/matchstick/picture" use:ctaTrack={'new_pic'}>
-						<b>그림 퍼즐</b><span>정사각형·강아지·한글</span>
-					</a>
-				</div>
-			</div>
-			<div class="more-grid">
-				<a class="mbtn" href="/play?filter=puzzle">
-					<span class="mb-t">발견형</span>
-					<span class="mb-n">{KIND_COUNT.discover}</span>
-				</a>
-				<a class="mbtn" href="/play?filter=trivia">
-					<span class="mb-t">상식</span>
-					<span class="mb-n">{KIND_COUNT.trivia}</span>
-				</a>
-				<!-- 성냥개비는 /play 무한 연습이 아니라 /matchstick으로 — 무한 연습·단계 도전·그림 퍼즐을 거기서 고른다 -->
-				<a class="mbtn" href="/matchstick">
-					<span class="mb-t">성냥개비</span>
-					<span class="mb-n">{KIND_COUNT.match}</span>
-				</a>
-				<a class="mbtn" href="/play?filter=cube">
-					<span class="mb-t">전개도</span>
-					<span class="mb-n">{KIND_COUNT.cube}</span>
-				</a>
-				<!-- 초성은 /play의 유형이 아니라 따로 도는 놀이지만(매일 10문제에도 안 나온다) 고르는
-				     자리는 같아서 격자에 넣는다. 여섯째 칸이 「전부 섞기」라 3×2로 맞는다(9/30) -->
-				<a class="mbtn" href="/chosung">
-					<span class="mb-t">초성 퀴즈</span>
-					<span class="mb-n">{KIND_COUNT.chosung}</span>
-				</a>
-				<a class="mbtn all" href="/play?filter=all">
-					<span class="mb-t">전부 섞기</span>
-					<span class="mb-n">→</span>
-				</a>
-			</div>
-		</div>
-	</section>
-
-	<!-- ⑤ 문제를 눈으로 훑고 싶은 사람 — 푸는 게 아니라 읽는 입구.
-	     분야별 페이지가 푸터 링크 하나로만 닿아 있어서 사람도 크롤러도 못 찾았다. -->
-	<section class="sec reveal d2">
-		<h2 class="sec-h">분야별로 골라 보기<span>정답·해설 포함</span></h2>
-		<div class="catgrid">
-			{#each data.categories as c (c.slug)}
-				<a class="catlink" href="/trivia/{c.slug}">{c.name}<b>{c.count}</b></a>
-			{/each}
-		</div>
-		<div class="deeplinks">
-			<a href="/read">읽을거리</a>
-			<a href="/discover">발견형 퍼즐이란</a>
-			<a href="/matchstick/guide">성냥개비 푸는 법</a>
-			<a href="/cubenet/guide">전개도 푸는 법</a>
-			<a href="/guide">발견형 푸는 법</a>
-			<a href="/archive">지난 문제</a>
-		</div>
-	</section>
 
 	<!-- ⑥ 짧은 소개. 8/24에 애드센스 대응으로 소개 다섯 꼭지(2,216자)와 읽을거리 카드 3편을
 	     「더 풀고 싶다면?」 위에 두었는데, 놀러 온 사람에게는 스크롤만 길었다(9/30 사용자 지적).
@@ -1435,14 +1344,12 @@
 		</p>
 	{/if}
 
+	<!-- v2(10/14): 유형별 정오표 5줄이 결과 화면 한 장을 차지했다 — 한 줄로 -->
 	<div class="rows">
 		{#each resultRows as r (r.label)}
-			<div class="row">
-				<span class="label">{r.label}</span>
-				<span class="frac" class:ok={r.ok === r.total} class:bad={r.ok < r.total}>
-					{r.ok} / {r.total}
-				</span>
-			</div>
+			<span class="row" class:ok={r.ok === r.total}>
+				{r.label} <b>{r.ok}/{r.total}</b>
+			</span>
 		{/each}
 	</div>
 
@@ -1522,7 +1429,7 @@
 			<p class="share-hint">이 줄과 링크만 전달돼요 · 정답은 안 담깁니다</p>
 		{/if}
 	<div class="share-btns" class:copy-first={복사우선}>
-		<button class="sh-btn" class:primary={!복사우선} onclick={shareNative}>
+		<button class="sh-btn" onclick={shareNative}>
 			<svg
 				viewBox="0 0 24 24"
 				fill="none"
@@ -1582,6 +1489,13 @@
 		</button>
 		{/if}
 	</div>
+
+	<!-- v2(10/14): 다 푼 사람이 갈 곳이 약한 유형 연습 하나뿐이었다. 오늘의 성냥·초성과 다른 놀이를 먼저 보인다 -->
+	<section class="nextplay">
+		<h2 class="np-h">다음 놀이</h2>
+		<Missions />
+		<a class="np-all" href="/games">놀이 전체 보기 <span aria-hidden="true">→</span></a>
+	</section>
 
 	<!-- 다음 행동: 가장 약했던 유형의 연습으로 이어준다 -->
 	<div class="nudge">
@@ -1834,245 +1748,13 @@
 		font-weight: 800;
 		margin: 0 0 10px 2px;
 	}
-	.sec-h span {
-		font-size: 12px;
-		font-weight: 600;
-		color: var(--muted-2);
-	}
 	/* 여백은 AdSlot 내부(.ad-slot, dev 전용)가 갖는다 — 프로덕션 빈 공백 방지 */
 	.adwrap {
 		margin: 0;
 	}
 
 	/* ── 유형 소개 ── */
-	/* 2×2 — 한 줄로 늘어놓으면 카드 넷이 홈 길이의 40%를 먹었다(9/30 사용자 지적) */
-	.kinds {
-		display: grid;
-		grid-template-columns: repeat(2, 1fr);
-		gap: 8px;
-	}
-	.kind {
-		text-decoration: none;
-		color: inherit;
-		background: var(--panel);
-		border: 1px solid var(--border-strong);
-		border-radius: 16px;
-		padding: 10px;
-		min-width: 0;
-	}
-	.kind-vis {
-		background: var(--panel-2);
-		border-radius: 12px;
-		padding: 8px;
-		margin-bottom: 8px;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		height: 74px;
-		overflow: hidden;
-	}
-	.kind-vis.rule {
-		flex-direction: column;
-		align-items: stretch;
-		justify-content: center;
-		gap: 2px;
-		padding: 8px 4px;
-	}
-	/* 그리드로 두면 행마다 트랙 높이가 달라져(마지막 행 35px) 물음표 줄만 내려앉는다.
-	   flex + 고정폭·고정높이로 세 줄을 같은 자리에 못박는다. */
-	.rrow {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		gap: 6px;
-		height: 18px;
-		line-height: 18px;
-		font-size: 12.5px;
-		font-weight: 700;
-	}
-	.rrow span {
-		width: 50px;
-		text-align: right;
-		font-size: 12.5px;
-		line-height: 18px;
-		color: var(--text);
-	}
-	.rrow em {
-		width: 12px;
-		text-align: center;
-		font-style: normal;
-		font-size: 12.5px;
-		line-height: 18px;
-		color: var(--muted-2);
-		font-weight: 400;
-	}
-	.rrow b {
-		width: 20px;
-		text-align: left;
-		font-size: 12.5px;
-		line-height: 18px;
-		color: var(--muted);
-	}
-	.rrow b.qm {
-		color: var(--accent-2);
-		font-weight: 800;
-	}
-	.kind-vis.quiz {
-		display: grid;
-		grid-template-columns: auto 1fr;
-		gap: 5px 7px;
-		align-content: center;
-		align-items: center;
-		justify-content: stretch;
-		width: 100%;
-		padding: 8px 12px;
-	}
-	.mini-badge {
-		width: 17px;
-		height: 17px;
-		border-radius: 50%;
-		background: var(--panel);
-		border: 1px solid var(--border-strong);
-		font-size: 11px;
-		font-weight: 800;
-		color: var(--muted);
-		display: flex;
-		align-items: center;
-		justify-content: center;
-	}
-	.mini-badge.on {
-		background: var(--accent);
-		border-color: var(--accent-text);
-		color: #fff;
-	}
-	.mini-line {
-		height: 8px;
-		border-radius: 4px;
-		background: var(--border);
-		align-self: center;
-	}
-	.mini-line.on {
-		background: #bcdcc9;
-	}
-	/* 카드 제목·설명만 겨냥한다. 자손 선택자로 두면 예시 표(.rrow) 안의 b·span까지
-	   먹어 글자 크기와 여백이 뒤틀린다. */
-	.kind > b {
-		display: block;
-		font-size: 14px;
-		margin-bottom: 2px;
-	}
-	.kind > span {
-		display: block;
-		font-size: 12px;
-		color: var(--muted);
-		line-height: 1.55;
-		word-break: keep-all;
-	}
 
-	/* ── 10문제로 부족한 사람 ── */
-	.more {
-		background: var(--panel);
-		border: 1px solid var(--border-strong);
-		border-radius: 18px;
-		padding: 20px 18px;
-		text-align: center;
-	}
-	.more-h {
-		font-size: 17px;
-		font-weight: 800;
-		margin: 0;
-	}
-	.more-s {
-		margin: 6px 0 16px;
-		font-size: 13px;
-		color: var(--muted);
-	}
-	.more-s b {
-		color: var(--accent-text);
-		font-size: 15px;
-		font-variant-numeric: tabular-nums;
-	}
-	.newbox {
-		margin: 0 0 14px;
-		padding: 12px;
-		border-radius: 14px;
-		border: 1.5px solid var(--accent);
-		background: var(--panel);
-	}
-	.new-h {
-		margin: 0 0 10px;
-		font-size: 13px;
-		font-weight: 800;
-		color: var(--accent-text);
-	}
-	.new-grid {
-		display: grid;
-		grid-template-columns: 1fr 1fr;
-		gap: 8px;
-	}
-	.nbtn {
-		display: flex;
-		flex-direction: column;
-		gap: 3px;
-		padding: 12px;
-		border-radius: 12px;
-		background: var(--panel-2);
-		border: 1px solid var(--border);
-		text-decoration: none;
-		color: inherit;
-	}
-	.nbtn b {
-		font-size: 15px;
-		font-weight: 800;
-	}
-	.nbtn span {
-		font-size: 12px;
-		color: var(--muted);
-		word-break: keep-all;
-	}
-	.more-grid {
-		display: grid;
-		grid-template-columns: repeat(3, 1fr);
-		gap: 8px;
-	}
-	.mbtn {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		gap: 3px;
-		padding: 13px 6px;
-		border-radius: 14px;
-		background: var(--panel-2);
-		border: 1px solid var(--border);
-		text-decoration: none;
-		color: inherit;
-		transition:
-			transform var(--dur-tap) var(--ease-out),
-			border-color var(--dur-move) ease;
-	}
-	.mbtn:hover {
-		transform: translateY(-2px);
-		border-color: var(--accent-text);
-	}
-	.mb-t {
-		font-size: 13px;
-		font-weight: 700;
-	}
-	.mb-n {
-		font-size: 17px;
-		font-weight: 800;
-		color: var(--accent-text);
-		font-variant-numeric: tabular-nums;
-	}
-	/* 「전부 섞기」 칸 — 유형 칸과 구분되게 강조색 */
-	.mbtn.all {
-		background: var(--accent);
-		border-color: var(--accent);
-		color: #fff;
-	}
-	.mbtn.all .mb-n {
-		color: #fff;
-	}
 	.intro-p {
 		font-size: 14px;
 		line-height: 1.85;
@@ -2109,50 +1791,6 @@
 		color: var(--accent-text);
 	}
 
-	.catgrid {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 6px;
-	}
-	.catlink {
-		display: inline-flex;
-		align-items: baseline;
-		gap: 5px;
-		padding: 8px 11px;
-		background: var(--panel);
-		border: 1px solid var(--border-strong);
-		border-radius: 9px;
-		font-size: 13px;
-		font-weight: 700;
-		color: var(--text);
-		text-decoration: none;
-	}
-	.catlink:hover {
-		background: var(--panel-2);
-	}
-	.catlink b {
-		font-size: 12px;
-		color: var(--accent-text);
-		font-variant-numeric: tabular-nums;
-	}
-	.deeplinks {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 6px 14px;
-		margin-top: 14px;
-		padding-top: 12px;
-		border-top: 1px solid var(--border);
-	}
-	.deeplinks a {
-		font-size: 13px;
-		font-weight: 600;
-		color: var(--muted);
-		text-decoration: none;
-	}
-	.deeplinks a:hover {
-		color: var(--accent-text);
-		text-decoration: underline;
-	}
 
 	@media (min-width: 768px) {
 		.hero-card {
@@ -2167,9 +1805,6 @@
 		.cta {
 			min-height: 68px;
 			font-size: 19px;
-		}
-		.kinds {
-			gap: 12px;
 		}
 	}
 
@@ -2789,33 +2424,44 @@
 	}
 	.rows {
 		display: flex;
-		flex-direction: column;
-		gap: 8px;
-		margin-top: 20px;
+		flex-wrap: wrap;
+		justify-content: center;
+		gap: 6px;
+		margin-top: 16px;
 	}
 	.row {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
+		font-size: 13px;
+		font-weight: 700;
+		color: var(--muted);
 		background: var(--panel);
 		border: 1px solid var(--border-strong);
-		border-radius: 12px;
-		padding: 11px 14px;
+		border-radius: 9px;
+		padding: 5px 9px;
 	}
-	.row .label {
-		font-size: 14px;
-		font-weight: 700;
-	}
-	.frac {
-		font-size: 14px;
-		font-weight: 800;
+	.row b {
+		color: var(--danger);
 		font-variant-numeric: tabular-nums;
 	}
-	.frac.ok {
+	.row.ok b {
 		color: var(--accent-text);
 	}
-	.frac.bad {
-		color: var(--danger);
+	.nextplay {
+		margin-top: 22px;
+	}
+	.np-h {
+		font-size: 17px;
+		font-weight: 900;
+		margin-bottom: 10px;
+	}
+	.np-all {
+		display: block;
+		margin-top: 10px;
+		text-align: center;
+		font-size: 14px;
+		font-weight: 800;
+		color: var(--accent-text);
+		text-decoration: none;
+		padding: 8px;
 	}
 	/* 기록 3칸 — 연속·누적·어제 대비 */
 	.stats {
@@ -3035,14 +2681,14 @@
 		align-items: center;
 		justify-content: center;
 		gap: 6px;
-		min-height: 54px;
+		min-height: 50px;
 		border-radius: 14px;
-		background: var(--accent);
-		color: #fff;
-		font-size: 15.5px;
+		background: var(--panel);
+		border: 1.5px solid var(--accent);
+		color: var(--accent-text);
+		font-size: 15px;
 		font-weight: 800;
 		text-decoration: none;
-		box-shadow: 0 5px 0 var(--accent-press);
 		transition:
 			transform var(--dur-tap) var(--ease-out),
 			box-shadow var(--dur-tap) var(--ease-out);
