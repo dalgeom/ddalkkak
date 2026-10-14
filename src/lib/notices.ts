@@ -20,6 +20,14 @@ export interface Notice {
 
 export const NOTICES: Notice[] = [
 	{
+		id: '2026-10-14-trivia-duel',
+		date: '2026-10-14',
+		title: '상식 퀴즈 대결',
+		body: '상식 10문제를 풀고 링크를 보내면 친구가 같은 문제로 도전해요. 점수가 같으면 빠른 쪽이 이겨요.',
+		href: '/trivia/duel',
+		cta: '대결 시작하기'
+	},
+	{
 		id: '2026-10-14-v2',
 		date: '2026-10-14',
 		title: '딸깍이 새로워졌어요',

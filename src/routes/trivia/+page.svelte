@@ -39,6 +39,7 @@
 			<div class="fact"><b>4단계</b><span>난이도</span></div>
 		</div>
 		<a class="cta top" href="/play?filter=trivia">상식 퀴즈 풀기 <span aria-hidden="true">→</span></a>
+		<a class="cta ghost duel" href="/trivia/duel">친구와 같은 10문제로 대결하기</a>
 	</header>
 
 	<section class="sec">
@@ -274,6 +275,15 @@
 	}
 	.cta.top {
 		margin-top: 16px;
+	}
+	.cta.ghost {
+		background: var(--panel);
+		color: var(--accent-text);
+		border: 1.5px solid var(--accent);
+		box-shadow: none;
+	}
+	.cta.duel {
+		margin-top: 10px;
 	}
 	.badge {
 		width: 22px;
