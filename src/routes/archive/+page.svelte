@@ -35,14 +35,14 @@
 	<title>지난 문제 — 딸깍 퍼즐</title>
 	<meta
 		name="description"
-		content="놓친 날의 오늘의 딸깍을 날짜별로 다시 볼 수 있어요. 발견형 퍼즐·상식 퀴즈·성냥개비·전개도 10문제의 문제와 정답·해설."
+		content="놓친 날의 10문제를 날짜별로 다시 볼 수 있어요. 발견형 퍼즐·상식 퀴즈·성냥개비·전개도 10문제의 문제와 정답·해설."
 	/>
 	<link rel="canonical" href="https://ddalkkak.app/archive" />
 	<meta property="og:title" content="지난 문제 — 딸깍 퍼즐" />
 	<meta property="og:url" content="https://ddalkkak.app/archive" />
 	<meta
 		property="og:description"
-		content="놓친 날의 오늘의 딸깍을 날짜별로 다시 확인하세요. 문제와 정답·해설."
+		content="놓친 날의 10문제를 날짜별로 다시 확인하세요. 문제와 정답·해설."
 	/>
 </svelte:head>
 
@@ -51,7 +51,7 @@
 		<span class="kicker">지난 문제</span>
 		<h1>놓친 날이 있다면<br /><b>지금 확인해 봐요</b></h1>
 		<p class="lead">
-			지난 {data.days.length}일치 오늘의 딸깍이 그대로 남아 있습니다. 날짜를 골라 그날의 10문제와
+			지난 {data.days.length}일치 문제가 그대로 남아 있습니다. 날짜를 골라 그날의 10문제와
 			정답·해설을 확인해 보세요.
 		</p>
 		{#if doneCount > 0}

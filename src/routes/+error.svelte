@@ -7,7 +7,7 @@
 <svelte:head>
 	<title>{page.status} — 딸깍 퍼즐</title>
 	<meta name="robots" content="noindex" />
-	<meta name="description" content="찾는 페이지가 없어요. 오늘의 딸깍은 매일 자정에 새로 열립니다." />
+	<meta name="description" content="찾는 페이지가 없어요. 오늘의 10문제는 매일 자정에 새로 열립니다." />
 </svelte:head>
 
 <div class="err">
@@ -15,7 +15,7 @@
 	<h1>{is404 ? '여기엔 아직 아무것도 없어요' : '문제가 생겼어요'}</h1>
 	<p>
 		{is404
-			? '찾는 페이지가 없거나, 아직 열리지 않은 날짜예요. 오늘의 딸깍은 매일 자정에 새로 열립니다.'
+			? '찾는 페이지가 없거나, 아직 열리지 않은 날짜예요. 오늘의 10문제는 매일 자정에 새로 열립니다.'
 			: '잠시 후 다시 시도해 주세요. 계속 그러면 새로고침해 보세요.'}
 	</p>
 	<div class="cta-row">

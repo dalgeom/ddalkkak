@@ -55,7 +55,7 @@
 		const ld = {
 			'@context': 'https://schema.org',
 			'@type': 'Quiz',
-			name: `${data.label} 오늘의 딸깍 10문제`,
+			name: `${data.label} 오늘의 10문제`,
 			inLanguage: 'ko',
 			about: { '@type': 'Thing', name: '두뇌 퍼즐·상식 퀴즈' },
 			hasPart: qs.map(({ q, a }) => ({
@@ -78,13 +78,13 @@
 	     사람은 '지난 문제' 링크로만 오므로 페이지 자체는 그대로 둔다. follow는 남겨
 	     여기 걸린 링크는 계속 따라가게 한다. -->
 	<meta name="robots" content="noindex, follow" />
-	<title>{data.label} 오늘의 딸깍 — 지난 문제</title>
+	<title>{data.label} 오늘의 10문제 — 지난 문제</title>
 	<meta
 		name="description"
-		content="{data.label}의 오늘의 딸깍 10문제와 정답·해설. {composition}."
+		content="{data.label}의 10문제와 정답·해설. {composition}."
 	/>
 	<link rel="canonical" href="https://ddalkkak.app/archive/{data.day}" />
-	<meta property="og:title" content="{data.label} 오늘의 딸깍 — 지난 문제" />
+	<meta property="og:title" content="{data.label} 오늘의 10문제 — 지난 문제" />
 	<meta
 		property="og:description"
 		content="{data.label}의 10문제와 정답·해설. {composition}."

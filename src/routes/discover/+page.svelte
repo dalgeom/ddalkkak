@@ -33,7 +33,7 @@
 		</p>
 		<div class="facts">
 			<div class="fact"><b>{data.total}</b><span>발견형 문제</span></div>
-			<div class="fact"><b>매일 3+</b><span>오늘의 딸깍 출제</span></div>
+			<div class="fact"><b>매일 3+</b><span>오늘의 10문제 출제</span></div>
 			<div class="fact"><b>3단계</b><span>막히면 힌트</span></div>
 		</div>
 	</header>
