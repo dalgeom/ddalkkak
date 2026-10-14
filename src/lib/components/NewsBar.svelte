@@ -18,7 +18,8 @@
 	}
 	function close() {
 		if (!n) return;
-		markSeen([n.id]);
+		// ✕는 「그만 보기」 — 지금 새 소식 전부를 본 것으로 둔다. 하나만 두면 닫을 때마다 다음 소식이 또 떴다(10/14 점검)
+		markSeen(freshNotices(Date.now()).map((x) => x.id));
 		track('news_bar_close', { id: n.id });
 		n = null;
 	}

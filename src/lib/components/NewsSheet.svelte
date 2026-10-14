@@ -9,12 +9,16 @@
 	 * 스플래시가 걷힌 뒤에 올라오도록 조금 늦게 연다.
 	 */
 	let list = $state<Notice[]>([]);
+	/** 안 본 새 소식 전부. 시트에는 3개까지만 보이지만, 닫으면 전부 본 것으로 둔다 —
+	    보인 3개만 표시했더니 4번째 때문에 다음 방문에 시트가 또 떴다(10/14 점검) */
+	let unseen: Notice[] = [];
 	let open = $state(false);
 
 	onMount(() => {
 		if (!isReturning()) return;
 		const seen = new Set(loadSeen());
-		list = freshNotices(Date.now()).filter((n) => !seen.has(n.id)).slice(0, 3);
+		unseen = freshNotices(Date.now()).filter((n) => !seen.has(n.id));
+		list = unseen.slice(0, 3);
 		if (!list.length) return;
 		const t = setTimeout(() => {
 			open = true;
@@ -24,11 +28,11 @@
 	});
 
 	function close() {
-		markSeen(list.map((n) => n.id));
+		markSeen(unseen.map((n) => n.id));
 		open = false;
 	}
 	function go(n: Notice) {
-		markSeen(list.map((x) => x.id));
+		markSeen(unseen.map((x) => x.id));
 		track('news_sheet_click', { id: n.id });
 	}
 </script>
