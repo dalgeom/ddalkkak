@@ -72,6 +72,7 @@
 
 <button class="fbtn" aria-label="의견 보내기" onclick={show}>
 	<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 5.5h15a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1h-8l-4.5 3.5v-3.5h-2.5a1 1 0 0 1-1-1v-9a1 1 0 0 1 1-1z" /><path d="M8.5 10.2h7M8.5 13h4.5" /></svg>
+	<span>의견</span>
 </button>
 
 {#if open}
@@ -120,13 +121,18 @@
 {/if}
 
 <style>
+	/* 아이콘만으로는 무엇인지 몰라 글자를 붙인다 */
 	.fbtn {
-		width: 40px;
 		height: 40px;
+		padding: 0 8px;
+		gap: 4px;
 		border-radius: 12px;
 		display: flex;
 		align-items: center;
 		justify-content: center;
+		font-size: 13.5px;
+		font-weight: 800;
+		font-family: inherit;
 		color: var(--muted);
 		background: none;
 		border: none;
