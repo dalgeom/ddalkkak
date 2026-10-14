@@ -6,6 +6,7 @@
 	import InAppGate from '$lib/components/InAppGate.svelte';
 	import { logoClicks, focusMode } from '$lib/nav';
 	import TabBar from '$lib/components/TabBar.svelte';
+	import FeedbackSheet from '$lib/components/FeedbackSheet.svelte';
 	import { freshNotices, loadSeen } from '$lib/notices';
 	import { captureInstallPrompt } from '$lib/pwa';
 	import { page } from '$app/state';
@@ -55,6 +56,7 @@
 		{#if !$focusMode}
 			<div class="hright">
 				<TabBar variant="top" />
+				<FeedbackSheet />
 				<a class="bell" href="/news" aria-label={newsDot ? '새 소식(안 본 소식 있음)' : '새 소식'}>
 					<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 16.5V11a6 6 0 0 1 12 0v5.5l1.5 2h-15z" /><path d="M10 20.5a2.2 2.2 0 0 0 4 0" /></svg>
 					{#if newsDot}<span class="dot"></span>{/if}

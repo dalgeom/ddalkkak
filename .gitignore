@@ -27,3 +27,4 @@ vite.config.ts.timestamp-*
 .claude/worktrees/
 *.stackdump
 scripts/tmp-*.mjs
+scripts/.feedback-seen

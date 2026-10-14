@@ -20,6 +20,14 @@ export interface Notice {
 
 export const NOTICES: Notice[] = [
 	{
+		id: '2026-10-14-feedback',
+		date: '2026-10-14',
+		title: '의견 보내기',
+		body: '재미없던 문제, 너무 어려운 문제, 있었으면 하는 문제나 기능을 화면 위 말풍선으로 보내 주세요. 하나하나 읽어요.',
+		href: '/games?feedback=1',
+		cta: '의견 보내러 가기'
+	},
+	{
 		id: '2026-10-14-trivia-duel',
 		date: '2026-10-14',
 		title: '상식 퀴즈 대결',

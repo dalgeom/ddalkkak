@@ -1,6 +1,6 @@
 <script lang="ts">
 	const CONTACT = 'hyun7219@gmail.com';
-	const UPDATED = '2026년 9월 30일';
+	const UPDATED = '2026년 10월 14일';
 </script>
 
 <svelte:head>
@@ -20,7 +20,8 @@
 		<h1>딸깍은 개인을 식별하는 정보를<br /><b>직접 수집하지 않습니다</b></h1>
 		<p class="lead">
 			회원가입도, 로그인도 없습니다. 푼 기록은 이용자의 브라우저 안에만 남습니다. 서버로 가는
-			것은 문제별 정답률을 내기 위한 익명 숫자, 그리고 알림을 켠 경우의 알림 주소뿐입니다.
+			것은 문제별 정답률을 내기 위한 익명 숫자, 알림을 켠 경우의 알림 주소, 그리고 직접 보낸
+			의견뿐입니다.
 		</p>
 		<p class="updated">최종 수정 · {UPDATED}</p>
 	</header>
@@ -31,6 +32,7 @@
 			<div class="srow ok"><span class="mark">✓</span><b>수집하지 않는 것</b><span class="d">이름 · 이메일 · 전화번호 · 계정 정보</span></div>
 			<div class="srow"><span class="mark">·</span><b>브라우저에만 저장</b><span class="d">푼 문제, 진행 상태, 연속 일수</span></div>
 			<div class="srow"><span class="mark">·</span><b>서버로 가는 것</b><span class="d">문제 번호와 정답 여부 (익명 집계용)</span></div>
+			<div class="srow"><span class="mark">·</span><b>의견을 보낸 경우</b><span class="d">적은 글 · 고른 주제 · 보낸 화면 주소 · 시각 (1년 뒤 삭제)</span></div>
 			<div class="srow"><span class="mark">·</span><b>알림을 켠 경우</b><span class="d">브라우저가 발급한 알림 주소 (언제든 끌 수 있음)</span></div>
 			<div class="srow"><span class="mark">·</span><b>방문 통계</b><span class="d">Google Analytics가 쿠키로 방문 페이지·기기 종류 등을 집계</span></div>
 			<div class="srow"><span class="mark">·</span><b>제3자 쿠키</b><span class="d">광고 게재 시 Google 등이 쿠키·웹 비콘·IP 주소를 사용할 수 있음</span></div>
@@ -60,6 +62,12 @@
 				서버에 저장합니다. 이 값은 그 브라우저로 알림을 보내기 위해서만 쓰이며, 이름이나
 				연락처가 아니고 게임 기록과도 이어 붙이지 않습니다. 알림은 하루 한 번, 새 문제가
 				올라왔을 때만 보냅니다.
+			</p>
+			<p>
+				화면 위 말풍선으로 <b>의견을 보낸 경우</b>에 한해, 이용자가 <b>적은 글과 고른 주제, 보낸 화면의
+				주소, 보낸 시각</b>을 서버에 저장합니다. 이름·연락처·IP 주소는 받지 않으며, 게임 기록이나
+				알림 주소와 이어 붙이지 않습니다. 저장한 의견은 문제와 기능을 고치는 데에만 쓰고, 받은
+				날로부터 1년이 지나면 지웁니다. 글에 이름·연락처 같은 개인정보는 적지 말아 주세요.
 			</p>
 			<p>
 				알림을 끄려면 브라우저 설정에서 이 사이트의 알림 권한을 차단하면 됩니다. 차단된

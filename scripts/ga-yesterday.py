@@ -266,6 +266,8 @@ NEW = [
     ("match_pic_solve", "그림 성냥 풀기"),
     ("match_pic_hint", "그림 성냥 힌트"),
     ("match_pic_reveal", "그림 성냥 정답 봄"),
+    ("feedback_open", "의견 보내기 창 열림(10/14~)"),
+    ("feedback_send", "의견 보냄"),
     ("duel_start", "상식 대결 시작(10/14~)"),
     ("duel_finish", "상식 대결 끝까지"),
     ("duel_share", "상식 대결 링크 보냄"),
