@@ -1,4 +1,5 @@
 <script lang="ts">
+	import OtherGames from '$lib/components/OtherGames.svelte';
 	import { onMount } from 'svelte';
 	import { browser } from '$app/environment';
 	import { page } from '$app/state';
@@ -8,7 +9,6 @@
 	import { CHOSUNG_WORDS, chosungOf, isCorrect, chosungOfDay, categoryBySlug } from '$lib/chosung';
 	import { nextStreak, shownStreak, type DayStreak } from '$lib/dailyStreak';
 	import PushPrompt from '$lib/components/PushPrompt.svelte';
-	import DailyBand from '$lib/components/DailyBand.svelte';
 
 	type Mode = { type: 'today' } | { type: 'free'; cat: string };
 
@@ -226,7 +226,6 @@
 				</div>
 			</section>
 
-			<DailyBand>초성 말고도, 매일 <b>10문제</b>씩 새로 나와요</DailyBand>
 
 			<!-- 검색으로 들어온 사람에게 이 놀이가 뭔지 설명한다. 놀이 흐름을 막지 않도록 아래에 둔다 -->
 			<section class="sec about">
@@ -251,6 +250,7 @@
 					{/each}
 				</div>
 			</section>
+			<OtherGames current="cho" />
 		</div>
 	{:else if cur}
 		<div class="topbar">

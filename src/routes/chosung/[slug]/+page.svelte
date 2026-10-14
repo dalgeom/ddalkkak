@@ -1,6 +1,6 @@
 <script lang="ts">
+	import OtherGames from '$lib/components/OtherGames.svelte';
 	import type { PageData } from './$types';
-	import DailyBand from '$lib/components/DailyBand.svelte';
 
 	let { data }: { data: PageData } = $props();
 
@@ -77,7 +77,6 @@
 		</section>
 	{/if}
 
-	<DailyBand>초성 말고도, 매일 <b>10문제</b>씩 새로 나와요</DailyBand>
 
 	<section class="sec">
 		<h2 class="sh">다른 초성 퀴즈</h2>
@@ -87,6 +86,7 @@
 			{/each}
 		</div>
 	</section>
+	<OtherGames current="cho" />
 </article>
 
 <style>

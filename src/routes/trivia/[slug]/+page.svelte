@@ -1,7 +1,7 @@
 <script lang="ts">
+	import OtherGames from '$lib/components/OtherGames.svelte';
 	import type { PageData } from './$types';
 	import { ctaTrack } from '$lib/analytics';
-	import DailyBand from '$lib/components/DailyBand.svelte';
 
 	let { data }: { data: PageData } = $props();
 
@@ -48,7 +48,6 @@
 
 	<!-- 검색으로 이 페이지에 떨어진 사람은 찾던 답만 읽고 나간다. 26문제와 해설을 다 지나야
 	     데일리로 가는 길이 나오면 늦다 — 목록에 들어가기 전에 한 줄로 알린다. -->
-	<DailyBand>이 문제들, 매일 <b>10문제</b>씩 새로 나와요</DailyBand>
 
 	<section class="sec">
 		<h2 class="sh">{data.category.name}, 이런 데서 틀립니다</h2>
@@ -125,6 +124,7 @@
 			{/each}
 		</div>
 	</section>
+	<OtherGames current="trivia" />
 </article>
 
 <style>

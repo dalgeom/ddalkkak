@@ -1,4 +1,5 @@
 <script lang="ts">
+	import OtherGames from '$lib/components/OtherGames.svelte';
 	import { onMount, tick } from 'svelte';
 	import { browser } from '$app/environment';
 	import { page } from '$app/state';
@@ -596,6 +597,9 @@
 
 	<p class="poolnote">{FILTERS.find((f) => f.key === filter)?.label} {poolSize.toLocaleString()}문제 중에서 무작위로 나와요</p>
 {/if}
+
+<!-- v2(10/14): /play로 들어온 세션의 86%가 이 화면만 보고 끝났다 — 다른 놀이로 이어지는 길 -->
+<OtherGames />
 
 <style>
 	.topbar {

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import OtherGames from '$lib/components/OtherGames.svelte';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
@@ -114,8 +115,8 @@
 
 	<section class="sec ctas">
 		<a class="cta" href="/play?filter=trivia">상식 퀴즈 무한으로 풀기 <span aria-hidden="true">→</span></a>
-		<a class="cta ghost" href="/">오늘의 10문제 풀러 가기</a>
 	</section>
+	<OtherGames current="trivia" />
 </article>
 
 <style>
@@ -393,15 +394,5 @@
 	.cta:active {
 		transform: translateY(2px);
 		box-shadow: 0 3px 0 var(--accent-press);
-	}
-	.cta.ghost {
-		background: var(--panel);
-		color: var(--text);
-		border: 1px solid var(--border-strong);
-		box-shadow: none;
-		font-weight: 700;
-	}
-	.cta.ghost:hover {
-		background: var(--panel-2);
 	}
 </style>

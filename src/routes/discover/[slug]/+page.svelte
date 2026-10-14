@@ -1,8 +1,8 @@
 <script lang="ts">
+	import OtherGames from '$lib/components/OtherGames.svelte';
 	import ProblemView from '$lib/components/ProblemView.svelte';
 	import type { PageData } from './$types';
 	import { ctaTrack } from '$lib/analytics';
-	import DailyBand from '$lib/components/DailyBand.svelte';
 
 	let { data }: { data: PageData } = $props();
 
@@ -34,7 +34,6 @@
 	<!-- 검색으로 이 분야 페이지에 떨어진 사람은 찾던 유형만 읽고 나간다. 데일리로 가는 길이
 	     맨 아래 버튼뿐이면 늦다 — 상식 분야 페이지와 같은 이유로 본문 앞에 한 줄을 세운다.
 	     9/16부터 이 띠에는 오늘 1번 문제의 예시 한 줄이 실린다(DailyBand). -->
-	<DailyBand>이런 규칙 찾기, 매일 <b>10문제</b>씩 새로 나와요</DailyBand>
 
 	<!-- 문제 목록만 늘어놓으면 어디서나 볼 수 있는 규칙 찾기 문제와 구분이 안 된다.
 	     그 분야에서 어디가 막히는지를 먼저 짚어 둔다 — 은행을 실제로 훑어보고 쓴 글이라
@@ -76,7 +75,6 @@
 
 	<section class="sec ctas">
 		<a class="cta" href="/play?filter=puzzle">발견형 무한으로 풀기 <span aria-hidden="true">→</span></a>
-		<a class="cta ghost" href="/" use:ctaTrack={'foot'}>오늘의 10문제 풀러 가기</a>
 	</section>
 
 	<section class="sec">
@@ -88,6 +86,7 @@
 			{/each}
 		</div>
 	</section>
+	<OtherGames current="discover" />
 </article>
 
 <style>
@@ -242,15 +241,5 @@
 	.cta:active {
 		transform: translateY(2px);
 		box-shadow: 0 3px 0 var(--accent-press);
-	}
-	.cta.ghost {
-		background: var(--panel);
-		color: var(--text);
-		border: 1px solid var(--border-strong);
-		box-shadow: none;
-		font-weight: 700;
-	}
-	.cta.ghost:hover {
-		background: var(--panel-2);
 	}
 </style>

@@ -25,7 +25,7 @@
 	import { shareResult as shareCardResult, outcomeMessage } from '$lib/shareCard';
 	import MatchstickBoard, { type PickLoc } from '$lib/components/MatchstickBoard.svelte';
 	import AdSlot from '$lib/components/AdSlot.svelte';
-	import DailyBand from '$lib/components/DailyBand.svelte';
+	import OtherGames from '$lib/components/OtherGames.svelte';
 	import Icon from '$lib/components/Icon.svelte';
 
 	type Mode =
@@ -68,6 +68,11 @@
 	let stageIdx = $state(0);
 	let stageResults = $state<StageResult[]>([]);
 	let nextNo = $derived(nextStage(stageProgress));
+	/** v2(10/14): 메뉴 모드 타일에서 펼친 선택지(타임어택 시간·개수 도전 개수) */
+	let pick = $state<'' | 'time' | 'count'>('');
+	/** 60칸 단계판은 펼칠 때만 — 처음 온 사람에게 59칸 잠긴 판이 화면 한 장을 차지했다 */
+	let showGrid = $state(false);
+	let picSolved = $state(0);
 	let orig = $state<Board | null>(null);
 	let cur = $state<Board | null>(null);
 	/** 정답 공개 시 원래 배치 — 성냥이 집혔다 날아가 안착하는 연출에 쓴다.
@@ -427,6 +432,11 @@
 	onMount(() => {
 		load();
 		stageProgress = loadStages();
+		try {
+			picSolved = JSON.parse(localStorage.getItem('ddal.match.pic') || '[]').length;
+		} catch {
+			picSolved = 0;
+		}
 		day = kstDayNumber(Date.now());
 		track('match_daily_seen', { done: todayDone, streak: dailyStreak });
 		const lv = page.url.searchParams.get('level');
@@ -501,7 +511,42 @@
 			</section>
 		{/if}
 
-		<!-- 단계 도전(matchStages.ts) — 검색으로 온 사람에게 다시 올 이유(목표·진행도)를 준다 -->
+		<!-- v2(10/14): 오늘의 성냥 · 단계 · 그림 · 처음이라면 · 띠 · 무한 · 타임어택 · 개수 · 설명이 세로로 쌓여
+		     3,200px였다. 고르는 것은 타일 6칸 하나로 모으고, 시간·개수 선택지는 누른 타일 아래에만 펼친다. -->
+		<section class="msec">
+			<h2 class="mh">어떻게 풀까요?</h2>
+			<div class="modes">
+				<button class="mode" onclick={() => startStage(nextNo)}>
+					<b>단계 도전</b><span>{Object.keys(stageProgress).length ? `${nextNo}단계 이어하기` : '60단계 · 1단계부터'}</span>
+				</button>
+				<a class="mode" href="/matchstick/picture"><b>그림 퍼즐</b><span>{picSolved ? `${picSolved} / 10 풀었어요` : '정사각형·강아지·한글'}</span></a>
+				<button class="mode" onclick={() => startMode({ type: 'free' })}><b>무한 연습</b><span>제한 없이 계속</span></button>
+				<button class="mode" class:on={pick === 'time'} aria-expanded={pick === 'time'} onclick={() => (pick = pick === 'time' ? '' : 'time')}><b>타임어택</b><span>3 · 5 · 10분</span></button>
+				<button class="mode" class:on={pick === 'count'} aria-expanded={pick === 'count'} onclick={() => (pick = pick === 'count' ? '' : 'count')}><b>개수 도전</b><span>5 · 10 · 20문제</span></button>
+				<a class="mode" href="/matchstick/guide"><b>푸는 법</b><span>한 획 차이 숫자표</span></a>
+			</div>
+			{#if pick === 'time'}
+				<div class="opts">
+					{#each [180, 300, 600] as sec (sec)}
+						<button class="opt" onclick={() => startMode({ type: 'time', seconds: sec })}>
+							<b>{sec / 60}분</b>
+							{#if bests[`time-${sec}`]}<span class="bst">최고 {bests[`time-${sec}`]}</span>{/if}
+						</button>
+					{/each}
+				</div>
+			{:else if pick === 'count'}
+				<div class="opts">
+					{#each [5, 10, 20] as n (n)}
+						<button class="opt" onclick={() => startMode({ type: 'count', total: n })}>
+							<b>{n}문제</b>
+							{#if bests[`count-${n}`]}<span class="bst">최고 {bests[`count-${n}`]}</span>{/if}
+						</button>
+					{/each}
+				</div>
+			{/if}
+		</section>
+
+		<!-- 단계 도전(matchStages.ts) — 메인 「단계 도전」 카드가 #stages로 온다 -->
 		<section class="msec" id="stages">
 			<h2 class="mh">단계 도전</h2>
 			<p class="mp">60단계. 뒤로 갈수록 성냥 2개 옮기기, 빼기, 더하기 문제가 나와요.</p>
@@ -509,73 +554,26 @@
 				{nextNo}단계 {Object.keys(stageProgress).length ? '이어하기' : '시작하기'}
 				<span class="arr" aria-hidden="true">→</span>
 			</button>
-			<div class="sgrid">
-				{#each STAGES as _, i (i)}
-					{@const no = i + 1}
-					{@const st = stageProgress[no] ?? 0}
-					<button
-						class="stile"
-						class:cleared={st > 0}
-						disabled={!isUnlocked(stageProgress, no)}
-						onclick={() => startStage(no)}
-						aria-label={st ? `${no}단계 별 ${st}개` : `${no}단계`}
-					>
-						<b>{no}</b><span>{'★'.repeat(st)}</span>
-					</button>
-				{/each}
-			</div>
-		</section>
-
-		<!-- 그림 성냥(/matchstick/picture) — 등식이 아닌 격자 그림 문제. 2026-10-14 -->
-		<section class="msec">
-			<h2 class="mh">그림 퍼즐</h2>
-			<p class="mp">성냥을 옮겨 정사각형을 만들고, 강아지를 돌려세우고, ㅁ을 ㄹ로 바꿔요.</p>
-			<a class="big plink" href="/matchstick/picture">그림 퍼즐 풀기 <span class="arr" aria-hidden="true">→</span></a>
-		</section>
-
-		<!-- 처음 온 사람이 푸는 법을 찾을 수 있어야 한다(문장 속 링크는 눈에 안 띈다) -->
-		<a class="gbanner" href="/matchstick/guide">
-			<span class="gb-txt">
-				<b>성냥개비가 처음이라면</b>
-				<span>한 획 차이 숫자표로 푸는 법 익히기</span>
-			</span>
-			<span class="gb-go" aria-hidden="true">→</span>
-		</a>
-
-		<DailyBand>성냥개비 말고도, 매일 <b>10문제</b>씩 새로 나와요</DailyBand>
-
-		<section class="msec">
-			<h2 class="mh">무한 연습</h2>
-			<p class="mp">시간·개수 제한 없이 계속 풉니다.</p>
-			<button class="big" onclick={() => startMode({ type: 'free' })}>
-				시작하기 <span class="arr" aria-hidden="true">→</span>
+			<button class="gridtoggle" aria-expanded={showGrid} onclick={() => (showGrid = !showGrid)}>
+				{showGrid ? '단계판 접기' : '60단계 전체 보기'}
 			</button>
-		</section>
-
-		<section class="msec">
-			<h2 class="mh">타임어택</h2>
-			<p class="mp">제한 시간 안에 최대한 많이.</p>
-			<div class="opts">
-				{#each [180, 300, 600] as sec (sec)}
-					<button class="opt" onclick={() => startMode({ type: 'time', seconds: sec })}>
-						<b>{sec / 60}분</b>
-						{#if bests[`time-${sec}`]}<span class="bst">최고 {bests[`time-${sec}`]}</span>{/if}
-					</button>
-				{/each}
-			</div>
-		</section>
-
-		<section class="msec">
-			<h2 class="mh">개수 도전</h2>
-			<p class="mp">시간은 무제한, 정해진 개수를 끝까지.</p>
-			<div class="opts">
-				{#each [5, 10, 20] as n (n)}
-					<button class="opt" onclick={() => startMode({ type: 'count', total: n })}>
-						<b>{n}문제</b>
-						{#if bests[`count-${n}`]}<span class="bst">최고 {bests[`count-${n}`]}</span>{/if}
-					</button>
-				{/each}
-			</div>
+			{#if showGrid}
+				<div class="sgrid">
+					{#each STAGES as _, i (i)}
+						{@const no = i + 1}
+						{@const st = stageProgress[no] ?? 0}
+						<button
+							class="stile"
+							class:cleared={st > 0}
+							disabled={!isUnlocked(stageProgress, no)}
+							onclick={() => startStage(no)}
+							aria-label={st ? `${no}단계 별 ${st}개` : `${no}단계`}
+						>
+							<b>{no}</b><span>{'★'.repeat(st)}</span>
+						</button>
+					{/each}
+				</div>
+			{/if}
 		</section>
 
 		<!-- 검색으로 들어온 사람에게 이 퍼즐이 뭔지 설명한다. 놀이 흐름을 막지 않도록 모드 아래에 둔다. -->
@@ -624,13 +622,7 @@
 			</div>
 		</section>
 
-		<section class="msec">
-			<h2 class="mh">오늘의 딸깍</h2>
-			<p class="mp">
-				매일 자정에 새 10문제가 올라옵니다. 성냥개비뿐 아니라 숫자·한글·도형까지 섞여 나와요.
-			</p>
-			<a class="big" href="/" use:ctaTrack={'foot'}>오늘의 10문제 풀러 가기 <span class="arr" aria-hidden="true">→</span></a>
-		</section>
+		<OtherGames current="match" />
 	</div>
 
 	{:else if screen === 'play'}
@@ -747,7 +739,6 @@
 		<button class="btn wide" onclick={share}>결과 공유 — 친구에게 도전장</button>
 		<button class="btn ghost wide" onclick={() => startMode(mode)}>다시 하기</button>
 		<button class="btn ghost wide" onclick={toMenu}>모드 선택으로</button>
-		<DailyBand>오늘은 성냥개비 말고 <b>10문제</b>도 나와 있어요</DailyBand>
 		<AdSlot label="모드 결과" />
 	</div>
 {/if}
@@ -841,45 +832,6 @@
 		line-height: 1.7;
 		word-break: keep-all;
 	}
-	/* 풀이 가이드 배너 — 모드 카드와 구분되게 왼쪽 강조선 + 연한 바탕 */
-	.gbanner {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		gap: 12px;
-		background: var(--panel-2);
-		border: 1px solid var(--border);
-		border-left: 3px solid var(--accent);
-		border-radius: 14px;
-		padding: 13px 15px;
-		text-decoration: none;
-		color: inherit;
-		transition:
-			transform var(--dur-tap) var(--ease-out),
-			border-color var(--dur-move) ease;
-	}
-	.gbanner:hover {
-		transform: translateY(-2px);
-		border-color: var(--accent-text);
-	}
-	.gb-txt b {
-		display: block;
-		font-size: 14.5px;
-		font-weight: 800;
-		margin-bottom: 2px;
-	}
-	.gb-txt > span {
-		font-size: 12.5px;
-		color: var(--muted);
-		line-height: 1.55;
-		word-break: keep-all;
-	}
-	.gb-go {
-		flex: none;
-		font-size: 17px;
-		font-weight: 800;
-		color: var(--accent-text);
-	}
 	.mstats {
 		display: grid;
 		grid-template-columns: repeat(3, 1fr);
@@ -969,14 +921,6 @@
 		font-size: 14.5px;
 		font-weight: 800;
 		word-break: keep-all;
-	}
-	/* .big과 .btn은 button에 맞춰 놨다. a에 그대로 입히면 폭이 안 차고 밑줄이 남는다 */
-	a.big,
-	a.btn {
-		display: block;
-		box-sizing: border-box;
-		text-align: center;
-		text-decoration: none;
 	}
 	.kinds {
 		display: flex;
@@ -1158,11 +1102,55 @@
 	.feedback.ok {
 		color: var(--accent-text);
 	}
-	.plink {
-		display: block;
-		box-sizing: border-box;
-		text-align: center;
+	.modes {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 8px;
+	}
+	.mode {
+		display: flex;
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 2px;
+		padding: 13px 14px;
+		border-radius: 14px;
+		background: var(--panel-2);
+		border: 1.5px solid var(--border);
+		color: var(--text);
+		text-align: left;
 		text-decoration: none;
+		font-family: inherit;
+		cursor: pointer;
+	}
+	.mode b {
+		font-size: 15.5px;
+		font-weight: 900;
+	}
+	.mode span {
+		font-size: 12.5px;
+		font-weight: 600;
+		color: var(--muted);
+	}
+	.mode.on {
+		border-color: var(--accent);
+		background: var(--panel);
+	}
+	.modes + .opts {
+		margin-top: 10px;
+	}
+	.gridtoggle {
+		display: block;
+		width: 100%;
+		margin-top: 10px;
+		padding: 11px;
+		border-radius: 12px;
+		border: 1px solid var(--border);
+		background: transparent;
+		color: var(--muted);
+		font-size: 13.5px;
+		font-weight: 700;
+		font-family: inherit;
+		cursor: pointer;
 	}
 	.sgrid {
 		display: grid;

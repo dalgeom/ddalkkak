@@ -1,4 +1,5 @@
 <script lang="ts">
+	import OtherGames from '$lib/components/OtherGames.svelte';
 	import ExampleList from '$lib/components/ExampleList.svelte';
 	import type { PageData } from './$types';
 
@@ -102,9 +103,9 @@
 	</section>
 
 	<section class="sec ctas">
-		<a class="cta" href="/">오늘의 10문제 풀러 가기 <span aria-hidden="true">→</span></a>
 		<a class="cta ghost" href="/play?filter=puzzle">발견형만 무한 연습하기</a>
 	</section>
+	<OtherGames current="discover" />
 </article>
 
 <style>
