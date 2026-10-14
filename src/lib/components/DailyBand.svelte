@@ -47,7 +47,7 @@
 	{:else}
 		<span class="t">{@render children()}</span>
 	{/if}
-	<span class="go">오늘 문제 풀기 →</span>
+	<span class="go">오늘의 10문제 풀기 →</span>
 </a>
 
 <style>

@@ -78,7 +78,7 @@
 		</div>
 	</section>
 
-	<section class="sec">
+	<section class="sec" id="fields">
 		<h2 class="sh">{data.categories.length}개 분야, 골라 푸는 재미</h2>
 		<p class="sub">
 			분야를 누르면 그 분야 문제 전체를 정답·해설과 함께 볼 수 있습니다. 직접 풀고 싶다면 무한

@@ -100,7 +100,7 @@
 		</div>
 		<p class="note">
 			매일 10문제와 따로 즐기는 <a href="/chosung">초성 퀴즈</a>도 있어요. 발견형 푸는 법은
-			<a href="/guide">풀이 가이드</a>에 단계별로 정리해 두었어요.
+			<a href="/guide">발견형 푸는 법</a>에 단계별로 정리해 두었어요.
 		</p>
 	</section>
 
@@ -185,7 +185,7 @@
 		<h2 class="sh">문의</h2>
 		<p class="sub">문제 제보·오류 신고·제휴 문의를 환영해요.</p>
 		<a class="mail" href="mailto:{CONTACT}">{CONTACT}</a>
-		<a class="cta" href="/">오늘의 10문제 풀어보기 <span class="arr" aria-hidden="true">→</span></a>
+		<a class="cta" href="/">오늘의 10문제 풀러 가기 <span class="arr" aria-hidden="true">→</span></a>
 	</section>
 </article>
 

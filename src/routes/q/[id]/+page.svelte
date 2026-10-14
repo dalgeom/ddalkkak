@@ -200,7 +200,7 @@
 <section class="next" class:big={judged}>
 	<p class="next-copy">딸깍은 이런 문제를 하루 10개 내요. 규칙을 찾는 문제와 상식, 성냥개비, 전개도가 섞여 나와요.</p>
 	<a class="btn-primary link" href="/" onclick={() => track('q_to_daily', { id: p.id, judged: judged ? 1 : 0 })}
-		>오늘의 10문제 풀기</a
+		>오늘의 10문제 풀러 가기</a
 	>
 	{#if judged}
 		<a class="more" href="/play" onclick={() => track('q_to_play', { id: p.id })}>이런 문제 더 풀기 (무한 연습)</a>

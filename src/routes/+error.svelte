@@ -19,7 +19,7 @@
 			: '잠시 후 다시 시도해 주세요. 계속 그러면 새로고침해 보세요.'}
 	</p>
 	<div class="cta-row">
-		<a class="cta" href="/">오늘의 딸깍 풀러 가기 →</a>
+		<a class="cta" href="/">오늘의 10문제 풀러 가기 →</a>
 		{#if is404}
 			<a class="cta ghost" href="/archive">지난 문제 보기</a>
 		{/if}

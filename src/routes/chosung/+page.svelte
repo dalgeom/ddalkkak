@@ -211,7 +211,7 @@
 				</section>
 			{/if}
 
-			<section class="sec">
+			<section class="sec" id="fields">
 				<h2 class="mh">분야 골라 풀기</h2>
 				<p class="mp">시간 제한 없이 계속 나옵니다. 푼 낱말은 한 바퀴 돌 때까지 다시 안 나와요.</p>
 				<div class="cats">

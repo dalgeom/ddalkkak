@@ -248,7 +248,7 @@
 
 	<section class="sec ctas">
 		<a class="cta" href="/cubenet">전개도 문제 풀러 가기 <span aria-hidden="true">→</span></a>
-		<a class="cta ghost" href="/" use:ctaTrack={'foot'}>오늘의 딸깍 풀러 가기</a>
+		<a class="cta ghost" href="/" use:ctaTrack={'foot'}>오늘의 10문제 풀러 가기</a>
 	</section>
 </article>
 

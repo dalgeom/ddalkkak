@@ -46,7 +46,7 @@
 	</div>
 {:else if phase === 'ready' && view}
 	<nav class="crumb">
-		<a href="/">← 오늘의 딸깍</a>
+		<a href="/">← 오늘의 10문제</a>
 	</nav>
 	<h1>{label}</h1>
 	<div class="mymarks" aria-label="내 결과">

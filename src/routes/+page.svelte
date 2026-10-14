@@ -35,7 +35,7 @@
 	import { isOpener } from '$lib/opener';
 	import { weekOf, readDayRecord } from '$lib/record';
 	import { bankSizesAt } from '$lib/bankHistory';
-	import { logoClicks } from '$lib/nav';
+	import { logoClicks, focusMode } from '$lib/nav';
 	import { track } from '$lib/analytics';
 	import { parseEq, cloneBoard, isSolved, bit, type Board } from '$lib/matchstick';
 	import MatchstickBoard, { type PickLoc } from '$lib/components/MatchstickBoard.svelte';
@@ -74,6 +74,11 @@
 
 	type Phase = 'home' | 'play' | 'done';
 	let phase = $state<Phase>('home');
+	// v2(10/14): 푸는 동안은 레이아웃이 메뉴·탭·푸터를 접는다(nav.ts focusMode)
+	$effect(() => {
+		focusMode.set(phase === 'play');
+		return () => focusMode.set(false);
+	});
 	let loading = $state(false);
 
 	/** 세션에 올라가는 한 문제. 성냥개비는 등식 한 쌍, 전개도는 그림 문제라 Problem이 아니다. */

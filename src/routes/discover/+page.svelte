@@ -98,7 +98,7 @@
 			<div class="rule"><b>답이 하나로 유일해야 한다</b><span>다른 규칙으로도 말이 되면 문제가 아니라 논쟁입니다.</span></div>
 			<div class="rule"><b>발견의 쾌감이 있어야 한다</b><span>규칙을 알아낸 순간 "아!" 소리가 나야 채택합니다.</span></div>
 		</div>
-		<p class="note">더 자세한 풀이 요령은 <a href="/guide">발견형 풀이 가이드</a>에 정리해 두었습니다.</p>
+		<p class="note">더 자세한 풀이 요령은 <a href="/guide">발견형 푸는 법</a>에 정리해 두었습니다.</p>
 	</section>
 
 	<section class="sec ctas">

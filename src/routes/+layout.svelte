@@ -3,12 +3,22 @@
 	import AdSlot from '$lib/components/AdSlot.svelte';
 	import Splash from '$lib/components/Splash.svelte';
 	import InAppGate from '$lib/components/InAppGate.svelte';
-	import { logoClicks } from '$lib/nav';
+	import { logoClicks, focusMode } from '$lib/nav';
+	import TabBar from '$lib/components/TabBar.svelte';
+	import NewsSheet from '$lib/components/NewsSheet.svelte';
+	import { freshNotices, loadSeen } from '$lib/notices';
 	import { captureInstallPrompt } from '$lib/pwa';
 	import { page } from '$app/state';
 
 	let { children, data } = $props();
 	const year = new Date().getFullYear();
+	/** 안 본 새 소식이 있으면 헤더 종에 점 */
+	let newsDot = $state(false);
+	// 다른 화면으로 옮기면 집중 화면은 끝난다(랜딩이 다시 켠다)
+	$effect(() => {
+		page.url.pathname;
+		if (page.url.pathname !== '/') focusMode.set(false);
+	});
 
 	// 구주소(pages.dev) 접속을 커스텀 도메인으로 보낸다.
 	// 동적 라우트는 hooks.server.ts가 301로 처리하지만, 프리렌더된 정적 페이지는
@@ -21,6 +31,8 @@
 		// 설치 가능 이벤트는 한 번만 오고 다시 안 온다 — 앱 시작 시 붙잡아 뒀다가
 		// 10문제를 끝낸 순간에 쓴다(InstallPrompt).
 		captureInstallPrompt();
+		const seen = new Set(loadSeen());
+		newsDot = freshNotices(Date.now()).some((n) => !seen.has(n.id));
 	});
 </script>
 
@@ -31,71 +43,54 @@
 	<Splash />
 {/if}
 <InAppGate />
+{#if page.url.pathname === '/' && !$focusMode}
+	<NewsSheet />
+{/if}
 
-<div class="wrap">
+<div class="wrap" class:focus={$focusMode}>
 	<header>
 		<a class="logo" href="/" onclick={() => logoClicks.update((n) => n + 1)}>
 			<span class="bulb" aria-hidden="true"></span>
 			<span class="name">딸깍</span>
 		</a>
-		<!-- "연습"만으로는 뭘 하는 곳인지 안 읽힌다. 원하는 만큼 계속 풀 수 있다는 걸 이름으로 알린다.
-		     검색으로 들어온 사람은 상식·성냥개비 같은 낱개 페이지에 떨어진다(3주차 유입의 20%).
-		     그 화면에는 데일리로 가는 길이 맨 아래 CTA뿐이라 대부분 읽고 나갔다 — 방문 대비
-		     시작이 60%에서 26%로 떨어진 게 이것 때문이다. 그래서 홈이 아닐 때는 데일리를
-		     맨 앞에 세운다. 폭이 늘지 않게 가이드는 그때 접는다(푸터에 그대로 있다). -->
-		<nav>
-			{#if page.url.pathname !== '/'}
-				<a class="daily" href="/">오늘 문제</a>
-				<span class="sep" aria-hidden="true"></span>
-			{/if}
-			<a href="/play">무한 연습</a>
-			<!-- 초성 퀴즈는 매일 10문제에 안 나오는 별도 놀이라 헤더 말고는 들어갈 길이 없다(9/29) -->
-			<span class="sep" aria-hidden="true"></span>
-			<a href="/chosung">초성 퀴즈</a>
-			{#if page.url.pathname === '/'}
-				<span class="sep" aria-hidden="true"></span>
-				<a href="/guide">가이드</a>
-			{/if}
-		</nav>
+		<!-- v2(10/14): 오늘 · 놀이 · 기록. 휴대폰은 화면 아래 탭(TabBar), 넓은 화면은 여기 헤더에 같은 셋을 둔다.
+		     예전 헤더(무한 연습 · 초성 퀴즈 · 가이드)로는 성냥 새 놀이·상식·전개도가 안 보였다. -->
+		{#if !$focusMode}
+			<div class="hright">
+				<TabBar variant="top" />
+				<a class="bell" href="/news" aria-label={newsDot ? '새 소식(안 본 소식 있음)' : '새 소식'}>
+					<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 16.5V11a6 6 0 0 1 12 0v5.5l1.5 2h-15z" /><path d="M10 20.5a2.2 2.2 0 0 0 4 0" /></svg>
+					{#if newsDot}<span class="dot"></span>{/if}
+				</a>
+			</div>
+		{/if}
 	</header>
 
 	<main class="page">
 		{@render children()}
 	</main>
 
-	<div class="bottom-ad"><AdSlot label="하단 배너" /></div>
+	{#if !$focusMode}
+		<div class="bottom-ad"><AdSlot label="하단 배너" /></div>
 
-	<footer>
-		<nav class="flinks">
-			<a href="/guide">가이드</a>
-			<span aria-hidden="true">·</span>
-			<a href="/read">읽을거리</a>
-			<span aria-hidden="true">·</span>
-			<a href="/play">연습</a>
-			<span aria-hidden="true">·</span>
-			<a href="/discover">발견형</a>
-			<span aria-hidden="true">·</span>
-			<a href="/trivia">상식퀴즈</a>
-			<span aria-hidden="true">·</span>
-			<a href="/matchstick">성냥개비</a>
-			<span aria-hidden="true">·</span>
-			<a href="/cubenet">전개도</a>
-			<span aria-hidden="true">·</span>
-			<a href="/chosung">초성퀴즈</a>
-			<span aria-hidden="true">·</span>
-			<a href="/about">소개</a>
-			<span aria-hidden="true">·</span>
-			<a href="/record">내 기록</a>
-			<span aria-hidden="true">·</span>
-			<a href="/archive">지난 문제</a>
-			<span aria-hidden="true">·</span>
-			<a href="/terms">이용약관</a>
-			<span aria-hidden="true">·</span>
-			<a href="/privacy">개인정보</a>
-		</nav>
-		<p class="copy">© {year} 딸깍 · 문제 {data.totalProblems.toLocaleString()}개</p>
-	</footer>
+		<!-- v2(10/14): 링크 13개가 한 줄로 이어져 있던 것을 놀이 · 읽을거리 · 사이트 세 줄로 묶는다 -->
+		<footer>
+			<nav class="flinks" aria-label="놀이">
+				<a href="/matchstick">성냥개비</a><a href="/chosung">초성 퀴즈</a><a href="/trivia">상식 퀴즈</a><a href="/discover">발견형</a><a href="/cubenet">전개도</a><a href="/play">무한 연습</a>
+			</nav>
+			<nav class="flinks" aria-label="읽을거리">
+				<a href="/read">읽을거리</a><a href="/guide">발견형 푸는 법</a><a href="/matchstick/guide">성냥개비 푸는 법</a><a href="/cubenet/guide">전개도 푸는 법</a><a href="/archive">지난 문제</a><a href="/news">새 소식</a>
+			</nav>
+			<nav class="flinks" aria-label="사이트">
+				<a href="/about">소개</a><a href="/record">내 기록</a><a href="/terms">이용약관</a><a href="/privacy">개인정보</a>
+			</nav>
+			<p class="copy">© {year} 딸깍 · 문제 {data.totalProblems.toLocaleString()}개</p>
+		</footer>
+	{/if}
 </div>
+{#if !$focusMode}
+	<TabBar />
+{/if}
 
 <style>
 	:global(:root) {
@@ -262,29 +257,39 @@
 		font-size: 19px;
 		font-weight: 800;
 	}
-	header nav {
+	.hright {
 		display: flex;
 		align-items: center;
-		gap: 11px;
-		font-size: 13px;
-		font-weight: 600;
+		gap: 6px;
 	}
-	header nav .sep {
-		width: 1px;
-		height: 12px;
-		background: var(--border-strong);
-	}
-	header nav a {
+	.bell {
+		position: relative;
+		width: 40px;
+		height: 40px;
+		border-radius: 12px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
 		color: var(--muted);
-		text-decoration: none;
 	}
-	header nav a:hover {
-		color: var(--text);
+	.bell svg {
+		width: 22px;
+		height: 22px;
+		fill: none;
+		stroke: currentColor;
+		stroke-width: 1.8;
+		stroke-linecap: round;
+		stroke-linejoin: round;
 	}
-	/* 데일리는 이 사이트의 본체다. 다른 메뉴와 같은 무게로 두면 검색으로 온 사람이 지나친다 */
-	header nav a.daily {
-		color: var(--accent-text);
-		font-weight: 800;
+	.bell .dot {
+		position: absolute;
+		top: 8px;
+		right: 9px;
+		width: 8px;
+		height: 8px;
+		border-radius: 50%;
+		background: var(--accent-2);
+		border: 2px solid var(--bg);
 	}
 
 	.page {
@@ -292,14 +297,18 @@
 		display: flex;
 		flex-direction: column;
 	}
-	/* 콘텐츠를 화면 세로 중앙에 세운다. 위에 붙여두면 아래가 통째로 비어
-	   버려진 페이지처럼 보인다(모바일·데스크톱 공통).
-	   화면이 낮으면(가로모드 등) 중앙 정렬이 오히려 답답해서 높이 가드를 둔다.
-	   콘텐츠가 길어지면 flex가 알아서 늘어나므로 잘리지 않는다. */
-	@media (min-height: 620px) {
-		.page {
-			justify-content: center;
-			padding-bottom: 20px;
+	/* v2(10/14): 세로 가운데 정렬을 걷었다. 콘텐츠 높이가 바뀔 때마다 시작 위치가 달라져
+	   데일리 문제를 넘길 때마다 화면이 위아래로 뛰었다(「나가기」 높이 150 → 142 → 185px). */
+	.page {
+		padding-bottom: 20px;
+	}
+	/* 휴대폰 — 하단 탭(약 62px + 안전 영역)에 마지막 줄이 가리지 않게 */
+	@media (max-width: 767px) {
+		.wrap {
+			padding-bottom: calc(70px + env(safe-area-inset-bottom));
+		}
+		.wrap.focus {
+			padding-bottom: 0;
 		}
 	}
 	/* 넓은 화면에서 480px은 허전하다. 열을 조금 넓혀 카드가 화면을 감당하게 한다. */
@@ -320,16 +329,20 @@
 
 	footer {
 		margin-top: 22px;
-		padding-bottom: 26px;
+		padding: 16px 0 26px;
 		text-align: center;
+		border-top: 1px solid var(--border);
+		display: flex;
+		flex-direction: column;
+		gap: 6px;
 	}
 	.flinks {
 		display: flex;
 		flex-wrap: wrap;
 		justify-content: center;
 		align-items: center;
-		gap: 6px;
-		font-size: 11.5px;
+		gap: 4px 12px;
+		font-size: 12px;
 		color: var(--muted-2);
 	}
 	.flinks a {

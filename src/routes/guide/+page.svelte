@@ -125,7 +125,7 @@
 <article>
 	<!-- 표지 -->
 	<header class="cover">
-		<span class="kicker">풀이 가이드</span>
+		<span class="kicker">발견형 푸는 법</span>
 		<h1>규칙을 알려주지 않는 퍼즐,<br /><b>어떻게 풀까?</b></h1>
 		<p class="lead">
 			발견형 퍼즐은 예시 몇 개만 주고, 그 안에 숨은 규칙을 스스로 찾아 물음표를 채우는 문제입니다.
@@ -233,7 +233,7 @@
 		<p class="sub">
 			발견형·상식·성냥개비·전개도를 섞은 10문제가 매일 새로 열리고, 그날은 모두가 같은 문제를 풉니다.
 		</p>
-		<a class="cta" href="/">오늘의 10문제 풀어보기 <span class="arr" aria-hidden="true">→</span></a>
+		<a class="cta" href="/">오늘의 10문제 풀러 가기 <span class="arr" aria-hidden="true">→</span></a>
 	</section>
 </article>
 

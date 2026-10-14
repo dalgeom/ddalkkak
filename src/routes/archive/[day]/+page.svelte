@@ -103,7 +103,7 @@
 <div class="mid-ad"><AdSlot label="지난 문제" /></div>
 
 <a class="today-cta" href="/">
-	<span><Icon name="arrow" size={15} /> 오늘의 딸깍 풀러 가기</span>
+	<span><Icon name="arrow" size={15} /> 오늘의 10문제 풀러 가기</span>
 </a>
 
 <style>
