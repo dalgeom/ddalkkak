@@ -113,6 +113,29 @@ export function isSolved(orig: Board, cur: Board): boolean {
 	return removed === 1 && added === 1 && isTrue(cur);
 }
 
+/** 단계 모드의 문제 규칙(2026-10-14). 기존 741개는 전부 move1이다 */
+export type MatchRule = 'move1' | 'move2' | 'remove1' | 'add1';
+
+/** 규칙마다 끝났을 때의 뺀 수·꽂은 수 */
+export const RULE_DIFF: Record<MatchRule, { removed: number; added: number }> = {
+	move1: { removed: 1, added: 1 },
+	move2: { removed: 2, added: 2 },
+	remove1: { removed: 1, added: 0 },
+	add1: { removed: 0, added: 1 }
+};
+
+/**
+ * 손을 하나 쓴 뒤의 판정. 'more'는 아직 덜 옮겼다는 뜻이라 되돌리지 않고 계속 받는다.
+ * 2개 옮기기에서 첫 번째를 옮긴 직후(뺀 1·꽂은 1)가 그 경우다.
+ */
+export function judgeRule(orig: Board, cur: Board, rule: MatchRule): 'solved' | 'more' | 'wrong' {
+	const d = moveDiff(orig, cur);
+	const need = RULE_DIFF[rule];
+	if (d.removed > need.removed || d.added > need.added) return 'wrong';
+	if (d.removed < need.removed || d.added < need.added) return 'more';
+	return isTrue(cur) ? 'solved' : 'wrong';
+}
+
 function popcount(n: number): number {
 	let c = 0;
 	while (n) {

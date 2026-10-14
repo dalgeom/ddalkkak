@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { parseEq, isTrue, isSolved, eqString, moveDiff, moveHints } from './matchstick';
+import { parseEq, isTrue, isSolved, eqString, moveDiff, moveHints, judgeRule } from './matchstick';
 import problems from './data/matchstick-problems.json';
 import { MATCH_TOTAL } from './game';
 
@@ -156,5 +156,23 @@ describe('moveHints — 빼는 곳·꽂는 곳', () => {
 			expect(moveDiff(parseEq(p.displayed), parseEq(p.solution)), p.displayed).toEqual({ removed: 1, added: 1 });
 			expect(moveHints(p).join(' '), p.displayed).not.toMatch(/undefined/);
 		}
+	});
+});
+
+describe('judgeRule — 규칙별 판정', () => {
+	it('1개 옮기기는 기존 isSolved와 같다', () => {
+		const o = parseEq('0 + 0 = 8');
+		expect(judgeRule(o, parseEq('8 - 0 = 8'), 'move1')).toBe('solved');
+		expect(judgeRule(o, parseEq('0 + 0 = 8'), 'move1')).toBe('more');
+	});
+	it('2개 옮기기는 하나만 옮긴 상태면 계속, 둘 옮겨 참이면 정답', () => {
+		const o = parseEq('0 - 0 = 7');
+		expect(judgeRule(o, o, 'move2')).toBe('more');
+		expect(judgeRule(o, parseEq('9 - 8 = 1'), 'move2')).toBe('solved');
+	});
+	it('빼기·더하기는 한 번에 판정', () => {
+		expect(judgeRule(parseEq('8 + 1 = 9'), parseEq('8 + 1 = 9'), 'remove1')).toBe('more');
+		expect(judgeRule(parseEq('9 - 1 = 9'), parseEq('9 - 1 = 8'), 'add1')).toBe('solved');
+		expect(judgeRule(parseEq('9 - 1 = 9'), parseEq('9 - 7 = 9'), 'add1')).toBe('wrong');
 	});
 });
