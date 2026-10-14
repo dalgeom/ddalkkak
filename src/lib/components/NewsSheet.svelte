@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { freshNotices, loadSeen, markSeen, isReturning, type Notice } from '$lib/notices';
+	import { freshNotices, loadSeen, markSeen, isReturning, newsSheetActive, type Notice } from '$lib/notices';
 	import { track } from '$lib/analytics';
 	import BottomSheet from './BottomSheet.svelte';
 
@@ -22,15 +22,21 @@
 		unseen = freshNotices(Date.now()).filter((n) => !seen.has(n.id));
 		list = unseen.slice(0, 3);
 		if (!list.length) return;
+		// 띠보다 먼저 자리를 잡는다 — 시트가 올라오기 전 1.6초 동안에도 띠에 같은 소식이 보이지 않게
+		newsSheetActive.set(true);
 		const t = setTimeout(() => {
 			open = true;
 			track('news_sheet_open', { n: list.length });
 		}, 1600);
-		return () => clearTimeout(t);
+		return () => {
+			clearTimeout(t);
+			newsSheetActive.set(false);
+		};
 	});
 
 	function seenAll() {
 		markSeen(unseen.map((n) => n.id));
+		newsSheetActive.set(false);
 	}
 	function go(e: MouseEvent, n: Notice) {
 		e.preventDefault();

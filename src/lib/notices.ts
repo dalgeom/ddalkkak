@@ -8,6 +8,8 @@
  *   /news     전체 목록
  * 공지는 신규 기능만 싣는다(오류 수정·내부 정리는 싣지 않는다).
  */
+import { writable } from 'svelte/store';
+
 export interface Notice {
 	id: string;
 	/** YYYY-MM-DD (KST) */
@@ -63,6 +65,11 @@ export const NOTICES: Notice[] = [
 
 /** 이 날수 안의 소식만 「새」 소식으로 띄운다 */
 const FRESH_DAYS = 14;
+
+/** markSeen이 불릴 때마다 1씩 오른다 — 띠(NewsBar) · 헤더 종의 점이 다시 읽는다(닫아도 점이 남아 있었다) */
+export const seenTick = writable(0);
+/** 메인에서 새 소식 시트가 이번에 뜰 차례이거나 떠 있다 — 그동안 띠는 숨긴다(같은 소식이 띠와 시트에 두 번 보였다, 10/14) */
+export const newsSheetActive = writable(false);
 const KEY = 'ddal.news.seen';
 
 /** 오늘(KST) 기준 FRESH_DAYS 안의 소식 */
@@ -88,6 +95,7 @@ export function markSeen(ids: string[]): void {
 	} catch {
 		/* 사생활 보호 창 — 다음에 또 보일 뿐이다 */
 	}
+	seenTick.update((n) => n + 1);
 }
 
 /** 새 소식 말고 딸깍 기록이 하나라도 있으면 다시 온 사람 */

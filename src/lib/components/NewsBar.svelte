@@ -1,12 +1,13 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
-	import { freshNotices, loadSeen, markSeen, type Notice } from '$lib/notices';
+	import { freshNotices, loadSeen, markSeen, seenTick, newsSheetActive, type Notice } from '$lib/notices';
 	import { track } from '$lib/analytics';
 
-	/** 아직 안 본 최근 소식 하나를 한 줄로(notices.ts). ✕를 누르거나 들어가면 다시 안 뜬다. */
+	/** 아직 안 본 최근 소식 하나를 한 줄로(notices.ts). ✕를 누르거나 들어가면 다시 안 뜬다.
+	    새 소식 시트가 떠 있으면 숨는다(같은 소식 두 번) · 시트를 닫아 다 봤으면 사라진다(seenTick) */
 	let n = $state<Notice | null>(null);
 
-	onMount(() => {
+	$effect(() => {
+		$seenTick;
 		const seen = new Set(loadSeen());
 		n = freshNotices(Date.now()).find((x) => !seen.has(x.id)) ?? null;
 	});
@@ -25,7 +26,7 @@
 	}
 </script>
 
-{#if n}
+{#if n && !$newsSheetActive}
 	<div class="nbar">
 		<a href={n.href} onclick={go}>
 			<span class="tag">새 소식</span>

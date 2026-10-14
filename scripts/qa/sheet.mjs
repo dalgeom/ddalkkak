@@ -113,7 +113,16 @@ await b.ev(`localStorage.clear(); localStorage.setItem('ddal.visit','1'); return
 await b.go('/games', 1500);
 await b.go('/', 3800);
 ok('I 새 소식 시트가 올라옴', await isOpen(b));
+ok('I1 시트가 떠 있는 동안 위 새 소식 띠는 숨김(같은 소식 두 번 금지)', !(await b.ev(`return !!document.querySelector('.nbar');`)));
 await b.shot(OUT + 'S-news.jpg');
+// 바깥으로 닫으면 띠도 종의 점도 남지 않는다
+await b.ev(`document.querySelector('.dim').click(); return 1;`);
+await sleep(800);
+ok('I1b 시트를 닫으면 띠 · 종의 점이 바로 사라짐', !(await b.ev(`return !!document.querySelector('.nbar') || !!document.querySelector('.bell .dot');`)));
+// 링크 이동 시험을 위해 다시 안 본 상태로
+await b.ev(`localStorage.clear(); localStorage.setItem('ddal.visit','1'); return 1;`);
+await b.go('/games', 1500);
+await b.go('/', 3800);
 await b.ev(`[...document.querySelectorAll('.panel a')].find(a=>/대결/.test(a.textContent)).click(); return 1;`);
 await sleep(1800);
 const at = await b.ev(`return location.pathname;`);

@@ -7,7 +7,7 @@
 	import { logoClicks, focusMode } from '$lib/nav';
 	import TabBar from '$lib/components/TabBar.svelte';
 	import FeedbackSheet from '$lib/components/FeedbackSheet.svelte';
-	import { freshNotices, loadSeen } from '$lib/notices';
+	import { freshNotices, loadSeen, seenTick } from '$lib/notices';
 	import { captureInstallPrompt } from '$lib/pwa';
 	import { page } from '$app/state';
 
@@ -34,6 +34,10 @@
 		captureInstallPrompt();
 		// 첫 화면이 떴다 — 이 뒤로 메인에 와도 스플래시는 없다
 		markBooted();
+	});
+	// 안 본 소식이 남았는지 — 시트 · 띠에서 보면(seenTick) 점이 바로 꺼진다
+	$effect(() => {
+		$seenTick;
 		const seen = new Set(loadSeen());
 		newsDot = freshNotices(Date.now()).some((n) => !seen.has(n.id));
 	});
