@@ -37,7 +37,7 @@
 	import { bankSizesAt } from '$lib/bankHistory';
 	import { logoClicks, focusMode } from '$lib/nav';
 	import { track } from '$lib/analytics';
-	import { parseEq, cloneBoard, isSolved, bit, type Board } from '$lib/matchstick';
+	import { parseEq, cloneBoard, isSolved, bit, moveHints, type Board } from '$lib/matchstick';
 	import MatchstickBoard, { type PickLoc } from '$lib/components/MatchstickBoard.svelte';
 	import CubeNetFigure from '$lib/components/CubeNetFigure.svelte';
 	import CubeDie from '$lib/components/CubeDie.svelte';
@@ -146,7 +146,12 @@
 			? { ...queue[pos], problem: queue[pos].problem ? displayChoices(queue[pos].problem!) : undefined }
 			: undefined
 	);
-	let shownHints = $derived(current?.problem?.hints ? current.problem.hints.slice(0, hintsUsed) : []);
+	/** 그 문제의 힌트. v2(10/14): 성냥개비도 /matchstick과 같은 두 단계 힌트(빼는 곳 → 꽂는 곳)를 쓴다 —
+	    데일리 성냥에는 힌트가 없어 같은 유형인데 화면마다 기능이 달랐다(10/14 점검) */
+	let hintList = $derived<string[] | null>(
+		current?.problem?.hints ?? (current?.eq ? moveHints(current.eq) : null)
+	);
+	let shownHints = $derived(hintList ? hintList.slice(0, hintsUsed) : []);
 	let correctCount = $derived(marks.filter((m) => m !== 'miss').length);
 	let puzzleNo = $derived(puzzleNumber(dayNum));
 
@@ -529,7 +534,7 @@
 	}
 
 	function showHint() {
-		if (judged || !current?.problem?.hints || hintsUsed >= current.problem.hints.length) return;
+		if (judged || !hintList || hintsUsed >= hintList.length) return;
 		if (!hintUnlocked(hintsUsed, elapsedMs, wrongAttempts)) return;
 		hintsUsed += 1;
 	}
@@ -1209,22 +1214,22 @@
 				{/if}
 			{/if}
 
-			{#if !judged && current.problem?.hints}
+			{#if !judged && hintList}
 				<div class="hint-row">
 					<div class="dots" aria-hidden="true">
-						{#each [0, 1, 2] as i (i)}
+						{#each hintList as _, i (i)}
 							<span class="dot" class:on={i < hintsUsed}></span>
 						{/each}
 					</div>
 					<button
 						class="hint-btn"
-						disabled={hintsUsed >= 3 || !hintUnlocked(hintsUsed, elapsedMs, wrongAttempts)}
+						disabled={hintsUsed >= hintList.length || !hintUnlocked(hintsUsed, elapsedMs, wrongAttempts)}
 						onclick={showHint}
 					>
-						{hintsUsed >= 3
+						{hintsUsed >= hintList.length
 							? '힌트 다 봤어요'
 							: hintUnlocked(hintsUsed, elapsedMs, wrongAttempts)
-								? `힌트 보기 (${hintsUsed + 1}/3)`
+								? `힌트 보기 (${hintsUsed + 1}/${hintList.length})`
 								: `${hintWaitSec}초 뒤 힌트`}
 					</button>
 				</div>

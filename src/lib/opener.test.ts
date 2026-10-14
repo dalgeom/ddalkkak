@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { isOpener, openerMetrics, OPENER_EASY_START_DAY } from './opener';
+import { isOpener, openerMetrics, OPENER_EASY_START_DAY, OPENER_BLOCK_START_DAY } from './opener';
 import { OPENER_SCORES } from './openerScores';
 import { PROBLEMS } from './problems';
 import { buildDailySetStable, MATCH_TOTAL, OPENER_START_DAY, PICK_V2_START_DAY } from './game';
@@ -190,13 +190,22 @@ describe('쉬운 문지기 — 그날 세 문제 중 가장 쉬운 것이 1번 (
 		for (let day = OPENER_EASY_START_DAY; day < OPENER_EASY_START_DAY + 60; day++) {
 			const picks = set(day);
 			const disc = picks.filter((p) => p.kind === 'discover' && !p.bonus).map((p) => PROBLEMS[p.index]);
-			const scored = disc.filter((p) => isOpener(p) && OPENER_SCORES[p.id] !== undefined);
+			// isOpener(p, day, 5) — 점수가 있고(1~5) 그날 1번에서 빼는 문제가 아닌 문지기(opener.ts OPENER_BLOCK)
+			const scored = disc.filter((p) => isOpener(p, day, 5));
 			if (!scored.length) continue;
 			const best = Math.min(...scored.map((p) => OPENER_SCORES[p.id]));
 			const first = PROBLEMS[picks[0].index];
 			if (OPENER_SCORES[first.id] !== best) 실패.push(`${day}: ${first.id}(${OPENER_SCORES[first.id]}) 최저 ${best}`);
 		}
 		expect(실패, 실패.join(', ')).toEqual([]);
+	});
+
+	it('10/15부터 60일간 수학 패턴 감상형·고전은 1번에 서지 않는다', () => {
+		const 막은 = ['nm-ones-square', 'nm-square-gap', 'nm-sum-1-100', 'nm-digit-root', 'cal-clock-angle'];
+		for (let day = OPENER_BLOCK_START_DAY; day < OPENER_BLOCK_START_DAY + 60; day++) {
+			const first = PROBLEMS[set(day)[0].index];
+			expect(막은, `day ${day}`).not.toContain(first.id);
+		}
 	});
 
 	it('시작일 전날까지는 점수를 안 봐서 순서가 그대로다 — 아카이브 불변', () => {

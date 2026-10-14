@@ -58,10 +58,22 @@ export function openerMetrics(p: Problem): { lines: number; prose: number } {
  */
 export const OPENER_EASY_START_DAY = 20734;
 
+/**
+ * 2026-10-15(KST)부터 1번에 세우지 않는 문제 — 수학 패턴 감상형과 널리 알려진 고전.
+ * 10/14 1번이 1111×1111(nm-ones-square, 문지기 1점)이었다. 검수 게이트 9(×11 트릭 같은 「신기한 성질」
+ * 감상은 산수로 느껴진다)와 「널린 고전」(6시 30분 각도·1부터 100까지 합)에 걸린다. 문제는 은행에 그대로
+ * 두고 1번 자리에서만 뺀다. 오늘과 지난 날짜의 순서는 바뀌지 않는다(goldenSets·todaySafety).
+ */
+export const OPENER_BLOCK_START_DAY = 20741;
+const OPENER_BLOCK = new Set(['nm-ones-square', 'nm-square-gap', 'nm-sum-1-100', 'nm-digit-root', 'cal-clock-angle']);
+
 export function isOpener(p: Problem, day?: number, maxScore = 2): boolean {
 	const { lines, prose } = openerMetrics(p);
 	const shaped = lines >= MIN_LINES && lines <= MAX_LINES && prose <= MAX_PROSE;
 	if (day === undefined || day < OPENER_EASY_START_DAY) return shaped;
+	if (day >= OPENER_BLOCK_START_DAY && OPENER_BLOCK.has(p.id)) return false;
+	// game.ts의 예비 판정(점수 없이 모양만) — 10/15 전에는 지금까지와 같은 결과다
+	if (maxScore === -1) return shaped;
 	const score = OPENER_SCORES[p.id];
 	return shaped && score !== undefined && score <= maxScore;
 }

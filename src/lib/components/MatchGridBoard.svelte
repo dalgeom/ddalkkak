@@ -2,9 +2,11 @@
 	import { gridEdges } from '$lib/matchGrid';
 
 	/**
-	 * 그림 성냥 판(matchGrid.ts) — 네모 격자의 변에 성냥이 놓인다. 등식 판(MatchstickBoard)과 같은 색을 쓴다:
-	 * 켜진 성냥 초록, 빈 자리 어두운 칸, 집은 성냥 주황.
-	 * 성냥은 두께 8이라 손가락으로 누르기 어렵다 — 그 위에 두께 26짜리 투명한 누름 영역을 겹친다.
+	 * 그림 성냥 판(matchGrid.ts) — 네모 격자의 변에 성냥이 놓인다.
+	 *
+	 * v2(10/14): 처음엔 등식 판과 같은 검은 판·초록 막대로 그렸는데, 그러면 그림이 아니라 전광판 숫자로
+	 * 읽혔다(강아지가 「ㄱ+ㅓ」로 보였다 — 10/14 점검). 모눈종이 위에 머리가 빨간 나무 성냥으로 그린다.
+	 * 빈 자리는 옅은 점선으로만 두고, 성냥은 두께 8이라 손가락용 넓은 누름 영역(26)을 겹친다.
 	 */
 	let {
 		w,
@@ -27,9 +29,10 @@
 	} = $props();
 
 	const U = 44;
-	const PAD = 10;
-	const T = 8;
+	const PAD = 12;
+	const T = 7;
 	const HIT = 26;
+	const HEAD = 5.2;
 
 	let litSet = $derived(new Set(lit));
 	let edges = $derived(
@@ -37,11 +40,12 @@
 			const [k, xs, ys] = e.split(',');
 			const x = +xs * U + PAD;
 			const y = +ys * U + PAD;
-			const g =
-				k === 'h'
-					? { x: x + 4, y: y - T / 2, w: U - 8, h: T, hx: x + 4, hy: y - HIT / 2, hw: U - 8, hh: HIT }
-					: { x: x - T / 2, y: y + 4, w: T, h: U - 8, hx: x - HIT / 2, hy: y + 4, hw: HIT, hh: U - 8 };
-			return { e, ...g, name: `${k === 'h' ? '가로' : '세로'} ${+xs + 1}-${+ys + 1}` };
+			const horiz = k === 'h';
+			// 성냥 몸통은 점과 점 사이를 거의 다 채우고, 머리는 한쪽 끝(가로는 오른쪽, 세로는 위)
+			const g = horiz
+				? { x: x + 5, y: y - T / 2, w: U - 10, h: T, hx: x + 4, hy: y - HIT / 2, hw: U - 8, hh: HIT, cx: x + U - 7, cy: y }
+				: { x: x - T / 2, y: y + 5, w: T, h: U - 10, hx: x - HIT / 2, hy: y + 4, hw: HIT, hh: U - 8, cx: x, cy: y + 7 };
+			return { e, horiz, ...g, name: `${horiz ? '가로' : '세로'} ${+xs + 1}-${+ys + 1}` };
 		})
 	);
 
@@ -53,23 +57,26 @@
 	}
 </script>
 
-<div class="gboard">
+<div class="gboard" class:mini={!interactive}>
 	{#if label}<span class="sr-only">{label}</span>{/if}
 	<svg class="fit" viewBox="0 0 {w * U + PAD * 2} {h * U + PAD * 2}" role="presentation">
+		<!-- 모눈 -->
 		{#each Array.from({ length: (w + 1) * (h + 1) }, (_, i) => i) as i (i)}
-			<circle cx={(i % (w + 1)) * U + PAD} cy={Math.floor(i / (w + 1)) * U + PAD} r="1.6" class="dot" />
+			<circle cx={(i % (w + 1)) * U + PAD} cy={Math.floor(i / (w + 1)) * U + PAD} r="1.8" class="dot" />
 		{/each}
 		{#each edges as g (g.e)}
 			{@const on = litSet.has(g.e)}
-			{#if on || interactive}
-				<rect
-					x={g.x}
-					y={g.y}
-					width={g.w}
-					height={g.h}
-					rx="3"
-					class="stick {picked === g.e ? 'picked' : on ? 'lit' : 'ghost'}"
-				/>
+			{#if on}
+				<g class="match" class:picked={picked === g.e}>
+					<rect x={g.x} y={g.y} width={g.w} height={g.h} rx="2.5" class="wood" />
+					<circle cx={g.cx} cy={g.cy} r={HEAD} class="head" />
+				</g>
+			{:else if interactive}
+				{#if picked === g.e}
+					<rect x={g.x} y={g.y} width={g.w} height={g.h} rx="2.5" class="lifted" />
+				{:else}
+					<rect x={g.x} y={g.y} width={g.w} height={g.h} rx="2.5" class="slot" />
+				{/if}
 			{/if}
 			{#if interactive}
 				<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
@@ -92,12 +99,21 @@
 
 <style>
 	.gboard {
-		background: #0a0d0a;
-		border-radius: 12px;
+		background-color: #fffaf0;
+		background-image:
+			linear-gradient(rgba(120, 150, 200, 0.12) 1px, transparent 1px),
+			linear-gradient(90deg, rgba(120, 150, 200, 0.12) 1px, transparent 1px);
+		background-size: 11px 11px;
+		border: 1px solid var(--border);
+		border-radius: 14px;
 		padding: 12px;
 		display: flex;
 		align-items: center;
 		justify-content: center;
+	}
+	.gboard.mini {
+		padding: 6px;
+		border-radius: 10px;
 	}
 	.fit {
 		width: 100%;
@@ -105,27 +121,43 @@
 		height: auto;
 	}
 	.dot {
-		fill: #2a3a2e;
+		fill: rgba(80, 90, 110, 0.28);
 	}
-	.stick.lit {
-		fill: #3aff62;
-		filter: drop-shadow(0 0 5px rgba(58, 255, 98, 0.7));
-	}
-	.stick.ghost {
-		fill: #121a14;
-		stroke: #1f2f23;
+	.wood {
+		fill: #e3a648;
+		stroke: #b57a26;
 		stroke-width: 1;
 	}
-	.stick.picked {
-		fill: #ffb020;
-		filter: drop-shadow(0 0 8px rgba(255, 176, 32, 0.9));
+	.head {
+		fill: #c8382e;
+		stroke: #8f2219;
+		stroke-width: 1;
+	}
+	.match.picked .wood {
+		fill: #f3c46f;
+	}
+	.match.picked {
+		filter: drop-shadow(0 4px 5px rgba(140, 90, 20, 0.45));
+	}
+	.slot {
+		fill: transparent;
+		stroke: rgba(80, 90, 110, 0.22);
+		stroke-width: 1;
+		stroke-dasharray: 3 3;
+	}
+	/* 집어 든 성냥의 원래 자리 */
+	.lifted {
+		fill: rgba(227, 166, 72, 0.18);
+		stroke: #e3a648;
+		stroke-width: 1.2;
+		stroke-dasharray: 3 2;
 	}
 	.hit {
 		fill: transparent;
 		cursor: pointer;
 	}
 	.hit:focus-visible {
-		outline: 2px solid #ffd24a;
+		outline: 2px solid #c8382e;
 		outline-offset: -2px;
 	}
 	.sr-only {

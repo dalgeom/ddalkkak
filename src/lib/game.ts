@@ -665,7 +665,8 @@ export function buildDailySetStable<D, T>(
 			at = head.findIndex((i) => openerOf(discoverAll[i], d, maxScore));
 			if (at >= 0) break;
 		}
-		if (at < 0) at = head.findIndex((i) => openerOf(discoverAll[i]));
+		// 모양만 보는 예비 판정. maxScore -1은 점수를 안 보되 10/15부터 1번에서 빼는 문제는 지킨다(opener.ts)
+		if (at < 0) at = head.findIndex((i) => openerOf(discoverAll[i], d, -1));
 		if (at > 0) {
 			const [opener] = head.splice(at, 1);
 			head.unshift(opener);
