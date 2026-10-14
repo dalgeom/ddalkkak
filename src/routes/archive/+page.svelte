@@ -95,39 +95,6 @@
 </article>
 
 <style>
-	.cover {
-		background: var(--panel);
-		border: 1px solid var(--border-strong);
-		border-radius: 20px;
-		padding: 26px 20px 22px;
-	}
-	.kicker {
-		display: inline-block;
-		font-size: 11.5px;
-		font-weight: 800;
-		letter-spacing: 0.4px;
-		color: var(--accent-text);
-		background: var(--correct-bg);
-		border-radius: 7px;
-		padding: 4px 11px;
-	}
-	h1 {
-		margin: 12px 0 10px;
-		font-size: 24px;
-		font-weight: 800;
-		line-height: 1.35;
-		letter-spacing: -0.4px;
-		word-break: keep-all;
-	}
-	h1 b {
-		color: var(--accent-text);
-	}
-	.lead {
-		font-size: 14px;
-		line-height: 1.75;
-		color: var(--muted);
-		word-break: keep-all;
-	}
 	.prog {
 		margin-top: 16px;
 	}
@@ -155,9 +122,6 @@
 		color: var(--accent-text);
 	}
 
-	.sec {
-		margin-top: 20px;
-	}
 	.days {
 		list-style: none;
 		display: grid;
@@ -237,12 +201,6 @@
 	}
 
 	@media (min-width: 768px) {
-		.cover {
-			padding: 34px 30px 28px;
-		}
-		h1 {
-			font-size: 28px;
-		}
 		.days {
 			grid-template-columns: 1fr 1fr;
 		}

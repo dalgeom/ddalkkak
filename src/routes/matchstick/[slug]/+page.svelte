@@ -37,6 +37,7 @@
 		</nav>
 		<h1>{data.meta.title}<br /><b>{data.count}개</b></h1>
 		<p class="lead">{data.meta.intro}</p>
+		<a class="cta top" href={practice}>{data.isLevel ? `${data.meta.short}만 바로 풀기` : '성냥개비 바로 풀기'} <span aria-hidden="true">→</span></a>
 	</header>
 
 	<section class="sec">
@@ -117,7 +118,7 @@
 
 	<section class="sec ctas">
 		<a class="cta" href={practice}>
-			{data.isLevel ? `${data.meta.short}만 무한으로 풀기` : '성냥개비 무한으로 풀기'} <span aria-hidden="true">→</span>
+			{data.isLevel ? `${data.meta.short}만 바로 풀기` : '성냥개비 바로 풀기'} <span aria-hidden="true">→</span>
 		</a>
 		<a class="cta ghost" href="/" use:ctaTrack={'foot'}>오늘의 10문제 풀러 가기</a>
 	</section>
@@ -134,49 +135,7 @@
 </article>
 
 <style>
-	.cover {
-		background: var(--panel);
-		border: 1px solid var(--border-strong);
-		border-radius: 20px;
-		padding: 22px 20px;
-	}
-	.crumb {
-		display: flex;
-		align-items: center;
-		gap: 6px;
-		font-size: 12px;
-		font-weight: 700;
-		color: var(--muted-2);
-	}
-	.crumb a {
-		color: var(--accent-text);
-		text-decoration: none;
-	}
-	.crumb a:hover {
-		text-decoration: underline;
-	}
-	h1 {
-		margin: 10px 0;
-		font-size: 25px;
-		font-weight: 800;
-		line-height: 1.35;
-		letter-spacing: -0.4px;
-		word-break: keep-all;
-	}
-	h1 b {
-		color: var(--accent-text);
-	}
-	.lead {
-		margin: 0;
-		font-size: 14.5px;
-		line-height: 1.75;
-		color: var(--muted);
-		word-break: keep-all;
-	}
 
-	.sec {
-		margin-top: 26px;
-	}
 	.sh {
 		font-size: 17px;
 		font-weight: 800;

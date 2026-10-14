@@ -1,5 +1,6 @@
 <script lang="ts">
 	import OtherGames from '$lib/components/OtherGames.svelte';
+	import Fold from '$lib/components/Fold.svelte';
 	import type { PageData } from './$types';
 	import { ctaTrack } from '$lib/analytics';
 
@@ -34,6 +35,7 @@
 				<div class="fact"><b>{g.count}</b><span>{g.name}</span></div>
 			{/each}
 		</div>
+		<a class="cta top" href="/play?filter=trivia">상식 퀴즈 바로 풀기 <span aria-hidden="true">→</span></a>
 	</header>
 
 	<!-- 문제 목록만 늘어놓으면 어디서나 볼 수 있는 상식 퀴즈와 구분이 안 된다.
@@ -55,6 +57,7 @@
 			{data.count}문제 중 서로 다른 함정을 보여주는 {data.items.length}개를 골랐습니다. 문제마다 사람들이 어디서
 			헛짚는지를 붙여 두었어요. {#if data.rest.length}나머지 {data.rest.length}문제는 그 아래에 이어 실었어요.{:else}나머지는 아래 무한 연습에서 {data.category.name}만 골라 만날 수 있습니다.{/if}
 		</p>
+		<Fold height={1500} label="{data.items.length}문제 모두 보기">
 		<ol class="list">
 			{#each data.items as q, i (q.id)}
 				<li class="q">
@@ -78,11 +81,13 @@
 				</li>
 			{/each}
 		</ol>
+		</Fold>
 	</section>
 
 	{#if data.rest.length}
 		<section class="sec">
 			<h2 class="sh">{data.category.name} 나머지 {data.rest.length}문제</h2>
+			<Fold height={700} label="나머지 {data.rest.length}문제 모두 보기">
 			<ol class="list" start={data.items.length + 1}>
 				{#each data.rest as q, i (q.id)}
 					<li class="q">
@@ -105,6 +110,7 @@
 					</li>
 				{/each}
 			</ol>
+			</Fold>
 		</section>
 	{/if}
 
@@ -112,7 +118,7 @@
 		<a class="cta" href="/" use:ctaTrack={'foot'}>
 			오늘의 10문제 풀러 가기 <span aria-hidden="true">→</span>
 		</a>
-		<a class="cta ghost" href="/play?filter=trivia">상식 퀴즈 무한으로 풀기</a>
+		<a class="cta ghost" href="/play?filter=trivia">상식 퀴즈 바로 풀기</a>
 	</section>
 
 	<section class="sec">
@@ -128,74 +134,7 @@
 </article>
 
 <style>
-	.cover {
-		background: var(--panel);
-		border: 1px solid var(--border-strong);
-		border-radius: 20px;
-		padding: 22px 20px;
-	}
-	.crumb {
-		display: flex;
-		align-items: center;
-		gap: 6px;
-		font-size: 12px;
-		font-weight: 700;
-		color: var(--muted-2);
-	}
-	.crumb a {
-		color: var(--accent-text);
-		text-decoration: none;
-	}
-	.crumb a:hover {
-		text-decoration: underline;
-	}
-	h1 {
-		margin: 10px 0;
-		font-size: 25px;
-		font-weight: 800;
-		line-height: 1.35;
-		letter-spacing: -0.4px;
-		word-break: keep-all;
-	}
-	h1 b {
-		color: var(--accent-text);
-	}
-	.lead {
-		margin: 0;
-		font-size: 14.5px;
-		line-height: 1.75;
-		color: var(--muted);
-		word-break: keep-all;
-	}
-	.facts {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 8px;
-		margin-top: 18px;
-	}
-	.fact {
-		flex: 1 1 70px;
-		background: var(--panel-2);
-		border: 1px solid var(--border);
-		border-radius: 12px;
-		padding: 11px 6px;
-		text-align: center;
-	}
-	.fact b {
-		display: block;
-		font-size: 17px;
-		font-weight: 800;
-		color: var(--accent-text);
-		font-variant-numeric: tabular-nums;
-	}
-	.fact span {
-		font-size: 11.5px;
-		color: var(--muted-2);
-	}
 
-	.sec {
-		margin-top: 26px;
-	}
 	.sh {
 		font-size: 17px;
 		font-weight: 800;

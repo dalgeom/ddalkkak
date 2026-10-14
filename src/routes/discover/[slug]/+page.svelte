@@ -1,5 +1,6 @@
 <script lang="ts">
 	import OtherGames from '$lib/components/OtherGames.svelte';
+	import Fold from '$lib/components/Fold.svelte';
 	import ProblemView from '$lib/components/ProblemView.svelte';
 	import type { PageData } from './$types';
 	import { ctaTrack } from '$lib/analytics';
@@ -29,6 +30,7 @@
 		</nav>
 		<h1>{data.field.title}<br /><b>{data.count}개</b></h1>
 		<p class="lead">{data.field.intro}</p>
+		<a class="cta top" href="/play?filter=puzzle">발견형 바로 풀기 <span aria-hidden="true">→</span></a>
 	</header>
 
 	<!-- 검색으로 이 분야 페이지에 떨어진 사람은 찾던 유형만 읽고 나간다. 데일리로 가는 길이
@@ -63,6 +65,7 @@
 			{data.count}개 중 서로 다른 함정을 보여주는 {data.items.length}개를 골랐습니다. 정답은 접어 두었으니 먼저
 			풀어보고 눌러서 확인하세요. 문제마다 사람들이 어디서 헛짚는지를 붙여 두었습니다.
 		</p>
+		<Fold height={1400} label="{data.items.length}문제 모두 보기">
 		<ol class="list">
 			{#each data.items as x (x.problem.id)}
 				<li>
@@ -71,10 +74,11 @@
 				</li>
 			{/each}
 		</ol>
+		</Fold>
 	</section>
 
 	<section class="sec ctas">
-		<a class="cta" href="/play?filter=puzzle">발견형 무한으로 풀기 <span aria-hidden="true">→</span></a>
+		<a class="cta" href="/play?filter=puzzle">발견형 바로 풀기 <span aria-hidden="true">→</span></a>
 	</section>
 
 	<section class="sec">
@@ -111,49 +115,7 @@
 		word-break: keep-all;
 	}
 
-	.cover {
-		background: var(--panel);
-		border: 1px solid var(--border-strong);
-		border-radius: 20px;
-		padding: 22px 20px;
-	}
-	.crumb {
-		display: flex;
-		align-items: center;
-		gap: 6px;
-		font-size: 12px;
-		font-weight: 700;
-		color: var(--muted-2);
-	}
-	.crumb a {
-		color: var(--accent-text);
-		text-decoration: none;
-	}
-	.crumb a:hover {
-		text-decoration: underline;
-	}
-	h1 {
-		margin: 10px 0;
-		font-size: 25px;
-		font-weight: 800;
-		line-height: 1.35;
-		letter-spacing: -0.4px;
-		word-break: keep-all;
-	}
-	h1 b {
-		color: var(--accent-text);
-	}
-	.lead {
-		margin: 0;
-		font-size: 14.5px;
-		line-height: 1.75;
-		color: var(--muted);
-		word-break: keep-all;
-	}
 
-	.sec {
-		margin-top: 26px;
-	}
 	.sh {
 		font-size: 17px;
 		font-weight: 800;

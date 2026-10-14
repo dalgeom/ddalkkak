@@ -133,10 +133,10 @@
 
 <div class="proot">
 	{#if !cur}
-		<header class="pcover">
+		<header class="cover">
 			<a class="back" href="/matchstick">← 성냥개비</a>
 			<h1>성냥개비 <b>그림 퍼즐</b></h1>
-			<p class="plead">
+			<p class="lead">
 				성냥을 옮겨 정사각형을 만들고, 그림을 바꿔요. 성냥을 눌러 집고, 빈 자리를 눌러 놓으면 됩니다.
 			</p>
 			<p class="pcount">{solved.length} / {GRID_PUZZLES.length} 풀었어요</p>
@@ -207,7 +207,7 @@
 		margin: 0 auto;
 		padding: 16px;
 	}
-	.pcover {
+	.cover {
 		margin-bottom: 14px;
 	}
 	.back,
@@ -221,22 +221,6 @@
 		padding: 0;
 		cursor: pointer;
 		font-family: inherit;
-	}
-	h1 {
-		margin: 10px 0 8px;
-		font-size: 26px;
-		font-weight: 900;
-		line-height: 1.3;
-	}
-	h1 b {
-		color: var(--accent-text);
-	}
-	.plead {
-		margin: 0;
-		font-size: 14.5px;
-		line-height: 1.7;
-		color: var(--muted);
-		word-break: keep-all;
 	}
 	.pcount {
 		margin: 10px 0 0;

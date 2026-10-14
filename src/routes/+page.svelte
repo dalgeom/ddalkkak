@@ -1067,13 +1067,13 @@
 	<!-- v2(10/14): ② 「네 가지」 카드(링크 없음) · ③ 「더 풀고 싶다면?」 6칸 · ⑤ 분야 칩 19개가 모두
 	     「유형으로 들어가기」였다. 오늘의 미션 + 놀이 고르기 카드 6장 하나로 합친다. 카드는 어디서 눌러도
 	     그 유형의 홈으로 간다(GameCards). 상식 분야 19개는 상식 홈(/trivia#fields)에 있다. -->
-	<section class="sec reveal d1">
+	<section class="hsec reveal d1">
 		<Missions />
 	</section>
 
 	<div class="adwrap reveal d1"><AdSlot label="랜딩 중단" /></div>
 
-	<section class="sec reveal d2">
+	<section class="hsec reveal d2">
 		<h2 class="sec-h">놀이 고르기</h2>
 		<GameCards counts={KIND_COUNT} />
 	</section>
@@ -1083,7 +1083,7 @@
 	<!-- ⑥ 짧은 소개. 8/24에 애드센스 대응으로 소개 다섯 꼭지(2,216자)와 읽을거리 카드 3편을
 	     「더 풀고 싶다면?」 위에 두었는데, 놀러 온 사람에게는 스크롤만 길었다(9/30 사용자 지적).
 	     긴 글은 /about으로 옮기고 여기엔 두 줄과 글 제목만 남긴다. 순서도 맨 아래로. -->
-	<section class="sec reveal d2 intro">
+	<section class="hsec reveal d2 intro">
 		<h2 class="sec-h">딸깍은 이런 곳이에요</h2>
 		<p class="intro-p">
 			매일 자정에 열 문제가 새로 열리고, 그날 들어온 사람은 모두 같은 문제를 풀어요. 가입 없이
@@ -1744,7 +1744,7 @@
 	}
 
 	/* ── 섹션 공통 ── */
-	.sec {
+	.hsec {
 		margin-top: 26px;
 	}
 	.sec-h {

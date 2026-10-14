@@ -196,46 +196,10 @@
 </article>
 
 <style>
-	.cover {
-		background: var(--panel);
-		border: 1px solid var(--border-strong);
-		border-radius: 20px;
-		padding: 26px 20px 22px;
-	}
-	.kicker {
-		display: inline-block;
-		font-size: 11.5px;
-		font-weight: 800;
-		letter-spacing: 0.4px;
-		color: var(--accent-text);
-		background: var(--correct-bg);
-		border-radius: 7px;
-		padding: 4px 11px;
-	}
-	h1 {
-		margin: 12px 0 10px;
-		font-size: 26px;
-		font-weight: 800;
-		line-height: 1.35;
-		letter-spacing: -0.4px;
-		word-break: keep-all;
-	}
-	h1 b {
-		color: var(--accent-text);
-	}
-	.lead {
-		font-size: 14.5px;
-		line-height: 1.75;
-		color: var(--muted);
-		word-break: keep-all;
-	}
 	.lead b {
 		color: var(--text);
 	}
 
-	.sec {
-		margin-top: 26px;
-	}
 	.sh {
 		font-size: 17px;
 		font-weight: 800;
@@ -398,22 +362,6 @@
 		word-break: keep-all;
 	}
 
-	/* 전수 분석 사실 */
-	.facts {
-		display: flex;
-		flex-direction: column;
-		gap: 8px;
-	}
-	.fact {
-		display: flex;
-		align-items: baseline;
-		gap: 12px;
-		background: var(--panel);
-		border: 1px solid var(--border-strong);
-		border-left: 3px solid var(--accent);
-		border-radius: 14px;
-		padding: 14px 15px;
-	}
 	.fact > b {
 		flex: none;
 		font-size: 17px;
@@ -421,12 +369,6 @@
 		color: var(--accent-text);
 		font-variant-numeric: tabular-nums;
 		min-width: 42px;
-	}
-	.fact span {
-		font-size: 13px;
-		color: var(--muted);
-		line-height: 1.7;
-		word-break: keep-all;
 	}
 	.fact span b {
 		color: var(--text);

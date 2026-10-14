@@ -1,5 +1,7 @@
 <script lang="ts">
 	import OtherGames from '$lib/components/OtherGames.svelte';
+	import ModeTiles from '$lib/components/ModeTiles.svelte';
+	import Fold from '$lib/components/Fold.svelte';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
@@ -38,12 +40,20 @@
 			<div class="fact"><b>{data.categories.length}개</b><span>분야</span></div>
 			<div class="fact"><b>4단계</b><span>난이도</span></div>
 		</div>
-		<a class="cta top" href="/play?filter=trivia">상식 퀴즈 풀기 <span aria-hidden="true">→</span></a>
-		<a class="cta ghost duel" href="/trivia/duel">친구와 같은 10문제로 대결하기</a>
 	</header>
+
+	<ModeTiles
+		modes={[
+			{ name: '바로 풀기', sub: '섞어서 계속, 해설과 함께', href: '/play?filter=trivia', main: true },
+			{ name: '친구와 대결', sub: '같은 10문제로 점수 비교', href: '/trivia/duel' },
+			{ name: '분야 골라 풀기', sub: `${data.categories.length}개 분야`, href: '#fields' },
+			{ name: '오늘의 10문제', sub: '매일 자정에 새로', href: '/' }
+		]}
+	/>
 
 	<section class="sec">
 		<h2 class="sh">난이도별 {data.samples.length}문제 — 하나씩 풀어보세요</h2>
+		<Fold height={1150} label="{data.samples.length}문제 모두 보기">
 		<div class="samples">
 			{#each data.samples as s (s.id)}
 				<div class="sample">
@@ -78,6 +88,7 @@
 				</div>
 			{/each}
 		</div>
+		</Fold>
 	</section>
 
 	<section class="sec" id="fields">
@@ -115,73 +126,13 @@
 	</section>
 
 	<section class="sec ctas">
-		<a class="cta" href="/play?filter=trivia">상식 퀴즈 무한으로 풀기 <span aria-hidden="true">→</span></a>
+		<a class="cta" href="/play?filter=trivia">상식 퀴즈 바로 풀기 <span aria-hidden="true">→</span></a>
 	</section>
 	<OtherGames current="trivia" />
 </article>
 
 <style>
-	.cover {
-		background: var(--panel);
-		border: 1px solid var(--border-strong);
-		border-radius: 20px;
-		padding: 26px 20px 22px;
-	}
-	.kicker {
-		display: inline-block;
-		font-size: 11.5px;
-		font-weight: 800;
-		letter-spacing: 0.4px;
-		color: var(--accent-text);
-		background: var(--correct-bg);
-		border-radius: 7px;
-		padding: 4px 11px;
-	}
-	h1 {
-		margin: 12px 0 10px;
-		font-size: 26px;
-		font-weight: 800;
-		line-height: 1.35;
-		letter-spacing: -0.4px;
-		word-break: keep-all;
-	}
-	h1 b {
-		color: var(--accent-text);
-	}
-	.lead {
-		font-size: 14.5px;
-		line-height: 1.75;
-		color: var(--muted);
-		word-break: keep-all;
-	}
-	.facts {
-		display: grid;
-		grid-template-columns: repeat(3, 1fr);
-		gap: 8px;
-		margin-top: 18px;
-	}
-	.fact {
-		background: var(--panel-2);
-		border: 1px solid var(--border);
-		border-radius: 12px;
-		padding: 12px 6px;
-		text-align: center;
-	}
-	.fact b {
-		display: block;
-		font-size: 18px;
-		font-weight: 800;
-		color: var(--accent-text);
-		font-variant-numeric: tabular-nums;
-	}
-	.fact span {
-		font-size: 11.5px;
-		color: var(--muted-2);
-	}
 
-	.sec {
-		margin-top: 26px;
-	}
 	.sh {
 		font-size: 17px;
 		font-weight: 800;
@@ -272,18 +223,6 @@
 	}
 	.verdict.right {
 		color: var(--accent-text);
-	}
-	.cta.top {
-		margin-top: 16px;
-	}
-	.cta.ghost {
-		background: var(--panel);
-		color: var(--accent-text);
-		border: 1.5px solid var(--accent);
-		box-shadow: none;
-	}
-	.cta.duel {
-		margin-top: 10px;
 	}
 	.badge {
 		width: 22px;

@@ -103,35 +103,6 @@
 </article>
 
 <style>
-	.cover {
-		background: var(--panel);
-		border: 1px solid var(--border-strong);
-		border-radius: 20px;
-		padding: 22px 20px;
-	}
-	.crumb {
-		display: flex;
-		align-items: center;
-		gap: 6px;
-		font-size: 12px;
-		font-weight: 700;
-		color: var(--muted-2);
-	}
-	.crumb a {
-		color: var(--accent-text);
-		text-decoration: none;
-	}
-	.crumb a:hover {
-		text-decoration: underline;
-	}
-	h1 {
-		margin: 10px 0 8px;
-		font-size: 23px;
-		font-weight: 800;
-		line-height: 1.4;
-		letter-spacing: -0.4px;
-		word-break: keep-all;
-	}
 	.byline {
 		display: flex;
 		align-items: center;
@@ -289,9 +260,6 @@
 		padding: 10px;
 	}
 
-	.sec {
-		margin-top: 26px;
-	}
 	.sh {
 		font-size: 17px;
 		font-weight: 800;

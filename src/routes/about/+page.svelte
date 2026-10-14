@@ -201,67 +201,7 @@
 	.para b {
 		color: var(--text);
 	}
-	.cover {
-		background: var(--panel);
-		border: 1px solid var(--border-strong);
-		border-radius: 20px;
-		padding: 26px 20px 22px;
-	}
-	.kicker {
-		display: inline-block;
-		font-size: 11.5px;
-		font-weight: 800;
-		letter-spacing: 0.4px;
-		color: var(--accent-text);
-		background: var(--correct-bg);
-		border-radius: 7px;
-		padding: 4px 11px;
-	}
-	h1 {
-		margin: 12px 0 10px;
-		font-size: 26px;
-		font-weight: 800;
-		line-height: 1.35;
-		letter-spacing: -0.4px;
-		word-break: keep-all;
-	}
-	h1 b {
-		color: var(--accent-text);
-	}
-	.lead {
-		font-size: 14.5px;
-		line-height: 1.75;
-		color: var(--muted);
-		word-break: keep-all;
-	}
-	.facts {
-		display: grid;
-		grid-template-columns: repeat(3, 1fr);
-		gap: 8px;
-		margin-top: 18px;
-	}
-	.fact {
-		background: var(--panel-2);
-		border: 1px solid var(--border);
-		border-radius: 12px;
-		padding: 12px 6px;
-		text-align: center;
-	}
-	.fact b {
-		display: block;
-		font-size: 19px;
-		font-weight: 800;
-		color: var(--accent-text);
-		font-variant-numeric: tabular-nums;
-	}
-	.fact span {
-		font-size: 11.5px;
-		color: var(--muted-2);
-	}
 
-	.sec {
-		margin-top: 26px;
-	}
 	.sh {
 		font-size: 17px;
 		font-weight: 800;
@@ -451,14 +391,6 @@
 	@media (prefers-reduced-motion: reduce) {
 		.arr {
 			animation: none;
-		}
-	}
-	@media (min-width: 768px) {
-		.cover {
-			padding: 34px 30px 28px;
-		}
-		h1 {
-			font-size: 30px;
 		}
 	}
 </style>

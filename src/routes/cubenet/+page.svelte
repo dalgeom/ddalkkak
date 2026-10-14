@@ -1,5 +1,6 @@
 <script lang="ts">
 	import OtherGames from '$lib/components/OtherGames.svelte';
+	import ModeTiles from '$lib/components/ModeTiles.svelte';
 	import { ctaTrack } from '$lib/analytics';
 	import { problemAt, FACES, NETS, objectParticle, type CubeNetProblem } from '$lib/cubenet';
 	import { CUBE_TOTAL } from '$lib/game';
@@ -104,7 +105,14 @@
 	</header>
 
 	{#if !started}
-		<button class="cta" onclick={start}>연습 시작하기 <span aria-hidden="true">→</span></button>
+		<ModeTiles
+			modes={[
+				{ name: '연습 시작', sub: '한 문제씩, 틀리면 접어서 보여 줘요', onclick: start, main: true },
+				{ name: '오늘의 10문제', sub: '전개도 2문제가 나와요', href: '/' },
+				{ name: '푸는 법', sub: '규칙 세 가지', href: '/cubenet/guide' },
+				{ name: '섞어서 풀기', sub: '네 유형 무한 연습', href: '/play' }
+			]}
+		/>
 	{:else}
 		<section class="q">
 			<p class="ask">이 전개도를 접어 주사위를 만들면, 어떤 모양이 될까요?</p>
@@ -217,73 +225,12 @@
 		<a class="glink" href="/cubenet/guide">숫자로 정리한 전체 풀이법 보기 →</a>
 	</section>
 
-	<section class="sec ctas">
-		<a class="cta ghost" href="/matchstick">성냥개비 퍼즐도 풀기</a>
-	</section>
 	<OtherGames current="cube" />
 </article>
 
 <style>
-	.cover {
-		background: var(--panel);
-		border: 1px solid var(--border-strong);
-		border-radius: 20px;
-		padding: 22px 20px;
-	}
-	.kicker {
-		display: inline-block;
-		font-size: 11.5px;
-		font-weight: 800;
-		letter-spacing: 0.4px;
-		color: var(--accent-text);
-		background: var(--correct-bg);
-		border-radius: 7px;
-		padding: 4px 11px;
-	}
-	h1 {
-		margin: 12px 0 10px;
-		font-size: 25px;
-		font-weight: 800;
-		line-height: 1.35;
-		letter-spacing: -0.4px;
-		word-break: keep-all;
-	}
-	h1 b {
-		color: var(--accent-text);
-	}
-	.lead {
-		margin: 0;
-		font-size: 14.5px;
-		line-height: 1.75;
-		color: var(--muted);
-		word-break: keep-all;
-	}
 	.lead b {
 		color: var(--text);
-	}
-	.facts {
-		display: grid;
-		grid-template-columns: repeat(3, 1fr);
-		gap: 8px;
-		margin-top: 16px;
-	}
-	.fact {
-		background: var(--panel-2);
-		border: 1px solid var(--border);
-		border-radius: 12px;
-		padding: 11px 6px;
-		text-align: center;
-	}
-	.fact b {
-		display: block;
-		font-size: 17px;
-		font-weight: 800;
-		color: var(--accent-text);
-		font-variant-numeric: tabular-nums;
-	}
-	.fact span {
-		font-size: 11.5px;
-		color: var(--muted-2);
 	}
 
 	.q {
@@ -427,9 +374,6 @@
 		margin-top: 24px;
 	}
 
-	.sec {
-		margin-top: 28px;
-	}
 	.sec h2 {
 		font-size: 17px;
 		font-weight: 800;
@@ -510,21 +454,5 @@
 	.cta:active {
 		transform: translateY(2px);
 		box-shadow: 0 3px 0 var(--accent-press);
-	}
-	.ctas {
-		display: flex;
-		flex-direction: column;
-		gap: 8px;
-	}
-	.cta.ghost {
-		margin-top: 0;
-		background: var(--panel);
-		color: var(--text);
-		border: 1px solid var(--border-strong);
-		box-shadow: none;
-		font-weight: 700;
-	}
-	.cta.ghost:hover {
-		background: var(--panel-2);
 	}
 </style>

@@ -25,7 +25,7 @@
 		</p>
 	</header>
 
-	<section class="sec">
+	<section>
 		<ol class="list">
 			{#each data.items as a (a.slug)}
 				<li>
@@ -44,40 +44,7 @@
 </article>
 
 <style>
-	.cover {
-		background: var(--panel);
-		border: 1px solid var(--border-strong);
-		border-radius: 20px;
-		padding: 22px 20px;
-	}
-	.kicker {
-		font-size: 12px;
-		font-weight: 800;
-		color: var(--accent-text);
-		letter-spacing: 0.06em;
-	}
-	h1 {
-		margin: 10px 0;
-		font-size: 25px;
-		font-weight: 800;
-		line-height: 1.35;
-		letter-spacing: -0.4px;
-		word-break: keep-all;
-	}
-	h1 b {
-		color: var(--accent-text);
-	}
-	.lead {
-		margin: 0;
-		font-size: 14.5px;
-		line-height: 1.75;
-		color: var(--muted);
-		word-break: keep-all;
-	}
 
-	.sec {
-		margin-top: 18px;
-	}
 	.list {
 		list-style: none;
 		margin: 0;

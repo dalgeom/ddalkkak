@@ -242,40 +242,6 @@
 		padding-bottom: 8px;
 	}
 
-	/* ── 표지 ── */
-	.cover {
-		background: var(--panel);
-		border: 1px solid var(--border-strong);
-		border-radius: 20px;
-		padding: 26px 20px 22px;
-	}
-	.kicker {
-		display: inline-block;
-		font-size: 11.5px;
-		font-weight: 800;
-		letter-spacing: 0.4px;
-		color: var(--accent-text);
-		background: var(--correct-bg);
-		border-radius: 7px;
-		padding: 4px 11px;
-	}
-	h1 {
-		margin: 12px 0 10px;
-		font-size: 26px;
-		font-weight: 800;
-		line-height: 1.35;
-		letter-spacing: -0.4px;
-		word-break: keep-all;
-	}
-	h1 b {
-		color: var(--accent-text);
-	}
-	.lead {
-		font-size: 14.5px;
-		line-height: 1.75;
-		color: var(--muted);
-		word-break: keep-all;
-	}
 	.demo {
 		margin-top: 18px;
 	}
@@ -286,10 +252,6 @@
 		color: var(--muted-2);
 	}
 
-	/* ── 섹션 ── */
-	.sec {
-		margin-top: 26px;
-	}
 	.sh {
 		font-size: 17px;
 		font-weight: 800;
@@ -514,12 +476,4 @@
 		}
 	}
 
-	@media (min-width: 768px) {
-		.cover {
-			padding: 34px 30px 28px;
-		}
-		h1 {
-			font-size: 30px;
-		}
-	}
 </style>

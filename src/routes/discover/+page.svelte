@@ -1,5 +1,6 @@
 <script lang="ts">
 	import OtherGames from '$lib/components/OtherGames.svelte';
+	import ModeTiles from '$lib/components/ModeTiles.svelte';
 	import ExampleList from '$lib/components/ExampleList.svelte';
 	import type { PageData } from './$types';
 
@@ -37,6 +38,15 @@
 		</div>
 	</header>
 
+	<ModeTiles
+		modes={[
+			{ name: '바로 풀기', sub: '발견형만 계속', href: '/play?filter=puzzle', main: true },
+			{ name: '오늘의 10문제', sub: '발견형 3문제가 나와요', href: '/' },
+			{ name: '분야 골라 보기', sub: `${data.fields.length}개 분야`, href: '#fields' },
+			{ name: '푸는 법', sub: '막힐 때 보는 순서', href: '/guide' }
+		]}
+	/>
+
 	<section class="sec">
 		<h2 class="sh">이런 문제예요 — 직접 풀어보세요</h2>
 		<p class="sub">
@@ -64,7 +74,7 @@
 		</div>
 	</section>
 
-	<section class="sec">
+	<section class="sec" id="fields">
 		<h2 class="sh">분야별로 모아 보기</h2>
 		<p class="sub">
 			{data.total}문제를 6개 분야로 나눠 두었습니다. 각 분야 페이지에 문제 전체와 해설이 정리되어
@@ -102,74 +112,11 @@
 		<p class="note">더 자세한 풀이 요령은 <a href="/guide">발견형 푸는 법</a>에 정리해 두었습니다.</p>
 	</section>
 
-	<section class="sec ctas">
-		<a class="cta ghost" href="/play?filter=puzzle">발견형만 무한 연습하기</a>
-	</section>
 	<OtherGames current="discover" />
 </article>
 
 <style>
-	.cover {
-		background: var(--panel);
-		border: 1px solid var(--border-strong);
-		border-radius: 20px;
-		padding: 26px 20px 22px;
-	}
-	.kicker {
-		display: inline-block;
-		font-size: 11.5px;
-		font-weight: 800;
-		letter-spacing: 0.4px;
-		color: var(--accent-text);
-		background: var(--correct-bg);
-		border-radius: 7px;
-		padding: 4px 11px;
-	}
-	h1 {
-		margin: 12px 0 10px;
-		font-size: 26px;
-		font-weight: 800;
-		line-height: 1.35;
-		letter-spacing: -0.4px;
-		word-break: keep-all;
-	}
-	h1 b {
-		color: var(--accent-text);
-	}
-	.lead {
-		font-size: 14.5px;
-		line-height: 1.75;
-		color: var(--muted);
-		word-break: keep-all;
-	}
-	.facts {
-		display: grid;
-		grid-template-columns: repeat(3, 1fr);
-		gap: 8px;
-		margin-top: 18px;
-	}
-	.fact {
-		background: var(--panel-2);
-		border: 1px solid var(--border);
-		border-radius: 12px;
-		padding: 12px 6px;
-		text-align: center;
-	}
-	.fact b {
-		display: block;
-		font-size: 18px;
-		font-weight: 800;
-		color: var(--accent-text);
-		font-variant-numeric: tabular-nums;
-	}
-	.fact span {
-		font-size: 11.5px;
-		color: var(--muted-2);
-	}
 
-	.sec {
-		margin-top: 26px;
-	}
 	.sh {
 		font-size: 17px;
 		font-weight: 800;
@@ -316,37 +263,4 @@
 		word-break: keep-all;
 	}
 
-	.ctas {
-		display: flex;
-		flex-direction: column;
-		gap: 8px;
-	}
-	.cta {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		gap: 6px;
-		min-height: 54px;
-		border-radius: 14px;
-		background: var(--accent);
-		color: #fff;
-		font-size: 15.5px;
-		font-weight: 800;
-		text-decoration: none;
-		box-shadow: 0 5px 0 var(--accent-press);
-	}
-	.cta:active {
-		transform: translateY(2px);
-		box-shadow: 0 3px 0 var(--accent-press);
-	}
-	.cta.ghost {
-		background: var(--panel);
-		color: var(--text);
-		border: 1px solid var(--border-strong);
-		box-shadow: none;
-		font-weight: 700;
-	}
-	.cta.ghost:hover {
-		background: var(--panel-2);
-	}
 </style>

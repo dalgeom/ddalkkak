@@ -36,19 +36,22 @@
 </svelte:head>
 
 {#if phase === 'locked'}
-	<div class="lock">
-		<h1>아직 잠겨 있어요</h1>
-		<p>
+	<header class="cover">
+		<span class="kicker">오늘 문제 다시 보기</span>
+		<h1>완주하면<br /><b>열려요</b></h1>
+		<p class="lead">
 			오늘 문제 다시 보기는 <b>오늘의 10문제를 완주한 뒤</b>에 열립니다.
 			정답이 다 보이는 화면이라, 풀기 전에 열면 재미가 사라져요.
 		</p>
-		<a class="cta" href="/">오늘의 10문제 풀러 가기 <span aria-hidden="true">→</span></a>
-	</div>
+		<a class="cta top" href="/">오늘의 10문제 풀러 가기 <span aria-hidden="true">→</span></a>
+	</header>
 {:else if phase === 'ready' && view}
-	<nav class="crumb">
-		<a href="/">← 오늘의 10문제</a>
-	</nav>
-	<h1>{label}</h1>
+	<header class="cover">
+		<nav class="crumb" aria-label="위치">
+			<a href="/">오늘의 10문제</a><span aria-hidden="true">›</span><span>다시 보기</span>
+		</nav>
+		<h1>{label}</h1>
+	</header>
 	<div class="mymarks" aria-label="내 결과">
 		<span class="mm-label">내 기록</span>
 		<span class="mm-marks">{#each marks as m, i (i)}{MARK_EMOJI[m]}{/each}</span>
@@ -62,29 +65,12 @@
 {/if}
 
 <style>
-	.lock {
-		background: var(--panel);
-		border: 1px solid var(--border-strong);
-		border-radius: 20px;
-		padding: 26px 22px;
-		display: flex;
-		flex-direction: column;
-		gap: 14px;
-		align-items: flex-start;
-	}
-	.lock h1 {
-		font-size: 21px;
-		font-weight: 800;
-	}
-	.lock p {
-		margin: 0;
-		font-size: 14px;
-		line-height: 1.75;
-		color: var(--muted);
-		word-break: keep-all;
+	.cover {
+		margin-bottom: 14px;
 	}
 	.cta {
-		display: inline-flex;
+		display: flex;
+		justify-content: center;
 		align-items: center;
 		gap: 6px;
 		min-height: 50px;
@@ -102,25 +88,6 @@
 		box-shadow: 0 3px 0 var(--accent-press);
 	}
 
-	.crumb {
-		padding: 4px 0 6px;
-	}
-	.crumb a {
-		font-size: var(--fs-2xs);
-		font-weight: var(--fw-label);
-		color: var(--muted);
-		text-decoration: none;
-	}
-	.crumb a:hover {
-		color: var(--accent-text);
-	}
-	h1 {
-		font-size: var(--fs-xl);
-		font-weight: var(--fw-number);
-		letter-spacing: -0.02em;
-		font-variant-numeric: tabular-nums;
-		margin-bottom: 10px;
-	}
 	.mymarks {
 		display: flex;
 		align-items: center;

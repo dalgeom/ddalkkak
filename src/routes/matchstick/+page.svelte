@@ -471,14 +471,14 @@
 <div class="mroot">
 {#if screen === 'menu'}
 	<div class="menu">
-		<header class="mcover">
+		<header class="cover">
 			<span class="kicker">성냥개비</span>
 			<h1>성냥 <b>하나만</b> 옮겨<br />틀린 식을 참으로</h1>
-			<p class="mlead">획을 눌러 집고, 빈 자리를 눌러 놓으면 됩니다. 준비된 문제 {problems.length}개.</p>
-			<div class="mstats">
-				<div class="ms"><b>{stats.solved}</b><span>푼 판</span></div>
-				<div class="ms"><b>{stats.best}</b><span>최고 연속</span></div>
-				<div class="ms"><b>{problems.length - done.length}</b><span>남은 새 문제</span></div>
+			<p class="lead">획을 눌러 집고, 빈 자리를 눌러 놓으면 됩니다. 준비된 문제 {problems.length}개.</p>
+			<div class="facts">
+				<div class="fact"><b>{stats.solved}</b><span>푼 판</span></div>
+				<div class="fact"><b>{stats.best}</b><span>최고 연속</span></div>
+				<div class="fact"><b>{problems.length - done.length}</b><span>남은 새 문제</span></div>
 			</div>
 		</header>
 
@@ -513,7 +513,7 @@
 
 		<!-- v2(10/14): 오늘의 성냥 · 단계 · 그림 · 처음이라면 · 띠 · 무한 · 타임어택 · 개수 · 설명이 세로로 쌓여
 		     3,200px였다. 고르는 것은 타일 6칸 하나로 모으고, 시간·개수 선택지는 누른 타일 아래에만 펼친다. -->
-		<section class="msec">
+		<section class="sec">
 			<h2 class="mh">어떻게 풀까요?</h2>
 			<div class="modes">
 				<button class="mode" onclick={() => startStage(nextNo)}>
@@ -547,7 +547,7 @@
 		</section>
 
 		<!-- 단계 도전(matchStages.ts) — 메인 「단계 도전」 카드가 #stages로 온다 -->
-		<section class="msec" id="stages">
+		<section class="sec" id="stages">
 			<h2 class="mh">단계 도전</h2>
 			<p class="mp">60단계. 뒤로 갈수록 성냥 2개 옮기기, 빼기, 더하기 문제가 나와요.</p>
 			<button class="big" onclick={() => startStage(nextNo)}>
@@ -577,7 +577,7 @@
 		</section>
 
 		<!-- 검색으로 들어온 사람에게 이 퍼즐이 뭔지 설명한다. 놀이 흐름을 막지 않도록 모드 아래에 둔다. -->
-		<section class="msec about">
+		<section class="sec about">
 			<h2 class="mh">성냥개비 퍼즐이란</h2>
 			<p class="mp long">
 				틀린 등식이 성냥개비로 놓여 있습니다. 성냥 <b>하나만</b> 다른 자리로 옮겨서 등식을 참으로
@@ -755,39 +755,6 @@
 		flex-direction: column;
 		gap: 14px;
 	}
-	.mcover {
-		background: var(--panel);
-		border: 1px solid var(--border-strong);
-		border-radius: 20px;
-		padding: 24px 20px 20px;
-	}
-	.kicker {
-		display: inline-block;
-		font-size: 11.5px;
-		font-weight: 800;
-		letter-spacing: 0.4px;
-		color: var(--accent-text);
-		background: var(--correct-bg);
-		border-radius: 7px;
-		padding: 4px 11px;
-	}
-	.mcover h1 {
-		margin: 12px 0 8px;
-		font-size: 24px;
-		font-weight: 800;
-		line-height: 1.35;
-		letter-spacing: -0.4px;
-		word-break: keep-all;
-	}
-	.mcover h1 b {
-		color: var(--accent-text);
-	}
-	.mlead {
-		font-size: 13.5px;
-		line-height: 1.7;
-		color: var(--muted);
-		word-break: keep-all;
-	}
 	/* 오늘의 성냥개비 — 모드 카드보다 앞에 서는 자리라 강조선으로 구분한다 */
 	.today {
 		background: var(--panel);
@@ -832,38 +799,8 @@
 		line-height: 1.7;
 		word-break: keep-all;
 	}
-	.mstats {
-		display: grid;
-		grid-template-columns: repeat(3, 1fr);
-		gap: 8px;
-		margin-top: 16px;
-	}
-	.ms {
-		background: var(--panel-2);
-		border: 1px solid var(--border);
-		border-radius: 12px;
-		padding: 11px 6px;
-		text-align: center;
-	}
-	.ms b {
-		display: block;
-		font-size: 18px;
-		font-weight: 800;
-		color: var(--accent-text);
-		font-variant-numeric: tabular-nums;
-	}
-	.ms span {
-		font-size: 11.5px;
-		color: var(--muted-2);
-	}
 
 
-	.msec {
-		background: var(--panel);
-		border: 1px solid var(--border-strong);
-		border-radius: 16px;
-		padding: 16px;
-	}
 	.mh {
 		font-size: 16px;
 		font-weight: 800;
@@ -1019,14 +956,6 @@
 			animation: none;
 		}
 	}
-	@media (min-width: 768px) {
-		.mcover {
-			padding: 32px 28px 26px;
-		}
-		.mcover h1 {
-			font-size: 28px;
-		}
-	}
 
 	.mroot {
 		max-width: 640px;
@@ -1101,35 +1030,6 @@
 	}
 	.feedback.ok {
 		color: var(--accent-text);
-	}
-	.modes {
-		display: grid;
-		grid-template-columns: 1fr 1fr;
-		gap: 8px;
-	}
-	.mode {
-		display: flex;
-		flex-direction: column;
-		align-items: flex-start;
-		gap: 2px;
-		padding: 13px 14px;
-		border-radius: 14px;
-		background: var(--panel-2);
-		border: 1.5px solid var(--border);
-		color: var(--text);
-		text-align: left;
-		text-decoration: none;
-		font-family: inherit;
-		cursor: pointer;
-	}
-	.mode b {
-		font-size: 15.5px;
-		font-weight: 900;
-	}
-	.mode span {
-		font-size: 12.5px;
-		font-weight: 600;
-		color: var(--muted);
 	}
 	.mode.on {
 		border-color: var(--accent);

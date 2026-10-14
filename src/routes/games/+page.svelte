@@ -21,9 +21,9 @@
 
 <NewsBar />
 
-<header class="ghead">
+<header class="cover">
 	<h1>놀이</h1>
-	<p>딸깍의 퍼즐을 골라 풀어요. 가입 없이 바로 시작해요.</p>
+	<p class="lead">딸깍의 퍼즐을 골라 풀어요. 가입 없이 바로 시작해요.</p>
 </header>
 
 <div class="msp"><Missions /></div>
@@ -31,17 +31,8 @@
 <GameCards counts={data.counts} full />
 
 <style>
-	.ghead {
+	.cover {
 		margin-bottom: 14px;
-	}
-	h1 {
-		font-size: 28px;
-		font-weight: 900;
-	}
-	.ghead p {
-		margin-top: 4px;
-		font-size: 14px;
-		color: var(--muted);
 	}
 	.msp {
 		margin-bottom: 14px;

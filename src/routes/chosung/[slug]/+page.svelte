@@ -90,70 +90,6 @@
 </article>
 
 <style>
-	.cover {
-		background: var(--panel);
-		border: 1px solid var(--border-strong);
-		border-radius: 20px;
-		padding: 22px 20px;
-	}
-	.crumb {
-		display: flex;
-		align-items: center;
-		gap: 6px;
-		font-size: 12px;
-		font-weight: 700;
-		color: var(--muted-2);
-	}
-	.crumb a {
-		color: var(--accent-text);
-		text-decoration: none;
-	}
-	h1 {
-		margin: 10px 0;
-		font-size: 25px;
-		font-weight: 800;
-		line-height: 1.35;
-		letter-spacing: -0.4px;
-		word-break: keep-all;
-	}
-	h1 b {
-		color: var(--accent-text);
-	}
-	.lead {
-		margin: 0;
-		font-size: 14.5px;
-		line-height: 1.75;
-		color: var(--muted);
-		word-break: keep-all;
-	}
-	.facts {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 8px;
-		margin-top: 18px;
-	}
-	.fact {
-		flex: 1 1 60px;
-		background: var(--panel-2);
-		border: 1px solid var(--border);
-		border-radius: 12px;
-		padding: 11px 6px;
-		text-align: center;
-	}
-	.fact b {
-		display: block;
-		font-size: 17px;
-		font-weight: 800;
-		color: var(--accent-text);
-		font-variant-numeric: tabular-nums;
-	}
-	.fact span {
-		font-size: 11.5px;
-		color: var(--muted-2);
-	}
-	.sec {
-		margin-top: 26px;
-	}
 	.sh {
 		font-size: 17px;
 		font-weight: 800;
@@ -285,8 +221,5 @@
 		font-weight: 800;
 		text-decoration: none;
 		box-shadow: 0 5px 0 var(--accent-press);
-	}
-	.cta.top {
-		margin-top: 16px;
 	}
 </style>

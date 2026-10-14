@@ -17,9 +17,9 @@
 	<link rel="canonical" href="https://ddalkkak.app/news" />
 </svelte:head>
 
-<header class="nhead">
+<header class="cover">
 	<h1>새 소식</h1>
-	<p>딸깍에 새로 나온 퍼즐과 기능이에요.</p>
+	<p class="lead">딸깍에 새로 나온 퍼즐과 기능이에요.</p>
 </header>
 
 <ol class="nlist">
@@ -34,17 +34,8 @@
 </ol>
 
 <style>
-	.nhead {
+	.cover {
 		margin-bottom: 14px;
-	}
-	h1 {
-		font-size: 28px;
-		font-weight: 900;
-	}
-	.nhead p {
-		margin-top: 4px;
-		font-size: 14px;
-		color: var(--muted);
 	}
 	.nlist {
 		list-style: none;

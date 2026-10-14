@@ -322,64 +322,6 @@
 		flex-direction: column;
 		gap: 14px;
 	}
-	.cover {
-		background: var(--panel);
-		border: 1px solid var(--border-strong);
-		border-radius: 20px;
-		padding: 24px 20px 20px;
-	}
-	.kicker {
-		display: inline-block;
-		font-size: 11.5px;
-		font-weight: 800;
-		letter-spacing: 0.4px;
-		color: var(--accent-text);
-		background: var(--correct-bg);
-		border-radius: 7px;
-		padding: 4px 11px;
-	}
-	h1 {
-		margin: 12px 0 8px;
-		font-size: 24px;
-		font-weight: 800;
-		line-height: 1.35;
-		letter-spacing: -0.4px;
-		word-break: keep-all;
-	}
-	h1 b {
-		color: var(--accent-text);
-	}
-	.lead {
-		font-size: 13.5px;
-		line-height: 1.7;
-		color: var(--muted);
-		word-break: keep-all;
-	}
-	.facts {
-		display: grid;
-		grid-template-columns: repeat(3, 1fr);
-		gap: 8px;
-		margin-top: 16px;
-	}
-	.fact {
-		background: var(--panel-2);
-		border: 1px solid var(--border);
-		border-radius: 12px;
-		padding: 10px 4px;
-		text-align: center;
-	}
-	.fact b {
-		display: block;
-		font-size: 17px;
-		font-weight: 800;
-		color: var(--accent-text);
-		font-variant-numeric: tabular-nums;
-	}
-	.fact span {
-		font-size: 11.5px;
-		color: var(--muted-2);
-		word-break: keep-all;
-	}
 
 	/* 오늘의 초성 — /matchstick의 오늘의 성냥개비 카드와 같은 모양 */
 	.today {
@@ -465,12 +407,6 @@
 		}
 	}
 
-	.sec {
-		background: var(--panel);
-		border: 1px solid var(--border-strong);
-		border-radius: 18px;
-		padding: 18px 16px;
-	}
 	.mh {
 		margin: 0 0 4px;
 		font-size: 17px;

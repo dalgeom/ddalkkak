@@ -93,10 +93,12 @@
 	{@html `<script type="application/ld+json">${quizLd}</` + `script>`}
 </svelte:head>
 
-<nav class="crumb">
-	<a href="/archive">← 지난 문제</a>
-</nav>
-<h1>{data.label}</h1>
+<header class="cover">
+	<nav class="crumb" aria-label="위치">
+		<a href="/archive">지난 문제</a><span aria-hidden="true">›</span><span>그날의 10문제</span>
+	</nav>
+	<h1>{data.label}</h1>
+</header>
 
 <DayReview view={data} />
 
@@ -107,24 +109,8 @@
 </a>
 
 <style>
-	.crumb {
-		padding: 4px 0 6px;
-	}
-	.crumb a {
-		font-size: var(--fs-2xs);
-		font-weight: var(--fw-label);
-		color: var(--muted);
-		text-decoration: none;
-	}
-	.crumb a:hover {
-		color: var(--accent-text);
-	}
-	h1 {
-		font-size: var(--fs-xl);
-		font-weight: var(--fw-number);
-		letter-spacing: -0.02em;
-		font-variant-numeric: tabular-nums;
-		margin-bottom: 22px;
+	.cover {
+		margin-bottom: 16px;
 	}
 	.mid-ad {
 		margin: 0;
