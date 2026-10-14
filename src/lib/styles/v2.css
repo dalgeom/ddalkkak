@@ -55,7 +55,7 @@
 
 /* 머리 안 첫 행동 버튼(.cta 모양은 각 화면 것) */
 .cover .cta.top {
-	margin-top: 16px;
+	margin: 16px 0 10px;
 }
 
 /* 숫자 줄 — 몇 개든 한 줄에 같은 폭으로 */

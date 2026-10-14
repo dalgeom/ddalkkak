@@ -62,7 +62,7 @@
 		{/if}
 	</header>
 
-	<section class="sec">
+	<section>
 		<ul class="days">
 			{#each data.days as d (d.day)}
 				<li>
