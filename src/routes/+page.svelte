@@ -44,6 +44,7 @@
 	import GameCards from '$lib/components/GameCards.svelte';
 	import Missions from '$lib/components/Missions.svelte';
 	import NewsBar from '$lib/components/NewsBar.svelte';
+	import NewsSheet from '$lib/components/NewsSheet.svelte';
 	import CubeFold from '$lib/components/CubeFold.svelte';
 	import { FACES as CUBE_FACES, type CubeNetProblem } from '$lib/cubenet';
 	import SevenSeg from '$lib/components/SevenSeg.svelte';
@@ -210,10 +211,9 @@
 	let typeChip = $derived.by(() => {
 		const c = queue[pos];
 		if (!c) return '';
-		if (c.bonus) return '보너스 · 마지막 문제';
-		const same = queue.filter((q) => q.kind === c.kind && !q.bonus);
-		const nth = queue.slice(0, pos + 1).filter((q) => q.kind === c.kind && !q.bonus).length;
-		return `${KIND_LABEL[c.kind]} · ${nth}/${same.length}`;
+		// v2(10/14): 유형별 순번(「상식 · 1/2」)만 보여서 10문제 중 몇 번째인지는 막대로만 알았다
+		if (c.bonus) return `${pos + 1} / ${queue.length} · 보너스`;
+		return `${pos + 1} / ${queue.length} · ${KIND_LABEL[c.kind]}`;
 	});
 
 	/** 결과 화면 행: 유형 3개 + 보너스. 보너스를 유형에 합치면 "발견형 4"처럼 보여 10문제 구성이 어긋난다.
@@ -995,6 +995,8 @@
 </svelte:head>
 
 {#if phase === 'home'}
+	<!-- 새 소식 시트는 첫 화면에서만 — 결과 화면 위로 올라와 결과를 가렸다(10/14 확인) -->
+	<NewsSheet />
 	<NewsBar />
 	<!-- ① 히어로 -->
 	<section class="hero-card reveal">

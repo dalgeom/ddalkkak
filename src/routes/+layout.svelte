@@ -5,7 +5,6 @@
 	import InAppGate from '$lib/components/InAppGate.svelte';
 	import { logoClicks, focusMode } from '$lib/nav';
 	import TabBar from '$lib/components/TabBar.svelte';
-	import NewsSheet from '$lib/components/NewsSheet.svelte';
 	import { freshNotices, loadSeen } from '$lib/notices';
 	import { captureInstallPrompt } from '$lib/pwa';
 	import { page } from '$app/state';
@@ -43,9 +42,6 @@
 	<Splash />
 {/if}
 <InAppGate />
-{#if page.url.pathname === '/' && !$focusMode}
-	<NewsSheet />
-{/if}
 
 <div class="wrap" class:focus={$focusMode}>
 	<header>
