@@ -1095,6 +1095,19 @@
 			<p class="more-s">
 				딸깍이 준비한 <b>{TOTAL_PROBLEMS.toLocaleString()}</b>문제! 유형별로 계속 풀어봐요
 			</p>
+			<!-- 10/14에 /matchstick에 단계 도전·그림 퍼즐을 만들었는데 메인에서 닿는 길이 푸터 링크뿐이었다
+			     (사용자 지적). 성냥개비는 검색 입구 1위라 메인에서도 새 놀이를 바로 보여 준다. -->
+			<div class="newbox">
+				<p class="new-h">새로 나왔어요 · 성냥개비</p>
+				<div class="new-grid">
+					<a class="nbtn" href="/matchstick#stages" use:ctaTrack={'new_stage'}>
+						<b>단계 도전</b><span>60단계, 2개 옮기기까지</span>
+					</a>
+					<a class="nbtn" href="/matchstick/picture" use:ctaTrack={'new_pic'}>
+						<b>그림 퍼즐</b><span>정사각형·강아지·한글</span>
+					</a>
+				</div>
+			</div>
 			<div class="more-grid">
 				<a class="mbtn" href="/play?filter=puzzle">
 					<span class="mb-t">발견형</span>
@@ -1104,7 +1117,8 @@
 					<span class="mb-t">상식</span>
 					<span class="mb-n">{KIND_COUNT.trivia}</span>
 				</a>
-				<a class="mbtn" href="/play?filter=match">
+				<!-- 성냥개비는 /play 무한 연습이 아니라 /matchstick으로 — 무한 연습·단계 도전·그림 퍼즐을 거기서 고른다 -->
+				<a class="mbtn" href="/matchstick">
 					<span class="mb-t">성냥개비</span>
 					<span class="mb-n">{KIND_COUNT.match}</span>
 				</a>
@@ -1969,6 +1983,44 @@
 		color: var(--accent-text);
 		font-size: 15px;
 		font-variant-numeric: tabular-nums;
+	}
+	.newbox {
+		margin: 0 0 14px;
+		padding: 12px;
+		border-radius: 14px;
+		border: 1.5px solid var(--accent);
+		background: var(--panel);
+	}
+	.new-h {
+		margin: 0 0 10px;
+		font-size: 13px;
+		font-weight: 800;
+		color: var(--accent-text);
+	}
+	.new-grid {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 8px;
+	}
+	.nbtn {
+		display: flex;
+		flex-direction: column;
+		gap: 3px;
+		padding: 12px;
+		border-radius: 12px;
+		background: var(--panel-2);
+		border: 1px solid var(--border);
+		text-decoration: none;
+		color: inherit;
+	}
+	.nbtn b {
+		font-size: 15px;
+		font-weight: 800;
+	}
+	.nbtn span {
+		font-size: 12px;
+		color: var(--muted);
+		word-break: keep-all;
 	}
 	.more-grid {
 		display: grid;

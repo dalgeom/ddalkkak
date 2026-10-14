@@ -502,7 +502,7 @@
 		{/if}
 
 		<!-- 단계 도전(matchStages.ts) — 검색으로 온 사람에게 다시 올 이유(목표·진행도)를 준다 -->
-		<section class="msec">
+		<section class="msec" id="stages">
 			<h2 class="mh">단계 도전</h2>
 			<p class="mp">60단계. 뒤로 갈수록 성냥 2개 옮기기, 빼기, 더하기 문제가 나와요.</p>
 			<button class="big" onclick={() => startStage(nextNo)}>
