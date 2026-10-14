@@ -94,17 +94,46 @@ export function moveDiff(orig: Board, cur: Board): { removed: number; added: num
 export function moveHints(p: MatchProblem): [string, string] {
 	const o = parseEq(p.displayed);
 	const s = parseEq(p.solution);
-	const d = digitsOf(o);
-	const where = (gi: number) => {
-		if (gi === 0) return `맨 앞 숫자 「${d[0]}」`;
-		if (gi === 1) return `기호 뒤 숫자 「${d[1]}」`;
-		if (o.cLen === 1) return `= 뒤 숫자 「${d[2]}」`;
-		return `= 뒤 「${d[2]}${d[3]}」의 ${gi === 2 ? '앞자리' : '뒷자리'} 「${d[gi]}」`;
-	};
+	const where = (gi: number) => spotName(o, gi);
 	const op = `기호 「${o.opPlus ? '+' : '−'}」`;
 	const from = o.opPlus && !s.opPlus ? op : where(o.glyphs.findIndex((m, i) => m & ~s.glyphs[i]));
 	const to = !o.opPlus && s.opPlus ? op : where(o.glyphs.findIndex((m, i) => s.glyphs[i] & ~m));
 	return [`성냥을 빼는 곳: ${from}`, from === to ? '뺀 성냥을 같은 숫자 안에 다시 꽂아요' : `꽂는 곳: ${to}`];
+}
+
+/** 판 위 자리 이름 — moveHints·ruleHints가 쓴다 */
+function spotName(o: Board, gi: number): string {
+	const d = digitsOf(o);
+	if (gi === 0) return `맨 앞 숫자 「${d[0]}」`;
+	if (gi === 1) return `기호 뒤 숫자 「${d[1]}」`;
+	if (o.cLen === 1) return `= 뒤 숫자 「${d[2]}」`;
+	return `= 뒤 「${d[2]}${d[3]}」의 ${gi === 2 ? '앞자리' : '뒷자리'} 「${d[gi]}」`;
+}
+
+/**
+ * 단계 모드 힌트(2026-10-14). move1은 moveHints 그대로, 빼기·더하기는 한 줄,
+ * 2개 옮기기는 빼는 곳 → 꽂는 곳 두 줄이고 한 자리에서 둘이면 「~에서 2개」로 묶는다.
+ */
+export function ruleHints(p: MatchProblem, rule: MatchRule): string[] {
+	if (rule === 'move1') return moveHints(p);
+	const o = parseEq(p.displayed);
+	const s = parseEq(p.solution);
+	const from: string[] = [];
+	const to: string[] = [];
+	const put = (list: string[], name: string, n: number) => {
+		if (n === 1) list.push(name);
+		else if (n > 1) list.push(`${name}에서 ${n}개`);
+	};
+	o.glyphs.forEach((m, i) => {
+		put(from, spotName(o, i), popcount(m & ~s.glyphs[i]));
+		put(to, spotName(o, i), popcount(s.glyphs[i] & ~m));
+	});
+	const op = `기호 「${o.opPlus ? '+' : '−'}」`;
+	if (o.opPlus && !s.opPlus) from.push(op);
+	if (!o.opPlus && s.opPlus) to.push(op);
+	if (rule === 'remove1') return [`성냥을 빼는 곳: ${from.join(', ')}`];
+	if (rule === 'add1') return [`성냥을 꽂는 곳: ${to.join(', ')}`];
+	return [`성냥을 빼는 곳: ${from.join(', ')}`, `꽂는 곳: ${to.join(', ')}`];
 }
 
 /** 정확히 성냥 하나를 옮겨 참이 되었는가 */

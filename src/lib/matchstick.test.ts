@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { parseEq, isTrue, isSolved, eqString, moveDiff, moveHints, judgeRule } from './matchstick';
+import { parseEq, isTrue, isSolved, eqString, moveDiff, moveHints, judgeRule, ruleHints } from './matchstick';
+import V from './data/matchstick-variants.json';
 import problems from './data/matchstick-problems.json';
 import { MATCH_TOTAL } from './game';
 
@@ -174,5 +175,35 @@ describe('judgeRule — 규칙별 판정', () => {
 		expect(judgeRule(parseEq('8 + 1 = 9'), parseEq('8 + 1 = 9'), 'remove1')).toBe('more');
 		expect(judgeRule(parseEq('9 - 1 = 9'), parseEq('9 - 1 = 8'), 'add1')).toBe('solved');
 		expect(judgeRule(parseEq('9 - 1 = 9'), parseEq('9 - 7 = 9'), 'add1')).toBe('wrong');
+	});
+});
+
+describe('ruleHints — 규칙별 힌트', () => {
+	it('1개 옮기기는 moveHints와 같다', () => {
+		const p = { displayed: '0 + 0 = 8', solution: '8 - 0 = 8' };
+		expect(ruleHints(p, 'move1')).toEqual(moveHints(p));
+	});
+	it('빼기는 빼는 곳 하나, 더하기는 꽂는 곳 하나', () => {
+		expect(ruleHints({ displayed: '9 - 1 = 9', solution: '9 - 1 = 8' }, 'add1')).toEqual(['성냥을 꽂는 곳: = 뒤 숫자 「9」']);
+		expect(ruleHints({ displayed: '0 + 5 = 6', solution: '0 + 5 = 5' }, 'remove1')).toEqual(['성냥을 빼는 곳: = 뒤 숫자 「6」']);
+	});
+	it('2개 옮기기는 빼는 곳 → 꽂는 곳, 같은 숫자에서 둘이면 묶는다', () => {
+		expect(ruleHints({ displayed: '0 - 0 = 7', solution: '9 - 8 = 1' }, 'move2')).toEqual([
+			'성냥을 빼는 곳: 맨 앞 숫자 「0」, = 뒤 숫자 「7」',
+			'꽂는 곳: 맨 앞 숫자 「0」, 기호 뒤 숫자 「0」'
+		]);
+		expect(ruleHints({ displayed: '0 + 1 = 4', solution: '0 + 7 = 7' }, 'move2')).toEqual([
+			'성냥을 빼는 곳: = 뒤 숫자 「4」에서 2개',
+			'꽂는 곳: 기호 뒤 숫자 「1」, = 뒤 숫자 「4」'
+		]);
+	});
+	it('새 규칙 문제 전부 — 빈칸·undefined 없이 규칙 개수만큼', () => {
+		for (const rule of ['move2', 'remove1', 'add1'] as const) {
+			for (const p of (V as Record<string, { displayed: string; solution: string }[]>)[rule]) {
+				const h = ruleHints(p, rule);
+				expect(h, p.displayed).toHaveLength(rule === 'move2' ? 2 : 1);
+				expect(h.join(' '), p.displayed).not.toMatch(/undefined|: $/);
+			}
+		}
 	});
 });
