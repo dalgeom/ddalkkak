@@ -749,6 +749,18 @@
 {/if}
 
 <style>
+	/* 이 화면의 구역은 카드(v1부터). 사이는 .menu의 gap이 띄우므로 공통 .sec 여백(v2.css)은 0 */
+	.menu > .sec {
+		margin-top: 0;
+		background: var(--panel);
+		border: 1px solid var(--border-strong);
+		border-radius: var(--radius);
+		padding: 18px 16px;
+	}
+	/* 다른 놀이 칸은 다른 화면과 같은 28px — gap 14px가 더해지지 않게 */
+	.menu > :global(.other) {
+		margin-top: 14px;
+	}
 	/* ── 메뉴 화면 ── */
 	.menu {
 		display: flex;

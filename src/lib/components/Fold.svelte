@@ -32,7 +32,7 @@
 		right: 0;
 		bottom: 0;
 		height: 90px;
-		background: linear-gradient(to bottom, transparent, var(--panel));
+		background: linear-gradient(to bottom, rgba(239, 231, 216, 0), var(--bg));
 		pointer-events: none;
 	}
 	.more {

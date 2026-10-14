@@ -10,7 +10,6 @@
 /* ── 머리 ── */
 .cover {
 	padding: 2px 2px 0;
-	margin-bottom: 6px;
 }
 .kicker {
 	display: inline-block;
@@ -91,19 +90,12 @@
 	word-break: keep-all;
 }
 
-/* ── 구역 카드 ── */
+/* ── 구역 ──
+ * 평평한 구역 + 사이 여백만. 안의 견본·항목·달력이 이미 카드라 구역까지 카드로 싸면 카드 속 카드가 된다
+ * (v1에서 구역이 카드였던 곳은 초성 홈 · 성냥 홈뿐 — 그 두 화면은 .menu > .sec로 카드를 유지한다).
+ * 여백은 화면마다 18~28px이던 것을 26px 하나로. 이 여백을 빠뜨려 57개 화면에서 구역이 붙었다(10/14 재점검). */
 .sec {
-	background: var(--panel);
-	border: 1px solid var(--border-strong);
-	border-radius: var(--radius);
-	padding: 18px 16px;
-}
-
-/* 버튼만 든 구역은 카드로 감싸지 않는다 — 상자 속 상자가 된다 */
-.sec.ctas {
-	background: none;
-	border: none;
-	padding: 0;
+	margin-top: 26px;
 }
 
 /* ── 「어떻게 풀까요?」 놀이 방법 타일(ModeTiles.svelte와 /matchstick이 같이 쓴다) ── */
