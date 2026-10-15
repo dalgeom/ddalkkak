@@ -3,6 +3,7 @@
  *
  *   node scripts/indexnow.mjs            사이트맵 전체 + /llms.txt
  *   node scripts/indexnow.mjs /a /b      그 주소만
+ *   (Git Bash에서는 MSYS_NO_PATHCONV=1을 앞에 붙인다 — /a가 C:/Program Files/Git/a로 바뀌어 422가 난다)
  *
  * 키는 8/4에 static/163207f5f728f8389fb39dde1d60303f.txt로 심었다(#141). 내용이 바뀐 화면이 있을 때만 돌린다 —
  * 바뀐 것 없이 자주 보내면 무시당한다.
