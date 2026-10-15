@@ -1,5 +1,5 @@
 // 3·4: 흐름 시험. 처음 온 사람(빈 프로필)으로 운영 사이트를 끝까지 눌러 본다.
-import { launch, sleep, OUT } from './cdp.mjs';
+import { launch, sleep, OUT, BASE } from './cdp.mjs';
 import { writeFileSync } from 'node:fs';
 const res = [];
 const ok = (name, pass, detail = '') => { res.push({ name, pass, detail }); console.log(`${pass ? '통과' : '실패'}  ${name}${detail ? '  — ' + detail : ''}`); };
@@ -145,6 +145,10 @@ for (const [f, want] of [['cube', 'cube'], ['match', 'match'], ['trivia', 'choic
 	}
 	ok(`/play?filter=${f} 는 그 유형만`, kinds.every((k) => k === want), kinds.join(','));
 }
+
+// 5b. 상식 대결 링크 미리보기 — 친구 점수 그림 · 제목(10/15)
+m = await (async () => { const h = await (await fetch(BASE + '/trivia/duel?s=4242&n=7&t=80&nocache=' + Date.now())).text(); const im = [...h.matchAll(/property="og:image" content="([^"]+)"/g)].map((x) => x[1]); const t = (h.match(/property="og:title" content="([^"]+)"/) || [])[1]; return { im, t }; })();
+ok('대결 링크 미리보기 = 친구 점수 그림 하나 · 제목', m.im.length === 1 && m.im[0].endsWith('/og/duel-7.png') && (m.t || '').includes('7/10'), JSON.stringify(m));
 
 // 6. 상식 홈 — 견본 눌러 보기 · 접기 · 타일
 await b.go('/trivia', 2000);

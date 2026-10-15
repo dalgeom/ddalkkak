@@ -24,7 +24,7 @@ for (const w of [390, 320]) {
 			const imgs = [...document.images].filter(i=>i.complete && i.naturalWidth===0 && !/google|doubleclick/.test(i.src)).map(i=>i.src).slice(0,3);
 			const hrefs = [...document.querySelectorAll('a[href]')].map(a=>a.getAttribute('href')).filter(h=>h.startsWith('/') && !h.startsWith('//'));
 			return { w: W, sw: document.documentElement.scrollWidth, h: document.documentElement.scrollHeight, over, imgs, hrefs,
-				cover: !!document.querySelector('header.cover'), h1: document.querySelector('h1')?.textContent.trim().slice(0,30) ?? '', title: document.title.slice(0,40) };
+				og: document.querySelectorAll('meta[property="og:image"]').length, cover: !!document.querySelector('header.cover'), h1: document.querySelector('h1')?.textContent.trim().slice(0,30) ?? '', title: document.title.slice(0,40) };
 		`);
 		r.hrefs.forEach((h) => links.add(h.split('#')[0] || '/'));
 		rows.push({ p, w, ...r, hrefs: undefined });
@@ -48,8 +48,9 @@ writeFileSync(OUT + 'sweep.json', JSON.stringify({ rows, status, errors: b.error
 console.log('화면', rows.length, '· 링크', status.length);
 console.log('가로 넘침', rows.filter((r) => r.sw > r.w + 1 || r.over.length).map((r) => `${r.w} ${r.p} sw=${r.sw} ${r.over.join(', ')}`));
 console.log('깨진 이미지', rows.filter((r) => r.imgs.length).map((r) => `${r.p} ${r.imgs}`));
+console.log('미리보기 그림 태그가 1개가 아님', rows.filter((r) => r.og !== 1).map((r) => `${r.p} ${r.og}개`));
 console.log('공통 머리 없음', [...new Set(rows.filter((r) => !r.cover).map((r) => r.p))]);
 console.log('나쁜 링크', status.filter((s) => s.bad));
 console.log('오류', b.errors.length ? b.errors : '없음');
 console.log('막은 서버 기록 요청', b.stats.length);
-if (rows.some((r) => r.sw > r.w + 1 || r.over.length || r.imgs.length) || status.some((s) => s.bad) || b.errors.length) process.exitCode = 1;
+if (rows.some((r) => r.sw > r.w + 1 || r.over.length || r.imgs.length || r.og !== 1) || status.some((s) => s.bad) || b.errors.length) process.exitCode = 1;

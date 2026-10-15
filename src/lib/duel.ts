@@ -51,3 +51,27 @@ export function duelOutcome(me: { score: number; secs: number }, vs: { score: nu
 	if (me.secs !== vs.secs) return me.secs < vs.secs ? 'win' : 'lose';
 	return 'draw';
 }
+
+/**
+ * 대결 링크 미리보기(카카오톡 · 문자) — 그림 · 제목 · 설명. 그림은 scripts/og-duel.mjs가 미리 만든 12장 중 하나.
+ * 시간은 링크마다 달라 그림 대신 설명에 넣는다(10/15 시안 docs/시안/duel-og, 「B 점수판형 + 시간은 설명」).
+ */
+export function duelOg(vs: { score: number; secs: number } | null, fmt: (ms: number) => string): { title: string; description: string; image: string } {
+	const base = 'https://ddalkkak.app/og/';
+	if (!vs) {
+		return {
+			title: '상식 퀴즈 대결 — 같은 10문제로 겨뤄요',
+			description: '쉬운 문제부터 10개. 점수가 같으면 빠른 쪽이 이겨요.',
+			image: base + 'duel.png'
+		};
+	}
+	const t = fmt(vs.secs * 1000);
+	const image = `${base}duel-${vs.score}.png`;
+	if (vs.score === DUEL_SIZE) {
+		return { title: `친구가 ${DUEL_SIZE}/${DUEL_SIZE} 만점으로 도전장을 보냈어요`, description: `이기려면 ${t}보다 빨리 다 맞혀야 해요.`, image };
+	}
+	if (vs.score === 0) {
+		return { title: `친구가 0/${DUEL_SIZE}으로 도전장을 보냈어요`, description: '같은 10문제, 하나만 맞혀도 이겨요.', image };
+	}
+	return { title: `친구가 ${vs.score}/${DUEL_SIZE}으로 도전장을 보냈어요`, description: `같은 10문제, ${t}. 이길 수 있어요?`, image };
+}

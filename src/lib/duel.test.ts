@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { pickDuel, parseSeed, parseVs, duelOutcome, DUEL_SIZE, DUEL_PLAN } from './duel';
+import { pickDuel, parseSeed, parseVs, duelOutcome, duelOg, DUEL_SIZE, DUEL_PLAN } from './duel';
 import { TRIVIA } from './trivia';
 
 describe('상식 대결', () => {
@@ -35,5 +35,30 @@ describe('상식 대결', () => {
 		expect(duelOutcome({ score: 8, secs: 90 }, { score: 7, secs: 30 })).toBe('win');
 		expect(duelOutcome({ score: 7, secs: 90 }, { score: 7, secs: 30 })).toBe('lose');
 		expect(duelOutcome({ score: 7, secs: 30 }, { score: 7, secs: 30 })).toBe('draw');
+	});
+});
+
+describe('대결 링크 미리보기', () => {
+	const fmt = (ms: number) => `${Math.floor(ms / 60000)}분 ${(ms / 1000) % 60}초`;
+	it('점수 없는 링크는 기본 대결 그림', () => {
+		expect(duelOg(null, fmt)).toEqual({
+			title: '상식 퀴즈 대결 — 같은 10문제로 겨뤄요',
+			description: '쉬운 문제부터 10개. 점수가 같으면 빠른 쪽이 이겨요.',
+			image: 'https://ddalkkak.app/og/duel.png'
+		});
+	});
+	it('친구 점수에 맞는 그림 · 시간은 설명에', () => {
+		const o = duelOg({ score: 7, secs: 80 }, fmt);
+		expect(o.image).toBe('https://ddalkkak.app/og/duel-7.png');
+		expect(o.title).toBe('친구가 7/10으로 도전장을 보냈어요');
+		expect(o.description).toBe('같은 10문제, 1분 20초. 이길 수 있어요?');
+	});
+	it('만점 · 0점은 문구가 다르다', () => {
+		expect(duelOg({ score: 10, secs: 58 }, fmt).description).toBe('이기려면 0분 58초보다 빨리 다 맞혀야 해요.');
+		expect(duelOg({ score: 0, secs: 125 }, fmt).description).toBe('같은 10문제, 하나만 맞혀도 이겨요.');
+	});
+	it('그림 12장이 static/og에 다 있다(scripts/og-duel.mjs)', () => {
+		const have = Object.keys(import.meta.glob('/static/og/*.png')).map((p) => p.split('/').pop());
+		for (const f of ['duel', ...Array.from({ length: 11 }, (_, i) => `duel-${i}`)]) expect(have, f).toContain(`${f}.png`);
 	});
 });

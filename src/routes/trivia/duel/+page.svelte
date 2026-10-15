@@ -95,6 +95,10 @@
 		content="상식 퀴즈 10문제를 풀고 링크를 보내면 친구가 같은 문제로 도전해요. 점수가 같으면 빠른 쪽이 이겨요. 가입 없이 바로."
 	/>
 	<link rel="canonical" href="https://ddalkkak.app/trivia/duel" />
+	<!-- 미리보기: 링크마다 친구 점수 그림(그림 태그는 레이아웃이 data.ogImage로 낸다). og:url은 받은 주소 그대로 — 링크마다 따로 긁히게 -->
+	<meta property="og:title" content={data.og.title} />
+	<meta property="og:description" content={data.og.description} />
+	<meta property="og:url" content={data.ogUrl} />
 </svelte:head>
 
 {#if phase === 'intro'}

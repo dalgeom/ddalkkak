@@ -1,5 +1,6 @@
 import { TRIVIA } from '$lib/trivia';
-import { pickDuel, parseSeed, parseVs } from '$lib/duel';
+import { pickDuel, parseSeed, parseVs, duelOg } from '$lib/duel';
+import { formatDuration } from '$lib/game';
 
 // 링크의 씨앗(?s=)마다 다른 10문제다 — 미리 그려 둘 수 없다. 상식 문제 파일(약 300KB)은 서버에만 두고
 // 고른 10문제만 내린다(duel.ts).
@@ -18,5 +19,7 @@ export function load({ url }) {
 		answerIndex: p.answerIndex ?? 0,
 		explain: p.explain
 	}));
-	return { seed, vs, questions };
+	// 카카오톡 · 문자 미리보기 — 친구 점수가 보이는 그림 · 제목 · 설명(duel.ts duelOg). ogImage는 레이아웃이 읽는다
+	const og = duelOg(vs, formatDuration);
+	return { seed, vs, questions, og, ogImage: og.image, ogUrl: url.origin + url.pathname + url.search };
 }

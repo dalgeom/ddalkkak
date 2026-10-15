@@ -43,6 +43,14 @@
 	});
 </script>
 
+<!-- 공유 미리보기 그림 — 기본은 og-default.png, 페이지가 data.ogImage를 주면 그것(대결 링크의 친구 점수 그림). 절대 주소여야 카톡 · 페북이 읽는다 -->
+<svelte:head>
+	<meta property="og:image" content={(page.data as { ogImage?: string }).ogImage ?? 'https://ddalkkak.app/og-default.png'} />
+	<meta property="og:image:width" content="1200" />
+	<meta property="og:image:height" content="630" />
+	<meta name="twitter:image" content={(page.data as { ogImage?: string }).ogImage ?? 'https://ddalkkak.app/og-default.png'} />
+</svelte:head>
+
 <!-- 검색으로 낱개 페이지에 떨어진 사람에게 1.2초 브랜드 인트로는 이탈 요인일 뿐이다.
      세션당 1회로 막았다가 되돌린 적이 있는데(Splash.svelte 주석), 그건 횟수 조건이라
      새로고침해도 안 보이는 게 문제였다. 이건 경로 조건이라 홈에서는 늘 뜬다. -->
