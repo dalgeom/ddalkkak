@@ -234,6 +234,8 @@ CTA = [
     ("cta_new_pic_click", "메인 새 기능 → 그림 퍼즐 누름"),
     ("cta_other_seen", "다른 놀이 칸이 눈에 들어옴(10/14~)"),
     ("cta_other_click", "다른 놀이 → 오늘의 10문제 누름"),
+    ("cta_next_seen", "성냥·초성 다 푼 뒤 → 오늘의 10문제 카드 봄(10/15~)"),
+    ("cta_next_click", "그 카드 누름"),
     # 10/13~ 읽을거리 글의 분야 버튼 — 도입부 뒤(top)와 글 끝(end)
     ("cta_read_top_seen", "읽을거리 위 분야 버튼이 눈에 들어옴"),
     ("cta_read_top_click", "읽을거리 위 분야 버튼 누름"),

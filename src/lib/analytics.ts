@@ -33,13 +33,13 @@ export function track(name: string, params?: Params): void {
  */
 export function ctaTrack(
 	node: HTMLElement,
-	slot: 'band' | 'foot' | 'share' | 'teaser' | 'send' | 'read_top' | 'read_end' | 'new_stage' | 'new_pic' | 'other'
+	slot: 'band' | 'foot' | 'share' | 'teaser' | 'send' | 'read_top' | 'read_end' | 'new_stage' | 'new_pic' | 'other' | 'next'
 ) {
 	const onClick = () => {
 		track(`cta_${slot}_click`);
 		// 띠·하단 버튼은 데일리로 가는 버튼이다(공유 영역·내일 예고는 아니다). 홈이 뜨면 곧장
 		// 시작하도록 표시를 남긴다 — +page.svelte의 onMount가 takeGoDaily()로 읽고 지운다.
-		if (slot === 'band' || slot === 'foot' || slot === 'other') markGoDaily();
+		if (slot === 'band' || slot === 'foot' || slot === 'other' || slot === 'next') markGoDaily();
 	};
 	node.addEventListener('click', onClick);
 	const seen = seenOnce(node, `cta_${slot}_seen`);

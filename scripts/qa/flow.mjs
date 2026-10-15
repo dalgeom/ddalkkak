@@ -30,6 +30,23 @@ ok('하단 탭 오늘·놀이·기록', m.tabs.length >= 3, m.tabs.join(' '));
 ok('메인 카드 속 카드 없음', m.dbl === 0, 'dbl=' + m.dbl);
 await b.shot(OUT + 'f-home.jpg');
 
+// 1b. 오늘의 성냥개비를 끝낸 순간 → 오늘의 10문제로 잇는 카드(10/15 성장 작업 · DailyNext)
+await b.go('/matchstick', 2500);
+m = await b.ev(`
+	document.querySelector('.today .big').click(); await new Promise(r=>setTimeout(r,800));
+	[...document.querySelectorAll('button')].find(x=>x.textContent.trim()==='정답 보기').click(); await new Promise(r=>setTimeout(r,1500));
+	const card = document.querySelector('.dnext');
+	const free = [...document.querySelectorAll('button')].find(x=>/무한 연습 이어서/.test(x.textContent));
+	return { card: card?.innerText.replace(/\\s+/g,' ').slice(0,60) ?? null, freeGhost: !!free && free.classList.contains('ghost') };`);
+ok('오늘의 성냥 끝낸 뒤 「오늘의 10문제」 카드', !!m.card, m.card ?? '');
+ok('카드가 보이면 무한 연습 버튼은 테두리(초록 큰 버튼 하나)', m.freeGhost);
+await b.shot(OUT + 'f-match-next.jpg');
+await b.ev(`document.querySelector('.dnext').click(); return 1;`);
+await sleep(3500);
+m = await b.ev(`return { path: location.pathname, playing: !!document.querySelector('.exit') };`);
+ok('카드를 누르면 메인에서 오늘의 10문제가 바로 시작', m.path === '/' && m.playing, JSON.stringify(m));
+await b.go('/', 3500);
+
 // 2. 데일리 10문제 — 전부 「모르겠어요」로 넘겨 결과까지
 await b.ev(`document.querySelector('.cta').click(); return 1;`);
 await sleep(1500);
@@ -86,6 +103,10 @@ ok('전부 넘겨도 「완주」라 안 함', !m.wanju && m.took);
 ok('결과 화면 알림 권유 하나', m.notify.length <= 1, m.notify.join(' / '));
 ok('결과 화면 초록 큰 버튼 하나 이하', m.green.length <= 1, m.green.join(' / '));
 ok('결과 화면 「다음 놀이」로 이어짐', m.other);
+// 오늘의 10문제를 끝낸 뒤에는 성냥 화면의 「오늘의 10문제」 카드가 숨는다
+await b.go('/matchstick', 2500);
+ok('데일리를 끝낸 뒤에는 「오늘의 10문제」 카드 숨김', !(await b.ev(`return !!document.querySelector('.dnext');`)));
+await b.go('/', 3000);
 
 // 11. 기록·오늘 다시 보기(완주 뒤라 열려야 함)
 await b.go('/today', 2500);

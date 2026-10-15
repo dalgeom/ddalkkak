@@ -9,6 +9,7 @@
 	import { CHOSUNG_WORDS, chosungOf, isCorrect, chosungOfDay, categoryBySlug } from '$lib/chosung';
 	import { nextStreak, shownStreak, type DayStreak } from '$lib/dailyStreak';
 	import PushPrompt from '$lib/components/PushPrompt.svelte';
+	import DailyNext from '$lib/components/DailyNext.svelte';
 
 	type Mode = { type: 'today' } | { type: 'free'; cat: string };
 
@@ -36,6 +37,8 @@
 	let todayIdx = $derived(day ? chosungOfDay(day) : -1);
 	let todayWord = $derived(todayIdx >= 0 ? CHOSUNG_WORDS[todayIdx] : null);
 	let todayDone = $derived(!!day && daily?.day === day);
+	/** 「오늘의 10문제로 이어 가기」 카드가 보이는지 — 보이면 이어서 풀기 버튼을 테두리로 낮춘다(DailyNext) */
+	let nextShown = $state(false);
 	let todayWon = $derived(todayDone && (daily?.streak ?? 0) > 0);
 	let dailyStreak = $derived(day ? shownStreak(daily, day) : 0);
 	let tomorrowPeek = $derived.by(() => {
@@ -199,6 +202,7 @@
 						<p class="t-done">
 							{todayWon ? '오늘 초성을 풀었어요.' : '오늘 초성은 정답을 봤어요.'} 내일 자정에 새 문제가 열려요.
 						</p>
+						<DailyNext pitch="다음은 오늘의 10문제 어때요? 상식 · 발견형 · 성냥개비가 섞여 나와요" />
 					{:else}
 						<div class="tiles small">
 							{#each [...chosungOf(todayWord.word)] as ch, i (i)}<span class="tile">{ch}</span>{/each}
@@ -300,14 +304,19 @@
 				<p class="t-after">
 					{#if todayWon}🔥 <b>{daily?.streak}일 연속</b> · 내일 자정에 새 문제{:else}내일 문제를 맞히면 연속 기록이 시작돼요{/if}
 				</p>
+				<DailyNext pitch="다음은 오늘의 10문제 어때요? 상식 · 발견형 · 성냥개비가 섞여 나와요" bind:shown={nextShown} />
 				<PushPrompt dayNum={day} streak={daily?.streak ?? 0} tomorrow={tomorrowPeek} slot="chosung" />
-				<button class="btn wide" onclick={() => start({ type: 'free', cat: cur.category })}>
+				<button class="btn wide" class:ghost={nextShown} onclick={() => start({ type: 'free', cat: cur.category })}>
 					{curCat?.name} 이어서 풀기 →
 				</button>
 				<button class="btn ghost wide" onclick={toMenu}>분야 선택으로</button>
 			{:else}
 				{#if freeWins === 3 && status === 'won'}
 					<PushPrompt dayNum={day} tomorrow={tomorrowPeek} slot="chosung_free" />
+				{/if}
+				<!-- 초성 분야로 검색해 들어온 세션은 2%만 오늘의 10문제를 시작했다(10/1~10/13) — 다섯 문제째에 한 번 -->
+				{#if freeWins === 5 && status === 'won'}
+					<DailyNext pitch="다음은 오늘의 10문제 어때요? 상식 · 발견형 · 성냥개비가 섞여 나와요" />
 				{/if}
 				<button class="btn wide" onclick={next}>다음 문제 →</button>
 				<button class="btn ghost wide" onclick={toMenu}>분야 선택으로</button>
