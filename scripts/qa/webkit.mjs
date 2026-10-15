@@ -22,7 +22,8 @@ async function ctxOf(device) {
 	const ctx = await browser.newContext({ ...devices[device] });
 	await ctx.route(/googletagmanager|google-analytics|googlesyndication|doubleclick|\/api\/stat|\/api\/push|\/api\/feedback/, (r) => r.fulfill({ status: 204, body: '' }));
 	const page = await ctx.newPage();
-	page.on('pageerror', (e) => errs.push(`[${device}] ${e.message}`));
+	// 어느 화면 · 어느 코드에서 났는지까지 — 10/15에 메시지가 「int64」 한 단어뿐이라 원인을 못 짚었다
+	page.on('pageerror', (e) => errs.push(`[${device}] ${page.url().replace(BASE, '')} ${e.message} @ ${String(e.stack || '').split(/\r?\n/).slice(0, 3).join(' | ')}`));
 	return { ctx, page };
 }
 
