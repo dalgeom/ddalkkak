@@ -17,7 +17,7 @@ export function load({ params }) {
 	const items = c.featured.map((w) => {
 		const x = CHOSUNG_WORDS.find((y) => y.category === c.slug && y.word === w);
 		if (!x) throw new Error(`${c.slug}의 featured에 없는 낱말: ${w}`);
-		return { cho: chosungOf(x.word), word: x.word, hint: x.hint };
+		return { cho: chosungOf(x.word), word: x.word, hint: x.hint, why: c.featuredWhy[w] ?? '' };
 	});
 
 	// 글자 수 구성 — 분야마다 다르다(사자성어는 전부 넷)

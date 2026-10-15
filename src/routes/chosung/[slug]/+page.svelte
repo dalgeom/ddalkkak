@@ -59,6 +59,7 @@
 					<details>
 						<summary>정답 보기</summary>
 						<p class="ans"><b>{q.word}</b> — {q.hint}</p>
+						{#if q.why}<p class="why">{q.why}</p>{/if}
 					</details>
 				</li>
 			{/each}
@@ -166,6 +167,13 @@
 	}
 	.ans b {
 		color: var(--accent-text);
+	}
+	.why {
+		margin: 6px 0 0;
+		font-size: 13px;
+		line-height: 1.7;
+		color: var(--muted);
+		word-break: keep-all;
 	}
 	.coll {
 		list-style: none;

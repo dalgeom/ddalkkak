@@ -22,6 +22,14 @@ export interface Notice {
 
 export const NOTICES: Notice[] = [
 	{
+		id: '2026-10-15-chosung-100',
+		date: '2026-10-15',
+		title: '초성 퀴즈 100문제 더',
+		body: '동물, 음식, 과일·채소, 나라, 사자성어에 20개씩 더했어요. 북극곰, 마카롱, 두리안, 아이슬란드, 학수고대까지 모두 324문제예요.',
+		href: '/chosung',
+		cta: '초성 퀴즈 풀기'
+	},
+	{
 		id: '2026-10-14-feedback',
 		date: '2026-10-14',
 		title: '의견 보내기',

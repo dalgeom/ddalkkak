@@ -22,8 +22,23 @@ export function chosungOf(word: string): string {
 
 export type ChosungWord = { word: string; hint: string; alts: string[]; category: string };
 
-export const CHOSUNG_WORDS: ChosungWord[] = CHOSUNG_CATEGORIES.flatMap((c) =>
-	c.words.map(([word, hint, alts]: ChosungEntry) => ({ word, hint, alts: alts ?? [], category: c.slug }))
+/**
+ * 낱말을 늘린 이력. 분야마다 새 낱말은 words 끝에 붙이고, 전체 목록(CHOSUNG_WORDS)은 묶음 순서로 쌓는다.
+ * 그래야 앞 묶음 낱말의 번호가 그대로라 지난 날의 오늘의 초성과 기기에 남은 기록이 안 바뀐다.
+ * 마지막 묶음의 수는 words 길이와 같아야 한다(chosung.test.ts).
+ */
+export const CHOSUNG_BATCHES: { fromDay: number; counts: Record<string, number> }[] = [
+	{ fromDay: 0, counts: { animal: 52, food: 48, 'fruit-vegetable': 42, country: 42, idiom: 40 } },
+	// 10/15 배포, 10/16(20742)부터 오늘의 초성이 324개 순서로 돈다
+	{ fromDay: 20742, counts: { animal: 72, food: 68, 'fruit-vegetable': 62, country: 62, idiom: 60 } }
+];
+
+const toWord = (slug: string) => ([word, hint, alts]: ChosungEntry) => ({ word, hint, alts: alts ?? [], category: slug });
+
+export const CHOSUNG_WORDS: ChosungWord[] = CHOSUNG_BATCHES.flatMap((b, bi) =>
+	CHOSUNG_CATEGORIES.flatMap((c) =>
+		c.words.slice(bi ? CHOSUNG_BATCHES[bi - 1].counts[c.slug] : 0, b.counts[c.slug]).map(toWord(c.slug))
+	)
 );
 
 export function categoryBySlug(slug: string) {
@@ -57,9 +72,13 @@ export function collisionsOf(slug: string): { cho: string; words: string[] }[] {
 	return [...by].filter(([, ws]) => ws.length > 1).map(([cho, words]) => ({ cho, words }));
 }
 
-/** 오늘의 초성 — 전체 낱말을 시드 순열로 하루 한 칸씩. 한 바퀴(약 7달) 돌기 전엔 겹치지 않는다 */
+/**
+ * 오늘의 초성 — 그날까지 열린 낱말을 시드 순열로 하루 한 칸씩. 한 바퀴 돌기 전엔 겹치지 않는다.
+ * 낱말 수는 그날의 묶음(CHOSUNG_BATCHES)을 따른다 — 낱말을 늘려도 지난 날짜의 답은 그대로다.
+ */
 export function chosungOfDay(day: number): number {
-	const order = seededOrder(CHOSUNG_WORDS.length, 20260404);
-	const n = CHOSUNG_WORDS.length;
+	const b = [...CHOSUNG_BATCHES].reverse().find((x) => x.fromDay <= day) ?? CHOSUNG_BATCHES[0];
+	const n = Object.values(b.counts).reduce((a, v) => a + v, 0);
+	const order = seededOrder(n, 20260404);
 	return order[(((day - SITE_START_DAY) % n) + n) % n];
 }
