@@ -55,6 +55,7 @@
 	import Bulb from '$lib/components/Bulb.svelte';
 	import InstallPrompt from '$lib/components/InstallPrompt.svelte';
 	import PushPrompt from '$lib/components/PushPrompt.svelte';
+	import QuickReact from '$lib/components/QuickReact.svelte';
 	import { shouldOfferPush, pushSkipReason } from '$lib/push';
 	import { platformOf } from '$lib/pwa';
 	import InstallHint from '$lib/components/InstallHint.svelte';
@@ -1438,6 +1439,9 @@
 			<a href="/record">내 기록 달력</a>
 		</div>
 	</div>
+
+	<!-- 한 번 누름 반응(10/16) — 헤더 말풍선 의견이 0건이라 결과를 막 본 자리에서 묻는다 -->
+	<QuickReact place="/?day={dayNum}" question="오늘 10문제 어땠어요?" />
 
 	<!-- 알림 카드가 없을 때만 — 그 카드 안에 이미 예고가 있다(9/15). 웹 알림이 안 되는 기기는 달력 파일로(10/14) -->
 	{#if !offerPush}

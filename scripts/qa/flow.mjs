@@ -120,6 +120,8 @@ ok('기록에 오늘 완주가 반영', m.facts.some((f) => /1일/.test(f)), m.f
 await b.go('/', 3500);
 m = await b.ev(`return { sheet: !!document.querySelector('[role=dialog]'), result: !!document.querySelector('.np-all') };`);
 ok('완주한 사람의 메인은 결과 화면, 새 소식 시트가 가리지 않음', m.result && !m.sheet, JSON.stringify(m));
+m = await b.ev(`return [...document.querySelectorAll('.react .opt')].map(x=>x.textContent.trim());`);
+ok('결과 화면에 한 번 누름 반응 셋(10/16)', m.length === 3, m.join(' '));
 // 다시 온 사람(오늘 아직 안 풂) — 기록을 지우고 방문 흔적만 남긴다
 await b.ev(`localStorage.clear(); localStorage.setItem('ddal.visit','1'); return 1;`);
 await b.go('/', 3500);
@@ -149,6 +151,26 @@ for (const [f, want] of [['cube', 'cube'], ['match', 'match'], ['trivia', 'choic
 // 5b. 상식 대결 링크 미리보기 — 친구 점수 그림 · 제목(10/15)
 m = await (async () => { const h = await (await fetch(BASE + '/trivia/duel?s=4242&n=7&t=80&nocache=' + Date.now())).text(); const im = [...h.matchAll(/property="og:image" content="([^"]+)"/g)].map((x) => x[1]); const t = (h.match(/property="og:title" content="([^"]+)"/) || [])[1]; return { im, t }; })();
 ok('대결 링크 미리보기 = 친구 점수 그림 하나 · 제목', m.im.length === 1 && m.im[0].endsWith('/og/duel-7.png') && (m.t || '').includes('7/10'), JSON.stringify(m));
+
+// 5c. 상식 대결을 링크로 받아 끝까지 — 첫 화면 1번 문제 · 결과 미리보기 그림 · 반응(10/16)
+//     반응 저장(/api/feedback)은 가로채 운영 의견함에 시험 글이 쌓이지 않게 한다
+await b.go('/trivia/duel?s=4242&n=7&t=80', 2500);
+m = await b.ev(`
+	const first = { choices: document.querySelectorAll('.choice').length, h1: document.querySelector('h1')?.textContent.trim() ?? '', btn: [...document.querySelectorAll('button')].some(x=>/대결 시작|도전하기/.test(x.textContent)) };
+	window.__fb = []; const of = window.fetch; window.fetch = (u, o) => { if (String(u).includes('/api/feedback')) { window.__fb.push(o?.body); return Promise.resolve(new Response('{"ok":true}', { status: 200 })); } return of(u, o); };
+	for (let i = 0; i < 10; i++) {
+		document.querySelector('.choice:not([disabled])')?.click(); await new Promise(r=>setTimeout(r,250));
+		[...document.querySelectorAll('button')].find(x=>/다음 문제|결과 보기/.test(x.textContent))?.click(); await new Promise(r=>setTimeout(r,350));
+	}
+	const img = document.querySelector('.preview'); await new Promise(r=>setTimeout(r,1500));
+	const res = { score: document.querySelector('.big')?.textContent.trim(), img: img?.getAttribute('src'), loaded: img ? img.naturalWidth : 0, vs: document.querySelector('.vsres b')?.textContent.trim(), share: [...document.querySelectorAll('.cta')].map(x=>x.textContent.trim()).join('|') };
+	document.querySelector('.react .opt')?.click(); await new Promise(r=>setTimeout(r,400));
+	res.after = document.querySelector('.react .q')?.textContent.trim(); res.posted = window.__fb.map(x=>JSON.parse(x)).map(x=>x.kind+':'+x.quick+':'+x.page);
+	return { first, res };`);
+ok('대결 링크로 들어오면 첫 화면에 1번 보기가 바로 있음 · 시작 버튼 없음', m.first.choices >= 3 && !m.first.btn && /7 \/ 10/.test(m.first.h1), JSON.stringify(m.first));
+ok('대결 결과에 친구가 받을 그림(점수와 같은 번호 · 실제로 뜸) · 승패 · 보내기', /\/og\/duel-\d+\.png$/.test(m.res.img ?? '') && m.res.img.includes('duel-' + parseInt(m.res.score) + '.png') && m.res.loaded === 1200 && !!m.res.vs && /결과 보내기/.test(m.res.share), JSON.stringify(m.res));
+ok('반응 누르면 고맙다는 말과 한마디 칸 · 저장 요청은 quick', /고마워요/.test(m.res.after ?? '') && m.res.posted.length === 1 && m.res.posted[0].startsWith('fun:true:/trivia/duel'), JSON.stringify(m.res.posted));
+await b.shot(OUT + 'f-duel-result.jpg');
 
 // 6. 상식 홈 — 견본 눌러 보기 · 접기 · 타일
 await b.go('/trivia', 2000);

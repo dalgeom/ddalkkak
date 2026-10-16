@@ -19,6 +19,7 @@ const WRANGLER = join(ROOT, 'node_modules', 'wrangler', 'bin', 'wrangler.js');
 const SEEN = join(ROOT, 'scripts', '.feedback-seen');
 const KEEP_MS = 365 * 86400e3;
 const LABEL = {
+	fun: '재밌어요',
 	boring: '재미없어요',
 	hard: '너무 어려워요',
 	easy: '너무 쉬워요',
@@ -81,7 +82,7 @@ for (const k of pick) {
 		console.log(`\n· ${k} — 읽지 못함`);
 		continue;
 	}
-	console.log(`\n· ${kst(v.t)}  [${LABEL[v.kind] ?? v.kind}]  ${v.page || '(화면 모름)'}`);
-	console.log('  ' + String(v.text).split('\n').join('\n  '));
+	console.log(`\n· ${kst(v.t)}  [${LABEL[v.kind] ?? v.kind}${v.quick ? ' · 한 번 누름' : ''}]  ${v.page || '(화면 모름)'}`);
+	if (v.text) console.log('  ' + String(v.text).split('\n').join('\n  '));
 }
 if (!all && !days && pick.length) writeFileSync(SEEN, pick.at(-1));

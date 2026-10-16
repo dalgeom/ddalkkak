@@ -20,6 +20,12 @@ describe('의견 보내기 — 받은 값 검사', () => {
 		expect(cleanFeedback({ kind: 'etc', text: '좋아요', page: 'https://evil.example' })?.page).toBe('');
 		expect(cleanFeedback({ kind: 'etc', text: '좋아요', page: '/' + 'a'.repeat(300) })?.page.length).toBe(200);
 	});
+	it('한 번 누른 반응은 글 없이도 받는다 · 일반 의견은 여전히 두 글자부터', () => {
+		expect(cleanFeedback({ kind: 'fun', quick: true, page: '/?day=20742' })).toEqual({ kind: 'fun', text: '', page: '/?day=20742', quick: true });
+		expect(cleanFeedback({ kind: 'hard', quick: true, text: ' 7번이 어려웠어요 ', page: '/' })?.text).toBe('7번이 어려웠어요');
+		expect(cleanFeedback({ kind: 'fun', text: '', page: '/' })).toBeNull();
+		expect(cleanFeedback({ kind: 'fun', quick: true, text: '가'.repeat(FEEDBACK_MAX + 1) })).toBeNull();
+	});
 	it('키는 시각 순으로 정렬된다', () => {
 		const a = feedbackKey(Date.UTC(2026, 9, 14, 1), 'x');
 		const b = feedbackKey(Date.UTC(2026, 9, 14, 2), 'a');

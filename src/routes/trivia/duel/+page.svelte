@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onDestroy } from 'svelte';
-	import { track } from '$lib/analytics';
+	import { track, seenOnce } from '$lib/analytics';
+	import QuickReact from '$lib/components/QuickReact.svelte';
 	import { duelOutcome, DUEL_SIZE } from '$lib/duel';
 	import { formatDuration } from '$lib/game';
 	import OtherGames from '$lib/components/OtherGames.svelte';
@@ -8,6 +9,10 @@
 	/**
 	 * 상식 퀴즈 대결(v2, 2026-10-14) — 같은 10문제로 친구와 점수·시간을 겨룬다(duel.ts).
 	 * 링크(?s=씨앗&n=점수&t=초)로 들어오면 친구 기록을 먼저 보여 주고 같은 문제로 시작한다.
+	 *
+	 * 10/16: 첫 화면에 1번 문제를 바로 둔다. 설명 카드 + 「대결 시작」뿐이던 10/15에 화면을 본 21명 중 8명만 시작했다.
+	 * 보기를 누르는 순간이 시작이고, 시간도 그때부터 잰다(1번을 읽는 시간은 빠진다 — 양쪽 다 같은 규칙).
+	 * 결과에는 친구가 받을 미리보기 그림(scripts/og-duel.mjs)을 보여 준다 — 끝까지 푼 3명 중 공유 0명이었다.
 	 */
 	let { data } = $props();
 
@@ -24,17 +29,12 @@
 	let outcome = $derived(data.vs && phase === 'done' ? duelOutcome({ score, secs }, data.vs) : null);
 	let shareUrl = $derived(`https://ddalkkak.app/trivia/duel?s=${data.seed}&n=${score}&t=${secs}`);
 
-	function start() {
-		phase = 'play';
-		pos = 0;
-		score = 0;
-		picked = null;
-		startedAt = Date.now();
-		track('duel_start', { vs: !!data.vs });
-		window.scrollTo({ top: 0 });
-	}
-
 	function choose(i: number) {
+		if (phase === 'intro') {
+			phase = 'play';
+			startedAt = Date.now();
+			track('duel_start', { vs: !!data.vs, via: 'q1' });
+		}
 		if (picked !== null) return;
 		picked = i;
 		if (i === q.answerIndex) score++;
@@ -83,6 +83,10 @@
 		}
 	}
 
+	function sendSeen(node: HTMLElement) {
+		return seenOnce(node, 'duel_share_seen');
+	}
+
 	function again() {
 		location.href = '/trivia/duel';
 	}
@@ -101,32 +105,22 @@
 	<meta property="og:url" content={data.ogUrl} />
 </svelte:head>
 
-{#if phase === 'intro'}
-	<section class="intro card">
-		<span class="kicker">상식 퀴즈 대결</span>
-		{#if data.vs}
-			<h1>친구가 대결을 신청했어요</h1>
-			<div class="vs">
-				<span>친구 기록</span>
-				<b>{data.vs.score} / {DUEL_SIZE}</b>
-				<em>{formatDuration(data.vs.secs * 1000)}</em>
-			</div>
-			<p class="lead">같은 10문제예요. 점수가 같으면 더 빨리 푼 쪽이 이겨요.</p>
-			<button class="cta" onclick={start}>도전하기 <span aria-hidden="true">→</span></button>
-		{:else}
-			<h1>같은 10문제로<br /><b>친구와 겨뤄요</b></h1>
-			<p class="lead">
-				상식 퀴즈 10문제를 풀고 결과 링크를 보내면, 친구가 같은 문제로 도전해요. 점수가 같으면 더 빨리 푼
-				쪽이 이겨요.
-			</p>
-			<button class="cta" onclick={start}>대결 시작 <span aria-hidden="true">→</span></button>
-		{/if}
-		<p class="meta">초등 3 · 중등 3 · 고등 2 · 어른 2 · 쉬운 문제부터</p>
-	</section>
-{:else if phase === 'play' && q}
+{#if (phase === 'intro' || phase === 'play') && q}
+	{#if phase === 'intro'}
+		<header class="intro">
+			<span class="kicker">상식 퀴즈 대결</span>
+			{#if data.vs}
+				<h1>친구가 <b>{data.vs.score} / {DUEL_SIZE}</b>으로 도전장을 보냈어요</h1>
+				<p class="lead">같은 10문제예요. 친구는 {formatDuration(data.vs.secs * 1000)} 걸렸어요. 아래 1번부터 바로 풀어요.</p>
+			{:else}
+				<h1>같은 10문제로 <b>친구와 겨뤄요</b></h1>
+				<p class="lead">다 풀면 결과 링크를 친구에게 보내요. 점수가 같으면 빨리 푼 쪽이 이겨요. 아래 1번부터 바로 풀어요.</p>
+			{/if}
+		</header>
+	{/if}
 	<div class="topbar">
 		<span class="prog">{pos + 1} / {data.questions.length}</span>
-		<span class="sc">맞힌 수 {score}</span>
+		<span class="sc">{phase === 'intro' ? '보기를 누르면 시작해요' : `맞힌 수 ${score}`}</span>
 	</div>
 	<div class="bar"><i style="width:{((pos + (picked !== null ? 1 : 0)) / data.questions.length) * 100}%"></i></div>
 	<section class="card qcard">
@@ -168,10 +162,15 @@
 				<span>친구 {data.vs.score} / {DUEL_SIZE} · {formatDuration(data.vs.secs * 1000)}</span>
 			</div>
 		{/if}
-		<button class="cta" onclick={share}>
-			{data.vs ? '친구에게 결과 보내기' : '친구에게 대결 신청하기'} <span aria-hidden="true">→</span>
-		</button>
-		<p class="note">링크를 받은 친구는 같은 10문제를 풀어요</p>
+		<div class="send" use:sendSeen>
+			<p class="send-h">친구 카톡에는 이렇게 떠요</p>
+			<img class="preview" src="/og/duel-{score}.png" width="1200" height="630" alt="친구 {score}/{DUEL_SIZE} 대 나 ?/{DUEL_SIZE} 미리보기 그림" />
+			<button class="cta" onclick={share}>
+				{data.vs ? '친구에게 결과 보내기' : '친구에게 대결 신청하기'} <span aria-hidden="true">→</span>
+			</button>
+			<p class="note">링크를 받은 친구는 같은 10문제를 풀어요</p>
+		</div>
+		<QuickReact place="/trivia/duel?s={data.seed}" question="이번 10문제 어땠어요?" />
 		<button class="ghost" onclick={again}>새 문제로 다시 대결</button>
 		<a class="ghost" href="/trivia">상식 퀴즈 더 보기</a>
 	</section>
@@ -215,35 +214,27 @@
 		color: var(--muted);
 		word-break: keep-all;
 	}
-	.meta {
-		margin-top: 12px;
-		font-size: 12.5px;
-		color: var(--muted);
-		text-align: center;
+	.intro {
+		margin-bottom: 14px;
 	}
-	.vs {
-		margin-top: 14px;
-		display: flex;
-		align-items: baseline;
-		gap: 10px;
-		padding: 14px 16px;
-		border-radius: 14px;
-		background: var(--panel-2);
-		border: 1px solid var(--border);
+	.intro h1 {
+		font-size: 22px;
 	}
-	.vs span {
+	.send {
+		margin-top: 16px;
+	}
+	.send-h {
 		font-size: 13px;
+		font-weight: 800;
 		color: var(--muted);
+		margin-bottom: 8px;
 	}
-	.vs b {
-		font-size: 24px;
-		font-weight: 900;
-	}
-	.vs em {
-		font-style: normal;
-		font-size: 14px;
-		font-weight: 700;
-		color: var(--muted);
+	.preview {
+		display: block;
+		width: 100%;
+		height: auto;
+		border-radius: 12px;
+		border: 1px solid var(--border);
 	}
 	.cta {
 		width: 100%;
