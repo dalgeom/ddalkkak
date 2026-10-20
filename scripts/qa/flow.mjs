@@ -306,6 +306,36 @@ ok('발견형 판 화면 — 새싹 칩 · 문제 · 답 칸 · 힌트 대기', 
 ok('모르겠어요 다섯 번 → 조금만 더 · ❌ 5개 · 진행 안 남음 · 다시 하기가 첫 버튼', /조금만 더/.test(m.h1 ?? '') && m.marks === 5 && !m.saved && /first/.test(m.again), JSON.stringify({ ...m, first: undefined }));
 await b.shot(OUT + 'f-dstage-fail.jpg');
 
+// 5i. 초성 · 전개도 단계 도전(10/20) — 초성 1판은 낱말이 고정이라 실제로 다섯 개를 쳐서 ★3까지
+await b.go('/chosung/stages', 2500);
+await b.ev(`localStorage.removeItem('ddal.chosung.stages'); localStorage.removeItem('ddal.cube.stages'); return 1;`);
+await b.go('/chosung/stages', 2500);
+m = await b.ev(`return [...document.querySelectorAll('.tier h3')].map(h=>h.textContent.trim());`);
+ok('초성 단계 지도 — 새싹 · 쉬움 · 보통 · 어려움', m.length === 4 && /새싹/.test(m[0]) && /어려움/.test(m[3]), JSON.stringify(m));
+await b.go('/chosung/stages/1', 3000);
+m = await b.ev(`
+	const words = ['딸기', '짜장면', '펭귄', '바나나', '캥거루'];
+	const cho = document.querySelector('.cho')?.textContent.trim();
+	for (const w of words) {
+		const inp = document.querySelector('input[type=text]'); if (!inp) break;
+		inp.value = w; inp.dispatchEvent(new Event('input', { bubbles: true })); await new Promise(r=>setTimeout(r,80));
+		[...document.querySelectorAll('button')].find(x=>x.textContent.trim()==='확인')?.click(); await new Promise(r=>setTimeout(r,300));
+		[...document.querySelectorAll('button')].find(x=>/다음 문제|결과 보기/.test(x.textContent))?.click(); await new Promise(r=>setTimeout(r,400));
+	}
+	return { cho, h1: document.querySelector('h1')?.textContent.trim(), stars: document.querySelector('.stars')?.getAttribute('aria-label'), saved: JSON.parse(localStorage.getItem('ddal.chosung.stages') || '{}'), next: document.querySelector('.cta')?.getAttribute('href') };`);
+ok('초성 1판 다섯 낱말을 쳐서 → ★3 · 진행 저장 · 2판 링크', m.cho === 'ㄸㄱ' && /통과/.test(m.h1 ?? '') && m.stars === '별 3개' && m.saved['1'] === 3 && m.next === '/chosung/stages/2', JSON.stringify(m));
+await b.shot(OUT + 'f-chstage.jpg');
+await b.go('/cubenet/stages/1', 3000);
+m = await b.ev(`
+	const first = { net: !!document.querySelector('.netbox svg, .netbox *'), opts: document.querySelectorAll('.opt').length, chip: document.querySelector('.chiprow .lv')?.textContent.trim() };
+	for (let i = 0; i < 5; i++) {
+		for (let k = 0; k < 2; k++) { document.querySelector('.opt:not([disabled])')?.click(); await new Promise(r=>setTimeout(r,200)); }
+		[...document.querySelectorAll('button')].find(x=>/다음 문제|결과 보기/.test(x.textContent))?.click(); await new Promise(r=>setTimeout(r,400));
+	}
+	return { first, marks: (document.querySelector('.marks')?.textContent.match(/✅|❌/g) || []).length, h1: document.querySelector('h1')?.textContent.trim() };`);
+ok('전개도 판 — 쉬움 칩 · 전개도 · 보기 4개 · 끝까지 가면 결과', m.first.chip === '쉬움' && m.first.net && m.first.opts === 4 && m.marks === 5 && /통과|조금만 더/.test(m.h1 ?? ''), JSON.stringify(m));
+await b.shot(OUT + 'f-cbstage.jpg');
+
 // 6. 상식 홈 — 견본 눌러 보기 · 접기 · 타일
 await b.go('/trivia', 2000);
 m = await b.ev(`

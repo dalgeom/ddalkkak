@@ -22,6 +22,14 @@ export interface Notice {
 
 export const NOTICES: Notice[] = [
 	{
+		id: '2026-10-20-cho-cube-stages',
+		date: '2026-10-20',
+		title: '초성 · 전개도도 단계 도전',
+		body: '초성 퀴즈 64판, 전개도 퍼즐 24판을 쉬운 것부터 나눴어요. 한 판에 5문제, 3문제 이상 맞히면 다음 판이 열려요.',
+		href: '/chosung/stages',
+		cta: '초성 단계 도전 하러 가기'
+	},
+	{
 		id: '2026-10-20-discover-stages',
 		date: '2026-10-20',
 		title: '규칙 찾기 퍼즐 단계 도전',

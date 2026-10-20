@@ -42,6 +42,7 @@
 			href: '/chosung',
 			sub: [
 				{ label: '오늘의 초성', href: '/chosung' },
+				{ label: '단계 도전', href: '/chosung/stages' },
 				{ label: '분야 골라 풀기', href: '/chosung#fields' }
 			]
 		},
@@ -78,6 +79,7 @@
 			href: '/cubenet',
 			sub: [
 				{ label: '바로 풀기', href: '/cubenet' },
+				{ label: '단계 도전', href: '/cubenet/stages' },
 				{ label: '푸는 법', href: '/cubenet/guide' }
 			]
 		},

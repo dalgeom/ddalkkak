@@ -215,6 +215,13 @@
 				</section>
 			{/if}
 
+			<!-- 10/20 딸깍 5단계: 쉬운 낱말부터 판을 깨며 올라가는 길 -->
+			<section class="sec">
+				<h2 class="mh">단계 도전</h2>
+				<p class="mp">새싹부터 어려움까지 64판. 한 판에 5낱말, 3개 이상 맞히면 다음 판이 열려요.</p>
+				<a class="stagego" href="/chosung/stages">단계 지도 보기 <span class="arr" aria-hidden="true">→</span></a>
+			</section>
+
 			<section class="sec" id="fields">
 				<h2 class="mh">분야 골라 풀기</h2>
 				<p class="mp">시간 제한 없이 계속 나옵니다. 푼 낱말은 한 바퀴 돌 때까지 다시 안 나와요.</p>
@@ -523,6 +530,19 @@
 	.big:active {
 		transform: translateY(2px);
 		box-shadow: 0 3px 0 var(--accent-press);
+	}
+	.stagego {
+		display: block;
+		margin-top: 12px;
+		padding: 13px;
+		border-radius: 14px;
+		border: 1.5px solid var(--accent);
+		background: var(--panel);
+		color: var(--accent-text);
+		font-size: 15px;
+		font-weight: 800;
+		text-align: center;
+		text-decoration: none;
 	}
 
 	/* ── 풀이 화면 ── */
