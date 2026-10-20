@@ -124,7 +124,8 @@
 				</div>
 			</a>
 			{#if full && g.sub.length}
-				<div class="subs">
+				<!-- 갈래가 넷이면 2×2 — 한 줄에 넷이면 칸이 85px로 좁아져 「오늘의 성냥개비」가 두 줄로 접혔다(10/20 사용자 휴대폰) -->
+				<div class="subs" class:two={g.sub.length >= 4}>
 					{#each g.sub as s (s.label)}
 						<a href={s.href}>{s.label}</a>
 					{/each}
@@ -295,5 +296,21 @@
 	}
 	.subs a + a {
 		border-left: 1px solid var(--border);
+	}
+	.subs a {
+		white-space: nowrap;
+	}
+	.subs.two {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+	}
+	.subs.two a + a {
+		border-left: none;
+	}
+	.subs.two a:nth-child(even) {
+		border-left: 1px solid var(--border);
+	}
+	.subs.two a:nth-child(n + 3) {
+		border-top: 1px solid var(--border);
 	}
 </style>

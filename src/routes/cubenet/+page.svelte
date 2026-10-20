@@ -109,7 +109,7 @@
 			modes={[
 				{ name: '연습 시작', sub: '한 문제씩, 틀리면 접어서 보여 줘요', onclick: start, main: true },
 				// 10/20 딸깍 5단계 — 4칸을 지키려고 「오늘의 10문제」 타일 자리에(하단 「오늘」 탭 · 다른 놀이 칸에 있다)
-				{ name: '단계 도전', sub: '쉬운 십자 모양부터 24판', href: '/cubenet/stages' },
+				{ name: '단계 도전', sub: '쉬운 모양부터 24판', href: '/cubenet/stages' },
 				{ name: '푸는 법', sub: '규칙 세 가지', href: '/cubenet/guide' },
 				{ name: '섞어서 풀기', sub: '네 유형 무한 연습', href: '/play' }
 			]}

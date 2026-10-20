@@ -133,6 +133,15 @@ await b.go('/', 3000);
 m = await b.ev(`return !!document.querySelector('[role=dialog]');`);
 ok('닫은 뒤 다시 안 뜸', !m);
 
+// 4a. 놀이 카드 갈래 글자가 작은 휴대폰에서도 한 줄(10/20 사용자 휴대폰에서 「오늘의 성냥개비」가 두 줄로 접혔다)
+for (const w of [320, 360]) {
+	await b.viewport(w, 800);
+	await b.go('/games', 2500);
+	m = await b.ev(`return [...document.querySelectorAll('.subs a')].filter((a) => { const r = document.createRange(); r.selectNodeContents(a); return new Set([...r.getClientRects()].map((x) => Math.round(x.top))).size > 1 || a.scrollWidth > a.clientWidth + 1; }).map((a) => a.textContent.trim());`);
+	ok(`놀이 카드 갈래 글자 한 줄(${w}px)`, m.length === 0, JSON.stringify(m));
+}
+await b.viewport(390, 844);
+
 // 4b. 딸깍 5단계(10/20) — 오늘의 10문제 카드에 단계 칩(새싹~고수)
 await b.ev(`localStorage.clear(); return 1;`);
 await b.go('/', 3500);
