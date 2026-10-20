@@ -168,9 +168,29 @@ m = await b.ev(`
 	res.after = document.querySelector('.react .q')?.textContent.trim(); res.posted = window.__fb.map(x=>JSON.parse(x)).map(x=>x.kind+':'+x.quick+':'+x.page);
 	return { first, res };`);
 ok('대결 링크로 들어오면 첫 화면에 1번 보기가 바로 있음 · 시작 버튼 없음', m.first.choices >= 3 && !m.first.btn && /7 \/ 10/.test(m.first.h1), JSON.stringify(m.first));
-ok('대결 결과에 친구가 받을 그림(점수와 같은 번호 · 실제로 뜸) · 승패 · 보내기', /\/og\/duel-\d+\.png$/.test(m.res.img ?? '') && m.res.img.includes('duel-' + parseInt(m.res.score) + '.png') && m.res.loaded === 1200 && !!m.res.vs && /결과 보내기/.test(m.res.share), JSON.stringify(m.res));
+// 10/20~ 링크로 받은 대결의 결과는 답장이다 — 받는 쪽(도전장 보낸 친구 7점)의 답장 그림
+ok('대결 결과에 친구가 받을 답장 그림(친구 점수 번호 · 실제로 뜸) · 승패 · 보내기', (m.res.img ?? '').endsWith('/og/duel-reply-7.png') && m.res.loaded === 1200 && !!m.res.vs && /결과 보내기/.test(m.res.share), JSON.stringify(m.res));
 ok('반응 누르면 고맙다는 말과 한마디 칸 · 저장 요청은 quick', /고마워요/.test(m.res.after ?? '') && m.res.posted.length === 1 && m.res.posted[0].startsWith('fun:true:/trivia/duel'), JSON.stringify(m.res.posted));
 await b.shot(OUT + 'f-duel-result.jpg');
+
+// 5d. 상식 대결 답장(&a=&b=, 10/20) — 도전장 보낸 쪽이 열면 문제 대신 결과 비교 · 미리보기는 내 점수만 · 복수전은 새 문제
+m = await (async () => { const h = await (await fetch(BASE + '/trivia/duel?s=4242&n=9&t=60&a=7&b=80&nocache=' + Date.now())).text(); const im = [...h.matchAll(/property="og:image" content="([^"]+)"/g)].map((x) => x[1]); const t = (h.match(/property="og:title" content="([^"]+)"/) || [])[1]; const d = (h.match(/property="og:description" content="([^"]+)"/) || [])[1]; return { im, t, d }; })();
+ok('답장 링크 미리보기 = 내 점수 그림 · 친구 점수는 감춤', m.im.length === 1 && m.im[0].endsWith('/og/duel-reply-7.png') && /답했어요/.test(m.t || '') && !/9\//.test((m.t || '') + (m.d || '')), JSON.stringify(m));
+await b.go('/trivia/duel?s=4242&n=9&t=60&a=7&b=80', 2500);
+m = await b.ev(`
+	const r = { h1: document.querySelector('h1')?.textContent.trim(), sides: [...document.querySelectorAll('.board .side')].map(s=>s.textContent.replace(/\\s+/g,' ').trim()), won: document.querySelector('.board .side.won .who')?.textContent, cta: document.querySelector('.cta')?.textContent.trim(), choices: document.querySelectorAll('.choice').length };
+	[...document.querySelectorAll('button')].find(x=>/내가 풀어 보기/.test(x.textContent))?.click(); await new Promise(r=>setTimeout(r,400));
+	r.afterPlay = { choices: document.querySelectorAll('.choice').length, h1: document.querySelector('h1')?.textContent.trim() };
+	return r;`);
+ok('답장 열면 문제 대신 나 7 · 친구 9 비교 · 친구 승 · 복수전 버튼', m.choices === 0 && /친구가 이겼어요/.test(m.h1 ?? '') && m.sides.length === 2 && /나 7/.test(m.sides[0]) && /친구 9/.test(m.sides[1]) && m.won === '친구' && /복수전/.test(m.cta ?? ''), JSON.stringify(m));
+ok('답장에서 「이 10문제 내가 풀어 보기」 → 친구 9점 도전장으로 1번부터', m.afterPlay.choices >= 3 && /9 \/ 10/.test(m.afterPlay.h1 ?? ''), JSON.stringify(m.afterPlay));
+await b.shot(OUT + 'f-duel-reply.jpg');
+await b.go('/trivia/duel?s=4242&n=9&t=60&a=7&b=80', 2500);
+// 누르면 페이지가 바뀌어 같은 평가가 끊긴다 — 누르기와 재기를 나눈다
+await b.ev(`setTimeout(() => document.querySelector('.cta')?.click(), 50); return 1;`);
+await new Promise((r) => setTimeout(r, 3000));
+m = await b.ev(`return { path: location.pathname, search: location.search, choices: document.querySelectorAll('.choice').length, h1: document.querySelector('h1')?.textContent.trim() };`);
+ok('복수전 → 씨앗 없는 새 대결(1번부터)', m.path === '/trivia/duel' && m.search === '' && m.choices >= 3 && /친구와 겨뤄요/.test(m.h1 ?? ''), JSON.stringify(m));
 
 // 6. 상식 홈 — 견본 눌러 보기 · 접기 · 타일
 await b.go('/trivia', 2000);

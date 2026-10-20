@@ -1,6 +1,7 @@
 /**
  * 상식 퀴즈 대결(v2, 2026-10-14) — 씨앗(seed) 하나로 10문제를 고른다. 같은 씨앗이면 누구에게나 같은 10문제다.
  * 친구에게 「?s=씨앗&n=점수&t=초」 링크를 보내면 같은 문제로 겨룬다(/trivia/duel).
+ * 받은 친구가 결과를 돌려보내면 「&a=점수&b=초」(도전장 보낸 사람의 기록)가 붙는다 — 답장이다. 10/20부터.
  *
  * 왜: 공유가 4주 동안 사실상 0이었다(공유 53번 보임 · 1번 눌림, 문제 보내기 212번 · 1번 — 10/14 점검).
  * 점수 비교는 퀴즈에서 가장 강한 공유 동기다.
@@ -56,8 +57,20 @@ export function duelOutcome(me: { score: number; secs: number }, vs: { score: nu
  * 대결 링크 미리보기(카카오톡 · 문자) — 그림 · 제목 · 설명. 그림은 scripts/og-duel.mjs가 미리 만든 12장 중 하나.
  * 시간은 링크마다 달라 그림 대신 설명에 넣는다(10/15 시안 docs/시안/duel-og, 「B 점수판형 + 시간은 설명」).
  */
-export function duelOg(vs: { score: number; secs: number } | null, fmt: (ms: number) => string): { title: string; description: string; image: string } {
+export function duelOg(
+	vs: { score: number; secs: number } | null,
+	fmt: (ms: number) => string,
+	mine: { score: number; secs: number } | null = null
+): { title: string; description: string; image: string } {
 	const base = 'https://ddalkkak.app/og/';
+	// 답장 링크 — 도전장을 보낸 사람이 받는다. 친구 점수는 감추고 내 점수만 보여 눌러 보게 한다
+	if (vs && mine) {
+		return {
+			title: '친구가 내 도전장에 답했어요',
+			description: `나 ${mine.score}/${DUEL_SIZE} · ${fmt(mine.secs * 1000)}. 친구는 몇 개 맞혔을까요?`,
+			image: `${base}duel-reply-${mine.score}.png`
+		};
+	}
 	if (!vs) {
 		return {
 			title: '상식 퀴즈 대결 — 같은 10문제로 겨뤄요',

@@ -1,5 +1,6 @@
 /**
- * 상식 대결 링크 미리보기 그림 12장을 만든다 — static/og/duel.png(점수 없는 링크) · duel-0.png ~ duel-10.png.
+ * 상식 대결 링크 미리보기 그림 23장을 만든다 — static/og/duel.png(점수 없는 링크) · duel-0.png ~ duel-10.png,
+ * 답장 링크(&a=&b=, 10/20~) duel-reply-0.png ~ duel-reply-10.png(받는 사람 「나」 점수만 보이고 친구는 ?).
  *
  *   node scripts/og-duel.mjs
  *
@@ -43,7 +44,7 @@ const html = `<!doctype html><html lang="ko"><head><meta charset="utf-8" />
 	<div class="mid">
 		<div class="side"><div class="who">친구</div><div class="num"><span id="n">?</span><small> / 10</small></div></div>
 		<div class="vs">VS</div>
-		<div class="side me"><div class="who">나</div><div class="num">?<small> / 10</small></div></div>
+		<div class="side me"><div class="who">나</div><div class="num"><span id="m">?</span><small> / 10</small></div></div>
 	</div>
 	<div class="foot" id="foot"></div>
 </div></body></html>`;
@@ -55,6 +56,8 @@ export function footOf(n) {
 	if (n === 0) return '<b>하나만</b> 맞혀도 이겨요';
 	return `<b>${n + 1}개</b> 맞히면 이겨요`;
 }
+
+const REPLY_FOOT = '<b>결과가 도착했어요</b> · 누가 이겼을까요?';
 
 const CANDIDATES = [
 	'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe',
@@ -118,6 +121,17 @@ try {
 		await sleep(150);
 		const { data } = await send('Page.captureScreenshot', { format: 'png' });
 		const out = `${DIR}/duel${n === null ? '' : '-' + n}.png`;
+		writeFileSync(out, Buffer.from(data, 'base64'));
+		console.log(`${out} (${Math.round(Buffer.from(data, 'base64').length / 1024)}KB)`);
+	}
+	// 답장 — 도전장을 보낸 사람이 받는다. 내 점수만 보이고 친구 점수는 감춘다(duel.ts duelOg)
+	for (const m of [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]) {
+		await send('Runtime.evaluate', {
+			expression: `document.getElementById('n').textContent='?';document.getElementById('m').textContent=${JSON.stringify(String(m))};document.getElementById('foot').innerHTML=${JSON.stringify(REPLY_FOOT)};`
+		});
+		await sleep(150);
+		const { data } = await send('Page.captureScreenshot', { format: 'png' });
+		const out = `${DIR}/duel-reply-${m}.png`;
 		writeFileSync(out, Buffer.from(data, 'base64'));
 		console.log(`${out} (${Math.round(Buffer.from(data, 'base64').length / 1024)}KB)`);
 	}

@@ -57,8 +57,15 @@ describe('대결 링크 미리보기', () => {
 		expect(duelOg({ score: 10, secs: 58 }, fmt).description).toBe('이기려면 0분 58초보다 빨리 다 맞혀야 해요.');
 		expect(duelOg({ score: 0, secs: 125 }, fmt).description).toBe('같은 10문제, 하나만 맞혀도 이겨요.');
 	});
-	it('그림 12장이 static/og에 다 있다(scripts/og-duel.mjs)', () => {
+	it('답장(내 기록이 함께 오면) — 내 점수 그림 · 친구 점수는 감춘다', () => {
+		const o = duelOg({ score: 9, secs: 60 }, fmt, { score: 7, secs: 80 });
+		expect(o.image).toBe('https://ddalkkak.app/og/duel-reply-7.png');
+		expect(o.title).toBe('친구가 내 도전장에 답했어요');
+		expect(o.description).toBe('나 7/10 · 1분 20초. 친구는 몇 개 맞혔을까요?');
+	});
+	it('그림 23장이 static/og에 다 있다(scripts/og-duel.mjs)', () => {
 		const have = Object.keys(import.meta.glob('/static/og/*.png')).map((p) => p.split('/').pop());
-		for (const f of ['duel', ...Array.from({ length: 11 }, (_, i) => `duel-${i}`)]) expect(have, f).toContain(`${f}.png`);
+		const want = ['duel', ...Array.from({ length: 11 }, (_, i) => `duel-${i}`), ...Array.from({ length: 11 }, (_, i) => `duel-reply-${i}`)];
+		for (const f of want) expect(have, f).toContain(`${f}.png`);
 	});
 });
