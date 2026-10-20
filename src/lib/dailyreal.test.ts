@@ -1,8 +1,11 @@
 import { describe, it, expect } from 'vitest';
 import { PROBLEMS, fieldOfChip } from './problems';
 import { TRIVIA } from './trivia';
+import { bankSizesAt } from './bankHistory';
+import { isOpener } from './opener';
 import {
 	buildDailySet,
+	buildDailySetStable,
 	DAILY_SIZE,
 	MATCH_TOTAL,
 	CUBE_START_DAY,
@@ -10,7 +13,8 @@ import {
 	DAILY_COUNTS_LEGACY,
 	dailyKinds,
 	dailyKindOrder,
-	CUBE_TOTAL
+	CUBE_TOTAL,
+	TRIVIA_FIRST_DAY
 } from './game';
 
 /** 실제 문제은행으로 "오늘의 딸깍" 하루 세트를 검증한다(합성 데이터로는 분포 편향을 못 잡는다). */
@@ -116,10 +120,23 @@ describe('오늘의 딸깍 — 실제 문제은행 검증', () => {
 	});
 
 
+	it('10/21(TRIVIA_FIRST_DAY)부터 1번은 상식, 그 전날까지는 발견형 — 나가는 문제는 같다', () => {
+		const stable = (day: number) =>
+			buildDailySetStable(PROBLEMS, TRIVIA, MATCH_TOTAL, day, (p) => fieldOfChip(p.chip), (t) => t.category ?? '기타', bankSizesAt, isOpener);
+		for (let day = TRIVIA_FIRST_DAY - 30; day < TRIVIA_FIRST_DAY; day++) expect(stable(day)[0].kind, `day ${day}`).toBe('discover');
+		for (let day = TRIVIA_FIRST_DAY; day < TRIVIA_FIRST_DAY + 60; day++) {
+			const set = stable(day);
+			expect(set[0].kind, `day ${day}`).toBe('trivia');
+			expect(set[0].bonus, `day ${day}`).toBeFalsy();
+			expect(set.length, `day ${day}`).toBe(DAILY_SIZE);
+		}
+	});
+
 	/** 결과 화면이 queue 없이 유형을 복원할 때 쓰는 순서 — 실제 배치와 어긋나면 집계가 틀어진다 */
 	it('dailyKindOrder가 실제 배치 순서와 같다', () => {
+		// 실제로 나가는 세트는 안정 뽑기다(시작일 전은 buildDailySet에 위임) — 10/21부터 상식이 1번이라 v1과는 다르다
 		for (let day = START; day < START + 400; day++) {
-			const set = build(day);
+			const set = buildDailySetStable(PROBLEMS, TRIVIA, MATCH_TOTAL, day, (p) => fieldOfChip(p.chip), (t) => t.category ?? '기타', bankSizesAt, isOpener);
 			const actual = set.map((p) => p.kind);
 			expect(dailyKindOrder(day), `day ${day}`).toEqual(actual);
 			expect(set[set.length - 1].bonus, `day ${day} 마지막이 보너스`).toBe(true);

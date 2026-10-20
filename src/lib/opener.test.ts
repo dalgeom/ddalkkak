@@ -91,7 +91,7 @@ describe('1번 자리는 예시가 보이는 문제로 연다', () => {
 			isOpener
 		);
 
-	it('시작일부터 60일간, 후보가 있는 날은 1번이 문지기다', () => {
+	it('시작일부터 60일간, 후보가 있는 날은 발견형 맨 앞이 문지기다', () => {
 		const 실패: string[] = [];
 		let 후보없는날 = 0;
 		for (let day = OPENER_START_DAY; day < OPENER_START_DAY + 60; day++) {
@@ -101,8 +101,9 @@ describe('1번 자리는 예시가 보이는 문제로 연다', () => {
 				후보없는날++;
 				continue;
 			}
-			expect(picks[0].kind, `day ${day} 1번이 발견형이 아니다`).toBe('discover');
-			if (!isOpener(PROBLEMS[picks[0].index])) 실패.push(`${day}: ${PROBLEMS[picks[0].index].id}`);
+			// 10/21(TRIVIA_FIRST_DAY)부터 1번은 상식이다 — 문지기는 발견형 중 맨 앞에 선다
+			const head = firstDisc(picks);
+			if (!isOpener(PROBLEMS[head.index])) 실패.push(`${day}: ${PROBLEMS[head.index].id}`);
 		}
 		expect(실패, 실패.join(', ')).toEqual([]);
 		// 셋 다 산문인 날은 드물어야 한다 — 흔해지면 은행 쪽 문제다
@@ -155,6 +156,9 @@ describe('1번 자리는 예시가 보이는 문제로 연다', () => {
 	});
 });
 
+/** 발견형 맨 앞 — 10/21부터 1번은 상식이라 문지기 자리는 「첫 발견형」이다(game.ts TRIVIA_FIRST_DAY) */
+const firstDisc = <P extends { kind: string; bonus?: boolean }>(ps: P[]): P => ps.find((p) => p.kind === 'discover' && !p.bonus)!;
+
 describe('쉬운 문지기 — 그날 세 문제 중 가장 쉬운 것이 1번 (10/8~)', () => {
 	const set = (day: number, openerOf: Parameters<typeof buildDailySetStable>[7] = isOpener) =>
 		buildDailySetStable(
@@ -195,7 +199,7 @@ describe('쉬운 문지기 — 그날 세 문제 중 가장 쉬운 것이 1번 (
 			const scored = disc.filter((p) => isOpener(p, day, 5));
 			if (!scored.length) continue;
 			const best = Math.min(...scored.map((p) => OPENER_SCORES[p.id]));
-			const first = PROBLEMS[picks[0].index];
+			const first = PROBLEMS[firstDisc(picks).index];
 			if (OPENER_SCORES[first.id] !== best) 실패.push(`${day}: ${first.id}(${OPENER_SCORES[first.id]}) 최저 ${best}`);
 		}
 		expect(실패, 실패.join(', ')).toEqual([]);
@@ -204,7 +208,7 @@ describe('쉬운 문지기 — 그날 세 문제 중 가장 쉬운 것이 1번 (
 	it('10/15부터 60일간 수학 패턴 감상형·고전은 1번에 서지 않는다', () => {
 		const 막은 = ['nm-ones-square', 'nm-square-gap', 'nm-sum-1-100', 'nm-digit-root', 'cal-clock-angle'];
 		for (let day = OPENER_BLOCK_START_DAY; day < OPENER_BLOCK_START_DAY + 60; day++) {
-			const first = PROBLEMS[set(day)[0].index];
+			const first = PROBLEMS[firstDisc(set(day)).index];
 			expect(막은, `day ${day}`).not.toContain(first.id);
 		}
 	});

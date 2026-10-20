@@ -289,6 +289,22 @@ export function dailyKinds(dayNum: number): DailyKind[] {
 }
 
 /**
+ * 상식 먼저 — 2026-10-21(KST)부터 1번이 상식(보기 고르기)이다. 오늘(20746) 세트는 건드리지 않는다.
+ *
+ * 왜: 시작한 사람 중 1번을 보자마자 떠나는 비율이 쉬운 문지기(10/8) 앞뒤로 37%(41/112) → 34%(34/99)로
+ * 거의 그대로였다. 점수 1점 문지기도 5명 중 1명, 2점 clock-add도 38명 중 9명이 떠났다 — 발견형의 난이도보다
+ * 「처음 보는 규칙 찾기」라는 형식이 문턱으로 보인다. 같은 기간 초등 보기 문제부터 여는 상식 대결은
+ * 시작한 사람 대부분이 끝까지 갔다(10/18 8명 중 7, 10/19 7명 중 6 — 링크로 온 사람이라 집단은 다르다).
+ *
+ * 줄 세우는 순서만 바꾼다. 뽑기 · 보너스 유형(dailyKinds 기준) · 문지기는 그대로다. 판정은 promo/지표-기록.md 10/20.
+ */
+export const TRIVIA_FIRST_DAY = 20747;
+
+function laneOrder(d: number, kinds: DailyKind[]): DailyKind[] {
+	return d >= TRIVIA_FIRST_DAY ? ['trivia', ...kinds.filter((k) => k !== 'trivia')] : kinds;
+}
+
+/**
  * 그날 10문제가 어떤 유형 순서로 나오는지. 마지막 한 칸은 보너스다.
  *
  * 결과 화면은 다 푼 뒤 새로고침하면 문제은행이 없어 queue가 비는데, 그때도 유형별
@@ -301,7 +317,7 @@ export function dailyKindOrder(dayNum: number): DailyKind[] {
 	const kinds = dailyKinds(d);
 	const counts: Record<DailyKind, number> =
 		d >= CUBE_START_DAY ? { ...DAILY_COUNTS } : { ...DAILY_COUNTS_LEGACY, cube: 0 };
-	const lanes = kinds.map((k) => Array.from({ length: counts[k] }, () => k));
+	const lanes = laneOrder(d, kinds).map((k) => Array.from({ length: counts[k] }, () => k));
 	const out: DailyKind[] = [];
 	for (let r = 0; r < Math.max(...lanes.map((l) => l.length)); r++)
 		for (const lane of lanes) if (lane[r]) out.push(lane[r]);
@@ -689,7 +705,7 @@ export function buildDailySetStable<D, T>(
 	const bonus: DailyPick | null =
 		extra === undefined ? null : { kind: bonusKind, index: extra, bonus: true };
 
-	const lanes: DailyPick[][] = kinds.map((kind) =>
+	const lanes: DailyPick[][] = laneOrder(d, kinds).map((kind) =>
 		picked[kind].slice(0, counts[kind]).map((index) => ({ kind, index }))
 	);
 	const out: DailyPick[] = [];
