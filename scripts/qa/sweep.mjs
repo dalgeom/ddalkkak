@@ -5,7 +5,7 @@ import { writeFileSync } from 'node:fs';
 const sm = await (await fetch(BASE + '/sitemap.xml?nocache=' + Date.now())).text();
 const fromMap = [...sm.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1].replace(BASE, '') || '/');
 const extra = ['/games', '/news', '/record', '/today', '/play', '/play?filter=cube', '/play?filter=trivia', '/play?filter=puzzle', '/play?filter=match',
-	'/matchstick', '/matchstick/picture', '/chosung', '/cubenet', '/trivia/duel', '/trivia/duel?s=4242&n=7&t=80', '/matchstick/duel', '/matchstick/duel?s=4242&n=3&t=60', '/matchstick/duel?s=4242&n=3&t=60&a=4&b=50'];
+	'/matchstick', '/matchstick/picture', '/chosung', '/cubenet', '/trivia/duel', '/trivia/duel?s=4242&n=7&t=80', '/matchstick/duel', '/matchstick/duel?s=4242&n=3&t=60', '/matchstick/duel?s=4242&n=3&t=60&a=4&b=50', '/trivia/stages', '/trivia/stages/1', '/trivia/stages/20'];
 const pages = [...new Set([...fromMap, ...extra])];
 
 const NARROW = ['/', '/games', '/news', '/record', '/play', '/matchstick', '/matchstick/picture', '/chosung', '/trivia', '/discover', '/cubenet', '/read', '/archive', '/about', '/guide', '/trivia/duel', '/matchstick/duel', '/trivia/korean-history', '/discover/number'];

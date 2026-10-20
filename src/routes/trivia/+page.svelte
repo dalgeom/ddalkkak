@@ -45,9 +45,10 @@
 	<ModeTiles
 		modes={[
 			{ name: '바로 풀기', sub: '섞어서 계속, 해설과 함께', href: '/play?filter=trivia', main: true },
+			// 10/20: 4칸을 지키려고 「오늘의 10문제」 타일을 뺐다 — 하단 「오늘」 탭과 아래 「다른 놀이」 칸에 있다
+			{ name: '단계 도전', sub: '새싹부터 어려움까지 75판', href: '/trivia/stages' },
 			{ name: '친구와 대결', sub: '같은 10문제로 점수 비교', href: '/trivia/duel' },
-			{ name: '분야 골라 풀기', sub: `${data.categories.length}개 분야`, href: '#fields' },
-			{ name: '오늘의 10문제', sub: '매일 자정에 새로', href: '/' }
+			{ name: '분야 골라 풀기', sub: `${data.categories.length}개 분야`, href: '#fields' }
 		]}
 	/>
 

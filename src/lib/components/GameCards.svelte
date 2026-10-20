@@ -53,6 +53,7 @@
 			href: '/trivia',
 			sub: [
 				{ label: '바로 풀기', href: '/play?filter=trivia' },
+				{ label: '단계 도전', href: '/trivia/stages' },
 				{ label: '친구와 대결', href: '/trivia/duel' },
 				{ label: '분야별 문제', href: '/trivia#fields' }
 			]

@@ -250,6 +250,36 @@ if (m) {
 	ok('오늘의 성냥개비도 마우스로 끌어 옮기기', after.from === '0' && after.to === '1', JSON.stringify({ ...m, after }));
 } else ok('오늘의 성냥개비 판을 못 찾음', false, 'null');
 
+// 5g. 상식 단계 도전(10/20, 「딸깍 5단계」) — 지도 · 잠금 · 한 판 풀고 결과 · 진행 저장
+await b.go('/trivia/stages', 2500);
+await b.ev(`localStorage.removeItem('ddal.trivia.stages'); return 1;`);
+await b.go('/trivia/stages', 2500);
+m = await b.ev(`
+	const tiers = [...document.querySelectorAll('.tier h3')].map(h=>h.textContent.trim());
+	const firsts = [...document.querySelectorAll('.tier')].map(t=>t.querySelector('.stile')?.tagName);
+	const second = document.querySelector('.tier .stile:nth-child(2)')?.className ?? '';
+	return { tiers, firsts, second };`);
+ok('상식 단계 지도 — 새싹 · 쉬움 · 보통 · 어려움, 단계마다 첫 판 열림, 둘째 판 잠김', m.tiers.length === 4 && /새싹/.test(m.tiers[0]) && /어려움/.test(m.tiers[3]) && m.firsts.every((t) => t === 'A') && /locked/.test(m.second), JSON.stringify(m));
+await b.go('/trivia/stages/2', 2500);
+m = await b.ev(`return document.querySelector('h1')?.textContent.trim() ?? '';`);
+ok('잠긴 판을 주소로 열면 앞 판 안내', /잠긴 판/.test(m), m);
+await b.go('/trivia/stages/1', 2500);
+m = await b.ev(`
+	for (let i = 0; i < 5; i++) {
+		document.querySelector('.choice:not([disabled])')?.click(); await new Promise(r=>setTimeout(r,250));
+		[...document.querySelectorAll('button')].find(x=>/다음 문제|결과 보기/.test(x.textContent))?.click(); await new Promise(r=>setTimeout(r,300));
+	}
+	const stars = (document.querySelector('.stars')?.getAttribute('aria-label') ?? '');
+	const n = Number((stars.match(/\\d/) || ['-1'])[0]);
+	return { h1: document.querySelector('h1')?.textContent.trim(), marks: (document.querySelector('.marks')?.textContent.match(/✅|❌/g) || []).length, n, saved: JSON.parse(localStorage.getItem('ddal.trivia.stages') || '{}'), next: document.querySelector('.cta')?.getAttribute('href') ?? null, again: !![...document.querySelectorAll('button')].find(x=>/다시 하기/.test(x.textContent)) };`);
+ok('상식 단계 1판을 끝까지 → 별 · 5칸 표시 · 통과면 진행 저장과 2판 링크', m.marks === 5 && m.again && (m.n > 0 ? m.saved['1'] === m.n && m.next === '/trivia/stages/2' : /조금만 더/.test(m.h1 ?? '') && !m.saved['1']), JSON.stringify(m));
+await b.shot(OUT + 'f-tstage-result.jpg');
+await b.ev(`localStorage.setItem('ddal.trivia.stages', JSON.stringify({ 1: 3 })); return 1;`);
+await b.go('/trivia/stages', 2500);
+m = await b.ev(`const t = document.querySelector('.tier'); return { star: t.querySelector('.stile')?.textContent.trim(), second: t.querySelector('.stile:nth-child(2)')?.tagName, sub: t.querySelector('.th p')?.textContent.trim() };`);
+ok('1판 ★3이 지도에 · 2판이 열림 · 통과 수', /★★★/.test(m.star ?? '') && m.second === 'A' && /1판 통과/.test(m.sub ?? ''), JSON.stringify(m));
+await b.shot(OUT + 'f-tstage-map.jpg');
+
 // 6. 상식 홈 — 견본 눌러 보기 · 접기 · 타일
 await b.go('/trivia', 2000);
 m = await b.ev(`
@@ -261,7 +291,7 @@ m = await b.ev(`
 	const more = [...document.querySelectorAll('button')].find(b=>/모두 보기/.test(b.textContent)); more?.click(); await new Promise(r=>setTimeout(r,400));
 	return { tiles, opened, h0, h1: document.documentElement.scrollHeight, inDom: document.querySelectorAll('.samples .sample').length };
 `);
-ok('상식 홈 타일 4개', m.tiles.length === 4, m.tiles.join(' '));
+ok('상식 홈 타일 4개 · 단계 도전 있음', m.tiles.length === 4 && m.tiles.some((t) => t.endsWith(':/trivia/stages')), m.tiles.join(' '));
 ok('상식 견본 보기를 누르면 정답이 펼쳐짐', m.opened);
 ok('「모두 보기」로 펼치면 길어짐, 20문제는 처음부터 페이지에 있음', m.h1 > m.h0 + 1000 && m.inDom === 20, `${m.h0}→${m.h1}, 문제 ${m.inDom}`);
 

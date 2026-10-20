@@ -22,6 +22,14 @@ export interface Notice {
 
 export const NOTICES: Notice[] = [
 	{
+		id: '2026-10-20-trivia-stages',
+		date: '2026-10-20',
+		title: '상식 퀴즈 단계 도전',
+		body: '새싹부터 어려움까지 75판이에요. 한 판에 5문제, 3문제 이상 맞히면 다음 판이 열려요. 자신 있으면 어려움부터 시작해도 돼요.',
+		href: '/trivia/stages',
+		cta: '단계 도전 하러 가기'
+	},
+	{
 		id: '2026-10-20-match-duel',
 		date: '2026-10-20',
 		title: '성냥개비 대결',
