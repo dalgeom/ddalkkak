@@ -37,12 +37,12 @@ export function parseSeed(v: string | null): number | null {
 	return n > 0 ? n : null;
 }
 
-/** 친구 기록 — 점수 0~10, 시간 1초~1시간. 하나라도 이상하면 기록 없이 시작 */
-export function parseVs(n: string | null, t: string | null): { score: number; secs: number } | null {
+/** 친구 기록 — 점수 0~max(상식 10 · 성냥 5), 시간 1초~1시간. 하나라도 이상하면 기록 없이 시작 */
+export function parseVs(n: string | null, t: string | null, max = DUEL_SIZE): { score: number; secs: number } | null {
 	if (!n || !t || !/^\d{1,2}$/.test(n) || !/^\d{1,4}$/.test(t)) return null;
 	const score = Number(n);
 	const secs = Number(t);
-	if (score > DUEL_SIZE || secs < 1 || secs > 3600) return null;
+	if (score > max || secs < 1 || secs > 3600) return null;
 	return { score, secs };
 }
 

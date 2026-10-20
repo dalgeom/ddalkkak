@@ -128,7 +128,7 @@ await sleep(1800);
 const at = await b.ev(`return location.pathname;`);
 await b.ev(`history.back(); return 1;`);
 await sleep(1500);
-ok('I2 소식 링크 → 그 화면, 뒤로가기 한 번 = 메인(빈 칸 없음)', at === '/trivia/duel' && (await b.ev(`return location.pathname;`)) === '/' && !(await isOpen(b)), `${at} → ${await b.ev(`return location.pathname;`)}`);
+ok('I2 소식 링크 → 그 화면, 뒤로가기 한 번 = 메인(빈 칸 없음)', at === '/matchstick/duel' && (await b.ev(`return location.pathname;`)) === '/' && !(await isOpen(b)), `${at} → ${await b.ev(`return location.pathname;`)}`);
 
 // 하단 탭 — 아이폰 홈 바(34px) 흉내
 try {

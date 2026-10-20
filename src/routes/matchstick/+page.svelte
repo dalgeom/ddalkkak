@@ -523,11 +523,12 @@
 				<button class="mode" onclick={() => startStage(nextNo)}>
 					<b>단계 도전</b><span>{Object.keys(stageProgress).length ? `${nextNo}단계 이어하기` : '60단계 · 1단계부터'}</span>
 				</button>
+				<!-- 10/20: 6칸을 지키려고 「푸는 법」 타일을 뺐다 — 푸는 법은 아래 숫자표 링크와 푸터에 있다 -->
+				<a class="mode" href="/matchstick/duel" onclick={() => track('mduel_entry_match')}><b>친구와 대결</b><span>같은 5문제로 겨루기</span></a>
 				<a class="mode" href="/matchstick/picture"><b>그림 퍼즐</b><span>{picSolved ? `${picSolved} / 10 풀었어요` : '정사각형·강아지·한글'}</span></a>
 				<button class="mode" onclick={() => startMode({ type: 'free' })}><b>무한 연습</b><span>제한 없이 계속</span></button>
 				<button class="mode" class:on={pick === 'time'} aria-expanded={pick === 'time'} onclick={() => (pick = pick === 'time' ? '' : 'time')}><b>타임어택</b><span>3 · 5 · 10분</span></button>
 				<button class="mode" class:on={pick === 'count'} aria-expanded={pick === 'count'} onclick={() => (pick = pick === 'count' ? '' : 'count')}><b>개수 도전</b><span>5 · 10 · 20문제</span></button>
-				<a class="mode" href="/matchstick/guide"><b>푸는 법</b><span>한 획 차이 숫자표</span></a>
 			</div>
 			{#if pick === 'time'}
 				<div class="opts">

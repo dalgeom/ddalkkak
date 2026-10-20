@@ -62,7 +62,7 @@ async function ctxOf(device) {
 for (const dev of ['iPhone SE', 'iPhone 13']) {
 	const { ctx, page } = await ctxOf(dev);
 	const over = [];
-	for (const p of ['/', '/games', '/trivia', '/chosung', '/matchstick', '/record', '/trivia/duel']) {
+	for (const p of ['/', '/games', '/trivia', '/chosung', '/matchstick', '/record', '/trivia/duel', '/matchstick/duel']) {
 		await page.goto(BASE + p, { waitUntil: 'load' });
 		await page.waitForTimeout(1300);
 		const o = await page.evaluate(() => document.documentElement.scrollWidth - innerWidth);

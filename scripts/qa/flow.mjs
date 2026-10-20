@@ -192,6 +192,28 @@ await new Promise((r) => setTimeout(r, 3000));
 m = await b.ev(`return { path: location.pathname, search: location.search, choices: document.querySelectorAll('.choice').length, h1: document.querySelector('h1')?.textContent.trim() };`);
 ok('복수전 → 씨앗 없는 새 대결(1번부터)', m.path === '/trivia/duel' && m.search === '' && m.choices >= 3 && /친구와 겨뤄요/.test(m.h1 ?? ''), JSON.stringify(m));
 
+// 5e. 성냥 대결(10/20) — 링크 미리보기 · 첫 화면 1번 판 · 뽑고 내려놓기 · 넘기기 5번 → 결과 · 답장 비교
+m = await (async () => { const h = await (await fetch(BASE + '/matchstick/duel?s=4242&n=3&t=60&nocache=' + Date.now())).text(); const im = [...h.matchAll(/property="og:image" content="([^"]+)"/g)].map((x) => x[1]); const t = (h.match(/property="og:title" content="([^"]+)"/) || [])[1]; return { im, t }; })();
+ok('성냥 대결 링크 미리보기 = 친구 점수 그림 하나 · 제목', m.im.length === 1 && m.im[0].endsWith('/og/mduel-3.png') && (m.t || '').includes('3/5'), JSON.stringify(m));
+await b.go('/matchstick/duel?s=4242&n=3&t=60', 2500);
+m = await b.ev(`
+	const first = { h1: document.querySelector('h1')?.textContent.trim() ?? '', lit: document.querySelectorAll('.mboard .stick.lit').length, sc: document.querySelector('.sc')?.textContent.trim() };
+	const s = document.querySelector('.mboard .stick.lit'); const loc = s?.getAttribute('data-loc');
+	s?.dispatchEvent(new MouseEvent('click', { bubbles: true })); await new Promise(r=>setTimeout(r,300));
+	first.afterPick = { lit: document.querySelectorAll('.mboard .stick.lit').length, sc: document.querySelector('.sc')?.textContent.trim() };
+	document.querySelector('.mboard [data-loc="' + loc + '"]')?.dispatchEvent(new MouseEvent('click', { bubbles: true })); await new Promise(r=>setTimeout(r,300));
+	first.afterPut = document.querySelectorAll('.mboard .stick.lit').length;
+	for (let i = 0; i < 5; i++) { [...document.querySelectorAll('button')].find(x=>x.textContent.trim()==='넘기기')?.click(); await new Promise(r=>setTimeout(r,1900)); }
+	const img = document.querySelector('.preview'); await new Promise(r=>setTimeout(r,1500));
+	return { first, res: { score: document.querySelector('.big')?.textContent.trim(), img: img?.getAttribute('src'), loaded: img ? img.naturalWidth : 0, vs: document.querySelector('.vsres b')?.textContent.trim(), share: document.querySelector('.cta')?.textContent.trim() } };`);
+ok('성냥 대결 첫 화면에 1번 판 · 친구 3/5 · 성냥 누르면 시작', /3 \/ 5/.test(m.first.h1) && m.first.lit > 5 && /누르면 시작/.test(m.first.sc ?? '') && m.first.afterPick.lit === m.first.lit - 1 && /맞힌 수 0/.test(m.first.afterPick.sc ?? '') && m.first.afterPut === m.first.lit, JSON.stringify(m.first));
+ok('성냥 대결 넘기기 5번 → 0/5 · 졌어요 · 답장 그림(친구 3) · 결과 보내기', /^0/.test(m.res.score ?? '') && m.res.vs === '졌어요' && (m.res.img ?? '').endsWith('/og/mduel-reply-3.png') && m.res.loaded === 1200 && /결과 보내기/.test(m.res.share ?? ''), JSON.stringify(m.res));
+await b.shot(OUT + 'f-mduel-result.jpg');
+await b.go('/matchstick/duel?s=4242&n=3&t=60&a=4&b=50', 2500);
+m = await b.ev(`return { h1: document.querySelector('h1')?.textContent.trim(), sides: [...document.querySelectorAll('.board-vs .side')].map(s=>s.textContent.replace(/\\s+/g,' ').trim()), cta: document.querySelector('.cta')?.textContent.trim(), boards: document.querySelectorAll('.mboard').length };`);
+ok('성냥 대결 답장 = 나 4 · 친구 3 · 내가 이김 · 한 판 더(판 없음)', /내가 이겼어요/.test(m.h1 ?? '') && /나 4/.test(m.sides[0] ?? '') && /친구 3/.test(m.sides[1] ?? '') && /한 판 더/.test(m.cta ?? '') && m.boards === 0, JSON.stringify(m));
+await b.shot(OUT + 'f-mduel-reply.jpg');
+
 // 6. 상식 홈 — 견본 눌러 보기 · 접기 · 타일
 await b.go('/trivia', 2000);
 m = await b.ev(`

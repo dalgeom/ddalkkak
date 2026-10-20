@@ -29,6 +29,7 @@
 			sub: [
 				{ label: '오늘의 성냥개비', href: '/matchstick' },
 				{ label: '단계 도전', href: '/matchstick#stages' },
+				{ label: '친구와 대결', href: '/matchstick/duel' },
 				{ label: '그림 퍼즐', href: '/matchstick/picture' }
 			],
 			fresh: true

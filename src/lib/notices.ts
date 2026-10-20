@@ -22,6 +22,14 @@ export interface Notice {
 
 export const NOTICES: Notice[] = [
 	{
+		id: '2026-10-20-match-duel',
+		date: '2026-10-20',
+		title: '성냥개비 대결',
+		body: '성냥 하나만 옮기는 5문제를 풀고 링크를 보내면 친구가 같은 문제로 도전해요. 친구가 결과를 돌려보내면 누가 이겼는지 나란히 보여 줘요.',
+		href: '/matchstick/duel',
+		cta: '대결 시작하기'
+	},
+	{
 		id: '2026-10-15-chosung-100',
 		date: '2026-10-15',
 		title: '초성 퀴즈 100문제 더',

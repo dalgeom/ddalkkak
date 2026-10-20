@@ -1,6 +1,7 @@
 /**
- * 상식 대결 링크 미리보기 그림 23장을 만든다 — static/og/duel.png(점수 없는 링크) · duel-0.png ~ duel-10.png,
+ * 대결 링크 미리보기 그림 36장을 만든다 — static/og/duel.png(점수 없는 링크) · duel-0.png ~ duel-10.png,
  * 답장 링크(&a=&b=, 10/20~) duel-reply-0.png ~ duel-reply-10.png(받는 사람 「나」 점수만 보이고 친구는 ?).
+ * 성냥 대결(10/20~, /matchstick/duel) 13장 — mduel.png · mduel-0~5.png · mduel-reply-0~5.png.
  *
  *   node scripts/og-duel.mjs
  *
@@ -40,11 +41,11 @@ const html = `<!doctype html><html lang="ko"><head><meta charset="utf-8" />
 	.foot { margin-top: 24px; font-size: 40px; font-weight: 900; text-align: center; }
 	.foot b { color: #23703f; }
 </style></head><body><div class="in">
-	<div class="brand"><span class="bulb"></span>딸깍<span class="tag">상식 퀴즈 대결</span></div>
+	<div class="brand"><span class="bulb"></span>딸깍<span class="tag" id="tag">상식 퀴즈 대결</span></div>
 	<div class="mid">
-		<div class="side"><div class="who">친구</div><div class="num"><span id="n">?</span><small> / 10</small></div></div>
+		<div class="side"><div class="who">친구</div><div class="num"><span id="n">?</span><small class="tot"> / 10</small></div></div>
 		<div class="vs">VS</div>
-		<div class="side me"><div class="who">나</div><div class="num"><span id="m">?</span><small> / 10</small></div></div>
+		<div class="side me"><div class="who">나</div><div class="num"><span id="m">?</span><small class="tot"> / 10</small></div></div>
 	</div>
 	<div class="foot" id="foot"></div>
 </div></body></html>`;
@@ -57,7 +58,21 @@ export function footOf(n) {
 	return `<b>${n + 1}개</b> 맞히면 이겨요`;
 }
 
+/** 성냥 대결(10/20, matchDuel.ts) — 5문제, 「맞힌다」 대신 「푼다」 */
+export function mfootOf(n) {
+	if (n === null) return '같은 성냥 5문제, <b>누가 더 많이</b> 풀까요?';
+	if (n === 5) return '만점을 넘으려면 <b>더 빨라야</b> 해요';
+	if (n === 0) return '<b>하나만</b> 풀어도 이겨요';
+	return `<b>${n + 1}개</b> 풀면 이겨요`;
+}
+
 const REPLY_FOOT = '<b>결과가 도착했어요</b> · 누가 이겼을까요?';
+
+/** 대결 종류마다 한 벌 — 이름 앞머리 · 띠 글자 · 문제 수 · 아래 한 줄 */
+const KINDS = [
+	{ prefix: 'duel', tag: '상식 퀴즈 대결', total: 10, foot: footOf },
+	{ prefix: 'mduel', tag: '성냥개비 대결', total: 5, foot: mfootOf }
+];
 
 const CANDIDATES = [
 	'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe',
@@ -114,26 +129,29 @@ try {
 	await send('Emulation.setDeviceMetricsOverride', { width: W, height: H, deviceScaleFactor: 1, mobile: false });
 	await send('Page.navigate', { url: 'file:///' + htmlPath.replace(/\\/g, '/') });
 	await sleep(2500); // 웹폰트 도착 대기
-	for (const n of [null, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]) {
-		await send('Runtime.evaluate', {
-			expression: `document.getElementById('n').textContent=${JSON.stringify(n === null ? '?' : String(n))};document.getElementById('foot').innerHTML=${JSON.stringify(footOf(n))};`
-		});
+	const shot = async (expression, out) => {
+		await send('Runtime.evaluate', { expression });
 		await sleep(150);
 		const { data } = await send('Page.captureScreenshot', { format: 'png' });
-		const out = `${DIR}/duel${n === null ? '' : '-' + n}.png`;
 		writeFileSync(out, Buffer.from(data, 'base64'));
 		console.log(`${out} (${Math.round(Buffer.from(data, 'base64').length / 1024)}KB)`);
-	}
-	// 답장 — 도전장을 보낸 사람이 받는다. 내 점수만 보이고 친구 점수는 감춘다(duel.ts duelOg)
-	for (const m of [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]) {
-		await send('Runtime.evaluate', {
-			expression: `document.getElementById('n').textContent='?';document.getElementById('m').textContent=${JSON.stringify(String(m))};document.getElementById('foot').innerHTML=${JSON.stringify(REPLY_FOOT)};`
-		});
-		await sleep(150);
-		const { data } = await send('Page.captureScreenshot', { format: 'png' });
-		const out = `${DIR}/duel-reply-${m}.png`;
-		writeFileSync(out, Buffer.from(data, 'base64'));
-		console.log(`${out} (${Math.round(Buffer.from(data, 'base64').length / 1024)}KB)`);
+	};
+	for (const k of KINDS) {
+		const scores = Array.from({ length: k.total + 1 }, (_, i) => i);
+		const frame = `document.getElementById('tag').textContent=${JSON.stringify(k.tag)};document.querySelectorAll('.tot').forEach((e)=>e.textContent=${JSON.stringify(' / ' + k.total)});`;
+		for (const n of [null, ...scores]) {
+			await shot(
+				`${frame}document.getElementById('m').textContent='?';document.getElementById('n').textContent=${JSON.stringify(n === null ? '?' : String(n))};document.getElementById('foot').innerHTML=${JSON.stringify(k.foot(n))};`,
+				`${DIR}/${k.prefix}${n === null ? '' : '-' + n}.png`
+			);
+		}
+		// 답장 — 도전장을 보낸 사람이 받는다. 내 점수만 보이고 친구 점수는 감춘다(duel.ts duelOg · matchDuel.ts)
+		for (const m of scores) {
+			await shot(
+				`${frame}document.getElementById('n').textContent='?';document.getElementById('m').textContent=${JSON.stringify(String(m))};document.getElementById('foot').innerHTML=${JSON.stringify(REPLY_FOOT)};`,
+				`${DIR}/${k.prefix}-reply-${m}.png`
+			);
+		}
 	}
 } finally {
 	ws?.close();
