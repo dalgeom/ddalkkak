@@ -22,6 +22,14 @@ export interface Notice {
 
 export const NOTICES: Notice[] = [
 	{
+		id: '2026-10-20-discover-stages',
+		date: '2026-10-20',
+		title: '규칙 찾기 퍼즐 단계 도전',
+		body: '어렵기만 하던 발견형 퍼즐을 새싹부터 고수까지 74판으로 나눴어요. 새싹은 누구나 바로 풀리고, 고수는 머리를 제대로 굴려야 해요. 오늘의 10문제도 쉬운 문제부터 나와요.',
+		href: '/discover/stages',
+		cta: '새싹부터 풀어 보기'
+	},
+	{
 		id: '2026-10-20-trivia-stages',
 		date: '2026-10-20',
 		title: '상식 퀴즈 단계 도전',

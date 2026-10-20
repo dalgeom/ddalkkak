@@ -288,6 +288,24 @@ m = await b.ev(`const t = document.querySelector('.tier'); return { star: t.quer
 ok('1판 ★3이 지도에 · 2판이 열림 · 통과 수', /★★★/.test(m.star ?? '') && m.second === 'A' && /1판 통과/.test(m.sub ?? ''), JSON.stringify(m));
 await b.shot(OUT + 'f-tstage-map.jpg');
 
+// 5h. 발견형 단계 도전(10/20) — 지도 5단계 · 판 화면(문제 · 힌트 · 모르겠어요) · 다섯 번 모르겠어요 → 실패, 진행 안 남음
+await b.go('/discover/stages', 2500);
+await b.ev(`localStorage.removeItem('ddal.discover.stages'); return 1;`);
+await b.go('/discover/stages', 2500);
+m = await b.ev(`return { tiers: [...document.querySelectorAll('.tier h3')].map(h=>h.textContent.trim()), firsts: [...document.querySelectorAll('.tier')].map(t=>t.querySelector('.stile')?.tagName) };`);
+ok('발견형 단계 지도 — 새싹~고수 5단계, 단계마다 첫 판 열림', m.tiers.length === 5 && /고수/.test(m.tiers[4]) && m.firsts.every((t) => t === 'A'), JSON.stringify(m));
+await b.go('/discover/stages/1', 3000);
+m = await b.ev(`
+	const first = { chip: document.querySelector('.chiprow .lv')?.textContent.trim(), q: !!document.querySelector('.q'), answer: !!(document.querySelector('input[type=text]') || document.querySelector('.choice')), hint: document.querySelector('.hint-btn')?.textContent.trim() };
+	for (let i = 0; i < 5; i++) {
+		[...document.querySelectorAll('button')].find(x=>x.textContent.trim()==='모르겠어요')?.click(); await new Promise(r=>setTimeout(r,300));
+		[...document.querySelectorAll('button')].find(x=>/다음 문제|결과 보기/.test(x.textContent))?.click(); await new Promise(r=>setTimeout(r,400));
+	}
+	return { first, h1: document.querySelector('h1')?.textContent.trim(), marks: (document.querySelector('.marks')?.textContent.match(/❌/g) || []).length, saved: localStorage.getItem('ddal.discover.stages'), again: [...document.querySelectorAll('button')].find(x=>/다시 하기/.test(x.textContent))?.className ?? '' };`);
+ok('발견형 판 화면 — 새싹 칩 · 문제 · 답 칸 · 힌트 대기', m.first.chip === '새싹' && m.first.q && m.first.answer && /힌트/.test(m.first.hint ?? ''), JSON.stringify(m.first));
+ok('모르겠어요 다섯 번 → 조금만 더 · ❌ 5개 · 진행 안 남음 · 다시 하기가 첫 버튼', /조금만 더/.test(m.h1 ?? '') && m.marks === 5 && !m.saved && /first/.test(m.again), JSON.stringify({ ...m, first: undefined }));
+await b.shot(OUT + 'f-dstage-fail.jpg');
+
 // 6. 상식 홈 — 견본 눌러 보기 · 접기 · 타일
 await b.go('/trivia', 2000);
 m = await b.ev(`

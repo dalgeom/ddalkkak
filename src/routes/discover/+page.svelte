@@ -40,8 +40,10 @@
 
 	<ModeTiles
 		modes={[
-			{ name: '바로 풀기', sub: '발견형만 계속', href: '/play?filter=puzzle', main: true },
-			{ name: '오늘의 10문제', sub: '발견형 3문제가 나와요', href: '/' },
+			// 10/20 딸깍 5단계: 「너무 어렵다」던 유형이라 새싹부터 여는 단계 도전을 첫 칸에. 4칸을 지키려고
+			// 「오늘의 10문제」 타일을 뺐다 — 하단 「오늘」 탭과 아래 「다른 놀이」 칸에 있다
+			{ name: '단계 도전', sub: '새싹부터 고수까지 74판', href: '/discover/stages', main: true },
+			{ name: '바로 풀기', sub: '발견형만 계속', href: '/play?filter=puzzle' },
 			{ name: '분야 골라 보기', sub: `${data.fields.length}개 분야`, href: '#fields' },
 			{ name: '푸는 법', sub: '막힐 때 보는 순서', href: '/guide' }
 		]}

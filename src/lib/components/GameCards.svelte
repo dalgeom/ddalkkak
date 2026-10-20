@@ -65,6 +65,7 @@
 			line: '예시 속 규칙을 찾아요',
 			href: '/discover',
 			sub: [
+				{ label: '단계 도전', href: '/discover/stages' },
 				{ label: '바로 풀기', href: '/play?filter=puzzle' },
 				{ label: '푸는 법', href: '/guide' }
 			]

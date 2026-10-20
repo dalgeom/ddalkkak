@@ -2,7 +2,7 @@
 import { launch, BASE, OUT } from './cdp.mjs';
 const sm = await (await fetch(BASE + '/sitemap.xml?nocache=' + Date.now())).text();
 const pages = [...new Set([...[...sm.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1].replace(/^https?:\/\/[^/]+/, '') || '/'),
-	'/games', '/news', '/record', '/today', '/play', '/matchstick', '/matchstick/picture', '/chosung', '/cubenet', '/trivia/duel', '/matchstick/duel', '/trivia/stages', '/trivia/stages/1'])];
+	'/games', '/news', '/record', '/today', '/play', '/matchstick', '/matchstick/picture', '/chosung', '/cubenet', '/trivia/duel', '/matchstick/duel', '/trivia/stages', '/trivia/stages/1', '/discover/stages', '/discover/stages/1'])];
 const b = await launch('gaps');
 await b.viewport(390);
 const bad = [];
