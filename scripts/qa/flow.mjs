@@ -214,6 +214,42 @@ m = await b.ev(`return { h1: document.querySelector('h1')?.textContent.trim(), s
 ok('성냥 대결 답장 = 나 4 · 친구 3 · 내가 이김 · 한 판 더(판 없음)', /내가 이겼어요/.test(m.h1 ?? '') && /나 4/.test(m.sides[0] ?? '') && /친구 3/.test(m.sides[1] ?? '') && /한 판 더/.test(m.cta ?? '') && m.boards === 0, JSON.stringify(m));
 await b.shot(OUT + 'f-mduel-reply.jpg');
 
+// 5f. 성냥을 마우스로 끌어 옮기기(10/20 — 여울게임터 운영자 메일 지적). 실제 마우스 이벤트로 켜진 성냥 → 빈 자리
+await b.go('/matchstick/duel?s=4242', 2500);
+m = await b.ev(`
+	const c = (el) => { const r = el.getBoundingClientRect(); return { x: r.x + r.width / 2, y: r.y + r.height / 2, loc: el.getAttribute('data-loc') }; };
+	const from = document.querySelector('.mboard [data-lit="1"][data-loc^="g0"]');
+	const to = document.querySelector('.mboard [data-lit="0"][data-loc^="g2"]');
+	return from && to ? { from: c(from), to: c(to) } : null;`);
+if (m) {
+	const mouse = (type, p, buttons = 1) => b.send('Input.dispatchMouseEvent', { type, x: p.x, y: p.y, button: 'left', buttons, clickCount: 1 });
+	await mouse('mousePressed', m.from);
+	for (let i = 1; i <= 6; i++) await mouse('mouseMoved', { x: m.from.x + ((m.to.x - m.from.x) * i) / 6, y: m.from.y + ((m.to.y - m.from.y) * i) / 6 });
+	await mouse('mouseReleased', m.to, 0);
+	await sleep(80);
+	const after = await b.ev(`return { from: document.querySelector('.mboard [data-loc="${m.from.loc}"]').getAttribute('data-lit'), to: document.querySelector('.mboard [data-loc="${m.to.loc}"]').getAttribute('data-lit'), sc: document.querySelector('.sc')?.textContent.trim(), fb: document.querySelector('.verdict')?.textContent.trim() ?? '' };`);
+	ok('마우스로 끌어 옮기면 원래 자리는 비고 놓은 자리에 꽂힘 · 대결 시작', after.from === '0' && after.to === '1' && /맞힌 수/.test(after.sc ?? ''), JSON.stringify({ ...m, after }));
+	// 끌지 않은 누르기는 지금까지처럼 「집기」 — 끌기 뒤 click을 삼키는 장치가 다음 누르기를 먹지 않는지
+	await sleep(700);
+	const tap = await b.ev(`const s = document.querySelector('.mboard [data-lit="1"]'); s.dispatchEvent(new MouseEvent('click', { bubbles: true })); await new Promise(r=>setTimeout(r,200)); return document.querySelectorAll('.mboard .stick.picked').length;`);
+	ok('끌기 뒤에도 누르기로 집기가 그대로 됨', tap === 1, 'picked=' + tap);
+} else ok('끌기 시험 판을 못 찾음', false, 'null');
+// 같은 판을 쓰는 오늘의 성냥개비에서도 — 판이 움직이는 화면이 또 있는지
+await b.go('/matchstick', 3500);
+m = await b.ev(`document.querySelector('.today .big')?.click(); await new Promise(r=>setTimeout(r,900));
+	const c = (el) => { const r = el.getBoundingClientRect(); return { x: r.x + r.width / 2, y: r.y + r.height / 2, loc: el.getAttribute('data-loc') }; };
+	const from = document.querySelector('.mboard [data-lit="1"][data-loc^="g0"]'); const to = document.querySelector('.mboard [data-lit="0"][data-loc^="g2"]');
+	return from && to ? { from: c(from), to: c(to) } : null;`);
+if (m) {
+	const mouse = (type, p, buttons = 1) => b.send('Input.dispatchMouseEvent', { type, x: p.x, y: p.y, button: 'left', buttons, clickCount: 1 });
+	await mouse('mousePressed', m.from);
+	for (let i = 1; i <= 6; i++) await mouse('mouseMoved', { x: m.from.x + ((m.to.x - m.from.x) * i) / 6, y: m.from.y + ((m.to.y - m.from.y) * i) / 6 });
+	await mouse('mouseReleased', m.to, 0);
+	await sleep(80);
+	const after = await b.ev(`return { from: document.querySelector('.mboard [data-loc="${m.from.loc}"]').getAttribute('data-lit'), to: document.querySelector('.mboard [data-loc="${m.to.loc}"]').getAttribute('data-lit') };`);
+	ok('오늘의 성냥개비도 마우스로 끌어 옮기기', after.from === '0' && after.to === '1', JSON.stringify({ ...m, after }));
+} else ok('오늘의 성냥개비 판을 못 찾음', false, 'null');
+
 // 6. 상식 홈 — 견본 눌러 보기 · 접기 · 타일
 await b.go('/trivia', 2000);
 m = await b.ev(`

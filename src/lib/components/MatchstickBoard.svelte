@@ -38,6 +38,53 @@
 		}
 	}
 
+	/*
+	 * 마우스로 끌어 옮기기(10/20). 「눌러 집고 → 눌러 놓기」만 되던 때 PC에서 끌다가 헤맨 사람이 메일로 알려 왔다
+	 * (여울게임터 운영자, 10/16). 5px 넘게 끌기 시작하는 순간 집고, 빈 자리 위에서 놓으면 놓는다.
+	 * 끌지 않은 누르기는 지금까지와 같은 click 흐름 그대로다. 터치는 끌면 화면이 밀리므로 손대지 않는다.
+	 */
+	let press: { loc: PickLoc; x: number; y: number } | null = null;
+	let dragging = $state(false);
+
+	function locOf(el: Element | null): { loc: PickLoc; lit: boolean } | null {
+		const t = el?.closest('[data-loc]');
+		const key = t?.getAttribute('data-loc');
+		if (!t || !key) return null;
+		const lit = t.getAttribute('data-lit') === '1';
+		if (key === 'op-v') return { loc: { kind: 'op' }, lit };
+		const m = /^g(\d+)-([a-g])$/.exec(key);
+		return m ? { loc: { kind: 'glyph', gi: Number(m[1]), seg: m[2] as SegKey }, lit } : null;
+	}
+
+	function onDown(e: PointerEvent, loc: PickLoc, lit: boolean) {
+		if (e.pointerType !== 'mouse' || e.button !== 0 || !lit) return;
+		press = { loc, x: e.clientX, y: e.clientY };
+		window.addEventListener('pointermove', onMove);
+		window.addEventListener('pointerup', onUp, { once: true });
+	}
+	function onMove(e: PointerEvent) {
+		if (!press || dragging) return;
+		if (Math.hypot(e.clientX - press.x, e.clientY - press.y) < 5) return;
+		dragging = true;
+		onstick(press.loc, true);
+	}
+	function onUp(e: PointerEvent) {
+		window.removeEventListener('pointermove', onMove);
+		const was = dragging;
+		press = null;
+		dragging = false;
+		if (!was) return; // 끌지 않았다 — click이 처리한다
+		const hit = locOf(document.elementFromPoint(e.clientX, e.clientY));
+		if (hit && !hit.lit) onstick(hit.loc, false);
+		// 끌기 끝의 click(누른 곳과 뗀 곳이 다르면 공통 조상에서 난다)이 한 번 더 누른 것으로 읽히지 않게
+		// click이 안 따라오는 경우(창 밖에서 뗌)에 다음 진짜 누르기를 삼키지 않도록 바로 다음 차례에 거둔다
+		window.addEventListener('click', swallow, { capture: true, once: true });
+		setTimeout(() => window.removeEventListener('click', swallow, { capture: true }), 0);
+	}
+	function swallow(c: MouseEvent) {
+		c.stopPropagation();
+	}
+
 	/** 스크린리더용 세그먼트 위치 이름 — 35개가 전부 "N번째 자리 성냥"이면 구분이 안 된다 */
 	const SEG_NAME: Record<SegKey, string> = {
 		a: '위',
@@ -167,7 +214,7 @@
 	}
 </script>
 
-<div class="mboard">
+<div class="mboard" class:dragging>
 	{#if label}<span class="sr-only">{label}</span>{/if}
 	<svg
 		class="fit"
@@ -198,6 +245,8 @@
 							? `연산자 세로 획 — ${board.opPlus ? '성냥 있음(+)' : '빈 자리(−)'}`
 							: undefined}
 						data-loc="op-v"
+						data-lit={board.opPlus ? '1' : '0'}
+						onpointerdown={interactive ? (e) => onDown(e, { kind: 'op' }, board.opPlus) : undefined}
 						onclick={interactive ? () => onstick({ kind: 'op' }, board.opPlus) : undefined}
 						onkeydown={interactive ? (e) => onKey(e, { kind: 'op' }, board.opPlus) : undefined}
 					/>
@@ -234,6 +283,8 @@
 							? `${gi + 1}번째 글자 ${SEG_NAME[seg]} 획 — ${lit ? '성냥 있음' : '빈 자리'}`
 							: undefined}
 						data-loc="g{gi}-{seg}"
+						data-lit={lit ? '1' : '0'}
+						onpointerdown={interactive ? (e) => onDown(e, { kind: 'glyph', gi, seg }, lit) : undefined}
 						onclick={interactive ? () => onstick({ kind: 'glyph', gi, seg }, lit) : undefined}
 						onkeydown={interactive ? (e) => onKey(e, { kind: 'glyph', gi, seg }, lit) : undefined}
 					/>
@@ -279,6 +330,16 @@
 	}
 	.stick.ro {
 		cursor: default;
+	}
+	/* 끄는 동안 — 잡은 손 모양, 놓을 수 있는 빈 자리는 손 밑에서 밝아진다 */
+	.mboard.dragging,
+	.mboard.dragging .stick {
+		cursor: grabbing;
+		user-select: none;
+	}
+	.mboard.dragging .stick.ghost:hover {
+		fill: #2f6b3d;
+		stroke: #3aff62;
 	}
 	.stick.lit {
 		fill: #3aff62;

@@ -477,7 +477,7 @@
 		<header class="cover">
 			<span class="kicker">성냥개비</span>
 			<h1>성냥 <b>하나만</b> 옮겨<br />틀린 식을 참으로</h1>
-			<p class="lead">획을 눌러 집고, 빈 자리를 눌러 놓으면 됩니다. 준비된 문제 {problems.length}개.</p>
+			<p class="lead">획을 눌러 집고 빈 자리를 눌러 놓아요. 마우스로 끌어 옮겨도 돼요. 문제는 {problems.length}개 준비돼 있어요.</p>
 			<div class="facts">
 				<div class="fact"><b>{stats.solved}</b><span>푼 판</span></div>
 				<div class="fact"><b>{stats.best}</b><span>최고 연속</span></div>

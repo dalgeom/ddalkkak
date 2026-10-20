@@ -219,7 +219,8 @@
 	</section>
 	<OtherGames current="match" />
 {:else if phase === 'play' && item}
-	{#if !started}
+	<!-- 1번 동안은 안내를 둔다 — 첫 성냥을 집는 순간 숨기면 끄는 도중에 판이 위로 튀어 손 밑에서 빠져나갔다 -->
+	{#if pos === 0}
 		<header class="intro">
 			<span class="kicker">성냥개비 대결</span>
 			{#if data.vs}
