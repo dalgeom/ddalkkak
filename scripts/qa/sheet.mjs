@@ -65,6 +65,15 @@ await drag(b, p.x - 60, p.top + 10, p.top + 130, 80, 4);
 await sleep(500);
 ok('C3 짧아도 빠르게 튕기면 닫힘', !(await isOpen(b)));
 
+// 손잡이를 잠깐 누르고 있다가 휙 튕기기 — 처음부터의 평균 속도로 재던 때(10/20 전)는 안 닫혔다
+await openFb(b);
+p = await rect(b, '.handle');
+await b.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: p.x - 60, y: p.top + 10 }] });
+await sleep(400);
+await drag(b, p.x - 60, p.top + 10, p.top + 130, 60, 4);
+await sleep(500);
+ok('C4 누르고 있다가 휙 튕겨도 닫힘', !(await isOpen(b)));
+
 // H. 내용 영역(맨 위)에서 끌어 내리면 닫힘, 글 칸에서는 안 끌림
 await openFb(b);
 p = await rect(b, '.body .sub');
@@ -123,12 +132,13 @@ ok('I1b 시트를 닫으면 띠 · 종의 점이 바로 사라짐', !(await b.ev
 await b.ev(`localStorage.clear(); localStorage.setItem('ddal.visit','1'); return 1;`);
 await b.go('/games', 1500);
 await b.go('/', 3800);
-await b.ev(`[...document.querySelectorAll('.panel a')].find(a=>/대결/.test(a.textContent)).click(); return 1;`);
+// 시트는 안 본 소식 셋만 보인다 — 특정 소식을 찾지 말고 첫 링크로 잰다(10/20: 새 소식이 늘어 대결 링크가 밀려났다)
+const want = await b.ev(`const a = document.querySelector('.panel a'); const p = a ? new URL(a.href).pathname : null; a?.click(); return p;`);
 await sleep(1800);
 const at = await b.ev(`return location.pathname;`);
 await b.ev(`history.back(); return 1;`);
 await sleep(1500);
-ok('I2 소식 링크 → 그 화면, 뒤로가기 한 번 = 메인(빈 칸 없음)', at === '/matchstick/duel' && (await b.ev(`return location.pathname;`)) === '/' && !(await isOpen(b)), `${at} → ${await b.ev(`return location.pathname;`)}`);
+ok('I2 소식 링크 → 그 화면, 뒤로가기 한 번 = 메인(빈 칸 없음)', !!want && at === want && (await b.ev(`return location.pathname;`)) === '/' && !(await isOpen(b)), `${want}: ${at} → ${await b.ev(`return location.pathname;`)}`);
 
 // 하단 탭 — 아이폰 홈 바(34px) 흉내
 try {

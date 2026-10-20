@@ -149,6 +149,9 @@
 	let fromHandle = false;
 	let canDrag = false;
 	let blockClick = false;
+	/** 최근 움직임(시각 · 끈 거리) — 튕긴 속도는 손을 뗄 무렵 0.1초로 잰다. 처음부터의 평균으로 재면
+	    손잡이를 잠깐 누르고 있다가 휙 튕긴 것이 느린 끌기로 읽혀 안 닫혔다(10/20 QA C3가 들쭉날쭉했던 원인) */
+	let trail: { t: number; dy: number }[] = [];
 
 	function begin(y: number, target: EventTarget | null) {
 		const el = target as Element | null;
@@ -157,6 +160,7 @@
 		canDrag = fromHandle || (!inField && (body?.scrollTop ?? 0) <= 0);
 		startY = y;
 		startT = performance.now();
+		trail = [{ t: startT, dy: 0 }];
 		dragging = false;
 	}
 	/** 끌기로 넘어갔으면 true(그때부터 스크롤 대신 시트가 움직인다) */
@@ -173,6 +177,9 @@
 			dragging = true;
 		}
 		dy = d > 0 ? d : d * (expandable && !expanded ? 0.45 : 0.15);
+		const now = performance.now();
+		trail.push({ t: now, dy });
+		while (trail.length > 2 && now - trail[1].t > 100) trail.shift();
 		return true;
 	}
 	function end() {
@@ -181,7 +188,11 @@
 		blockClick = true;
 		setTimeout(() => (blockClick = false), 50);
 		const h = panel?.offsetHeight ?? 400;
-		const v = dy / Math.max(1, performance.now() - startT);
+		// 손을 떼기 직전 0.1초쯤 움직인 속도(px/ms) — 마지막 움직임까지로 잰다(떼는 데 걸린 틈은 뺀다).
+		// 마지막으로 움직인 뒤 0.1초 넘게 멈췄다가 뗐으면 튕긴 것이 아니다
+		const from = trail[0] ?? { t: startT, dy: 0 };
+		const last = trail[trail.length - 1] ?? from;
+		const v = performance.now() - last.t > 100 ? 0 : (last.dy - from.dy) / Math.max(1, last.t - from.t);
 		if (expanded && dy > 0 && dy < h * 0.45 && v < 0.8) {
 			expanded = false;
 			dy = 0;
