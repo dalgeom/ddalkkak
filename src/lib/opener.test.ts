@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { isOpener, openerMetrics, OPENER_EASY_START_DAY, OPENER_BLOCK_START_DAY } from './opener';
 import { OPENER_SCORES } from './openerScores';
 import { PROBLEMS } from './problems';
-import { buildDailySetStable, MATCH_TOTAL, OPENER_START_DAY, PICK_V2_START_DAY } from './game';
+import { buildDailySetStable, MATCH_TOTAL, OPENER_START_DAY, PICK_V2_START_DAY, TRIVIA_FIRST_DAY } from './game';
 import { fieldOfChip } from './problems';
 import { TRIVIA } from './trivia';
 import { bankSizesAt } from './bankHistory';
@@ -94,7 +94,7 @@ describe('1번 자리는 예시가 보이는 문제로 연다', () => {
 	it('시작일부터 60일간, 후보가 있는 날은 발견형 맨 앞이 문지기다', () => {
 		const 실패: string[] = [];
 		let 후보없는날 = 0;
-		for (let day = OPENER_START_DAY; day < OPENER_START_DAY + 60; day++) {
+		for (let day = OPENER_START_DAY; day < Math.min(OPENER_START_DAY + 60, TRIVIA_FIRST_DAY); day++) {
 			const picks = set(day);
 			const disc = picks.filter((p) => p.kind === 'discover' && !p.bonus).map((p) => PROBLEMS[p.index]);
 			if (!disc.some(isOpener)) {
@@ -192,7 +192,7 @@ describe('쉬운 문지기 — 그날 세 문제 중 가장 쉬운 것이 1번 (
 
 	it('시작일부터 60일간 1번은 그날 문지기 중 점수가 가장 낮다', () => {
 		const 실패: string[] = [];
-		for (let day = OPENER_EASY_START_DAY; day < OPENER_EASY_START_DAY + 60; day++) {
+		for (let day = OPENER_EASY_START_DAY; day < Math.min(OPENER_EASY_START_DAY + 60, TRIVIA_FIRST_DAY); day++) {
 			const picks = set(day);
 			const disc = picks.filter((p) => p.kind === 'discover' && !p.bonus).map((p) => PROBLEMS[p.index]);
 			// isOpener(p, day, 5) — 점수가 있고(1~5) 그날 1번에서 빼는 문제가 아닌 문지기(opener.ts OPENER_BLOCK)
@@ -207,7 +207,7 @@ describe('쉬운 문지기 — 그날 세 문제 중 가장 쉬운 것이 1번 (
 
 	it('10/15부터 60일간 수학 패턴 감상형·고전은 1번에 서지 않는다', () => {
 		const 막은 = ['nm-ones-square', 'nm-square-gap', 'nm-sum-1-100', 'nm-digit-root', 'cal-clock-angle'];
-		for (let day = OPENER_BLOCK_START_DAY; day < OPENER_BLOCK_START_DAY + 60; day++) {
+		for (let day = OPENER_BLOCK_START_DAY; day < Math.min(OPENER_BLOCK_START_DAY + 60, TRIVIA_FIRST_DAY); day++) {
 			const first = PROBLEMS[firstDisc(set(day)).index];
 			expect(막은, `day ${day}`).not.toContain(first.id);
 		}

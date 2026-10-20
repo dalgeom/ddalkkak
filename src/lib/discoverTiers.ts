@@ -10,7 +10,7 @@
  * 실측이 10건 넘게 쌓이면 실측이 이 판정보다 앞선다(다시 매길 때 고친다). 새 문제는 추가할 때 여기에 단계를 함께 적는다
  * (discoverTiers.test.ts가 빠진 id를 잡는다).
  */
-import type { Tier } from './tiers';
+import { TIER_OF_GRADE, type Tier } from './tiers';
 
 export const DISCOVER_TIERS: Readonly<Record<string, Tier>> = {
 	'diamond-op': 3, // 곱 뒤집기, 81→18 눈에 띔
@@ -394,3 +394,13 @@ export const DISCOVER_TIERS: Readonly<Record<string, Tier>> = {
 	'legs-sum': 1, // 10/20 새로 · 검수 새싹 적합
 	'cal-arrow-move': 2, // 10/20 새로 · 검수가 쉬움으로 판정
 };
+
+/**
+ * 문제 하나의 단계 — 상식은 학년(tiers.ts TIER_OF_GRADE), 발견형은 위 표. 모르면 null(성냥 · 전개도는 아직 단계가 없다).
+ * 오늘의 10문제 계단(game.ts)과 문제 카드의 단계 표시가 같이 쓴다.
+ */
+export function tierOf(p: { id?: string; grade?: string; trivia?: boolean } | undefined | null): Tier | null {
+	if (!p) return null;
+	if (p.trivia || p.grade) return TIER_OF_GRADE[p.grade ?? ''] ?? null;
+	return (p.id && DISCOVER_TIERS[p.id]) || null;
+}

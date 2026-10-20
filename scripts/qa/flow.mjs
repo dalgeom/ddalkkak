@@ -133,6 +133,14 @@ await b.go('/', 3000);
 m = await b.ev(`return !!document.querySelector('[role=dialog]');`);
 ok('닫은 뒤 다시 안 뜸', !m);
 
+// 4b. 딸깍 5단계(10/20) — 오늘의 10문제 카드에 단계 칩(새싹~고수)
+await b.ev(`localStorage.clear(); return 1;`);
+await b.go('/', 3500);
+m = await b.ev(`document.querySelector('.cta')?.click(); await new Promise(r=>setTimeout(r,2500));
+	return { tier: document.querySelector('.chiprow .tier-chip')?.textContent.trim() ?? null, cat: document.querySelector('.chiprow .cat-chip')?.textContent.trim() ?? null, top: document.querySelector('.type-chip')?.textContent.trim() };`);
+ok('오늘의 10문제 1번 카드에 단계 칩 · 분야 칩이 나란히', /^(새싹|쉬움|보통|어려움|고수)$/.test(m.tier ?? '') && !!m.cat, JSON.stringify(m));
+await b.shot(OUT + 'f-daily-tier.jpg');
+
 // 5. /play 필터
 for (const [f, want] of [['cube', 'cube'], ['match', 'match'], ['trivia', 'choice']]) {
 	await b.go('/play?filter=' + f, 2500);

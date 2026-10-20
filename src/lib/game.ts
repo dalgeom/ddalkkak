@@ -1,5 +1,6 @@
 import type { Problem } from './problems';
 import { encodeChallenge, type Challenge } from './challenge';
+import { tierOf } from './discoverTiers';
 
 /** 힌트 사용 수(0~3)에 따른 획득 점수 */
 export const HINT_SCORES = [100, 80, 50, 20] as const;
@@ -297,6 +298,11 @@ export function dailyKinds(dayNum: number): DailyKind[] {
  * 시작한 사람 대부분이 끝까지 갔다(10/18 8명 중 7, 10/19 7명 중 6 — 링크로 온 사람이라 집단은 다르다).
  *
  * 줄 세우는 순서만 바꾼다. 뽑기 · 보너스 유형(dailyKinds 기준) · 문지기는 그대로다. 판정은 promo/지표-기록.md 10/20.
+ *
+ * 같은 날부터 「계단」(딸깍 5단계, 10/20 승인): 종류마다 쉬운 문제가 앞에 선다 — 발견형 줄은 단계(discoverTiers.ts)
+ * 오름차순, 상식 줄은 학년 오름차순. 종류 순서(상식 → 발견 → 성냥 → 전개도 반복)는 그대로라 dailyKindOrder와
+ * 결과 화면 복원이 안 깨진다. 1번은 그날 가장 쉬운 상식, 발견형은 2 · 6 · 9번으로 갈수록 어려워진다.
+ * 같은 단계끼리는 원래 순서(발견형은 문지기가 앞)를 지킨다.
  */
 export const TRIVIA_FIRST_DAY = 20747;
 
@@ -690,6 +696,18 @@ export function buildDailySetStable<D, T>(
 		}
 	}
 	const tAll = pickStable(triviaAll, (e) => sizesAt(e).trivia, catOf, 20260202, 'trivia', d);
+	// 계단(TRIVIA_FIRST_DAY 주석) — 정규 칸 안에서만 쉬운 것부터. 보너스 칸(counts 다음)은 건드리지 않는다
+	if (d >= TRIVIA_FIRST_DAY) {
+		const stair = (lane: number[], n: number, all: unknown[]) => {
+			const head = lane
+				.slice(0, n)
+				.map((i, k) => ({ i, k, t: tierOf(all[i] as Parameters<typeof tierOf>[0]) ?? 3 }))
+				.sort((a, b) => a.t - b.t || a.k - b.k);
+			head.forEach((h, k) => (lane[k] = h.i));
+		};
+		stair(dAll, counts.discover, discoverAll);
+		stair(tAll, counts.trivia, triviaAll);
+	}
 	const mAll = pickAtCursor(
 		Array.from({ length: matchTotal }, (_, i) => i),
 		cursorAt('match', d),

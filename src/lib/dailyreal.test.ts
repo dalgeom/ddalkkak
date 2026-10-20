@@ -3,6 +3,7 @@ import { PROBLEMS, fieldOfChip } from './problems';
 import { TRIVIA } from './trivia';
 import { bankSizesAt } from './bankHistory';
 import { isOpener } from './opener';
+import { tierOf } from './discoverTiers';
 import {
 	buildDailySet,
 	buildDailySetStable,
@@ -130,6 +131,21 @@ describe('오늘의 딸깍 — 실제 문제은행 검증', () => {
 			expect(set[0].bonus, `day ${day}`).toBeFalsy();
 			expect(set.length, `day ${day}`).toBe(DAILY_SIZE);
 		}
+	});
+
+	it('계단(10/21~) — 종류마다 쉬운 문제부터, 오늘까지는 그대로, 나가는 문제는 같다', () => {
+		const stable = (day: number) =>
+			buildDailySetStable(PROBLEMS, TRIVIA, MATCH_TOTAL, day, (p) => fieldOfChip(p.chip), (t) => t.category ?? '기타', bankSizesAt, isOpener);
+		let 오른날 = 0;
+		for (let day = TRIVIA_FIRST_DAY; day < TRIVIA_FIRST_DAY + 120; day++) {
+			const set = stable(day).filter((p) => !p.bonus);
+			const dt = set.filter((p) => p.kind === 'discover').map((p) => tierOf(PROBLEMS[p.index]) ?? 3);
+			const tt = set.filter((p) => p.kind === 'trivia').map((p) => tierOf(TRIVIA[p.index]) ?? 3);
+			for (const ts of [dt, tt]) expect(ts, `day ${day}`).toEqual([...ts].sort((a, b) => a - b));
+			if (dt[0] < dt[dt.length - 1]) 오른날++;
+		}
+		// 양성 대조 — 정렬이 실제로 일을 하는가(발견형 셋이 같은 단계인 날만 있으면 이 시험은 헛돈다)
+		expect(오른날).toBeGreaterThan(60);
 	});
 
 	/** 결과 화면이 queue 없이 유형을 복원할 때 쓰는 순서 — 실제 배치와 어긋나면 집계가 틀어진다 */

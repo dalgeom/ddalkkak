@@ -33,6 +33,8 @@
 	import { parseChallenge, judgeChallenge, type Challenge } from '$lib/challenge';
 	import { teaserOf, type Teaser } from '$lib/teaser';
 	import { isOpener } from '$lib/opener';
+	import { tierOf } from '$lib/discoverTiers';
+	import { tierName, type Tier } from '$lib/tiers';
 	import { bankSizesAt } from '$lib/bankHistory';
 	import { logoClicks, focusMode } from '$lib/nav';
 	import { track } from '$lib/analytics';
@@ -153,6 +155,16 @@
 	);
 	let shownHints = $derived(hintList ? hintList.slice(0, hintsUsed) : []);
 	let correctCount = $derived(marks.filter((m) => m !== 'miss').length);
+	/** 딸깍 5단계(10/20) — 지금 문제의 단계, 오늘 맞힌 문제 중 가장 높은 단계(다 풀고 새로고침하면 queue가 없어 안 뜬다) */
+	let cardTier = $derived(tierOf(queue[pos]?.problem));
+	let reachedTier = $derived.by(() => {
+		let best: Tier | null = null;
+		marks.forEach((m, i) => {
+			const t = m && m !== 'miss' ? tierOf(queue[i]?.problem) : null;
+			if (t && (!best || t > best)) best = t;
+		});
+		return best as Tier | null;
+	});
 	let puzzleNo = $derived(puzzleNumber(dayNum));
 
 	/* ───────── 도전장 (challenge.ts) ─────────
@@ -1105,8 +1117,12 @@
 			class:hit={judged && feedback?.ok}
 			class:miss={feedback && !feedback.ok}
 		>
-			{#if current.problem?.chip && !current.bonus}
-				<span class="cat-chip">{current.problem.chip}</span>
+			<!-- 10/20 딸깍 5단계: 문제마다 단계(새싹~고수)를 보여 준다 — 성냥 · 전개도는 아직 단계가 없다 -->
+			{#if !current.bonus && (current.problem?.chip || cardTier)}
+				<div class="chiprow">
+					{#if cardTier}<span class="tier-chip lv{cardTier}">{tierName(cardTier)}</span>{/if}
+					{#if current.problem?.chip}<span class="cat-chip">{current.problem.chip}</span>{/if}
+				</div>
 			{/if}
 
 			<div class="q">
@@ -1315,6 +1331,10 @@
 	<div class="score">
 		<span class="num">{correctCount}</span><span class="rest"> / {DAILY_SIZE} 정답</span>
 	</div>
+	<!-- 딸깍 5단계: 몇 개 틀렸는지보다 어디까지 올라갔는지 — 중간에 멈춰도 자기 단계를 찾은 것으로 읽히게 -->
+	{#if reachedTier}
+		<p class="reached">오늘은 <b>{tierName(reachedTier)}</b> 문제까지 맞혔어요</p>
+	{/if}
 
 	<!-- 걸린 시간은 푸는 동안 숨겨 두었다가 여기서만 공개한다.
 	     보면서 풀면 쫓기는 기분이 들어 발견형 퍼즐과 안 맞는다. -->
@@ -1893,9 +1913,40 @@
 	.card.bonus {
 		border: 2px dashed var(--gold);
 	}
-	.cat-chip {
+	.chiprow {
 		/* 카드가 flex column이라 그냥 두면 칩이 가로로 늘어난다 */
 		align-self: flex-start;
+		display: flex;
+		gap: 6px;
+	}
+	.tier-chip {
+		font-size: 12px;
+		font-weight: 800;
+		padding: 3px 9px;
+		border-radius: 7px;
+		color: var(--accent-text);
+		background: var(--correct-bg);
+	}
+	.tier-chip.lv3 {
+		color: var(--gold-text);
+		background: var(--gold-bg);
+	}
+	.tier-chip.lv4,
+	.tier-chip.lv5 {
+		color: var(--danger);
+		background: var(--danger-bg);
+	}
+	.reached {
+		margin-top: 6px;
+		text-align: center;
+		font-size: 14.5px;
+		color: var(--muted);
+		word-break: keep-all;
+	}
+	.reached b {
+		color: var(--accent-text);
+	}
+	.cat-chip {
 		font-size: 12px;
 		font-weight: 700;
 		background: var(--panel-2);
