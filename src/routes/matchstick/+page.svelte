@@ -28,6 +28,7 @@
 	import AdSlot from '$lib/components/AdSlot.svelte';
 	import OtherGames from '$lib/components/OtherGames.svelte';
 	import Icon from '$lib/components/Icon.svelte';
+	import SolveEntry from '$lib/components/SolveEntry.svelte';
 
 	type Mode =
 		| { type: 'free' }
@@ -484,6 +485,9 @@
 				<div class="fact"><b>{problems.length - done.length}</b><span>남은 새 문제</span></div>
 			</div>
 		</header>
+
+		<!-- 「12-7=6 성냥」처럼 식을 검색해 들어온 사람은 그 식의 답을 찾고 있다(10/21) — 오늘의 성냥보다 먼저 보이게 -->
+		<SolveEntry from="match" />
 
 		<!-- 오늘의 성냥개비 — 검색으로 온 사람에게 매일 올 이유를 준다(matchDaily.ts) -->
 		{#if day && todayIdx >= 0}

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { ctaTrack } from '$lib/analytics';
 	import MatchstickBoard from '$lib/components/MatchstickBoard.svelte';
+	import SolveEntry from '$lib/components/SolveEntry.svelte';
 	import { parseEq } from '$lib/matchstick';
 	import { MATCH_TOTAL } from '$lib/game';
 
@@ -93,6 +94,7 @@
 			<b>어떤 숫자가 어떤 숫자로 바뀔 수 있는지</b>를 모르기 때문이다. 그 표부터 외우면 대부분 풀린다.
 		</p>
 	</header>
+	<SolveEntry from="guide" />
 
 	<section class="sec">
 		<h2 class="sh">핵심 도구 — 한 획 차이 숫자표</h2>

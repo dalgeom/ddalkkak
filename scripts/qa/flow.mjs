@@ -388,6 +388,58 @@ ok('타임어택 누르면 3·5·10분 펼침', m.opts === 3);
 ok('단계판 펼치기(10/21부터 100단계)', m.cells >= 100, 'cells=' + m.cells);
 ok('무한 연습 시작 → 판·힌트', m.board && m.hint);
 
+// 8b. 성냥 정답 찾기(10/21) — 성냥 화면 입구(오늘의 성냥보다 위) → 자판으로 식 넣기 → 답 · 다른 규칙 · 많이 찾는 식 · 주소로 열기
+await b.go('/matchstick', 2500);
+m = await b.ev(`
+	const e=document.querySelector('.solve-entry'), t=document.querySelector('.today');
+	return { has: !!e, above: !!e && (!t || e.getBoundingClientRect().top < t.getBoundingClientRect().top), href: e?.getAttribute('href') };`);
+ok('성냥 화면에 정답 찾기 입구 · 오늘의 성냥보다 위', m.has && m.above && m.href === '/matchstick/solve', JSON.stringify(m));
+await b.ev(`document.querySelector('.solve-entry').click(); return 1;`);
+await sleep(2500);
+const typeEq = (eq) => `
+	const keys=[...document.querySelectorAll('.key')]; const k=(c)=>keys.find(x=>x.textContent.trim()===(c==='-'?'−':c));
+	for (let i = 0; i < 30 && document.querySelector('.eq').value; i++) { k('⌫').click(); await new Promise(r=>setTimeout(r,0)); }
+	for (const c of ${JSON.stringify(eq)}) k(c).click();
+	await new Promise(r=>setTimeout(r,200));`;
+m = await b.ev(`${typeEq('12-7=6')}
+	const pre=!!document.querySelector('.pre .meq');
+	[...document.querySelectorAll('.go')].find(x=>x.textContent.trim()==='정답 찾기').click(); await new Promise(r=>setTimeout(r,600));
+	return { path: location.pathname, pre, ans: [...document.querySelectorAll('.ans .at')].map(x=>x.textContent.trim()), q: location.search,
+		orange: document.querySelectorAll('.ans rect.new').length, gone: document.querySelectorAll('.ans rect.gone').length,
+		over: document.documentElement.scrollWidth - innerWidth };`);
+ok('입구 누르면 정답 찾기 화면', m.path === '/matchstick/solve');
+ok('자판으로 12−7=6 → 미리보기 판', m.pre);
+ok('정답 찾기 → 13 − 7 = 6 하나 · 옮긴 성냥 주황 · 뺀 자리 점선', m.ans.join() === '13 − 7 = 6' && m.orange === 1 && m.gone === 1, JSON.stringify(m));
+ok('주소에 식이 남는다(?q=)', /q=12-7%3D6/.test(m.q) && /r=move1/.test(m.q), m.q);
+ok('정답 찾기 390px 가로 넘침 없음', m.over <= 0, 'over=' + m.over);
+await b.shot(OUT + 'f-solve.jpg');
+m = await b.ev(`${typeEq('6-6=8')}
+	const stale=document.querySelectorAll('.ans').length;
+	[...document.querySelectorAll('.go')].find(x=>x.textContent.trim()==='정답 찾기').click(); await new Promise(r=>setTimeout(r,600));
+	const head=document.querySelector('.res .sh')?.textContent.trim();
+	const alts=[...document.querySelectorAll('.alt')].map(x=>x.textContent.replace(/\\s+/g,' ').trim());
+	[...document.querySelectorAll('.alt')].find(x=>/2개 옮기기/.test(x.textContent))?.click(); await new Promise(r=>setTimeout(r,800));
+	return { stale, head, alts, after: document.querySelectorAll('.ans').length, on: document.querySelector('.rule.on')?.textContent.trim() };`);
+ok('식을 바꾸면 지난 답은 사라짐', m.stale === 0, 'stale=' + m.stale);
+ok('6−6=8 → 1개 옮기기로는 답 없음 · 다른 규칙 제안', /답이 없어요/.test(m.head) && m.alts.some((a) => /2개 옮기기/.test(a)), JSON.stringify(m));
+ok('제안 누르면 2개 옮기기로 답 4개', m.after === 4 && m.on === '2개 옮기기', JSON.stringify(m));
+m = await b.ev(`${typeEq('1-3=2')}
+	[...document.querySelectorAll('.go')].find(x=>x.textContent.trim()==='정답 찾기').click(); await new Promise(r=>setTimeout(r,800));
+	return document.querySelector('.res')?.innerText.replace(/\\s+/g,' ').slice(0,80);`);
+ok('어느 규칙으로도 답이 없는 식은 그렇게 알려 줌', /네 가지 규칙 모두 답이 없어요/.test(m ?? ''), m ?? '');
+m = await b.ev(`${typeEq('12-7')}
+	const typing = document.querySelector('.err')?.textContent ?? '';
+	[...document.querySelectorAll('.go')].find(x=>x.textContent.trim()==='정답 찾기').click(); await new Promise(r=>setTimeout(r,300));
+	return { typing, after: document.querySelector('.err')?.textContent.trim() ?? '' };`);
+ok('치는 중(= 없음)엔 빨간 글 없음 · 누르면 까닭', m.typing === '' && /= 가 하나/.test(m.after), JSON.stringify(m));
+m = await b.ev(`
+	const ex=[...document.querySelectorAll('.ex')]; const n=ex.length; ex.find(x=>/10 \\+ 3 = 18/.test(x.textContent)).click(); await new Promise(r=>setTimeout(r,600));
+	return { n, val: document.querySelector('.eq').value, ans: [...document.querySelectorAll('.ans .at')].map(x=>x.textContent.trim()) };`);
+ok('많이 찾는 식 10개 · 누르면 바로 풀림', m.n === 10 && m.ans.join() === '10 + 9 = 19', JSON.stringify(m));
+await b.go('/matchstick/solve?q=9-9%3D5&r=move1', 2500);
+m = await b.ev(`for (let i=0;i<20 && !document.querySelector('.ans');i++) await new Promise(r=>setTimeout(r,200)); return [...document.querySelectorAll('.ans .at')].map(x=>x.textContent.trim());`);
+ok('주소로 열면 바로 답(9−9=5 → 답 2개)', m.length === 2, m.join(' / '));
+
 // 9. 그림 퍼즐 — 한 문제 정답 보기까지
 await b.go('/matchstick/picture', 2000);
 m = await b.ev(`

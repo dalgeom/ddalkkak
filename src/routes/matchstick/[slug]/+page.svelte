@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { ctaTrack } from '$lib/analytics';
 	import MatchstickBoard from '$lib/components/MatchstickBoard.svelte';
+	import SolveEntry from '$lib/components/SolveEntry.svelte';
 	import { parseEq } from '$lib/matchstick';
 	import type { PageData } from './$types';
 
@@ -39,6 +40,7 @@
 		<p class="lead">{data.meta.intro}</p>
 		<a class="cta top" href={practice}>{data.isLevel ? `${data.meta.short}만 바로 풀기` : '성냥개비 바로 풀기'} <span aria-hidden="true">→</span></a>
 	</header>
+	<SolveEntry from="kind" />
 
 	<section class="sec">
 		<h2 class="sh">{data.isLevel ? '이렇게 풀어 보세요' : '이 유형은 이렇게 풉니다'}</h2>

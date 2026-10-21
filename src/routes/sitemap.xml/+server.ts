@@ -34,6 +34,8 @@ const PAGES: { path: string; freq: string; priority: string }[] = [
 	{ path: '/discover', freq: 'monthly', priority: '0.8' },
 	{ path: '/trivia', freq: 'monthly', priority: '0.8' },
 	{ path: '/matchstick/guide', freq: 'monthly', priority: '0.8' },
+	// 성냥 정답 찾기(10/21) — 식을 검색해 들어오는 사람용 도구. 게임 화면과 달리 설명 글과 자주 찾는 식의 답이 HTML에 있다
+	{ path: '/matchstick/solve', freq: 'monthly', priority: '0.7' },
 	{ path: '/cubenet/guide', freq: 'monthly', priority: '0.8' },
 	{ path: '/archive', freq: 'daily', priority: '0.8' },
 	{ path: '/guide', freq: 'monthly', priority: '0.6' },

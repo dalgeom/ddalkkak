@@ -2,6 +2,7 @@
 	import OtherGames from '$lib/components/OtherGames.svelte';
 	import type { PageData } from './$types';
 	import { ctaTrack } from '$lib/analytics';
+	import SolveEntry from '$lib/components/SolveEntry.svelte';
 
 	let { data }: { data: PageData } = $props();
 
@@ -66,6 +67,7 @@
 			<time datetime={data.article.date}>{data.article.date.replaceAll('-', '.')}</time>
 		</p>
 	</header>
+	{#if data.article.tag === '성냥개비'}<SolveEntry from="read" />{/if}
 
 	<!-- 글만 읽고 나가면 이 사람은 사이트가 매일 문제를 낸다는 걸 모른 채 떠난다.
 	     읽을거리에는 데일리로 가는 길이 헤더 링크 하나뿐이었다(글 끝 버튼은 그 글의 분야로 간다).
