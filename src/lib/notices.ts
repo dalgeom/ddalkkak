@@ -22,6 +22,14 @@ export interface Notice {
 
 export const NOTICES: Notice[] = [
 	{
+		id: '2026-10-21-match-solve',
+		date: '2026-10-21',
+		title: '성냥개비 정답 찾기',
+		body: '어디서 본 성냥개비 문제든 식을 넣으면 답을 찾아 드려요. 두 자리 수도 되고, 2개 옮기기 · 빼기 · 더하기 문제도 풀어요. 어느 성냥을 어디로 옮기는지 그림으로 보여 줘요.',
+		href: '/matchstick/solve',
+		cta: '정답 찾아보기'
+	},
+	{
 		id: '2026-10-20-cho-cube-stages',
 		date: '2026-10-20',
 		title: '초성 · 전개도도 단계 도전',
