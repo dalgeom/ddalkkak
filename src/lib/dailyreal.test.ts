@@ -15,7 +15,8 @@ import {
 	dailyKinds,
 	dailyKindOrder,
 	CUBE_TOTAL,
-	TRIVIA_FIRST_DAY
+	TRIVIA_FIRST_DAY,
+	EASY_FIRST_DAY
 } from './game';
 
 /** 실제 문제은행으로 "오늘의 딸깍" 하루 세트를 검증한다(합성 데이터로는 분포 편향을 못 잡는다). */
@@ -146,6 +147,20 @@ describe('오늘의 딸깍 — 실제 문제은행 검증', () => {
 		}
 		// 양성 대조 — 정렬이 실제로 일을 하는가(발견형 셋이 같은 단계인 날만 있으면 이 시험은 헛돈다)
 		expect(오른날).toBeGreaterThan(60);
+	});
+
+	it('10/22(EASY_FIRST_DAY)부터 1번은 늘 새싹 · 쉬움 상식, 하루 안에 같은 문제 없음', () => {
+		const stable = (day: number) =>
+			buildDailySetStable(PROBLEMS, TRIVIA, MATCH_TOTAL, day, (p) => fieldOfChip(p.chip), (t) => t.category ?? '기타', bankSizesAt, isOpener);
+		for (let day = EASY_FIRST_DAY; day < EASY_FIRST_DAY + 120; day++) {
+			const set = stable(day);
+			expect(set[0].kind, `day ${day}`).toBe('trivia');
+			expect(tierOf(TRIVIA[set[0].index]), `day ${day} ${TRIVIA[set[0].index].id}`).toBeLessThanOrEqual(2);
+			const keys = set.map((p) => `${p.kind}-${p.index}`);
+			expect(new Set(keys).size, `day ${day}`).toBe(keys.length);
+		}
+		// 전날까지는 그대로 — 10/21은 1번이 어른 상식이었다
+		expect(tierOf(TRIVIA[stable(EASY_FIRST_DAY - 1)[0].index])).toBe(4);
 	});
 
 	/** 결과 화면이 queue 없이 유형을 복원할 때 쓰는 순서 — 실제 배치와 어긋나면 집계가 틀어진다 */

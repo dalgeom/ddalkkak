@@ -306,6 +306,16 @@ export function dailyKinds(dayNum: number): DailyKind[] {
  */
 export const TRIVIA_FIRST_DAY = 20747;
 
+/**
+ * 1번은 늘 쉬운 상식 — 2026-10-22(KST)부터. 오늘(20747) 세트는 건드리지 않는다.
+ *
+ * 왜: 계단 첫날(10/21) 뽑힌 상식 둘이 모두 「어른」이라 정렬해도 1번이 어른 문제였다. 정렬만으로는 뽑힌 것이
+ * 다 어려운 날을 못 막는다. 그런 날에는 더 어려운 상식 하나를 초등 · 중등 보기형 문제로 바꾼다 — 그 문제는
+ * 날짜를 따라 정해진 순서로 돌고(같은 날이면 누구에게나 같다), 그날 이미 나온 문제는 건너뛴다.
+ * 날짜별 비율: 정규 상식 둘이 다 보통 이상인 날만 바뀐다(dailyreal.test.ts가 1번 단계를 지킨다).
+ */
+export const EASY_FIRST_DAY = 20748;
+
 function laneOrder(d: number, kinds: DailyKind[]): DailyKind[] {
 	return d >= TRIVIA_FIRST_DAY ? ['trivia', ...kinds.filter((k) => k !== 'trivia')] : kinds;
 }
@@ -697,6 +707,26 @@ export function buildDailySetStable<D, T>(
 	}
 	const tAll = pickStable(triviaAll, (e) => sizesAt(e).trivia, catOf, 20260202, 'trivia', d);
 	// 계단(TRIVIA_FIRST_DAY 주석) — 정규 칸 안에서만 쉬운 것부터. 보너스 칸(counts 다음)은 건드리지 않는다
+	// 1번은 늘 쉬운 상식(EASY_FIRST_DAY 주석) — 정규 상식이 다 보통 이상이면 더 어려운 쪽을 초등 · 중등 보기형으로 바꾼다
+	if (d >= EASY_FIRST_DAY) {
+		const t = (i: number) => tierOf(triviaAll[i] as Parameters<typeof tierOf>[0]) ?? 3;
+		const reg = tAll.slice(0, counts.trivia);
+		if (reg.length && !reg.some((i) => t(i) <= 2)) {
+			const size = Math.min(triviaAll.length, sizesAt(d).trivia);
+			const pool: number[] = [];
+			for (let i = 0; i < size; i++) if (t(i) <= 2 && (triviaAll[i] as { type?: string }).type === 'choice') pool.push(i);
+			const order = seededOrder(pool.length, 20261022);
+			const used = new Set(tAll);
+			for (let k = 0; k < pool.length; k++) {
+				const cand = pool[order[(d + k) % pool.length]];
+				if (used.has(cand)) continue;
+				let hard = 0;
+				for (let j = 1; j < reg.length; j++) if (t(tAll[j]) >= t(tAll[hard])) hard = j;
+				tAll[hard] = cand;
+				break;
+			}
+		}
+	}
 	if (d >= TRIVIA_FIRST_DAY) {
 		const stair = (lane: number[], n: number, all: unknown[]) => {
 			const head = lane
