@@ -40,12 +40,30 @@ const PARTS: [number, MatchRule, MatchProblem[], number][] = [
 	[22, 'move2', V.move2, 1406]
 ];
 
-export const STAGES: StageProblem[][] = PARTS.flatMap(([n, rule, pool, seed]) => {
-	const order = seededOrder(pool.length, seed).slice(0, n * STAGE_SIZE);
-	return Array.from({ length: n }, (_, s) =>
-		order.slice(s * STAGE_SIZE, (s + 1) * STAGE_SIZE).map((i) => ({ ...pool[i], rule }))
-	);
-});
+/**
+ * 61~100단계(10/21) — 60단계를 다 깬 사람이 「할 게 없네」가 되지 않게. 같은 문제 줄(같은 씨앗)에서
+ * 1~60단계가 쓰고 남은 칸을 이어서 쓴다 — 겹치지 않고, 앞 단계는 그대로다. 두 번째 바퀴도 쉬움 → 빼기 · 더하기
+ * → 어려움 → 2개 옮기기로 오른다. 더 붙일 때는 이 표 끝에 줄을 더한다(중간에 끼우면 뒤 단계 번호가 밀린다).
+ */
+const MORE: [number, MatchRule, MatchProblem[], number][] = [
+	[8, 'move1', byLevel('easy'), 1401],
+	[8, 'move1', byLevel(null), 1402],
+	[4, 'remove1', V.remove1, 1403],
+	[4, 'add1', V.add1, 1404],
+	[8, 'move1', byLevel('hard'), 1405],
+	[8, 'move2', V.move2, 1406]
+];
+
+/** 같은 씨앗 줄에서 이미 쓴 칸 수 — 이어 쓸 자리 */
+const used = new Map<number, number>();
+const cut = ([n, rule, pool, seed]: [number, MatchRule, MatchProblem[], number]) => {
+	const from = used.get(seed) ?? 0;
+	used.set(seed, from + n * STAGE_SIZE);
+	const order = seededOrder(pool.length, seed).slice(from, from + n * STAGE_SIZE);
+	return Array.from({ length: n }, (_, s) => order.slice(s * STAGE_SIZE, (s + 1) * STAGE_SIZE).map((i) => ({ ...pool[i], rule })));
+};
+
+export const STAGES: StageProblem[][] = [...PARTS.flatMap(cut), ...MORE.flatMap(cut)];
 
 export type StageResult = 'clean' | 'hinted' | 'revealed';
 

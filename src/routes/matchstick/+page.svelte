@@ -521,7 +521,7 @@
 			<h2 class="mh">어떻게 풀까요?</h2>
 			<div class="modes">
 				<button class="mode" onclick={() => startStage(nextNo)}>
-					<b>단계 도전</b><span>{Object.keys(stageProgress).length ? `${nextNo}단계 이어하기` : '60단계 · 1단계부터'}</span>
+					<b>단계 도전</b><span>{Object.keys(stageProgress).length ? `${nextNo}단계 이어하기` : `${STAGES.length}단계 · 1단계부터`}</span>
 				</button>
 				<!-- 10/20: 6칸을 지키려고 「푸는 법」 타일을 뺐다 — 푸는 법은 아래 숫자표 링크와 푸터에 있다 -->
 				<a class="mode" href="/matchstick/duel" onclick={() => track('mduel_entry_match')}><b>친구와 대결</b><span>같은 5문제로 겨루기</span></a>
@@ -554,13 +554,13 @@
 		<!-- 단계 도전(matchStages.ts) — 메인 「단계 도전」 카드가 #stages로 온다 -->
 		<section class="sec" id="stages">
 			<h2 class="mh">단계 도전</h2>
-			<p class="mp">60단계. 뒤로 갈수록 성냥 2개 옮기기, 빼기, 더하기 문제가 나와요.</p>
+			<p class="mp">{STAGES.length}단계. 뒤로 갈수록 성냥 2개 옮기기, 빼기, 더하기 문제가 나와요.</p>
 			<button class="big" onclick={() => startStage(nextNo)}>
 				{nextNo}단계 {Object.keys(stageProgress).length ? '이어하기' : '시작하기'}
 				<span class="arr" aria-hidden="true">→</span>
 			</button>
 			<button class="gridtoggle" aria-expanded={showGrid} onclick={() => (showGrid = !showGrid)}>
-				{showGrid ? '단계판 접기' : '60단계 전체 보기'}
+				{showGrid ? '단계판 접기' : `${STAGES.length}단계 전체 보기`}
 			</button>
 			{#if showGrid}
 				<div class="sgrid">

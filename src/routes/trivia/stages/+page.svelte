@@ -16,10 +16,10 @@
 </script>
 
 <svelte:head>
-	<title>상식 퀴즈 단계 도전 — 새싹부터 어려움까지 75판 | 딸깍</title>
+	<title>상식 퀴즈 단계 도전 — 새싹부터 고수까지 {data.stages.length}판 | 딸깍</title>
 	<meta
 		name="description"
-		content="초등 수준 새싹부터 어른도 고민하는 어려움까지, 상식 퀴즈 75판을 한 판에 5문제씩 풀어요. 3문제 이상 맞히면 다음 판이 열리고 별을 모아요. 가입 없이 바로."
+		content="초등 수준 새싹부터 어른도 대부분 틀리는 고수까지, 상식 퀴즈 {data.stages.length}판을 한 판에 5문제씩 풀어요. 3문제 이상 맞히면 다음 판이 열리고 별을 모아요. 가입 없이 바로."
 	/>
 	<link rel="canonical" href="https://ddalkkak.app/trivia/stages" />
 </svelte:head>

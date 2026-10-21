@@ -16,10 +16,10 @@
 </script>
 
 <svelte:head>
-	<title>규칙 찾기 퍼즐 단계 도전 — 새싹부터 고수까지 74판 | 딸깍</title>
+	<title>규칙 찾기 퍼즐 단계 도전 — 새싹부터 고수까지 {data.stages.length}판 | 딸깍</title>
 	<meta
 		name="description"
-		content="예시 몇 줄을 보고 숨은 규칙을 찾는 발견형 퍼즐을 새싹부터 고수까지 74판으로 나눴어요. 한 판에 5문제, 3문제 이상 맞히면 다음 판이 열려요. 힌트와 해설이 있어요."
+		content="예시 몇 줄을 보고 숨은 규칙을 찾는 발견형 퍼즐을 새싹부터 고수까지 {data.stages.length}판으로 나눴어요. 한 판에 5문제, 3문제 이상 맞히면 다음 판이 열려요. 힌트와 해설이 있어요."
 	/>
 	<link rel="canonical" href="https://ddalkkak.app/discover/stages" />
 </svelte:head>

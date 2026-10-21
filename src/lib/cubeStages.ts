@@ -22,7 +22,8 @@ export function cubeTier(p: CubeNetProblem): Tier {
 }
 
 /** 단계마다 여는 판 수 — 늘리면 단계 끝에 판이 붙는다 */
-export const PER_TIER: Partial<Record<Tier, number>> = { 2: 12, 3: 12 };
+// 10/21: 12 · 12 → 30 · 40(쉬움 172문제 · 보통 528문제에서). 단계마다 바닥나지 않게 생성기 몫은 한 번에 넉넉히
+export const PER_TIER: Partial<Record<Tier, number>> = { 2: 30, 3: 40 };
 
 const all = Array.from({ length: CUBE_TOTAL }, (_, i) => i);
 const tierOfIdx = new Map(all.map((i) => [i, cubeTier(problemAt(i))]));

@@ -218,7 +218,7 @@
 			<!-- 10/20 딸깍 5단계: 쉬운 낱말부터 판을 깨며 올라가는 길 -->
 			<section class="sec">
 				<h2 class="mh">단계 도전</h2>
-				<p class="mp">새싹부터 어려움까지 64판. 한 판에 5낱말, 3개 이상 맞히면 다음 판이 열려요.</p>
+				<p class="mp">새싹부터 어려움까지, 한 판에 5낱말, 3개 이상 맞히면 다음 판이 열려요.</p>
 				<a class="stagego" href="/chosung/stages">단계 지도 보기 <span class="arr" aria-hidden="true">→</span></a>
 			</section>
 

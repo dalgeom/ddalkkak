@@ -277,7 +277,7 @@ m = await b.ev(`
 	const firsts = [...document.querySelectorAll('.tier')].map(t=>t.querySelector('.stile')?.tagName);
 	const second = document.querySelector('.tier .stile:nth-child(2)')?.className ?? '';
 	return { tiers, firsts, second };`);
-ok('상식 단계 지도 — 새싹 · 쉬움 · 보통 · 어려움, 단계마다 첫 판 열림, 둘째 판 잠김', m.tiers.length === 4 && /새싹/.test(m.tiers[0]) && /어려움/.test(m.tiers[3]) && m.firsts.every((t) => t === 'A') && /locked/.test(m.second), JSON.stringify(m));
+ok('상식 단계 지도 — 새싹 ~ 고수(10/21 고수 신설), 단계마다 첫 판 열림, 둘째 판 잠김', m.tiers.length === 5 && /새싹/.test(m.tiers[0]) && /고수/.test(m.tiers[4]) && m.firsts.every((t) => t === 'A') && /locked/.test(m.second), JSON.stringify(m));
 await b.go('/trivia/stages/1-2', 2500);
 m = await b.ev(`return document.querySelector('h1')?.textContent.trim() ?? '';`);
 ok('잠긴 판을 주소로 열면 앞 판 안내', /잠긴 판/.test(m), m);
@@ -378,14 +378,14 @@ m = await b.ev(`
 	const tiles=[...document.querySelectorAll('.modes .mode')].map(x=>x.textContent.trim().slice(0,6));
 	const time=[...document.querySelectorAll('.mode')].find(x=>/타임어택/.test(x.textContent)); time.click(); await new Promise(r=>setTimeout(r,300));
 	const opts=document.querySelectorAll('.opt').length;
-	const grid=[...document.querySelectorAll('button')].find(b=>/60단계 전체 보기/.test(b.textContent)); grid?.click(); await new Promise(r=>setTimeout(r,300));
+	const grid=[...document.querySelectorAll('button')].find(b=>/[0-9]+단계 전체 보기/.test(b.textContent)); grid?.click(); await new Promise(r=>setTimeout(r,300));
 	const cells=document.querySelectorAll('#stages button, #stages a').length;
 	const free=[...document.querySelectorAll('.mode')].find(x=>/무한 연습/.test(x.textContent)); free.click(); await new Promise(r=>setTimeout(r,900));
 	return { tiles, opts, cells, board: !!document.querySelector('.mboard'), hint: [...document.querySelectorAll('button')].some(b=>/힌트/.test(b.textContent)) };
 `);
 ok('성냥 모드 타일 6개', m.tiles.length === 6, m.tiles.join(' '));
 ok('타임어택 누르면 3·5·10분 펼침', m.opts === 3);
-ok('단계판 펼치기', m.cells >= 60, 'cells=' + m.cells);
+ok('단계판 펼치기(10/21부터 100단계)', m.cells >= 100, 'cells=' + m.cells);
 ok('무한 연습 시작 → 판·힌트', m.board && m.hint);
 
 // 9. 그림 퍼즐 — 한 문제 정답 보기까지

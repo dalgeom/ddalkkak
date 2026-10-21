@@ -13,10 +13,10 @@
 </script>
 
 <svelte:head>
-	<title>초성 퀴즈 단계 도전 — 새싹부터 어려움까지 64판 | 딸깍</title>
+	<title>초성 퀴즈 단계 도전 — 새싹부터 어려움까지 {data.stages.length}판 | 딸깍</title>
 	<meta
 		name="description"
-		content="동물 · 음식 · 과일 · 나라 · 사자성어 초성 퀴즈를 쉬운 낱말부터 어려운 낱말까지 64판으로 나눴어요. 한 판에 5낱말, 3개 이상 맞히면 다음 판이 열려요."
+		content="동물 · 음식 · 과일 · 나라 · 사자성어 초성 퀴즈를 쉬운 낱말부터 어려운 낱말까지 {data.stages.length}판으로 나눴어요. 한 판에 5낱말, 3개 이상 맞히면 다음 판이 열려요."
 	/>
 	<link rel="canonical" href="https://ddalkkak.app/chosung/stages" />
 </svelte:head>

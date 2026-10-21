@@ -19,7 +19,7 @@ describe('초성 단계', () => {
 		}
 		expect([1, 2, 3, 4].map((t) => CHOSUNG_STAGES.filter((s) => s.tier === t).length)).toMatchInlineSnapshot(`
 			[
-			  7,
+			  8,
 			  24,
 			  24,
 			  9,
@@ -46,9 +46,9 @@ describe('전개도 단계', () => {
 			expect(cubeTier(p), `${i} ${netShape(p)}`).toBe(netShape(p) === '1-4-1' ? 2 : 3);
 		}
 	});
-	it('쉬움 12판 · 보통 12판, 판의 문제는 그 단계, 겹침 없음, 구성 고정', () => {
-		expect(CUBE_STAGES.map((s) => s.tier).filter((t) => t === 2).length).toBe(12);
-		expect(CUBE_STAGES.map((s) => s.tier).filter((t) => t === 3).length).toBe(12);
+	it('쉬움 30판 · 보통 40판(10/21 12 · 12에서 늘림), 판의 문제는 그 단계, 겹침 없음, 구성 고정', () => {
+		expect(CUBE_STAGES.map((s) => s.tier).filter((t) => t === 2).length).toBe(30);
+		expect(CUBE_STAGES.map((s) => s.tier).filter((t) => t === 3).length).toBe(40);
 		const all = CUBE_STAGES.flatMap((s) => s.ids);
 		expect(new Set(all).size).toBe(all.length);
 		for (const s of CUBE_STAGES) for (const i of s.ids) expect(cubeTier(problemAt(i))).toBe(s.tier);

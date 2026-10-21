@@ -13,10 +13,10 @@
 </script>
 
 <svelte:head>
-	<title>전개도 퍼즐 단계 도전 — 쉬움부터 보통까지 24판 | 딸깍</title>
+	<title>전개도 퍼즐 단계 도전 — 쉬움부터 보통까지 {data.stages.length}판 | 딸깍</title>
 	<meta
 		name="description"
-		content="정육면체 전개도를 접으면 어떤 주사위가 될지 고르는 퍼즐을 쉬운 십자 모양부터 24판으로 나눴어요. 한 판에 5문제, 3문제 이상 맞히면 다음 판이 열려요."
+		content="정육면체 전개도를 접으면 어떤 주사위가 될지 고르는 퍼즐을 쉬운 십자 모양부터 {data.stages.length}판으로 나눴어요. 한 판에 5문제, 3문제 이상 맞히면 다음 판이 열려요."
 	/>
 	<link rel="canonical" href="https://ddalkkak.app/cubenet/stages" />
 </svelte:head>

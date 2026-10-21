@@ -393,6 +393,9 @@ export const DISCOVER_TIERS: Readonly<Record<string, Tier>> = {
 	'rps-fingers': 1, // 10/20 새로 · 검수 새싹 적합
 	'legs-sum': 1, // 10/20 새로 · 검수 새싹 적합
 	'cal-arrow-move': 2, // 10/20 새로 · 검수가 쉬움으로 판정
+	'buy2-get1': 1, // 10/21 새로 · 2+1 행사, 첫 가설이 2줄에서 죽음
+	'ring-cut': 1, // 10/21 새로 · 고리는 첫 가위질 +0
+	'ob-gear-ring': 5, // 10/21 새로 · 짧은 길 미끼(반시계), 두 길 모순 발견
 };
 
 /**

@@ -13,13 +13,13 @@ describe('상식 단계 도전', () => {
 		expect(new Set(TRIVIA_STAGES.map((s) => s.key)).size).toBe(TRIVIA_STAGES.length);
 	});
 	it('판의 문제는 그 학년의 보기 고르기다', () => {
-		const grade = { 1: '초등', 2: '중등', 3: '고등', 4: '어른' } as const;
+		const grade = { 1: '초등', 2: '중등', 3: '고등', 4: '어른', 5: '어른' } as const; // 고수(5)는 어른 문제 중 tier: 5를 단 것
 		const byId = new Map(TRIVIA.map((p) => [p.id, p]));
 		for (const s of TRIVIA_STAGES)
 			for (const id of s.ids) {
 				const p = byId.get(id)!;
 				expect(p.type, id).toBe('choice');
-				expect(p.grade, id).toBe(grade[s.tier as 1 | 2 | 3 | 4]);
+				expect(p.grade, id).toBe(grade[s.tier as 1 | 2 | 3 | 4 | 5]);
 			}
 	});
 	// 기기에 진행이 남으므로 배포 뒤에 판 구성이 바뀌면 안 된다 — 첫 판과 단계 첫 판을 박아 둔다

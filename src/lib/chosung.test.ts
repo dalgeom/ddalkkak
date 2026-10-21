@@ -78,7 +78,8 @@ describe('채점', () => {
 
 describe('오늘의 초성', () => {
 	it('같은 날은 같은 낱말, 한 바퀴 안에서는 겹치지 않는다', () => {
-		const start = 20742;
+		// 낱말이 늘면 그날부터 새 순서로 돈다 — 가장 최근 묶음의 시작일부터 한 바퀴를 본다
+		const start = CHOSUNG_BATCHES[CHOSUNG_BATCHES.length - 1].fromDay;
 		expect(chosungOfDay(start)).toBe(chosungOfDay(start));
 		const seen = new Set<number>();
 		for (let d = start; d < start + CHOSUNG_WORDS.length; d++) seen.add(chosungOfDay(d));
