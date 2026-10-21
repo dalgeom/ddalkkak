@@ -399,8 +399,8 @@ export const DISCOVER_TIERS: Readonly<Record<string, Tier>> = {
  * 문제 하나의 단계 — 상식은 학년(tiers.ts TIER_OF_GRADE), 발견형은 위 표. 모르면 null(성냥 · 전개도는 아직 단계가 없다).
  * 오늘의 10문제 계단(game.ts)과 문제 카드의 단계 표시가 같이 쓴다.
  */
-export function tierOf(p: { id?: string; grade?: string; trivia?: boolean } | undefined | null): Tier | null {
+export function tierOf(p: { id?: string; grade?: string; trivia?: boolean; tier?: Tier } | undefined | null): Tier | null {
 	if (!p) return null;
-	if (p.trivia || p.grade) return TIER_OF_GRADE[p.grade ?? ''] ?? null;
+	if (p.trivia || p.grade) return p.tier ?? TIER_OF_GRADE[p.grade ?? ''] ?? null;
 	return (p.id && DISCOVER_TIERS[p.id]) || null;
 }

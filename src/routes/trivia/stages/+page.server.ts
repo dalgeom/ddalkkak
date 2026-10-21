@@ -4,5 +4,5 @@ import { TRIVIA_STAGES } from '$lib/triviaStages';
 export const prerender = true;
 
 export function load() {
-	return { stages: TRIVIA_STAGES.map(({ no, tier, inTier }) => ({ no, tier, inTier })) };
+	return { stages: TRIVIA_STAGES.map(({ key, tier, inTier }) => ({ key, tier, inTier })) };
 }

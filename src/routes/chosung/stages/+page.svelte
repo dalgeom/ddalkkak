@@ -3,12 +3,12 @@
 	import StageMap from '$lib/components/StageMap.svelte';
 	import OtherGames from '$lib/components/OtherGames.svelte';
 	import { loadProgress, type StageProgress } from '$lib/stages';
-	import { CHOSUNG_STAGE_KEY } from '$lib/chosungStages';
+	import { CHOSUNG_STAGE_KEY, CHOSUNG_LEGACY } from '$lib/chosungStages';
 
 	/** 초성 단계 도전 지도(2026-10-20) — 새싹 7 · 쉬움 24 · 보통 24 · 어려움 9판 */
 	let { data } = $props();
 	let progress = $state<StageProgress>({});
-	onMount(() => (progress = loadProgress(CHOSUNG_STAGE_KEY)));
+	onMount(() => (progress = loadProgress(CHOSUNG_STAGE_KEY, CHOSUNG_LEGACY)));
 	let cleared = $derived(Object.values(progress).filter((v) => v >= 1).length);
 </script>
 

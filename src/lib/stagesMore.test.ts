@@ -11,11 +11,11 @@ describe('초성 단계', () => {
 		expect(CHOSUNG_WORDS.slice(0, 324).filter((w) => !CHOSUNG_TIERS[w.word]).map((w) => w.word)).toEqual([]);
 	});
 	it('판마다 5낱말, 그 단계(고수는 어려움에), 겹침 없음, 구성 고정', () => {
-		const all = CHOSUNG_STAGES.flatMap((s) => s.words);
+		const all = CHOSUNG_STAGES.flatMap((s) => s.ids);
 		expect(new Set(all).size).toBe(all.length);
 		for (const s of CHOSUNG_STAGES) {
-			expect(s.words).toHaveLength(STAGE_SIZE);
-			for (const w of s.words) expect(Math.min(CHOSUNG_TIERS[w], 4), w).toBe(s.tier);
+			expect(s.ids).toHaveLength(STAGE_SIZE);
+			for (const w of s.ids) expect(Math.min(CHOSUNG_TIERS[w], 4), w).toBe(s.tier);
 		}
 		expect([1, 2, 3, 4].map((t) => CHOSUNG_STAGES.filter((s) => s.tier === t).length)).toMatchInlineSnapshot(`
 			[
@@ -25,7 +25,7 @@ describe('초성 단계', () => {
 			  9,
 			]
 		`);
-		expect(CHOSUNG_STAGES[0].words).toMatchInlineSnapshot(`
+		expect(CHOSUNG_STAGES[0].ids).toMatchInlineSnapshot(`
 			[
 			  "딸기",
 			  "짜장면",
@@ -34,8 +34,8 @@ describe('초성 단계', () => {
 			  "캥거루",
 			]
 		`);
-		expect(chosungStageWords(1)).toHaveLength(5);
-		expect(chosungStageWords(999)).toBeNull();
+		expect(chosungStageWords('1-1')).toHaveLength(5);
+		expect(chosungStageWords('9-9')).toBeNull();
 	});
 });
 
@@ -49,10 +49,10 @@ describe('전개도 단계', () => {
 	it('쉬움 12판 · 보통 12판, 판의 문제는 그 단계, 겹침 없음, 구성 고정', () => {
 		expect(CUBE_STAGES.map((s) => s.tier).filter((t) => t === 2).length).toBe(12);
 		expect(CUBE_STAGES.map((s) => s.tier).filter((t) => t === 3).length).toBe(12);
-		const all = CUBE_STAGES.flatMap((s) => s.indices);
+		const all = CUBE_STAGES.flatMap((s) => s.ids);
 		expect(new Set(all).size).toBe(all.length);
-		for (const s of CUBE_STAGES) for (const i of s.indices) expect(cubeTier(problemAt(i))).toBe(s.tier);
-		expect(CUBE_STAGES[0].indices).toMatchInlineSnapshot(`
+		for (const s of CUBE_STAGES) for (const i of s.ids) expect(cubeTier(problemAt(i))).toBe(s.tier);
+		expect(CUBE_STAGES[0].ids).toMatchInlineSnapshot(`
 			[
 			  281,
 			  341,

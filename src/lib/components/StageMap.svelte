@@ -11,7 +11,7 @@
 		stages,
 		progress,
 		hrefOf
-	}: { stages: StageMeta[]; progress: StageProgress; hrefOf: (no: number) => string } = $props();
+	}: { stages: StageMeta[]; progress: StageProgress; hrefOf: (key: string) => string } = $props();
 
 	let groups = $derived(
 		TIERS.map((t) => ({ ...t, list: stages.filter((s) => s.tier === t.tier) })).filter((g) => g.list.length)
@@ -19,9 +19,8 @@
 </script>
 
 {#each groups as g (g.tier)}
-	{@const cleared = g.list.filter((s) => (progress[s.no] ?? 0) >= 1).length}
-	{@const go = nextOpen(stages, progress, g.list[0].no)}
-	{@const goIn = stages[go - 1]?.tier === g.tier ? go : g.list[0].no}
+	{@const cleared = g.list.filter((s) => (progress[s.key] ?? 0) >= 1).length}
+	{@const goIn = nextOpen(stages, progress, g.tier)}
 	<section class="tier" id="tier-{g.tier}">
 		<div class="th">
 			<div>
@@ -31,10 +30,10 @@
 			<a class="go" href={hrefOf(goIn)}>{cleared ? '이어하기' : '시작'}</a>
 		</div>
 		<div class="sgrid">
-			{#each g.list as s (s.no)}
-				{@const st = progress[s.no] ?? 0}
-				{#if isOpen(stages, progress, s.no)}
-					<a class="stile" class:cleared={st > 0} href={hrefOf(s.no)} aria-label={st ? `${g.name} ${s.inTier}판 별 ${st}개` : `${g.name} ${s.inTier}판`}>
+			{#each g.list as s (s.key)}
+				{@const st = progress[s.key] ?? 0}
+				{#if isOpen(stages, progress, s.key)}
+					<a class="stile" class:cleared={st > 0} href={hrefOf(s.key)} aria-label={st ? `${g.name} ${s.inTier}판 별 ${st}개` : `${g.name} ${s.inTier}판`}>
 						<b>{s.inTier}</b><span>{'★'.repeat(st)}</span>
 					</a>
 				{:else}

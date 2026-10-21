@@ -3,7 +3,7 @@
 	import StageMap from '$lib/components/StageMap.svelte';
 	import OtherGames from '$lib/components/OtherGames.svelte';
 	import { loadProgress, type StageProgress } from '$lib/stages';
-	import { TRIVIA_STAGE_KEY } from '$lib/triviaStages';
+	import { TRIVIA_STAGE_KEY, TRIVIA_LEGACY } from '$lib/triviaStages';
 
 	/**
 	 * 상식 단계 도전 지도(2026-10-20) — 새싹(초등) · 쉬움(중등) · 보통(고등) · 어려움(어른) 75판.
@@ -11,7 +11,7 @@
 	 */
 	let { data } = $props();
 	let progress = $state<StageProgress>({});
-	onMount(() => (progress = loadProgress(TRIVIA_STAGE_KEY)));
+	onMount(() => (progress = loadProgress(TRIVIA_STAGE_KEY, TRIVIA_LEGACY)));
 	let cleared = $derived(Object.values(progress).filter((v) => v >= 1).length);
 </script>
 

@@ -23,6 +23,8 @@ export interface Problem {
 	category?: string;
 	/** 상식 퀴즈 난이도 등급 */
 	grade?: Grade;
+	/** 딸깍 5단계(tiers.ts)를 학년과 달리 정할 때 — 상식 「고수」처럼(10/21). 없으면 학년으로 정한다 */
+	tier?: 1 | 2 | 3 | 4 | 5;
 }
 
 /** 상식 퀴즈 난이도 등급 */

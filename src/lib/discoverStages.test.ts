@@ -13,7 +13,7 @@ describe('발견형 단계 도전', () => {
 		}
 		const per = [1, 2, 3, 4, 5].map((t) => DISCOVER_STAGES.filter((s) => s.tier === t).length);
 		expect(per.every((n) => n > 0)).toBe(true);
-		expect(DISCOVER_STAGES.map((s) => s.no)).toEqual(DISCOVER_STAGES.map((_, i) => i + 1));
+		expect(new Set(DISCOVER_STAGES.map((s) => s.key)).size).toBe(DISCOVER_STAGES.length);
 	});
 	it('판 구성 고정(기기에 진행이 남는다)', () => {
 		expect(DISCOVER_STAGES.length).toMatchInlineSnapshot(`74`);
@@ -28,7 +28,7 @@ describe('발견형 단계 도전', () => {
 		`);
 	});
 	it('판 문제를 꺼낸다', () => {
-		expect(discoverStageProblems(1)).toHaveLength(5);
-		expect(discoverStageProblems(9999)).toBeNull();
+		expect(discoverStageProblems('1-1')).toHaveLength(5);
+		expect(discoverStageProblems('9-9')).toBeNull();
 	});
 });

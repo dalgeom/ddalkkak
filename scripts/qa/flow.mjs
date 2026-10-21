@@ -33,7 +33,7 @@ await b.shot(OUT + 'f-home.jpg');
 // 1b. 오늘의 성냥개비를 끝낸 순간 → 오늘의 10문제로 잇는 카드(10/15 성장 작업 · DailyNext)
 await b.go('/matchstick', 2500);
 m = await b.ev(`
-	document.querySelector('.today .big').click(); await new Promise(r=>setTimeout(r,800));
+	for (let i = 0; i < 40 && !document.querySelector('.today .big'); i++) await new Promise(r=>setTimeout(r,200)); document.querySelector('.today .big').click(); await new Promise(r=>setTimeout(r,800));
 	[...document.querySelectorAll('button')].find(x=>x.textContent.trim()==='정답 보기').click(); await new Promise(r=>setTimeout(r,1500));
 	const card = document.querySelector('.dnext');
 	const free = [...document.querySelectorAll('button')].find(x=>/무한 연습 이어서/.test(x.textContent));
@@ -253,11 +253,12 @@ if (m) {
 } else ok('끌기 시험 판을 못 찾음', false, 'null');
 // 같은 판을 쓰는 오늘의 성냥개비에서도 — 판이 움직이는 화면이 또 있는지
 await b.go('/matchstick', 3500);
-m = await b.ev(`document.querySelector('.today .big')?.click(); await new Promise(r=>setTimeout(r,900));
+m = await b.ev(`for (let i = 0; i < 40 && !document.querySelector('.today .big'); i++) await new Promise(r=>setTimeout(r,200)); document.querySelector('.today .big')?.click(); await new Promise(r=>setTimeout(r,900));
 	const c = (el) => { const r = el.getBoundingClientRect(); return { x: r.x + r.width / 2, y: r.y + r.height / 2, loc: el.getAttribute('data-loc') }; };
-	const from = document.querySelector('.mboard [data-lit="1"][data-loc^="g0"]'); const to = document.querySelector('.mboard [data-lit="0"][data-loc^="g2"]');
-	return from && to ? { from: c(from), to: c(to) } : null;`);
-if (m) {
+	// 오늘 문제는 날마다 바뀐다 — 셋째 숫자가 8이면 빈자리가 없다(10/21). 첫 숫자의 성냥 → 첫 숫자 밖의 아무 빈자리
+	const from = document.querySelector('.mboard [data-lit="1"][data-loc^="g0"]'); const to = [...document.querySelectorAll('.mboard [data-lit="0"]')].find((e) => !e.getAttribute('data-loc').startsWith('g0'));
+	return from && to ? { from: c(from), to: c(to) } : { board: !!document.querySelector('.mboard'), lit: document.querySelectorAll('.mboard [data-lit="1"]').length, ghost: document.querySelectorAll('.mboard [data-lit="0"]').length };`);
+if (m.from) {
 	const mouse = (type, p, buttons = 1) => b.send('Input.dispatchMouseEvent', { type, x: p.x, y: p.y, button: 'left', buttons, clickCount: 1 });
 	await mouse('mousePressed', m.from);
 	for (let i = 1; i <= 6; i++) await mouse('mouseMoved', { x: m.from.x + ((m.to.x - m.from.x) * i) / 6, y: m.from.y + ((m.to.y - m.from.y) * i) / 6 });
@@ -265,7 +266,7 @@ if (m) {
 	await sleep(80);
 	const after = await b.ev(`return { from: document.querySelector('.mboard [data-loc="${m.from.loc}"]').getAttribute('data-lit'), to: document.querySelector('.mboard [data-loc="${m.to.loc}"]').getAttribute('data-lit') };`);
 	ok('오늘의 성냥개비도 마우스로 끌어 옮기기', after.from === '0' && after.to === '1', JSON.stringify({ ...m, after }));
-} else ok('오늘의 성냥개비 판을 못 찾음', false, 'null');
+} else ok('오늘의 성냥개비 판을 못 찾음', false, JSON.stringify(m));
 
 // 5g. 상식 단계 도전(10/20, 「딸깍 5단계」) — 지도 · 잠금 · 한 판 풀고 결과 · 진행 저장
 await b.go('/trivia/stages', 2500);
@@ -277,10 +278,10 @@ m = await b.ev(`
 	const second = document.querySelector('.tier .stile:nth-child(2)')?.className ?? '';
 	return { tiers, firsts, second };`);
 ok('상식 단계 지도 — 새싹 · 쉬움 · 보통 · 어려움, 단계마다 첫 판 열림, 둘째 판 잠김', m.tiers.length === 4 && /새싹/.test(m.tiers[0]) && /어려움/.test(m.tiers[3]) && m.firsts.every((t) => t === 'A') && /locked/.test(m.second), JSON.stringify(m));
-await b.go('/trivia/stages/2', 2500);
+await b.go('/trivia/stages/1-2', 2500);
 m = await b.ev(`return document.querySelector('h1')?.textContent.trim() ?? '';`);
 ok('잠긴 판을 주소로 열면 앞 판 안내', /잠긴 판/.test(m), m);
-await b.go('/trivia/stages/1', 2500);
+await b.go('/trivia/stages/1-1', 2500);
 m = await b.ev(`
 	for (let i = 0; i < 5; i++) {
 		document.querySelector('.choice:not([disabled])')?.click(); await new Promise(r=>setTimeout(r,250));
@@ -289,12 +290,13 @@ m = await b.ev(`
 	const stars = (document.querySelector('.stars')?.getAttribute('aria-label') ?? '');
 	const n = Number((stars.match(/\\d/) || ['-1'])[0]);
 	return { h1: document.querySelector('h1')?.textContent.trim(), marks: (document.querySelector('.marks')?.textContent.match(/✅|❌/g) || []).length, n, saved: JSON.parse(localStorage.getItem('ddal.trivia.stages') || '{}'), next: document.querySelector('.cta')?.getAttribute('href') ?? null, again: !![...document.querySelectorAll('button')].find(x=>/다시 하기/.test(x.textContent)) };`);
-ok('상식 단계 1판을 끝까지 → 별 · 5칸 표시 · 통과면 진행 저장과 2판 링크', m.marks === 5 && m.again && (m.n > 0 ? m.saved['1'] === m.n && m.next === '/trivia/stages/2' : /조금만 더/.test(m.h1 ?? '') && !m.saved['1']), JSON.stringify(m));
+ok('상식 단계 1판을 끝까지 → 별 · 5칸 표시 · 통과면 진행 저장과 2판 링크', m.marks === 5 && m.again && (m.n > 0 ? m.saved['1-1'] === m.n && m.next === '/trivia/stages/1-2' : /조금만 더/.test(m.h1 ?? '') && !m.saved['1-1']), JSON.stringify(m));
 await b.shot(OUT + 'f-tstage-result.jpg');
+// 10/20 줄번호 기록({1: 3})을 넣어 두면 지도가 열쇠({'1-1': 3})로 옮겨 담아야 한다(10/21)
 await b.ev(`localStorage.setItem('ddal.trivia.stages', JSON.stringify({ 1: 3 })); return 1;`);
 await b.go('/trivia/stages', 2500);
-m = await b.ev(`const t = document.querySelector('.tier'); return { star: t.querySelector('.stile')?.textContent.trim(), second: t.querySelector('.stile:nth-child(2)')?.tagName, sub: t.querySelector('.th p')?.textContent.trim() };`);
-ok('1판 ★3이 지도에 · 2판이 열림 · 통과 수', /★★★/.test(m.star ?? '') && m.second === 'A' && /1판 통과/.test(m.sub ?? ''), JSON.stringify(m));
+m = await b.ev(`const t = document.querySelector('.tier'); return { star: t.querySelector('.stile')?.textContent.trim(), second: t.querySelector('.stile:nth-child(2)')?.tagName, sub: t.querySelector('.th p')?.textContent.trim(), stored: localStorage.getItem('ddal.trivia.stages') };`);
+ok('옛 줄번호 기록 1번 ★3 → 새싹 1판 ★3로 옮겨져 지도에 · 2판이 열림', /★★★/.test(m.star ?? '') && m.second === 'A' && /1판 통과/.test(m.sub ?? '') && m.stored === JSON.stringify({ '1-1': 3 }), JSON.stringify(m));
 await b.shot(OUT + 'f-tstage-map.jpg');
 
 // 5h. 발견형 단계 도전(10/20) — 지도 5단계 · 판 화면(문제 · 힌트 · 모르겠어요) · 다섯 번 모르겠어요 → 실패, 진행 안 남음
@@ -303,7 +305,7 @@ await b.ev(`localStorage.removeItem('ddal.discover.stages'); return 1;`);
 await b.go('/discover/stages', 2500);
 m = await b.ev(`return { tiers: [...document.querySelectorAll('.tier h3')].map(h=>h.textContent.trim()), firsts: [...document.querySelectorAll('.tier')].map(t=>t.querySelector('.stile')?.tagName) };`);
 ok('발견형 단계 지도 — 새싹~고수 5단계, 단계마다 첫 판 열림', m.tiers.length === 5 && /고수/.test(m.tiers[4]) && m.firsts.every((t) => t === 'A'), JSON.stringify(m));
-await b.go('/discover/stages/1', 3000);
+await b.go('/discover/stages/1-1', 3000);
 m = await b.ev(`
 	const first = { chip: document.querySelector('.chiprow .lv')?.textContent.trim(), q: !!document.querySelector('.q'), answer: !!(document.querySelector('input[type=text]') || document.querySelector('.choice')), hint: document.querySelector('.hint-btn')?.textContent.trim() };
 	for (let i = 0; i < 5; i++) {
@@ -321,7 +323,7 @@ await b.ev(`localStorage.removeItem('ddal.chosung.stages'); localStorage.removeI
 await b.go('/chosung/stages', 2500);
 m = await b.ev(`return [...document.querySelectorAll('.tier h3')].map(h=>h.textContent.trim());`);
 ok('초성 단계 지도 — 새싹 · 쉬움 · 보통 · 어려움', m.length === 4 && /새싹/.test(m[0]) && /어려움/.test(m[3]), JSON.stringify(m));
-await b.go('/chosung/stages/1', 3000);
+await b.go('/chosung/stages/1-1', 3000);
 m = await b.ev(`
 	const words = ['딸기', '짜장면', '펭귄', '바나나', '캥거루'];
 	const cho = document.querySelector('.cho')?.textContent.trim();
@@ -332,9 +334,9 @@ m = await b.ev(`
 		[...document.querySelectorAll('button')].find(x=>/다음 문제|결과 보기/.test(x.textContent))?.click(); await new Promise(r=>setTimeout(r,400));
 	}
 	return { cho, h1: document.querySelector('h1')?.textContent.trim(), stars: document.querySelector('.stars')?.getAttribute('aria-label'), saved: JSON.parse(localStorage.getItem('ddal.chosung.stages') || '{}'), next: document.querySelector('.cta')?.getAttribute('href') };`);
-ok('초성 1판 다섯 낱말을 쳐서 → ★3 · 진행 저장 · 2판 링크', m.cho === 'ㄸㄱ' && /통과/.test(m.h1 ?? '') && m.stars === '별 3개' && m.saved['1'] === 3 && m.next === '/chosung/stages/2', JSON.stringify(m));
+ok('초성 1판 다섯 낱말을 쳐서 → ★3 · 진행 저장 · 2판 링크', m.cho === 'ㄸㄱ' && /통과/.test(m.h1 ?? '') && m.stars === '별 3개' && m.saved['1-1'] === 3 && m.next === '/chosung/stages/1-2', JSON.stringify(m));
 await b.shot(OUT + 'f-chstage.jpg');
-await b.go('/cubenet/stages/1', 3000);
+await b.go('/cubenet/stages/2-1', 3000);
 m = await b.ev(`
 	const first = { net: !!document.querySelector('.netbox svg, .netbox *'), opts: document.querySelectorAll('.opt').length, chip: document.querySelector('.chiprow .lv')?.textContent.trim() };
 	for (let i = 0; i < 5; i++) {

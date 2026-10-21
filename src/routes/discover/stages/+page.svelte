@@ -3,7 +3,7 @@
 	import StageMap from '$lib/components/StageMap.svelte';
 	import OtherGames from '$lib/components/OtherGames.svelte';
 	import { loadProgress, type StageProgress } from '$lib/stages';
-	import { DISCOVER_STAGE_KEY } from '$lib/discoverStages';
+	import { DISCOVER_STAGE_KEY, DISCOVER_LEGACY } from '$lib/discoverStages';
 
 	/**
 	 * 발견형 단계 도전 지도(2026-10-20) — 새싹 8 · 쉬움 20 · 보통 21 · 어려움 20 · 고수 5판.
@@ -11,7 +11,7 @@
 	 */
 	let { data } = $props();
 	let progress = $state<StageProgress>({});
-	onMount(() => (progress = loadProgress(DISCOVER_STAGE_KEY)));
+	onMount(() => (progress = loadProgress(DISCOVER_STAGE_KEY, DISCOVER_LEGACY)));
 	let cleared = $derived(Object.values(progress).filter((v) => v >= 1).length);
 </script>
 

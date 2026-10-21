@@ -2,7 +2,7 @@
 	import { onMount, type Snippet } from 'svelte';
 	import { track } from '$lib/analytics';
 	import OtherGames from '$lib/components/OtherGames.svelte';
-	import { starsByScore, isOpen, loadProgress, saveProgress, type StageMeta, type StageProgress } from '$lib/stages';
+	import { starsByScore, isOpen, isTierEnd, loadProgress, saveProgress, type StageMeta, type StageProgress } from '$lib/stages';
 	import { tierName, type Tier } from '$lib/tiers';
 
 	/**
@@ -18,6 +18,7 @@
 		current,
 		count,
 		otherKey,
+		legacy,
 		card
 	}: {
 		label: string;
@@ -25,7 +26,9 @@
 		storageKey: string;
 		/** 계측 앞머리 — `${event}_start` · `_clear` · `_fail` */
 		event: string;
-		current: { no: number; tier: Tier; inTier: number; stages: StageMeta[] };
+		current: { key: string; tier: Tier; inTier: number; stages: StageMeta[] };
+		/** 10/20 줄번호 기록을 열쇠로 옮길 표(stages.ts legacyKeys) */
+		legacy?: string[];
 		count: number;
 		otherKey: 'match' | 'cho' | 'trivia' | 'discover' | 'cube';
 		card: Snippet<[number, (ok: boolean) => void]>;
@@ -40,14 +43,15 @@
 
 	let score = $derived(marks.filter(Boolean).length);
 	let stars = $derived(starsByScore(score, count));
-	let next = $derived(current.stages[current.no] ?? null);
-	let prev = $derived(current.no > 1 ? current.stages[current.no - 2] : null);
+	let idx = $derived(current.stages.findIndex((s) => s.key === current.key));
+	let next = $derived(current.stages[idx + 1] ?? null);
+	let prev = $derived(current.stages.find((s) => s.tier === current.tier && s.inTier === current.inTier - 1) ?? null);
 	let title = $derived(`${tierName(current.tier)} ${current.inTier}판`);
 
 	onMount(() => {
-		progress = loadProgress(storageKey);
-		locked = !isOpen(current.stages, progress, current.no);
-		if (!locked) track(`${event}_start`, { stage: current.no, tier: current.tier });
+		progress = loadProgress(storageKey, legacy);
+		locked = !isOpen(current.stages, progress, current.key);
+		if (!locked) track(`${event}_start`, { stage: current.key, tier: current.tier });
 	});
 
 	function onsettle(ok: boolean) {
@@ -64,11 +68,13 @@
 			return;
 		}
 		done = true;
-		if (stars > (progress[current.no] ?? 0)) {
-			progress = { ...progress, [current.no]: stars };
+		if (stars > (progress[current.key] ?? 0)) {
+			progress = { ...progress, [current.key]: stars };
 			saveProgress(storageKey, progress);
 		}
-		track(stars ? `${event}_clear` : `${event}_fail`, { stage: current.no, tier: current.tier, stars });
+		track(stars ? `${event}_clear` : `${event}_fail`, { stage: current.key, tier: current.tier, stars });
+		// 단계 마지막 판을 깼다 — 이 사람에게 그 단계 문제가 바닥났다(10/21, 채울 단계를 고르는 신호)
+		if (stars && isTierEnd(current.stages, current.key)) track(`${event}_tier_end`, { tier: current.tier });
 		window.scrollTo({ top: 0 });
 	}
 
@@ -77,7 +83,7 @@
 		settled = false;
 		marks = [];
 		done = false;
-		track(`${event}_start`, { stage: current.no, tier: current.tier });
+		track(`${event}_start`, { stage: current.key, tier: current.tier });
 		window.scrollTo({ top: 0 });
 	}
 </script>
@@ -87,7 +93,7 @@
 		<span class="kicker">{label} 단계 도전 · {title}</span>
 		<h1>아직 잠긴 판이에요</h1>
 		<p class="lead">앞 판을 3문제 이상 맞히면 열려요.</p>
-		<a class="cta" href="{base}/{prev.no}">{tierName(prev.tier)} {prev.inTier}판 하러 가기 <span aria-hidden="true">→</span></a>
+		<a class="cta" href="{base}/{prev.key}">{tierName(prev.tier)} {prev.inTier}판 하러 가기 <span aria-hidden="true">→</span></a>
 		<a class="ghost" href={base}>단계 지도 보기</a>
 	</section>
 {:else if !done}
@@ -116,7 +122,7 @@
 		</p>
 		<div class="marks">{marks.map((m) => (m ? '✅' : '❌')).join(' ')}</div>
 		{#if stars && next}
-			<a class="cta" href="{base}/{next.no}">
+			<a class="cta" href="{base}/{next.key}">
 				{next.tier !== current.tier ? `${tierName(next.tier)} 단계로 올라가기` : `${tierName(next.tier)} ${next.inTier}판으로`} <span aria-hidden="true">→</span>
 			</a>
 		{/if}

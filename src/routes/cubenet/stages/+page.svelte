@@ -3,12 +3,12 @@
 	import StageMap from '$lib/components/StageMap.svelte';
 	import OtherGames from '$lib/components/OtherGames.svelte';
 	import { loadProgress, type StageProgress } from '$lib/stages';
-	import { CUBE_STAGE_KEY } from '$lib/cubeStages';
+	import { CUBE_STAGE_KEY, CUBE_LEGACY } from '$lib/cubeStages';
 
 	/** 전개도 단계 도전 지도(2026-10-20) — 쉬움(십자 모양) 12 · 보통 12판 */
 	let { data } = $props();
 	let progress = $state<StageProgress>({});
-	onMount(() => (progress = loadProgress(CUBE_STAGE_KEY)));
+	onMount(() => (progress = loadProgress(CUBE_STAGE_KEY, CUBE_LEGACY)));
 	let cleared = $derived(Object.values(progress).filter((v) => v >= 1).length);
 </script>
 

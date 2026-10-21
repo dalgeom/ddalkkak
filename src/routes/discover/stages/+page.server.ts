@@ -4,5 +4,5 @@ import { DISCOVER_STAGES } from '$lib/discoverStages';
 export const prerender = true;
 
 export function load() {
-	return { stages: DISCOVER_STAGES.map(({ no, tier, inTier }) => ({ no, tier, inTier })) };
+	return { stages: DISCOVER_STAGES.map(({ key, tier, inTier }) => ({ key, tier, inTier })) };
 }

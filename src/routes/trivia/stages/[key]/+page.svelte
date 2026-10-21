@@ -2,8 +2,8 @@
 	import { onMount } from 'svelte';
 	import { track } from '$lib/analytics';
 	import OtherGames from '$lib/components/OtherGames.svelte';
-	import { starsByScore, isOpen, loadProgress, saveProgress, STAGE_SIZE, type StageProgress } from '$lib/stages';
-	import { TRIVIA_STAGE_KEY } from '$lib/triviaStages';
+	import { starsByScore, isOpen, isTierEnd, loadProgress, saveProgress, STAGE_SIZE, type StageProgress } from '$lib/stages';
+	import { TRIVIA_STAGE_KEY, TRIVIA_LEGACY } from '$lib/triviaStages';
 	import { tierName } from '$lib/tiers';
 
 	/**
@@ -22,13 +22,14 @@
 	let q = $derived(data.questions[pos]);
 	let score = $derived(marks.filter(Boolean).length);
 	let stars = $derived(starsByScore(score));
-	let next = $derived(data.no < data.total ? data.stages[data.no] : null);
+	let next = $derived(data.stages[data.stages.findIndex((s) => s.key === data.key) + 1] ?? null);
+	let prev = $derived(data.stages.find((s) => s.tier === data.tier && s.inTier === data.inTier - 1) ?? null);
 	let title = $derived(`${tierName(data.tier)} ${data.inTier}판`);
 
 	onMount(() => {
-		progress = loadProgress(TRIVIA_STAGE_KEY);
-		locked = !isOpen(data.stages, progress, data.no);
-		if (!locked) track('tstage_start', { stage: data.no, tier: data.tier });
+		progress = loadProgress(TRIVIA_STAGE_KEY, TRIVIA_LEGACY);
+		locked = !isOpen(data.stages, progress, data.key);
+		if (!locked) track('tstage_start', { stage: data.key, tier: data.tier });
 	});
 
 	function choose(i: number) {
@@ -45,11 +46,13 @@
 			return;
 		}
 		done = true;
-		if (stars > (progress[data.no] ?? 0)) {
-			progress = { ...progress, [data.no]: stars };
+		if (stars > (progress[data.key] ?? 0)) {
+			progress = { ...progress, [data.key]: stars };
 			saveProgress(TRIVIA_STAGE_KEY, progress);
 		}
-		track(stars ? 'tstage_clear' : 'tstage_fail', { stage: data.no, tier: data.tier, stars });
+		track(stars ? 'tstage_clear' : 'tstage_fail', { stage: data.key, tier: data.tier, stars });
+		// 단계 마지막 판을 깼다 — 이 사람에게 그 단계 문제가 바닥났다(10/21, 채울 단계를 고르는 신호)
+		if (stars && isTierEnd(data.stages, data.key)) track('tstage_tier_end', { tier: data.tier });
 		window.scrollTo({ top: 0 });
 	}
 
@@ -58,7 +61,7 @@
 		picked = null;
 		marks = [];
 		done = false;
-		track('tstage_start', { stage: data.no, tier: data.tier });
+		track('tstage_start', { stage: data.key, tier: data.tier });
 		window.scrollTo({ top: 0 });
 	}
 </script>
@@ -66,16 +69,16 @@
 <svelte:head>
 	<title>상식 퀴즈 단계 도전 {title} | 딸깍</title>
 	<meta name="description" content="상식 퀴즈 단계 도전 {title}. 5문제 중 3문제 이상 맞히면 다음 판이 열려요." />
-	<link rel="canonical" href="https://ddalkkak.app/trivia/stages/{data.no}" />
+	<link rel="canonical" href="https://ddalkkak.app/trivia/stages/{data.key}" />
 	<meta name="robots" content="noindex" />
 </svelte:head>
 
-{#if locked}
+{#if locked && prev}
 	<section class="card result">
 		<span class="kicker">상식 단계 도전 · {title}</span>
 		<h1>아직 잠긴 판이에요</h1>
 		<p class="lead">앞 판을 3문제 이상 맞히면 열려요.</p>
-		<a class="cta" href="/trivia/stages/{data.no - 1}">{tierName(data.stages[data.no - 2].tier)} {data.stages[data.no - 2].inTier}판 하러 가기 <span aria-hidden="true">→</span></a>
+		<a class="cta" href="/trivia/stages/{prev?.key}">{tierName(data.tier)} {data.inTier - 1}판 하러 가기 <span aria-hidden="true">→</span></a>
 		<a class="ghost" href="/trivia/stages">단계 지도 보기</a>
 	</section>
 {:else if !done && q}
@@ -119,7 +122,7 @@
 		</p>
 		<div class="marks">{marks.map((m) => (m ? '✅' : '❌')).join(' ')}</div>
 		{#if stars && next}
-			<a class="cta" href="/trivia/stages/{next.no}">
+			<a class="cta" href="/trivia/stages/{next.key}">
 				{next.tier !== data.tier ? `${tierName(next.tier)} 단계로 올라가기` : `${tierName(next.tier)} ${next.inTier}판으로`} <span aria-hidden="true">→</span>
 			</a>
 		{/if}
