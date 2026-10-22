@@ -1,6 +1,7 @@
 import type { Problem } from './problems';
 import { encodeChallenge, type Challenge } from './challenge';
 import { tierOf } from './discoverTiers';
+import { problemAt } from './cubenet';
 
 /** 힌트 사용 수(0~3)에 따른 획득 점수 */
 export const HINT_SCORES = [100, 80, 50, 20] as const;
@@ -315,6 +316,16 @@ export const TRIVIA_FIRST_DAY = 20747;
  * 날짜별 비율: 정규 상식 둘이 다 보통 이상인 날만 바뀐다(dailyreal.test.ts가 1번 단계를 지킨다).
  */
 export const EASY_FIRST_DAY = 20748;
+
+/**
+ * 전개도도 계단 — 2026-10-23(KST)부터. 오늘(20748) 세트는 건드리지 않는다.
+ *
+ * 왜: 10/22 직접 풀어 보니 4번(첫 전개도)이 십자 모양이 아닌 전개도에 거울상 보기 둘을 가르는 문제였고,
+ * 8번(둘째 전개도)이 오히려 쉬운 십자 모양이었다. 1번을 쉽게 열어 놓고 4번에서 가장 높은 벽을 만난다.
+ * 그날 전개도 둘 중 십자 모양(cubeStages.ts의 쉬움, 정답률 약 85%)을 앞에 세운다. 뽑기는 그대로다.
+ */
+export const CUBE_STAIR_DAY = 20749;
+const crossNet = (i: number) => problemAt(i).net.rows.map((r) => (r.match(/#/g) || []).length).join('-') === '1-4-1';
 
 function laneOrder(d: number, kinds: DailyKind[]): DailyKind[] {
 	return d >= TRIVIA_FIRST_DAY ? ['trivia', ...kinds.filter((k) => k !== 'trivia')] : kinds;
@@ -747,6 +758,14 @@ export function buildDailySetStable<D, T>(
 	);
 	const cStart = cursorAt('cube', d);
 	const cAll = Array.from({ length: takeAt('cube', d) }, (_, i) => (cStart + i) % CUBE_TOTAL);
+	// 전개도 계단(CUBE_STAIR_DAY 주석) — 정규 칸 안에서만 십자 모양을 앞으로. 같은 모양끼리는 원래 순서
+	if (d >= CUBE_STAIR_DAY) {
+		const head = cAll
+			.slice(0, counts.cube)
+			.map((i, k) => ({ i, k, t: crossNet(i) ? 0 : 1 }))
+			.sort((a, b) => a.t - b.t || a.k - b.k);
+		head.forEach((h, k) => (cAll[k] = h.i));
+	}
 
 	const picked: Record<DailyKind, number[]> = { discover: dAll, trivia: tAll, match: mAll, cube: cAll };
 	const extra = picked[bonusKind][counts[bonusKind]];

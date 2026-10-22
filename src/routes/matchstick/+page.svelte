@@ -5,7 +5,7 @@
 	import { browser } from '$app/environment';
 	import { page } from '$app/state';
 	import problems from '$lib/data/matchstick-problems.json';
-	import { parseEq, cloneBoard, bit, judgeRule, ruleHints, type Board } from '$lib/matchstick';
+	import { parseEq, cloneBoard, bit, judgeRule, ruleHints, moveSentence, type Board } from '$lib/matchstick';
 	import {
 		STAGES,
 		RULE_LABEL,
@@ -334,7 +334,8 @@
 		else markDone();
 		if (mode.type === 'today') finishToday('revealed');
 		persist();
-		feedback = `정답: ${prob.solution.replace('-', '−')}`;
+		// 1개 옮기기는 어느 성냥을 어디로 옮겼는지 한 문장 더(10/22 matchstick.ts moveSentence)
+		feedback = `정답: ${prob.solution.replace('-', '−')}${prob.rule === 'move1' ? '. ' + moveSentence(prob) : ''}`;
 		if (mode.type === 'count') {
 			runResults = [...runResults, 'fail'];
 			setTimeout(() => {

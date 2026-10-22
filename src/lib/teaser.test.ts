@@ -11,7 +11,7 @@ describe('내일 예고 — 문제의 첫 예시 한 줄만 흘린다', () => {
 			{ kind: 'text', html: '물음표에 들어갈 수는?' },
 			{ kind: 'pre', text: '2 → 5\n3 → 10\n4 → ?' }
 		]);
-		expect(teaserOf(p)).toEqual({ chip: '수열', line: '2 → 5' });
+		expect(teaserOf(p)).toEqual({ chip: '수·연산', line: '2 → 5' });
 	});
 
 	it('물음표가 든 줄은 절대 내보내지 않는다 — 그 줄이 문제 자체다', () => {
@@ -21,7 +21,7 @@ describe('내일 예고 — 문제의 첫 예시 한 줄만 흘린다', () => {
 
 	it('글자 블록도 첫 줄을 쓴다', () => {
 		const p = 문제([{ kind: 'glyph', lines: ['V = 1 · A = 0', 'ㅂ = ?'] }], '웅덩이');
-		expect(teaserOf(p)).toEqual({ chip: '웅덩이', line: 'V = 1 · A = 0' });
+		expect(teaserOf(p)).toEqual({ chip: '도형·전광판', line: 'V = 1 · A = 0' });
 	});
 
 	it('안내 문장 줄은 건너뛴다 — 예시가 아니다', () => {
@@ -31,7 +31,7 @@ describe('내일 예고 — 문제의 첫 예시 한 줄만 흘린다', () => {
 
 	it('그림 문제처럼 한 줄로 못 옮기면 유형 이름만 남긴다', () => {
 		const p = 문제([{ kind: 'figure', svg: '<svg></svg>' }], '물길');
-		expect(teaserOf(p)).toEqual({ chip: '물길', line: null });
+		expect(teaserOf(p)).toEqual({ chip: '관찰·추리', line: null }) // 10/22부터 예고 이름은 chip이 아니라 상위 분야(chip은 규칙을 흘린다);
 	});
 
 	it('긴 줄은 잘라서 흘린다 — 예고가 문제를 다 말하면 안 된다', () => {

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { playChip } from '$lib/chipField';
 	import { onMount } from 'svelte';
 	import { track } from '$lib/analytics';
 	import OtherGames from '$lib/components/OtherGames.svelte';
@@ -92,7 +93,7 @@
 	</div>
 	<div class="bar"><i style="width:{(marks.length / data.problems.length) * 100}%"></i></div>
 	<section class="card">
-		<div class="chiprow"><span class="lv lv{data.tier}">{tierName(data.tier)}</span><span class="cat">{data.problems[pos].chip}</span></div>
+		<div class="chiprow"><span class="lv lv{data.tier}">{tierName(data.tier)}</span><span class="cat">{playChip(data.problems[pos])}</span></div>
 		{#key pos}
 			<DiscoverCard problem={data.problems[pos]} {onsettle} />
 		{/key}

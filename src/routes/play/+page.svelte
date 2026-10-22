@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { playChip } from '$lib/chipField';
 	import OtherGames from '$lib/components/OtherGames.svelte';
 	import { onMount, tick } from 'svelte';
 	import { browser } from '$app/environment';
@@ -401,7 +402,7 @@
 {:else if current}
 	<section class="card">
 		{#if shown?.chip}
-			<span class="cat-chip">{shown.chip}{shown.grade ? ` · ${shown.grade}` : ''}</span>
+			<span class="cat-chip">{playChip(shown)}{shown.grade ? ` · ${shown.grade}` : ''}</span>
 		{:else if current.eq}
 			<span class="cat-chip">성냥개비</span>
 		{:else if current.cube}

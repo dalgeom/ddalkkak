@@ -235,7 +235,7 @@
 						width="8"
 						height="35"
 						rx="3"
-						class="stick {shownLit('op', board.opPlus) ? 'lit' : 'ghost'} {isPicked({ kind: 'op' })
+						class="stick {shownLit('op', board.opPlus) ? 'lit' : picked || dragging ? 'ghost' : 'ghost opidle'} {isPicked({ kind: 'op' })
 							? 'picked'
 							: ''}"
 						class:ro={!interactive}
@@ -349,6 +349,11 @@
 		fill: #17231a;
 		stroke: #223528;
 		stroke-width: 1;
+	}
+	/* − 의 빈 세로 자리 — 아무것도 안 집었을 때는 숨긴다. 흐린 세로 획 때문에 언뜻 + 로 읽혔다(10/22 직접 풀어 봄).
+	   성냥을 집거나 끄는 동안에는 놓을 자리로 다시 보인다 */
+	.stick.ghost.opidle {
+		opacity: 0;
 	}
 	.stick.picked {
 		fill: #ffb020;

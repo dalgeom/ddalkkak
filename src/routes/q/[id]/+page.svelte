@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { playChip } from '$lib/chipField';
 	import { onMount, tick } from 'svelte';
 	import type { Problem } from '$lib/problems';
 	import { isCorrectText, isCloseAnswer, hintUnlocked, displayChoices, type Mark } from '$lib/game';
@@ -104,7 +105,7 @@
 <p class="from">{friendLine(data.friend)}</p>
 
 <section class="card">
-	<span class="cat-chip">{p.chip}</span>
+	<span class="cat-chip">{playChip(p)}</span>
 
 	<div class="q">
 		{#each p.blocks as b, i (i)}

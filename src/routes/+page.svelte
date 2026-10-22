@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { playChip } from '$lib/chipField';
 	import { onMount, tick } from 'svelte';
 	import { browser } from '$app/environment';
 	import { accuracyLabel } from '$lib/stats';
@@ -38,7 +39,7 @@
 	import { bankSizesAt } from '$lib/bankHistory';
 	import { logoClicks, focusMode } from '$lib/nav';
 	import { track } from '$lib/analytics';
-	import { parseEq, cloneBoard, isSolved, bit, moveHints, type Board } from '$lib/matchstick';
+	import { parseEq, cloneBoard, isSolved, bit, moveHints, moveSentence, type Board } from '$lib/matchstick';
 	import MatchstickBoard, { type PickLoc } from '$lib/components/MatchstickBoard.svelte';
 	import CubeNetFigure from '$lib/components/CubeNetFigure.svelte';
 	import CubeDie from '$lib/components/CubeDie.svelte';
@@ -1121,7 +1122,7 @@
 			{#if !current.bonus && (current.problem?.chip || cardTier)}
 				<div class="chiprow">
 					{#if cardTier}<span class="tier-chip lv{cardTier}">{tierName(cardTier)}</span>{/if}
-					{#if current.problem?.chip}<span class="cat-chip">{current.problem.chip}</span>{/if}
+					{#if current.problem?.chip}<span class="cat-chip">{playChip(current.problem)}</span>{/if}
 				</div>
 			{/if}
 
@@ -1265,7 +1266,7 @@
 				<div class="explain">
 					<b>해설</b>
 					{#if current.eq}
-						성냥 하나만 옮겨 <b>{current.eq.solution.replace('-', '−')}</b>을 만들면 참이 됩니다.
+						{moveSentence(current.eq)} 그러면 <b>{current.eq.solution.replace('-', '−')}</b>, 참이 돼요.
 					{:else if current.cube}
 						마주 보는 면은
 						{#each current.cube.opposites as [a, b], k (k)}<span class="oppair"

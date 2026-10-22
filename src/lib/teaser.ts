@@ -1,3 +1,4 @@
+import { playChip } from './chipField';
 import type { Problem } from './problems';
 
 /**
@@ -18,12 +19,14 @@ const MAX = 22;
 const isProse = (l: string) => /[가-힣]\.$/.test(l);
 
 export function teaserOf(p: Problem): Teaser {
+	// 예고의 이름도 상위 분야로 — 「내일의 끝점 L = 2」는 내일 규칙을 미리 말했다(10/22)
+	const chip = playChip(p) ?? p.chip;
 	for (const b of p.blocks) {
 		const lines = b.kind === 'pre' ? b.text.split('\n') : b.kind === 'glyph' ? b.lines : null;
 		if (!lines) continue;
 		const first = lines.map((l) => l.trim()).find((l) => l && !isProse(l));
-		if (!first || first.includes('?')) return { chip: p.chip, line: null };
-		return { chip: p.chip, line: first.length > MAX ? first.slice(0, MAX - 1) + '…' : first };
+		if (!first || first.includes('?')) return { chip, line: null };
+		return { chip, line: first.length > MAX ? first.slice(0, MAX - 1) + '…' : first };
 	}
-	return { chip: p.chip, line: null };
+	return { chip, line: null };
 }

@@ -101,6 +101,30 @@ export function moveHints(p: MatchProblem): [string, string] {
 	return [`성냥을 빼는 곳: ${from}`, from === to ? '뺀 성냥을 같은 숫자 안에 다시 꽂아요' : `꽂는 곳: ${to}`];
 }
 
+const SEG_KO: Record<SegKey, string> = { a: '위', b: '오른쪽 위', c: '오른쪽 아래', d: '아래', e: '왼쪽 아래', f: '왼쪽 위', g: '가운데' };
+
+/**
+ * 성냥 하나 옮기기 해설 한 문장(10/22). 해설이 「성냥 하나만 옮겨 6 − 2 = 4를 만들면 참」뿐이라
+ * 어느 성냥을 어디로 옮겼는지 몰랐다(직접 풀어 보고 확인). 빼는 자리 · 놓는 자리 · 바뀐 숫자를 말로 적는다.
+ */
+export function moveSentence(p: MatchProblem): string {
+	const o = parseEq(p.displayed);
+	const s = parseEq(p.solution);
+	const od = digitsOf(o);
+	const sd = digitsOf(s);
+	const segOf = (m: number) => SEG_KEYS.find((k) => m & bit(k))!;
+	const fi = o.glyphs.findIndex((m, i) => m & ~s.glyphs[i]);
+	const ti = o.glyphs.findIndex((m, i) => s.glyphs[i] & ~m);
+	if (o.opPlus && !s.opPlus)
+		return `기호 「+」의 세로 성냥을 빼서 ${spotName(o, ti)}의 ${SEG_KO[segOf(s.glyphs[ti] & ~o.glyphs[ti])]} 자리에 놓아요(+ → −, ${od[ti]} → ${sd[ti]}).`;
+	if (!o.opPlus && s.opPlus)
+		return `${spotName(o, fi)}의 ${SEG_KO[segOf(o.glyphs[fi] & ~s.glyphs[fi])]} 성냥을 빼서 기호 「−」에 세로로 꽂아요(${od[fi]} → ${sd[fi]}, − → +).`;
+	const from = SEG_KO[segOf(o.glyphs[fi] & ~s.glyphs[fi])];
+	const to = SEG_KO[segOf(s.glyphs[ti] & ~o.glyphs[ti])];
+	if (fi === ti) return `${spotName(o, fi)}의 ${from} 성냥을 같은 숫자 ${to} 자리로 옮겨요(${od[fi]} → ${sd[fi]}).`;
+	return `${spotName(o, fi)}의 ${from} 성냥을 빼서 ${spotName(o, ti)}의 ${to} 자리에 놓아요(${od[fi]} → ${sd[fi]}, ${od[ti]} → ${sd[ti]}).`;
+}
+
 /** 판 위 자리 이름 — moveHints·ruleHints가 쓴다 */
 function spotName(o: Board, gi: number): string {
 	const d = digitsOf(o);
