@@ -30,7 +30,7 @@
 	</p>
 </header>
 
-<StageMap stages={data.stages} {progress} hrefOf={(no) => `/chosung/stages/${no}`} />
+<StageMap stages={data.stages} {progress} hrefOf={(no) => `/chosung/stages/${no}`} storageKey={CHOSUNG_STAGE_KEY} event="chstage" />
 
 <OtherGames current="cho" />
 

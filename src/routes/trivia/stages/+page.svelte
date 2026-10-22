@@ -33,7 +33,7 @@
 	</p>
 </header>
 
-<StageMap stages={data.stages} {progress} hrefOf={(no) => `/trivia/stages/${no}`} />
+<StageMap stages={data.stages} {progress} hrefOf={(no) => `/trivia/stages/${no}`} storageKey={TRIVIA_STAGE_KEY} event="tstage" />
 
 <OtherGames current="trivia" />
 

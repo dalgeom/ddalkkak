@@ -2,6 +2,9 @@
 	import { onMount, type Snippet } from 'svelte';
 	import { track } from '$lib/analytics';
 	import OtherGames from '$lib/components/OtherGames.svelte';
+	import PushPrompt from '$lib/components/PushPrompt.svelte';
+	import TierEndNote from '$lib/components/TierEndNote.svelte';
+	import { kstDayNumber } from '$lib/game';
 	import { starsByScore, isOpen, isTierEnd, loadProgress, saveProgress, type StageMeta, type StageProgress } from '$lib/stages';
 	import { tierName, type Tier } from '$lib/tiers';
 
@@ -47,6 +50,13 @@
 	let next = $derived(current.stages[idx + 1] ?? null);
 	let prev = $derived(current.stages.find((s) => s.tier === current.tier && s.inTier === current.inTier - 1) ?? null);
 	let title = $derived(`${tierName(current.tier)} ${current.inTier}판`);
+	// 단계 끝 판(10/22) — 다음 판이 없으면 다른 유형의 같은 단계로 잇는다(초성 → 상식, 전개도 → 발견형)
+	let tierEnd = $derived(stars > 0 && isTierEnd(current.stages, current.key));
+	const ALT: Record<string, { href: string; label: string }> = {
+		'/chosung/stages': { href: '/trivia/stages', label: '상식 퀴즈' },
+		'/cubenet/stages': { href: '/discover/stages', label: '규칙 찾기 퍼즐' }
+	};
+	let alt = $derived(ALT[base] ?? null);
 
 	onMount(() => {
 		progress = loadProgress(storageKey, legacy);
@@ -121,14 +131,20 @@
 			{#if !stars}3문제 이상 맞히면 다음 판이 열려요.{:else if stars < 3}다 맞히면 별 3개예요.{/if}
 		</p>
 		<div class="marks">{marks.map((m) => (m ? '✅' : '❌')).join(' ')}</div>
+		{#if tierEnd}<TierEndNote tier={current.tier} />{/if}
 		{#if stars && next}
 			<a class="cta" href="{base}/{next.key}">
 				{next.tier !== current.tier ? `${tierName(next.tier)} 단계로 올라가기` : `${tierName(next.tier)} ${next.inTier}판으로`} <span aria-hidden="true">→</span>
+			</a>
+		{:else if tierEnd && alt}
+			<a class="cta" href="{alt.href}#tier-{current.tier}" onclick={() => track(`${event}_tier_end_alt`)}>
+				{alt.label} {tierName(current.tier)} 도전하기 <span aria-hidden="true">→</span>
 			</a>
 		{/if}
 		<button class="ghost" class:first={!stars} onclick={again}>이 판 다시 하기</button>
 		<a class="ghost" href={base}>단계 지도 보기</a>
 	</section>
+	{#if tierEnd}<PushPrompt dayNum={kstDayNumber(Date.now())} slot="stage" />{/if}
 	<OtherGames current={otherKey} />
 {/if}
 

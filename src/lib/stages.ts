@@ -108,3 +108,44 @@ export function saveProgress(key: string, p: StageProgress): void {
 		/* 사생활 보호 창 등 — 진행이 안 남을 뿐 놀이는 막지 않는다 */
 	}
 }
+
+/*
+ * 「새 판」 표시(2026-10-22). 매일 단계 채우기로 판이 단계 꼬리에 붙는데, 돌아온 사람은 무엇이 새로 생겼는지
+ * 알 길이 없었다. 지도를 열 때 단계별 판 수를 기기에 적어 두고, 다음에 열었을 때 그보다 뒤 판을 「새」로 본다.
+ * 한 판이라도 깬 단계에만 표시한다 — 손대지 않은 단계는 판이 전부 처음 보는 것이라 「새」가 뜻이 없다.
+ * 깬 판은 「새」에서 빠지고, 적어 둔 판 수는 새 판을 다 깬 뒤에야 앞으로 옮긴다(한 번 보고 지나쳐도 표시가 남게).
+ */
+export type SeenCounts = Record<number, number>;
+
+export function tierCounts(stages: StageMeta[]): SeenCounts {
+	const out: SeenCounts = {};
+	for (const s of stages) out[s.tier] = Math.max(out[s.tier] ?? 0, s.inTier);
+	return out;
+}
+
+export function newKeys(stages: StageMeta[], seen: SeenCounts | null, p: StageProgress): Set<string> {
+	if (!seen) return new Set();
+	const played = new Set(stages.filter((s) => (p[s.key] ?? 0) >= 1).map((s) => s.tier));
+	return new Set(
+		stages
+			.filter((s) => played.has(s.tier) && seen[s.tier] !== undefined && s.inTier > seen[s.tier] && !(p[s.key] >= 1))
+			.map((s) => s.key)
+	);
+}
+
+export function loadSeen(key: string): SeenCounts | null {
+	try {
+		const v = localStorage.getItem(`${key}:seen`);
+		return v ? JSON.parse(v) : null;
+	} catch {
+		return null;
+	}
+}
+
+export function saveSeen(key: string, counts: SeenCounts): void {
+	try {
+		localStorage.setItem(`${key}:seen`, JSON.stringify(counts));
+	} catch {
+		/* 표시만 안 될 뿐 */
+	}
+}

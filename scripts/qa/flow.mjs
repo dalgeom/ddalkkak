@@ -298,6 +298,34 @@ await b.go('/trivia/stages', 2500);
 m = await b.ev(`const t = document.querySelector('.tier'); return { star: t.querySelector('.stile')?.textContent.trim(), second: t.querySelector('.stile:nth-child(2)')?.tagName, sub: t.querySelector('.th p')?.textContent.trim(), stored: localStorage.getItem('ddal.trivia.stages') };`);
 ok('옛 줄번호 기록 1번 ★3 → 새싹 1판 ★3로 옮겨져 지도에 · 2판이 열림', /★★★/.test(m.star ?? '') && m.second === 'A' && /1판 통과/.test(m.sub ?? '') && m.stored === JSON.stringify({ '1-1': 3 }), JSON.stringify(m));
 await b.shot(OUT + 'f-tstage-map.jpg');
+// 5g2. 새 판 표시(10/22) — 새싹 1판을 깬 사람이 지난번에 새싹 판을 하나 덜 봤다면 마지막 판이 「새」
+m = await b.ev(`
+	const n = document.querySelectorAll('#tier-1 .stile').length;
+	localStorage.setItem('ddal.trivia.stages', JSON.stringify({ '1-1': 3 }));
+	const seen = {}; for (const t of [1,2,3,4,5]) seen[t] = document.querySelectorAll('#tier-' + t + ' .stile').length;
+	seen[1] = n - 1; localStorage.setItem('ddal.trivia.stages:seen', JSON.stringify(seen)); return n;`);
+await b.go('/trivia/stages', 2500);
+m = await b.ev(`const t = document.querySelector('#tier-1'); const tiles = [...t.querySelectorAll('.stile')];
+	return { n: tiles.length, newAt: tiles.findIndex(x=>x.querySelector('.nb')), count: t.querySelectorAll('.nb').length, sub: t.querySelector('.th p')?.textContent.replace(/\\s+/g,' ').trim(), others: document.querySelectorAll('.nb').length };`);
+ok('새 판 표시 — 지난번 뒤 붙은 새싹 마지막 판에 「새」 · 머리에 「새 판 1개」, 다른 단계엔 없음', m.count === 1 && m.newAt === m.n - 1 && /새 판 1개/.test(m.sub ?? '') && m.others === 1, JSON.stringify(m));
+await b.shot(OUT + 'f-tstage-new.jpg');
+// 5g3. 단계 끝 판(10/22) — 고수 마지막 판을 깨면 「다 깼어요」 · 발견형 고수로 잇는 버튼(다음 판이 없으니)
+m = await b.ev(`
+	const n = document.querySelectorAll('#tier-5 .stile').length; const p = {};
+	for (let i = 1; i < n; i++) p['5-' + i] = 3; localStorage.setItem('ddal.trivia.stages', JSON.stringify(p)); return n;`);
+const lastKey = '5-' + m;
+await b.go('/trivia/stages/' + lastKey, 2500);
+m = await b.ev(`
+	const step = async (pick) => { for (let i = 0; i < 5; i++) { const cs=[...document.querySelectorAll('.choice')]; const want = pick(i); (cs[want] ?? cs[0]).click(); await new Promise(r=>setTimeout(r,250)); const ok = [...document.querySelectorAll('.choice')].findIndex(c=>c.classList.contains('ok')); ans[i] = ok; [...document.querySelectorAll('button')].find(x=>/다음 문제|결과 보기/.test(x.textContent))?.click(); await new Promise(r=>setTimeout(r,300)); } };
+	const ans = [];
+	await step(() => 0);
+	[...document.querySelectorAll('button')].find(x=>/다시 하기/.test(x.textContent)).click(); await new Promise(r=>setTimeout(r,400));
+	const learned = [...ans];
+	await step((i) => learned[i]);
+	return { h1: document.querySelector('h1')?.textContent.trim(), tend: document.querySelector('.tend')?.textContent.replace(/\\s+/g,' ').trim() ?? '', cta: document.querySelector('.result .cta')?.getAttribute('href') ?? '', push: !!document.querySelector('.push') };`);
+ok('고수 마지막 판 통과 → 「고수 판을 다 깼어요」 · 발견형 고수로 잇기', /통과/.test(m.h1 ?? '') && /고수 판을 다 깼어요/.test(m.tend) && m.cta === '/discover/stages#tier-5', JSON.stringify(m));
+await b.shot(OUT + 'f-tstage-end.jpg');
+await b.ev(`localStorage.removeItem('ddal.trivia.stages'); localStorage.removeItem('ddal.trivia.stages:seen'); return 1;`);
 
 // 5h. 발견형 단계 도전(10/20) — 지도 5단계 · 판 화면(문제 · 힌트 · 모르겠어요) · 다섯 번 모르겠어요 → 실패, 진행 안 남음
 await b.go('/discover/stages', 2500);

@@ -30,7 +30,7 @@
 	</p>
 </header>
 
-<StageMap stages={data.stages} {progress} hrefOf={(no) => `/cubenet/stages/${no}`} />
+<StageMap stages={data.stages} {progress} hrefOf={(no) => `/cubenet/stages/${no}`} storageKey={CUBE_STAGE_KEY} event="cbstage" />
 
 <OtherGames current="cube" />
 
