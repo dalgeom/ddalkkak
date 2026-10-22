@@ -4,9 +4,9 @@ import { TRIVIA } from './trivia';
 import { starsByScore, isOpen, nextOpen, isTierEnd, loadProgress, buildTierStages, STAGE_SIZE } from './stages';
 
 describe('상식 단계 도전', () => {
-	it('75판 — 새싹 18 · 쉬움 21 · 보통 19 · 어려움 17, 판마다 5문제, 겹침 없음', () => {
-		const per = [1, 2, 3, 4].map((t) => TRIVIA_STAGES.filter((s) => s.tier === t).length);
-		expect(per).toEqual([18, 21, 19, 17]);
+	it('새싹 19 · 쉬움 21 · 보통 19 · 어려움 17 · 고수 3(10/22 새싹 5 · 고수 10 추가), 판마다 5문제, 겹침 없음', () => {
+		const per = [1, 2, 3, 4, 5].map((t) => TRIVIA_STAGES.filter((s) => s.tier === t).length);
+		expect(per).toEqual([19, 21, 19, 17, 3]);
 		const all = TRIVIA_STAGES.flatMap((s) => s.ids);
 		expect(TRIVIA_STAGES.every((s) => s.ids.length === STAGE_SIZE)).toBe(true);
 		expect(new Set(all).size).toBe(all.length);
@@ -33,7 +33,8 @@ describe('상식 단계 도전', () => {
 			  "tv-342",
 			]
 		`);
-		expect(TRIVIA_STAGES[18].ids).toMatchInlineSnapshot(`
+		// 쉬움 1판 — 줄번호가 아니라 열쇠로 찾는다(새싹에 판이 붙으면 줄번호가 밀린다, 10/22)
+		expect(TRIVIA_STAGES.find((s) => s.key === '2-1')!.ids).toMatchInlineSnapshot(`
 			[
 			  "tv-22",
 			  "tv-472",
@@ -68,8 +69,8 @@ describe('단계 공통 규칙', () => {
 		expect(nextOpen(TRIVIA_STAGES, {}, 2)).toBe('2-1');
 	});
 	it('단계 끝 판 — 그 단계에 뒤 판이 없으면 끝', () => {
-		expect(isTierEnd(TRIVIA_STAGES, '1-18')).toBe(true);
-		expect(isTierEnd(TRIVIA_STAGES, '1-17')).toBe(false);
+		expect(isTierEnd(TRIVIA_STAGES, '1-19')).toBe(true);
+		expect(isTierEnd(TRIVIA_STAGES, '1-18')).toBe(false);
 	});
 });
 

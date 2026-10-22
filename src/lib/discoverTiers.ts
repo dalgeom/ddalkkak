@@ -396,6 +396,9 @@ export const DISCOVER_TIERS: Readonly<Record<string, Tier>> = {
 	'buy2-get1': 1, // 10/21 새로 · 2+1 행사, 첫 가설이 2줄에서 죽음
 	'ring-cut': 1, // 10/21 새로 · 고리는 첫 가위질 +0
 	'ob-gear-ring': 5, // 10/21 새로 · 짧은 길 미끼(반시계), 두 길 모순 발견
+	'delivery-free': 1, // 10/22 새로 · 배달비, 19000원어치가 2만 원어치보다 비쌈
+	'cup-stack': 1, // 10/22 새로 · 종이컵은 포개져서 하나에 1cm
+	'grid-diagonal-op': 5, // 10/22 새로 · 모눈 대각선이 지나는 칸, a+b−최대공약수
 };
 
 /**
