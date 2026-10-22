@@ -1804,10 +1804,13 @@ export const PROBLEMS: Problem[] = [
 		chip: '탐색',
 		blocks: [
 			{ kind: 'text', html: '이 버스는 <b>왼쪽</b>과 <b>오른쪽</b> 중 어느 쪽으로 가고 있을까요?' },
-			{ kind: 'figure', svg: '<svg viewBox=\'0 0 300 150\' role=\'img\' aria-label=\'옆에서 본 버스\'><rect x=\'18\' y=\'34\' width=\'264\' height=\'78\' rx=\'16\' fill=\'var(--accent-soft)\' stroke=\'var(--accent)\' stroke-width=\'3\'/><rect x=\'36\' y=\'48\' width=\'46\' height=\'34\' rx=\'5\' fill=\'#fff\' stroke=\'var(--accent)\' stroke-width=\'2\'/><rect x=\'92\' y=\'48\' width=\'46\' height=\'34\' rx=\'5\' fill=\'#fff\' stroke=\'var(--accent)\' stroke-width=\'2\'/><rect x=\'148\' y=\'48\' width=\'46\' height=\'34\' rx=\'5\' fill=\'#fff\' stroke=\'var(--accent)\' stroke-width=\'2\'/><rect x=\'204\' y=\'48\' width=\'46\' height=\'34\' rx=\'5\' fill=\'#fff\' stroke=\'var(--accent)\' stroke-width=\'2\'/><circle cx=\'74\' cy=\'118\' r=\'18\' fill=\'var(--text)\'/><circle cx=\'74\' cy=\'118\' r=\'7\' fill=\'var(--panel)\'/><circle cx=\'226\' cy=\'118\' r=\'18\' fill=\'var(--text)\'/><circle cx=\'226\' cy=\'118\' r=\'7\' fill=\'var(--panel)\'/><rect x=\'20\' y=\'92\' width=\'10\' height=\'12\' rx=\'2\' fill=\'var(--gold)\'/><rect x=\'270\' y=\'92\' width=\'10\' height=\'12\' rx=\'2\' fill=\'var(--accent-2)\'/></svg>', caption: '옆에서 본 버스 (한국 도로)' }
+			{ kind: 'figure', svg: '<svg viewBox=\'0 0 300 150\' role=\'img\' aria-label=\'옆에서 본 버스\'><rect x=\'18\' y=\'34\' width=\'264\' height=\'78\' rx=\'16\' fill=\'var(--accent-soft)\' stroke=\'var(--accent)\' stroke-width=\'3\'/><rect x=\'36\' y=\'48\' width=\'46\' height=\'34\' rx=\'5\' fill=\'#fff\' stroke=\'var(--accent)\' stroke-width=\'2\'/><rect x=\'92\' y=\'48\' width=\'46\' height=\'34\' rx=\'5\' fill=\'#fff\' stroke=\'var(--accent)\' stroke-width=\'2\'/><rect x=\'148\' y=\'48\' width=\'46\' height=\'34\' rx=\'5\' fill=\'#fff\' stroke=\'var(--accent)\' stroke-width=\'2\'/><rect x=\'204\' y=\'48\' width=\'46\' height=\'34\' rx=\'5\' fill=\'#fff\' stroke=\'var(--accent)\' stroke-width=\'2\'/><circle cx=\'74\' cy=\'118\' r=\'18\' fill=\'var(--text)\'/><circle cx=\'74\' cy=\'118\' r=\'7\' fill=\'var(--panel)\'/><circle cx=\'226\' cy=\'118\' r=\'18\' fill=\'var(--text)\'/><circle cx=\'226\' cy=\'118\' r=\'7\' fill=\'var(--panel)\'/><rect x=\'20\' y=\'92\' width=\'10\' height=\'12\' rx=\'2\' fill=\'var(--gold)\'/><rect x=\'270\' y=\'92\' width=\'10\' height=\'12\' rx=\'2\' fill=\'var(--gold)\'/></svg>', caption: '옆에서 본 버스 (한국 도로)' }
 		],
-		type: 'text',
-		answers: ['왼쪽', '왼', '좌'],
+		// 10/22 미리 풀기: 앞등(노랑) · 뒷등(빨강) 색이 달라 그림이 답을 먼저 알려 줬다 → 두 등을 같은 색으로.
+		// 답이 둘 중 하나라 글자 입력 대신 보기 둘(왼쪽 · 오른쪽)
+		type: 'choice',
+		choices: ['왼쪽', '오른쪽'],
+		answerIndex: 0,
 		hints: [
 			'버스에 있어야 할 무언가가 이 그림엔 안 보여요. 승객이 타고 내리는 곳이요.',
 			'문이 안 보인다는 건, 문이 우리 반대편(먼 쪽)에 있다는 뜻이에요.',

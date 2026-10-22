@@ -113,16 +113,19 @@ export function moveSentence(p: MatchProblem): string {
 	const od = digitsOf(o);
 	const sd = digitsOf(s);
 	const segOf = (m: number) => SEG_KEYS.find((k) => m & bit(k))!;
+	// 해설용 짧은 자리 이름(10/22 미리 풀기: 「= 뒤 「16」의 뒷자리 「6」의」가 딱딱했다). 힌트는 spotName 그대로
+	const at = (gi: number) =>
+		gi === 0 ? `맨 앞 「${od[0]}」` : gi === 1 ? `기호 뒤 「${od[1]}」` : o.cLen === 1 ? `답 「${od[2]}」` : `답 ${gi === 2 ? '첫자리' : '끝자리'} 「${od[gi]}」`;
 	const fi = o.glyphs.findIndex((m, i) => m & ~s.glyphs[i]);
 	const ti = o.glyphs.findIndex((m, i) => s.glyphs[i] & ~m);
 	if (o.opPlus && !s.opPlus)
-		return `기호 「+」의 세로 성냥을 빼서 ${spotName(o, ti)}의 ${SEG_KO[segOf(s.glyphs[ti] & ~o.glyphs[ti])]} 자리에 놓아요(+ → −, ${od[ti]} → ${sd[ti]}).`;
+		return `기호 「+」의 세로 성냥을 빼서 ${at(ti)}의 ${SEG_KO[segOf(s.glyphs[ti] & ~o.glyphs[ti])]} 자리에 놓아요(+ → −, ${od[ti]} → ${sd[ti]}).`;
 	if (!o.opPlus && s.opPlus)
-		return `${spotName(o, fi)}의 ${SEG_KO[segOf(o.glyphs[fi] & ~s.glyphs[fi])]} 성냥을 빼서 기호 「−」에 세로로 꽂아요(${od[fi]} → ${sd[fi]}, − → +).`;
+		return `${at(fi)}의 ${SEG_KO[segOf(o.glyphs[fi] & ~s.glyphs[fi])]} 성냥을 빼서 기호 「−」에 세로로 꽂아요(${od[fi]} → ${sd[fi]}, − → +).`;
 	const from = SEG_KO[segOf(o.glyphs[fi] & ~s.glyphs[fi])];
 	const to = SEG_KO[segOf(s.glyphs[ti] & ~o.glyphs[ti])];
-	if (fi === ti) return `${spotName(o, fi)}의 ${from} 성냥을 같은 숫자 ${to} 자리로 옮겨요(${od[fi]} → ${sd[fi]}).`;
-	return `${spotName(o, fi)}의 ${from} 성냥을 빼서 ${spotName(o, ti)}의 ${to} 자리에 놓아요(${od[fi]} → ${sd[fi]}, ${od[ti]} → ${sd[ti]}).`;
+	if (fi === ti) return `${at(fi)}의 ${from} 성냥을 같은 숫자 ${to} 자리로 옮겨요(${od[fi]} → ${sd[fi]}).`;
+	return `${at(fi)}의 ${from} 성냥을 빼서 ${at(ti)}의 ${to} 자리에 놓아요(${od[fi]} → ${sd[fi]}, ${od[ti]} → ${sd[ti]}).`;
 }
 
 /** 판 위 자리 이름 — moveHints·ruleHints가 쓴다 */

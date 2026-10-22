@@ -153,18 +153,20 @@
 	    손잡이를 잠깐 누르고 있다가 휙 튕긴 것이 느린 끌기로 읽혀 안 닫혔다(10/20 QA C3가 들쭉날쭉했던 원인) */
 	let trail: { t: number; dy: number }[] = [];
 
-	function begin(y: number, target: EventTarget | null) {
+	// 시각은 이벤트가 일어난 때(e.timeStamp)로 잰다 — 처리하는 때(performance.now)로 재면 화면이 잠깐 바쁠 때 손가락은 빨랐는데
+	// 느린 끌기로 읽혀 안 닫혔다(10/22 QA C3 · C4가 번갈아 흔들림). 두 값은 같은 기준(timeOrigin)이라 섞어 써도 된다
+	function begin(y: number, target: EventTarget | null, t: number) {
 		const el = target as Element | null;
 		fromHandle = !!el?.closest('.handle');
 		const inField = !!el?.closest('textarea, input, select');
 		canDrag = fromHandle || (!inField && (body?.scrollTop ?? 0) <= 0);
 		startY = y;
-		startT = performance.now();
+		startT = t;
 		trail = [{ t: startT, dy: 0 }];
 		dragging = false;
 	}
 	/** 끌기로 넘어갔으면 true(그때부터 스크롤 대신 시트가 움직인다) */
-	function move(y: number): boolean {
+	function move(y: number, t: number): boolean {
 		if (!canDrag) return false;
 		const d = y - startY;
 		if (!dragging) {
@@ -177,12 +179,12 @@
 			dragging = true;
 		}
 		dy = d > 0 ? d : d * (expandable && !expanded ? 0.45 : 0.15);
-		const now = performance.now();
+		const now = t;
 		trail.push({ t: now, dy });
 		while (trail.length > 2 && now - trail[1].t > 100) trail.shift();
 		return true;
 	}
-	function end() {
+	function end(t: number) {
 		if (!dragging) return;
 		dragging = false;
 		blockClick = true;
@@ -190,9 +192,11 @@
 		const h = panel?.offsetHeight ?? 400;
 		// 손을 떼기 직전 0.1초쯤 움직인 속도(px/ms) — 마지막 움직임까지로 잰다(떼는 데 걸린 틈은 뺀다).
 		// 마지막으로 움직인 뒤 0.1초 넘게 멈췄다가 뗐으면 튕긴 것이 아니다
-		const from = trail[0] ?? { t: startT, dy: 0 };
-		const last = trail[trail.length - 1] ?? from;
-		const v = performance.now() - last.t > 100 ? 0 : (last.dy - from.dy) / Math.max(1, last.t - from.t);
+		const last = trail[trail.length - 1] ?? { t: startT, dy: 0 };
+		// 마지막 움직임에서 0.1초 안의 가장 이른 점부터 잰다(그 안에 점이 하나뿐이면 바로 앞 점부터)
+		let from = trail.find((p) => last.t - p.t <= 100) ?? last;
+		if (from === last && trail.length > 1) from = trail[trail.length - 2];
+		const v = t - last.t > 100 ? 0 : (last.dy - from.dy) / Math.max(1, last.t - from.t);
 		if (expanded && dy > 0 && dy < h * 0.45 && v < 0.8) {
 			expanded = false;
 			dy = 0;
@@ -206,15 +210,15 @@
 
 	function onTouchStart(e: TouchEvent) {
 		if (e.touches.length !== 1) return;
-		begin(e.touches[0].clientY, e.target);
+		begin(e.touches[0].clientY, e.target, e.timeStamp);
 		const tm = (ev: TouchEvent) => {
-			if (move(ev.touches[0].clientY)) ev.preventDefault();
+			if (move(ev.touches[0].clientY, ev.timeStamp)) ev.preventDefault();
 		};
-		const te = () => {
+		const te = (ev: TouchEvent) => {
 			window.removeEventListener('touchmove', tm);
 			window.removeEventListener('touchend', te);
 			window.removeEventListener('touchcancel', te);
-			end();
+			end(ev.timeStamp);
 		};
 		window.addEventListener('touchmove', tm, { passive: false });
 		window.addEventListener('touchend', te);
@@ -223,12 +227,12 @@
 	// 마우스는 손잡이에서만
 	function onMouseDown(e: PointerEvent) {
 		if (e.pointerType !== 'mouse' || e.button !== 0 || !(e.target as Element).closest('.handle')) return;
-		begin(e.clientY, e.target);
-		const pm = (ev: PointerEvent) => void move(ev.clientY);
-		const pu = () => {
+		begin(e.clientY, e.target, e.timeStamp);
+		const pm = (ev: PointerEvent) => void move(ev.clientY, ev.timeStamp);
+		const pu = (ev: PointerEvent) => {
 			window.removeEventListener('pointermove', pm);
 			window.removeEventListener('pointerup', pu);
-			end();
+			end(ev.timeStamp);
 		};
 		window.addEventListener('pointermove', pm);
 		window.addEventListener('pointerup', pu);

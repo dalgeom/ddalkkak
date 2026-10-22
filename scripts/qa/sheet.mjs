@@ -3,13 +3,16 @@ import { launch, sleep, OUT } from './cdp.mjs';
 const res = [];
 const ok = (n, p, d = '') => { res.push({ n, p }); console.log(`${p ? '통과' : '실패'}  ${n}${d ? '  — ' + d : ''}`); };
 
+// 손가락이 움직인 시각을 이벤트에 직접 적는다(timestamp, 초) — 기계가 바쁠 때 CDP 전달이 늦어 「멈췄다 뗀 것」으로 읽혀
+// 튕기기 시험(C3 · C4)이 번갈아 흔들렸다(10/22). 시트는 이벤트 시각(e.timeStamp)으로 속도를 잰다
 async function drag(b, x, y0, y1, ms = 300, steps = 12) {
-	await b.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x, y: y0 }] });
+	const t0 = Date.now() / 1000;
+	await b.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x, y: y0 }], timestamp: t0 });
 	for (let i = 1; i <= steps; i++) {
-		await b.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x, y: y0 + ((y1 - y0) * i) / steps }] });
+		await b.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x, y: y0 + ((y1 - y0) * i) / steps }], timestamp: t0 + (ms * i) / steps / 1000 });
 		await sleep(ms / steps);
 	}
-	await b.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+	await b.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [], timestamp: t0 + (ms + ms / steps) / 1000 });
 }
 const rect = (b, sel) => b.ev(`const e=document.querySelector('${sel}'); if(!e) return null; const r=e.getBoundingClientRect(); return {x:r.left+r.width/2, top:r.top, bottom:r.bottom, h:r.height};`);
 const isOpen = (b) => b.ev(`return !!document.querySelector('.sheet.show');`);
