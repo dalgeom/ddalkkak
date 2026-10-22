@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { playChip } from '$lib/chipField';
 	import { onMount, tick } from 'svelte';
-	import { browser } from '$app/environment';
+	import { browser, dev } from '$app/environment';
 	import { accuracyLabel } from '$lib/stats';
 	import type { Problem } from '$lib/problems';
 	import {
@@ -888,8 +888,12 @@
 		return w && w.ok < w.total ? w : null;
 	});
 
+	// 내일 문제 미리 풀어 보기(10/22, CLAUDE.md 매일 루틴) — 로컬 dev 서버에서만 ?day=날짜번호로 그날을 연다.
+	// 운영 빌드에서는 dev가 false라 이 갈래가 통째로 빠진다
+	const todayNum = () => (dev && Number(new URL(location.href).searchParams.get('day'))) || kstDayNumber(Date.now());
+
 	onMount(() => {
-		dayNum = kstDayNumber(Date.now());
+		dayNum = todayNum();
 		savedProgress = readDailyProgress(dayNum);
 		marks = savedProgress.marks;
 		pos = savedProgress.pos;
@@ -954,7 +958,7 @@
 			// 탭을 열어둔 채 자정을 넘기면 홈에서만 새 날짜로 넘어간다.
 			// 세션 중에는 날짜를 고정해 풀던 10문제가 중간에 바뀌지 않게 한다.
 			if (phase !== 'play') {
-				const today = kstDayNumber(Date.now());
+				const today = todayNum();
 				if (today !== dayNum) {
 					dayNum = today;
 					savedProgress = readDailyProgress(today);

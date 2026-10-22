@@ -1,4 +1,5 @@
 import { json, error } from '@sveltejs/kit';
+import { dev } from '$app/environment';
 import { assembleDayQueue } from '$lib/dayview';
 import { kstDayNumber, SITE_START_DAY } from '$lib/game';
 import type { RequestHandler } from './$types';
@@ -23,7 +24,8 @@ export const GET: RequestHandler = ({ params, setHeaders }) => {
 
 	// 오늘과 어제만. 자정 경계에서 클라이언트 시계와 하루 어긋날 수 있어 여유를 둔다.
 	// 지난 날짜는 /archive/<날짜>가 스포일러 가드를 걸어 맡는다.
-	if (!Number.isInteger(day) || day > today || day < today - 1 || day < SITE_START_DAY)
+	// 로컬 dev 서버에서만 사흘 뒤까지 연다 — 내일 문제를 미리 풀어 보는 매일 루틴(10/22). 운영에서는 오늘 · 어제뿐이다
+	if (!Number.isInteger(day) || day > today + (dev ? 3 : 0) || day < today - 1 || day < SITE_START_DAY)
 		error(404, 'Not found');
 
 	// 같은 날짜는 같은 답이라 잠깐 캐시해도 된다. 자정에 바뀌는 것보다 짧게 잡는다.
