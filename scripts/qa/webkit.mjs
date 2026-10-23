@@ -19,7 +19,9 @@ const ok = (n, p, d = '') => { res.push(p); console.log(`${p ? '통과' : '실�
 const browser = await webkit.launch();
 const errs = [];
 async function ctxOf(device) {
-	const ctx = await browser.newContext({ ...devices[device] });
+	// 서비스 워커가 화면을 넘겨받으면 WebKit에서는 route가 GA · 광고를 못 막는다 — 10/14~22 운영 GA에
+	// 「고양시 Safari 320x568 · 390x844」로 대결 화면 방문이 하루 수십 건 찍혀 10/23 대결 판정을 흐렸다
+	const ctx = await browser.newContext({ ...devices[device], serviceWorkers: 'block' });
 	await ctx.route(/googletagmanager|google-analytics|googlesyndication|doubleclick|\/api\/stat|\/api\/push|\/api\/feedback/, (r) => r.fulfill({ status: 204, body: '' }));
 	const page = await ctx.newPage();
 	// 어느 화면 · 어느 코드에서 났는지까지 — 10/15에 메시지가 「int64」 한 단어뿐이라 원인을 못 짚었다
@@ -61,14 +63,16 @@ async function ctxOf(device) {
 // 3. 작은 아이폰(SE) · 아이폰 13 — 주요 화면 가로 넘침
 for (const dev of ['iPhone SE', 'iPhone 13']) {
 	const { ctx, page } = await ctxOf(dev);
-	const over = [];
+	const over = [], ga = [];
 	for (const p of ['/', '/games', '/trivia', '/chosung', '/matchstick', '/record', '/trivia/duel', '/matchstick/duel']) {
 		await page.goto(BASE + p, { waitUntil: 'load' });
 		await page.waitForTimeout(1300);
 		const o = await page.evaluate(() => document.documentElement.scrollWidth - innerWidth);
 		if (o > 1) over.push(`${p} +${o}px`);
+		if (await page.evaluate(() => !!window.google_tag_manager)) ga.push(p);
 	}
 	ok(`${dev} 주요 화면 가로 넘침 없음`, !over.length, over.join(', '));
+	ok(`${dev} GA가 안 실림(운영 숫자 오염 없음)`, !ga.length, ga.join(', '));
 	await ctx.close();
 }
 
