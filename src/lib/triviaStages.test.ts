@@ -6,7 +6,7 @@ import { starsByScore, isOpen, nextOpen, isTierEnd, loadProgress, buildTierStage
 describe('상식 단계 도전', () => {
 	it('새싹 19 · 쉬움 21 · 보통 19 · 어려움 17 · 고수 3(10/22 새싹 5 · 고수 10 추가), 판마다 5문제, 겹침 없음', () => {
 		const per = [1, 2, 3, 4, 5].map((t) => TRIVIA_STAGES.filter((s) => s.tier === t).length);
-		expect(per).toEqual([19, 21, 19, 17, 3]);
+		expect(per).toEqual([20, 21, 19, 17, 4]);
 		const all = TRIVIA_STAGES.flatMap((s) => s.ids);
 		expect(TRIVIA_STAGES.every((s) => s.ids.length === STAGE_SIZE)).toBe(true);
 		expect(new Set(all).size).toBe(all.length);
@@ -69,8 +69,8 @@ describe('단계 공통 규칙', () => {
 		expect(nextOpen(TRIVIA_STAGES, {}, 2)).toBe('2-1');
 	});
 	it('단계 끝 판 — 그 단계에 뒤 판이 없으면 끝', () => {
-		expect(isTierEnd(TRIVIA_STAGES, '1-19')).toBe(true);
-		expect(isTierEnd(TRIVIA_STAGES, '1-18')).toBe(false);
+		expect(isTierEnd(TRIVIA_STAGES, '1-20')).toBe(true);
+		expect(isTierEnd(TRIVIA_STAGES, '1-19')).toBe(false);
 	});
 });
 

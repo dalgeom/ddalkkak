@@ -399,6 +399,9 @@ export const DISCOVER_TIERS: Readonly<Record<string, Tier>> = {
 	'delivery-free': 1, // 10/22 새로 · 배달비, 19000원어치가 2만 원어치보다 비쌈
 	'cup-stack': 1, // 10/22 새로 · 종이컵은 포개져서 하나에 1cm
 	'grid-diagonal-op': 5, // 10/22 새로 · 모눈 대각선이 지나는 칸, a+b−최대공약수
+	'school-grade': 1, // 10/23 새로 · 몇 해째 → 학년(6 · 3 · 3에서 1로)
+	'escalator-stopped': 5, // 10/23 새로 · 멈춘 에스컬레이터, 빠르기를 빼야 60초
+	'track-lane-stagger': 5, // 10/23 새로 · 트랙 출발선, 반원 둘 = 원 하나라 2π × 레인 폭
 };
 
 /**
