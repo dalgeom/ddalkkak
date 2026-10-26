@@ -23,7 +23,8 @@ const ALL = [
 	['flow', '흐름 37개 — 데일리 완주 · 결과 · 재방문 · 유형별 · 기록 · 탭'],
 	['sheet', '아래 시트 · 스플래시 — 실제 터치로 끌기 · 튕기기 · 뒤로가기 · 홈 바'],
 	['lock', '시트 열린 동안 뒤 화면 스크롤 잠금'],
-	['webkit', '아이폰 엔진(WebKit) — 깜빡임 · 스플래시 · 작은 화면 넘침']
+	['webkit', '아이폰 엔진(WebKit) — 깜빡임 · 스플래시 · 작은 화면 넘침'],
+	['show', '초성 퀴즈 띄우기 — 화면 덮기 · 초성 크기 · 리모컨 · 뒤로가기 · 입구']
 ];
 const oi = process.argv.indexOf('--only');
 const only = oi > 0 ? process.argv[oi + 1].split(',') : null;

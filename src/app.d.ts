@@ -6,6 +6,8 @@ declare global {
 		/** 시트가 열려 있으면 그 이름(BottomSheet — 뒤로가기로 닫기) */
 		interface PageState {
 			sheet?: string;
+			/** 초성 퀴즈 띄우기 진행 화면이 열려 있다(chosung/show — 뒤로가기로 닫기) */
+			show?: boolean;
 		}
 
 		/**

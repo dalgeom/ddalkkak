@@ -86,6 +86,11 @@
 
 	<section class="sec">
 		<h2 class="sh">다른 초성 퀴즈</h2>
+		<!-- 10/26 수업 · 모임 진행자용. 위 「나머지 N문제 풀기」 실험(11/9 판정)과 섞이지 않게 아래에 둔다 -->
+		<a class="show" href="/chosung/show?c={data.category.slug}" onclick={() => track('chosung_show_in_cat')}>
+			<b>{data.category.name} 초성, 화면에 띄워 다 같이</b>
+			<span>수업 · 모임에서 TV에 크게 띄우고 힌트 · 정답을 눌러 넘겨요</span>
+		</a>
 		<div class="cats">
 			{#each data.others as c (c.slug)}
 				<a class="cat" href="/chosung/{c.slug}">{c.title} <b>{c.count}</b></a>
@@ -220,6 +225,24 @@
 	}
 	.cat b {
 		color: var(--accent-text);
+	}
+	.show {
+		display: flex;
+		flex-direction: column;
+		gap: 2px;
+		margin-bottom: 10px;
+		padding: 13px 16px;
+		background: var(--panel);
+		border: 1px solid var(--border-strong);
+		border-radius: 14px;
+		text-decoration: none;
+		color: var(--text);
+		font-size: 14.5px;
+		word-break: keep-all;
+	}
+	.show span {
+		font-size: 13px;
+		color: var(--muted);
 	}
 	.cta {
 		display: flex;

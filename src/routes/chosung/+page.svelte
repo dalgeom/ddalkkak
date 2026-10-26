@@ -222,6 +222,13 @@
 				<a class="stagego" href="/chosung/stages">단계 지도 보기 <span class="arr" aria-hidden="true">→</span></a>
 			</section>
 
+			<!-- 10/26 초성 퀴즈 띄우기: 수업 · 모임에서 TV에 크게 띄워 다 같이 맞히는 진행 화면 -->
+			<section class="sec">
+				<h2 class="mh">화면에 띄우기</h2>
+				<p class="mp">수업이나 모임에서 TV · 프로젝터에 크게 띄워 다 같이 맞혀요. 힌트와 정답은 진행자가 눌러 넘겨요.</p>
+				<a class="stagego" href="/chosung/show" onclick={() => track('chosung_show_in_hub')}>띄우기 화면 열기 <span class="arr" aria-hidden="true">→</span></a>
+			</section>
+
 			<section class="sec" id="fields">
 				<h2 class="mh">분야 골라 풀기</h2>
 				<p class="mp">시간 제한 없이 계속 나옵니다. 푼 낱말은 한 바퀴 돌 때까지 다시 안 나와요.</p>
