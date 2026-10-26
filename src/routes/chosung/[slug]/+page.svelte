@@ -1,5 +1,6 @@
 <script lang="ts">
 	import OtherGames from '$lib/components/OtherGames.svelte';
+	import { track } from '$lib/analytics';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
@@ -29,7 +30,7 @@
 				<div class="fact"><b>{l.count}</b><span>{l.len}글자</span></div>
 			{/each}
 		</div>
-		<a class="cta top" href="/chosung?c={data.category.slug}">
+		<a class="cta top" href="/chosung?c={data.category.slug}" onclick={() => track('chosung_land_top')}>
 			{data.category.name} 초성 바로 풀기 <span aria-hidden="true">→</span>
 		</a>
 	</header>
@@ -50,7 +51,7 @@
 
 	<section class="sec">
 		<h2 class="sh">먼저 풀어 보세요 — 대표 {data.items.length}문제</h2>
-		<p class="sub">초성을 보고 떠올린 뒤 「정답 보기」를 누르세요. 나머지 {data.count - data.items.length}문제는 위 버튼에서 풉니다.</p>
+		<p class="sub">초성을 보고 떠올린 뒤 「정답 보기」를 누르세요. 나머지 {data.count - data.items.length}문제는 아래 버튼에서 풉니다.</p>
 		<ol class="list">
 			{#each data.items as q, i (q.word)}
 				<li class="q">
@@ -64,6 +65,10 @@
 				</li>
 			{/each}
 		</ol>
+		<!-- 네이버 검색으로 착지한 사람의 4분의 3이 위 버튼을 지나쳐 여기까지 읽고 나갔다(10/12~25 127명 중 32명만 풀이로) — 2026-10-26 -->
+		<a class="cta end" href="/chosung?c={data.category.slug}" onclick={() => track('chosung_land_end')}>
+			나머지 {data.count - data.items.length}문제 풀기 <span aria-hidden="true">→</span>
+		</a>
 	</section>
 
 	{#if data.collisions.length}
@@ -229,5 +234,8 @@
 		font-weight: 800;
 		text-decoration: none;
 		box-shadow: 0 5px 0 var(--accent-press);
+	}
+	.cta.end {
+		margin-top: 14px;
 	}
 </style>
