@@ -402,6 +402,9 @@ export const DISCOVER_TIERS: Readonly<Record<string, Tier>> = {
 	'school-grade': 1, // 10/23 새로 · 몇 해째 → 학년(6 · 3 · 3에서 1로)
 	'escalator-stopped': 5, // 10/23 새로 · 멈춘 에스컬레이터, 빠르기를 빼야 60초
 	'track-lane-stagger': 5, // 10/23 새로 · 트랙 출발선, 반원 둘 = 원 하나라 2π × 레인 폭
+	'riddle-gim': 1, // 10/26 새로 · 다의어 김, 김매기의 김이 잡풀
+	'square-cut-op': 5, // 10/26 새로 · ▣ 종이에서 큰 정사각형부터 잘라 내기, 유클리드 몫의 합
+	'tissue-roll': 5, // 10/26 새로 · 두루마리 휴지 두께 절반이면 남은 양 3/8, 고리 넓이
 };
 
 /**
