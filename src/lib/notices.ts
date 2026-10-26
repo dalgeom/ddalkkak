@@ -22,6 +22,14 @@ export interface Notice {
 
 export const NOTICES: Notice[] = [
 	{
+		id: '2026-10-26-chosung-show',
+		date: '2026-10-26',
+		title: '초성 퀴즈 화면에 띄우기',
+		body: '수업이나 모임에서 TV · 프로젝터에 초성을 크게 띄워 다 같이 맞혀요. 분야 · 문제 수 · 난이도를 고르면 누를 때마다 힌트와 정답이 나와요. 발표용 리모컨으로도 넘길 수 있어요.',
+		href: '/chosung/show',
+		cta: '띄우기 화면 열기'
+	},
+	{
 		id: '2026-10-21-match-solve',
 		date: '2026-10-21',
 		title: '성냥개비 정답 찾기',

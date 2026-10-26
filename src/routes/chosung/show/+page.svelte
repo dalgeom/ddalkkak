@@ -207,7 +207,7 @@
 		</ol>
 		<p class="deep">
 			노트북을 TV에 연결했다면 전체 화면 버튼(또는 F 키)을 누르세요. 발표용 리모컨의 다음 · 이전 버튼도 그대로 먹어요.
-			휴대폰을 화면 공유로 띄울 때는 가로로 눕히면 초성이 더 크게 나와요. 진행을 멈추려면 ✕나 뒤로가기를 누르면 설정 화면으로 돌아와요.
+			휴대폰을 화면 공유로 띄울 때는 가로로 눕히면 초성이 더 크게 나와요. 진행을 멈추려면 「끝내기」나 뒤로가기를 누르면 설정 화면으로 돌아와요.
 		</p>
 	</section>
 
@@ -251,8 +251,8 @@
 		<div class="bar">
 			<span class="pos">{ended ? '끝' : `${pos + 1} / ${deck.length}`} · {catName}</span>
 			<span class="tools">
-				{#if canFull}<button class="tool" onclick={full} aria-label="전체 화면">⛶</button>{/if}
-				<button class="tool" onclick={close} aria-label="진행 끝내기">✕</button>
+				{#if canFull}<button class="tool" onclick={full}>전체 화면</button>{/if}
+				<button class="tool" onclick={close}>끝내기</button>
 			</span>
 		</div>
 
@@ -428,14 +428,17 @@
 		gap: 6px;
 	}
 	.tool {
-		width: 44px;
-		height: 44px;
+		min-height: 44px;
+		padding: 0 14px;
 		border-radius: 12px;
 		border: 1px solid var(--border-strong);
 		background: var(--panel);
 		color: var(--text);
-		font-size: 18px;
+		font: inherit;
+		font-size: max(14px, 2.4vh);
+		font-weight: 800;
 		cursor: pointer;
+		white-space: nowrap;
 	}
 	.board {
 		flex: 1;

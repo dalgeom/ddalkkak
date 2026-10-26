@@ -43,7 +43,8 @@
 			sub: [
 				{ label: '오늘의 초성', href: '/chosung' },
 				{ label: '단계 도전', href: '/chosung/stages' },
-				{ label: '분야 골라 풀기', href: '/chosung#fields' }
+				{ label: '분야 골라 풀기', href: '/chosung#fields' },
+				{ label: '화면에 띄우기', href: '/chosung/show' }
 			]
 		},
 		{
