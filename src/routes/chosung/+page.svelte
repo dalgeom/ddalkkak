@@ -331,6 +331,13 @@
 				<!-- 초성 분야로 검색해 들어온 세션은 2%만 오늘의 10문제를 시작했다(10/1~10/13) — 다섯 문제째에 한 번 -->
 				{#if freeWins === 5 && status === 'won'}
 					<DailyNext pitch="다음은 오늘의 10문제 어때요? 상식 · 발견형 · 성냥개비가 섞여 나와요" />
+				{:else if todayWord && !todayDone && !(freeWins === 3 && status === 'won')}
+					<!-- 분야 쪽(?c=)에서 곧장 풀이로 들어온 사람은 메뉴의 「오늘의 초성」을 못 본다 — 다시 올 이유(매일 새 문제 · 연속)를 여기서 알린다. 2026-10-27 -->
+					<button class="todaynudge" onclick={() => { track('chosung_free_today'); start({ type: 'today' }); }}>
+						<span class="tn-k">오늘의 초성 · {categoryBySlug(todayWord.category)?.name}</span>
+						<span class="tn-c">{chosungOf(todayWord.word)}</span>
+						<span class="tn-s">하루 한 문제, 자정마다 바뀌어요 · 풀어 보기 →</span>
+					</button>
 				{/if}
 				<button class="btn wide" onclick={next}>다음 문제 →</button>
 				<button class="btn ghost wide" onclick={toMenu}>분야 선택으로</button>
@@ -391,6 +398,35 @@
 	.t-done {
 		color: var(--text);
 		font-weight: 700;
+	}
+	.todaynudge {
+		display: grid;
+		gap: 2px;
+		width: 100%;
+		margin: 2px 0 10px;
+		padding: 12px 14px;
+		text-align: left;
+		background: var(--panel-2);
+		border: 1px dashed var(--border-strong);
+		border-radius: 12px;
+		color: var(--text);
+		font: inherit;
+		cursor: pointer;
+	}
+	.tn-k {
+		font-size: 12.5px;
+		font-weight: 700;
+		color: var(--accent-text);
+	}
+	.tn-c {
+		font-size: 22px;
+		font-weight: 800;
+		letter-spacing: 4px;
+	}
+	.tn-s {
+		font-size: 13px;
+		color: var(--muted);
+		word-break: keep-all;
 	}
 	.t-after {
 		margin: 4px 0 0;
