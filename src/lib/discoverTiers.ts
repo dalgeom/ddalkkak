@@ -408,6 +408,9 @@ export const DISCOVER_TIERS: Readonly<Record<string, Tier>> = {
 	'club-sseuda': 1, // 10/27 새로 · 「쓰다」 착용물 클럽, 우산도 쓴다
 	'count-game-21': 5, // 10/27 새로 · 2~5개씩 세기 놀이, 1개 금지라 이기는 자리가 한 바퀴에 둘 → 6개
 	'kr-word-ring': 1, // 10/27 새로 · 끝말잇기 고리가 닫히면 ○
+	'club-cry-name': 1, // 10/28 새로 · 이름에 울음소리가 든 동물 클럽
+	'updown-64': 5, // 10/28 새로 · 업다운 1~64 최악 7번(2^k − 1)
+	'strip-fold-cut': 5, // 10/28 새로 · 종이띠 3번 접어 한 번 자르기 → 9조각(2^n + 1)
 };
 
 /**
