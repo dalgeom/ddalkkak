@@ -325,7 +325,8 @@
 			(x) => p.fieldOfChip(x.chip),
 			(x) => x.category ?? '기타',
 			bankSizesAt,
-			isOpener
+			isOpener,
+			(i) => eqs[i].solution
 		);
 		queue = picks.map((pick) => ({
 			kind: pick.kind,
@@ -496,6 +497,13 @@
 			);
 		else {
 			wrongAttempts += 1;
+			// 처음 고른 오답만 보낸다 — 「가장 많이 고른 오답」 재료(api/stat). 두 번째는 소거가 섞여 판단이 흐려진다
+			if (wrongAttempts === 1)
+				fetch('/api/stat', {
+					method: 'POST',
+					headers: { 'content-type': 'application/json' },
+					body: JSON.stringify({ id: current.problem.id, wrongPick: i })
+				}).catch(() => {});
 			// 한 번 더 고를 기회를 주되, 남은 보기가 정답 하나뿐이면 주지 않는다.
 			// O/X 문제(보기 2개)에서 재시도를 주면 소거법으로 반드시 맞아 절대 틀릴 수 없었다.
 			if (wrongAttempts >= maxWrong(current.problem.choices?.length))

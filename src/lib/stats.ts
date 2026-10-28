@@ -34,6 +34,16 @@ export function parseTally(raw: string | null): Tally {
 	}
 }
 
+/** 보기 번호별 첫 오답 수(c:<id>). 깨진 값은 빈 칸으로 — 숫자 아닌 것은 0 */
+export function parsePicks(raw: string | null): number[] {
+	try {
+		const v = JSON.parse(raw ?? '[]');
+		return Array.isArray(v) ? v.slice(0, 10).map((x) => (Number.isFinite(Number(x)) && Number(x) > 0 ? Number(x) : 0)) : [];
+	} catch {
+		return [];
+	}
+}
+
 export function applyResult(t: Tally, correct: boolean): Tally {
 	return { n: t.n + 1, ok: t.ok + (correct ? 1 : 0) };
 }

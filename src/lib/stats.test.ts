@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { tallyKey, parseTally, applyResult, accuracyOf, accuracyLabel, MIN_SAMPLE } from './stats';
+import { tallyKey, parseTally, parsePicks, applyResult, accuracyOf, accuracyLabel, MIN_SAMPLE } from './stats';
 
 describe('정답률 집계', () => {
 	it('키는 문제 id 하나당 한 칸', () => {
@@ -31,5 +31,12 @@ describe('정답률 집계', () => {
 		expect(accuracyLabel(12)).toContain('다섯 명 중 한 명도');
 		expect(accuracyLabel(88)).toContain('대부분 맞히는');
 		expect(accuracyLabel(50)).toBe('이 문제, 정답률 50%');
+	});
+
+	it('오답 보기 칸 — 빈 칸(null)은 0, 깨진 값은 빈 배열', () => {
+		expect(parsePicks(null)).toEqual([]);
+		expect(parsePicks('oops')).toEqual([]);
+		expect(parsePicks('[null,null,2]')).toEqual([0, 0, 2]);
+		expect(parsePicks('[-1,"x",3]')).toEqual([0, 0, 3]);
 	});
 });

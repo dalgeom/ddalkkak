@@ -1,4 +1,4 @@
-// 딸깍 점검(npm run qa)용 헤드리스 크롬. GA·광고는 이름 풀이에서 막고, 우리 서버 기록(/api/stat·/api/push)은 가짜 204로 가로챈다.
+// 딸깍 점검(npm run qa)용 헤드리스 크롬. GA·광고는 이름 풀이에서 막고, 우리 서버 기록(/api/stat·/api/push·/api/msolve)은 가짜 204로 가로챈다.
 import { createRequire } from 'node:module';
 import { spawn } from 'node:child_process';
 import { mkdirSync, existsSync, rmSync } from 'node:fs';
@@ -72,7 +72,7 @@ export async function launch(tag) {
 	});
 	const stats = [];
 	await send('Page.enable'); await send('Runtime.enable'); await send('Log.enable'); await send('Network.enable');
-	await send('Fetch.enable', { patterns: [{ urlPattern: '*/api/stat*' }, { urlPattern: '*/api/push*' }] });
+	await send('Fetch.enable', { patterns: [{ urlPattern: '*/api/stat*' }, { urlPattern: '*/api/push*' }, { urlPattern: '*/api/msolve*' }] });
 	const api = {
 		send, errors, stats,
 		setLabel: (l) => (label = l),

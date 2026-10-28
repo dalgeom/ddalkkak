@@ -22,7 +22,7 @@ async function ctxOf(device) {
 	// 서비스 워커가 화면을 넘겨받으면 WebKit에서는 route가 GA · 광고를 못 막는다 — 10/14~22 운영 GA에
 	// 「고양시 Safari 320x568 · 390x844」로 대결 화면 방문이 하루 수십 건 찍혀 10/23 대결 판정을 흐렸다
 	const ctx = await browser.newContext({ ...devices[device], serviceWorkers: 'block' });
-	await ctx.route(/googletagmanager|google-analytics|googlesyndication|doubleclick|\/api\/stat|\/api\/push|\/api\/feedback/, (r) => r.fulfill({ status: 204, body: '' }));
+	await ctx.route(/googletagmanager|google-analytics|googlesyndication|doubleclick|\/api\/stat|\/api\/push|\/api\/feedback|\/api\/msolve/, (r) => r.fulfill({ status: 204, body: '' }));
 	const page = await ctx.newPage();
 	// 어느 화면 · 어느 코드에서 났는지까지 — 10/15에 메시지가 「int64」 한 단어뿐이라 원인을 못 짚었다
 	page.on('pageerror', (e) => errs.push(`[${device}] ${page.url().replace(BASE, '')} ${e.message} @ ${String(e.stack || '').split(/\r?\n/).slice(0, 3).join(' | ')}`));

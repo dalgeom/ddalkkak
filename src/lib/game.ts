@@ -325,6 +325,15 @@ export const EASY_FIRST_DAY = 20748;
  * 그날 전개도 둘 중 십자 모양(cubeStages.ts의 쉬움, 정답률 약 85%)을 앞에 세운다. 뽑기는 그대로다.
  */
 export const CUBE_STAIR_DAY = 20749;
+/**
+ * 성냥 둘이 같은 답 — 2026-10-29(KST)부터 막는다. 오늘(20754) 세트는 건드리지 않는다.
+ *
+ * 왜: 10/28에 내일 것을 미리 풀어 보니 3번(8 + 3 = 15)과 7번(6 - 9 = 16)의 답이 둘 다 6 + 9 = 15였다.
+ * 두 번째는 앞 문제의 답을 그대로 적으면 끝난다. 이날부터 뒤에 나온 같은 답을 순열에서 멀리(MATCH_SWAP_AHEAD칸)
+ * 떨어진 다른 답 문제로 바꾼다. 커서 근처를 집으면 다음 날 문제와 겹친다. 답을 모르면(matchSolOf 없음) 그대로 둔다.
+ */
+export const MATCH_DEDUP_DAY = 20755;
+const MATCH_SWAP_AHEAD = 185;
 const crossNet = (i: number) => problemAt(i).net.rows.map((r) => (r.match(/#/g) || []).length).join('-') === '1-4-1';
 
 function laneOrder(d: number, kinds: DailyKind[]): DailyKind[] {
@@ -677,7 +686,8 @@ export function buildDailySetStable<D, T>(
 	fieldOf: (d: D) => string,
 	catOf: (t: T) => string,
 	sizesAt: BankSizesAt,
-	openerOf: (d: D, day?: number, maxScore?: number) => boolean
+	openerOf: (d: D, day?: number, maxScore?: number) => boolean,
+	matchSolOf?: (i: number) => string
 ): DailyPick[] {
 	const sizes = sizesAt(dayNum);
 	if (dayNum < PICK_V2_START_DAY) {
@@ -756,6 +766,21 @@ export function buildDailySetStable<D, T>(
 		undefined,
 		20260303
 	);
+	// 성냥 같은 답(MATCH_DEDUP_DAY 주석) — 뒤에 나온 쪽을 멀리 떨어진 다른 답으로
+	if (d >= MATCH_DEDUP_DAY && matchSolOf) {
+		const order = seededOrder(matchTotal, 20260303);
+		const seen = new Set<string>();
+		let p = cursorAt('match', d) + MATCH_SWAP_AHEAD;
+		for (let k = 0; k < mAll.length; k++) {
+			if (!seen.has(matchSolOf(mAll[k]))) {
+				seen.add(matchSolOf(mAll[k]));
+				continue;
+			}
+			while (seen.has(matchSolOf(order[p % matchTotal])) || mAll.includes(order[p % matchTotal])) p++;
+			mAll[k] = order[p % matchTotal];
+			seen.add(matchSolOf(mAll[k]));
+		}
+	}
 	const cStart = cursorAt('cube', d);
 	const cAll = Array.from({ length: takeAt('cube', d) }, (_, i) => (cStart + i) % CUBE_TOTAL);
 	// 전개도 계단(CUBE_STAIR_DAY 주석) — 정규 칸 안에서만 십자 모양을 앞으로. 같은 모양끼리는 원래 순서

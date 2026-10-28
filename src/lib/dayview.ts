@@ -58,7 +58,8 @@ export function assembleDayQueue(day: number): DayQueueItem[] {
 		(x) => fieldOfChip(x.chip),
 		(x) => x.category ?? '기타',
 		bankSizesAt,
-		isOpener
+		isOpener,
+		(i) => eqs[i].solution
 	);
 	return picks.map((p) => ({
 		kind: p.kind,

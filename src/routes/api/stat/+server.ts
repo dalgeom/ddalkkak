@@ -1,5 +1,5 @@
 import { json } from '@sveltejs/kit';
-import { tallyKey, parseTally, applyResult, accuracyOf, type Tally } from '$lib/stats';
+import { tallyKey, parseTally, parsePicks, applyResult, accuracyOf, type Tally } from '$lib/stats';
 import type { RequestHandler } from './$types';
 
 /**
@@ -11,10 +11,23 @@ import type { RequestHandler } from './$types';
  */
 export const POST: RequestHandler = async ({ request, platform }) => {
 	const kv = platform?.env?.STATS;
-	let id: unknown, correct: unknown;
+	let id: unknown, correct: unknown, wrongPick: unknown;
 	try {
-		({ id, correct } = await request.json());
+		({ id, correct, wrongPick } = await request.json());
 	} catch {
+		return json({ accuracy: null });
+	}
+	// 객관식에서 처음 고른 오답 보기 번호(10/28) — 「가장 많이 고른 오답」 줄의 재료. 표본이 30을 넘기 전에는 보여 주지 않는다
+	if (typeof id === 'string' && id && id.length <= 64 && Number.isInteger(wrongPick) && (wrongPick as number) >= 0 && (wrongPick as number) < 10) {
+		if (!kv) return json({ accuracy: null });
+		const key = `c:${id}`;
+		try {
+			const counts = parsePicks(await kv.get(key));
+			counts[wrongPick as number] = (counts[wrongPick as number] ?? 0) + 1;
+			await kv.put(key, JSON.stringify(counts));
+		} catch {
+			/* 곁가지 — 조용히 넘어간다 */
+		}
 		return json({ accuracy: null });
 	}
 	if (typeof id !== 'string' || !id || id.length > 64 || typeof correct !== 'boolean') {
@@ -46,15 +59,22 @@ export const GET: RequestHandler = async ({ platform, setHeaders }) => {
 	if (!kv) return json({ items: {}, total: 0 });
 
 	const items: Record<string, Tally> = {};
+	const picks: Record<string, number[]> = {};
 	try {
-		let cursor: string | undefined;
-		do {
-			const page = await kv.list({ prefix: 'p:', limit: 1000, cursor });
-			for (const k of page.keys) items[k.name.slice(2)] = parseTally(await kv.get(k.name));
-			cursor = page.list_complete ? undefined : page.cursor;
-		} while (cursor);
+		for (const prefix of ['p:', 'c:']) {
+			let cursor: string | undefined;
+			do {
+				const page = await kv.list({ prefix, limit: 1000, cursor });
+				for (const k of page.keys) {
+					const raw = await kv.get(k.name);
+					if (prefix === 'p:') items[k.name.slice(2)] = parseTally(raw);
+					else picks[k.name.slice(2)] = parsePicks(raw);
+				}
+				cursor = page.list_complete ? undefined : page.cursor;
+			} while (cursor);
+		}
 	} catch {
-		return json({ items, total: Object.keys(items).length, partial: true });
+		return json({ items, picks, total: Object.keys(items).length, partial: true });
 	}
-	return json({ items, total: Object.keys(items).length });
+	return json({ items, picks, total: Object.keys(items).length });
 };

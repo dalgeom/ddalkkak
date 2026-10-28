@@ -113,6 +113,15 @@
 				};
 			}
 		}
+		// 예시 단추는 우리가 고른 식이라 「많이 찾는 식」에 넣지 않는다(api/msolve)
+		if (from !== 'example') {
+			const found = result?.kind !== 'none';
+			fetch('/api/msolve', {
+				method: 'POST',
+				headers: { 'content-type': 'application/json' },
+				body: JSON.stringify({ text: p.text, rule, found })
+			}).catch(() => {});
+		}
 		requestAnimationFrame(() => resultEl?.scrollIntoView({ behavior: 'smooth', block: 'start' }));
 	}
 
