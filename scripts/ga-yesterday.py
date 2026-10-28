@@ -292,6 +292,7 @@ NEW = [
     ("msolve_run", "성냥 정답 찾기 실행"),
     ("msolve_found", "  └ 답 찾음"),
     ("msolve_none", "  └ 그 규칙으로는 답 없음"),
+    ("msolve_none_shown", "    └ 다른 규칙 답을 바로 펼쳐 보임(10/28~)"),
     ("msolve_alt", "  └ 다른 규칙으로 다시 찾음"),
     ("msolve_example", "  └ 많이 찾는 식 눌러 봄"),
     ("msolve_bad", "  └ 식을 못 읽음"),

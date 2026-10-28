@@ -46,7 +46,14 @@
 
 	type Result =
 		| { kind: 'found'; text: string; cells: Cell[]; rule: MatchRule; list: Solution[] }
-		| { kind: 'none' | 'already'; text: string; cells: Cell[]; rule: MatchRule; others: { rule: MatchRule; n: number }[] };
+		| {
+				kind: 'none' | 'already';
+				text: string;
+				cells: Cell[];
+				rule: MatchRule;
+				shown?: { rule: MatchRule; list: Solution[] };
+				others: { rule: MatchRule; n: number }[];
+		  };
 	let result = $state<Result | null>(null);
 	let resultEl = $state<HTMLElement>();
 
@@ -80,8 +87,8 @@
 		track('msolve_run');
 		const others = () =>
 			RULES.filter((r) => r !== rule)
-				.map((r) => ({ rule: r, n: solve(p.cells, r).length }))
-				.filter((o) => o.n > 0);
+				.map((r) => ({ rule: r, list: solve(p.cells, r) }))
+				.filter((o) => o.list.length);
 		if (isTrueText(p.text)) {
 			track('msolve_already');
 			result = { kind: 'already', text: p.text, cells: p.cells, rule, others: [] };
@@ -92,7 +99,18 @@
 				result = { kind: 'found', text: p.text, cells: p.cells, rule, list };
 			} else {
 				track('msolve_none');
-				result = { kind: 'none', text: p.text, cells: p.cells, rule, others: others() };
+				// 답이 있는 첫 규칙의 답은 바로 펼친다(10/28) — 10/27에 한 사람이 5+9=3을 1개 옮기기로 26번 눌렀다.
+				// 다시 눌러도 같은 「답 없음」이라 반응이 없는 줄 알았고, 아래 「2개 옮기기 · 답 5개 보기」는 끝내 안 눌렀다
+				const [first, ...rest] = others();
+				if (first) track('msolve_none_shown');
+				result = {
+					kind: 'none',
+					text: p.text,
+					cells: p.cells,
+					rule,
+					shown: first,
+					others: rest.map((o) => ({ rule: o.rule, n: o.list.length }))
+				};
 			}
 		}
 		requestAnimationFrame(() => resultEl?.scrollIntoView({ behavior: 'smooth', block: 'start' }));
@@ -215,8 +233,23 @@
 				<p class="sub">{pretty(result.text)}는 성냥을 옮기지 않아도 맞아요. 식을 다시 한번 봐 주세요.</p>
 			{:else}
 				<h2 class="sh">성냥 {RULE_LABEL[result.rule]}로는 답이 없어요</h2>
+				{#if result.shown}
+					<p class="sub">
+						성냥 <b>{RULE_LABEL[result.shown.rule]}</b>로는 답이 {result.shown.list.length}개 있어요. 문제에 적힌 규칙이 이쪽인지
+						확인해 보세요.
+					</p>
+					<div class="answers">
+						{#each result.shown.list as s (s.text)}
+							<div class="ans">
+								<MatchEquation cells={s.cells} added={s.added} removed={s.removed} label={'답 ' + pretty(s.text)} />
+								<p class="at">{pretty(s.text)}</p>
+								<p class="ch">{changeLine(result.cells, s.cells)}</p>
+							</div>
+						{/each}
+					</div>
+				{/if}
 				{#if result.others.length}
-					<p class="sub">다른 규칙으로는 답이 있어요. 문제에 적힌 규칙을 한번 확인해 보세요.</p>
+					<p class="sub">{result.shown ? '그 밖에 이 규칙으로도 답이 있어요.' : '다른 규칙으로는 답이 있어요. 문제에 적힌 규칙을 한번 확인해 보세요.'}</p>
 					<div class="alts">
 						{#each result.others as o (o.rule)}
 							<button type="button" class="alt" onclick={() => tryRule(o.rule)}>

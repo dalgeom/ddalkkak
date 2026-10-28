@@ -446,11 +446,13 @@ m = await b.ev(`${typeEq('6-6=8')}
 	[...document.querySelectorAll('.go')].find(x=>x.textContent.trim()==='정답 찾기').click(); await new Promise(r=>setTimeout(r,600));
 	const head=document.querySelector('.res .sh')?.textContent.trim();
 	const alts=[...document.querySelectorAll('.alt')].map(x=>x.textContent.replace(/\\s+/g,' ').trim());
-	[...document.querySelectorAll('.alt')].find(x=>/2개 옮기기/.test(x.textContent))?.click(); await new Promise(r=>setTimeout(r,800));
-	return { stale, head, alts, after: document.querySelectorAll('.ans').length, on: document.querySelector('.rule.on')?.textContent.trim() };`);
+	const sub=document.querySelector('.res .sub')?.textContent.trim(), shown=document.querySelectorAll('.ans').length;
+	[...document.querySelectorAll('.alt')].find(x=>/1개 빼기/.test(x.textContent))?.click(); await new Promise(r=>setTimeout(r,800));
+	return { stale, head, sub, shown, alts, after: [...document.querySelectorAll('.ans .at')].map(x=>x.textContent.trim()).join(), on: document.querySelector('.rule.on')?.textContent.trim() };`);
 ok('식을 바꾸면 지난 답은 사라짐', m.stale === 0, 'stale=' + m.stale);
-ok('6−6=8 → 1개 옮기기로는 답 없음 · 다른 규칙 제안', /답이 없어요/.test(m.head) && m.alts.some((a) => /2개 옮기기/.test(a)), JSON.stringify(m));
-ok('제안 누르면 2개 옮기기로 답 4개', m.after === 4 && m.on === '2개 옮기기', JSON.stringify(m));
+ok('6−6=8 → 1개 옮기기로는 답 없음 · 2개 옮기기 답 4개를 바로 펼침', /답이 없어요/.test(m.head) && /2개 옮기기/.test(m.sub) && m.shown === 4, JSON.stringify(m));
+ok('펼친 규칙은 버튼에서 빠지고 나머지(1개 빼기)만 남음', m.alts.length === 1 && /1개 빼기/.test(m.alts[0]), JSON.stringify(m.alts));
+ok('남은 버튼 누르면 1개 빼기로 6 − 6 = 0', m.after === '6 − 6 = 0' && m.on === '1개 빼기', JSON.stringify(m));
 m = await b.ev(`${typeEq('1-3=2')}
 	[...document.querySelectorAll('.go')].find(x=>x.textContent.trim()==='정답 찾기').click(); await new Promise(r=>setTimeout(r,800));
 	return document.querySelector('.res')?.innerText.replace(/\\s+/g,' ').slice(0,80);`);
