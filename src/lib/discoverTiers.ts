@@ -411,6 +411,9 @@ export const DISCOVER_TIERS: Readonly<Record<string, Tier>> = {
 	'club-cry-name': 1, // 10/28 새로 · 이름에 울음소리가 든 동물 클럽
 	'updown-64': 5, // 10/28 새로 · 업다운 1~64 최악 7번(2^k − 1)
 	'strip-fold-cut': 5, // 10/28 새로 · 종이띠 3번 접어 한 번 자르기 → 9조각(2^n + 1)
+	'soccer-unbeaten-9': 1, // 10/29 새로 · 무패라는 한 마디가 3승 2패를 지운다
+	'cal-five-weekdays': 4, // 10/29 새로 · 365 − 12 × 28 = 29
+	'ladder-reverse-10': 5, // 10/29 새로 · 뒤바뀐 쌍마다 가로줄 하나
 };
 
 /**
