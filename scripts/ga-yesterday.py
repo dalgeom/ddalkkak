@@ -438,6 +438,10 @@ if any(k.startswith("leave_p") for k in ev):
             print(f"        {p:>2}번   {칸[0]:>6} {칸[1]:>6} {칸[2]:>7}")
     돌아옴 = sum(ev[k][0] for k in ev if k.startswith("back_p"))
     print(f"        (잠깐 나갔다 돌아온 {돌아옴}회는 뺐다)")
+    # 10/29부터 1번 처음봄은 떠나기 전 머문 시간도 찍는다(analytics.ts openDwellEventName). 돌아온 사람도 포함된다.
+    머묾 = [ev[f"p1_open_{b}"][1] for b in ("s3", "s10", "s30", "long")]
+    if any(머묾):
+        print(f"        1번 처음봄 머문 시간  3초 안 {머묾[0]} · 3~10초 {머묾[1]} · 10~30초 {머묾[2]} · 30초 넘게 {머묾[3]}")
 
 # 10문제를 /api/day로 받았는지, 실패해서 문제은행 전체(gz 174KB)로 떨어졌는지.
 # 9/3에 앞의 길을 냈다 — full이 계속 잡히면 엔드포인트가 어딘가에서 막히는 것이다.

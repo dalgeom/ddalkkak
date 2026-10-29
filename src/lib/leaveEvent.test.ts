@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { leaveEventName } from './analytics';
+import { leaveEventName, openDwellEventName } from './analytics';
 
 describe('데일리 이탈 지점 — 자리와 상태를 이벤트 이름에 싣는다', () => {
 	it('몇 번째 문제인지는 1부터 센다', () => {
@@ -16,6 +16,14 @@ describe('데일리 이탈 지점 — 자리와 상태를 이벤트 이름에 �
 
 	it('돌아온 사람은 같은 꼴의 back 이름으로 짝을 맞춘다 — 순수 이탈은 둘의 차이다', () => {
 		expect(leaveEventName('back', 4, { judged: false, tried: true })).toBe('back_p5_tried');
+	});
+
+	it('1번 처음봄 머문 시간은 3초 · 10초 · 30초 · 그 너머로 가른다', () => {
+		expect(openDwellEventName(0)).toBe('p1_open_s3');
+		expect(openDwellEventName(2999)).toBe('p1_open_s3');
+		expect(openDwellEventName(3000)).toBe('p1_open_s10');
+		expect(openDwellEventName(29999)).toBe('p1_open_s30');
+		expect(openDwellEventName(30000)).toBe('p1_open_long');
 	});
 
 	it('자리가 범위를 벗어나도 이름이 망가지지 않는다', () => {

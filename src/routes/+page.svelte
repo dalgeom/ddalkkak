@@ -30,7 +30,7 @@
 		type DailyKind
 	} from '$lib/game';
 	import { shareResult, outcomeMessage } from '$lib/shareCard';
-	import { ctaTrack, takeGoDaily, leaveEventName } from '$lib/analytics';
+	import { ctaTrack, takeGoDaily, leaveEventName, openDwellEventName } from '$lib/analytics';
 	import { parseChallenge, judgeChallenge, type Challenge } from '$lib/challenge';
 	import { teaserOf, type Teaser } from '$lib/teaser';
 	import { isOpener } from '$lib/opener';
@@ -656,6 +656,7 @@
 	 * 푸는 도중 화면이 가려지거나 떠나는 순간 자리와 상태를 찍고, 돌아오면 같은 꼴의 back을 찍는다.
 	 * leftAt이 찍어 둔 이름이다 — 가려짐과 pagehide가 연달아 와도 한 번만, 돌아왔을 때만 짝을 맞춘다. */
 	let leftAt: { pos: number; judged: boolean; tried: boolean } | null = null;
+	let dwellSent = false;
 
 	function markLeave() {
 		if (phase !== 'play' || leftAt) return;
@@ -666,6 +667,11 @@
 			tried: wrongAttempts > 0 || hintsUsed > 0 || mMisses > 0 || !!answerValue.trim() || !!mPicked
 		};
 		track(leaveEventName('leave', leftAt.pos, leftAt));
+		// 1번 처음봄은 머문 시간도 — 돌아왔다 다시 떠나면 startedAt에 자리 비운 시간이 섞이니 처음 한 번만
+		if (pos === 0 && !leftAt.judged && !leftAt.tried && !dwellSent) {
+			dwellSent = true;
+			track(openDwellEventName(Date.now() - startedAt));
+		}
 	}
 
 	function markBack() {
