@@ -291,6 +291,7 @@
 				</a>
 			{/each}
 		</div>
+		<a class="cta more" href="/matchstick/answer">자주 찾는 식 정답과 풀이 모음 <span aria-hidden="true">→</span></a>
 	</section>
 
 	<section class="sec">
@@ -568,6 +569,9 @@
 	}
 	.cta:hover {
 		background: var(--panel-2);
+	}
+	.cta.more {
+		margin-top: 10px;
 	}
 
 	.exs {

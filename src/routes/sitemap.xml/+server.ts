@@ -3,6 +3,7 @@ import { TRIVIA_CATEGORIES } from '$lib/triviaCategories';
 import { DISCOVER_FIELD_META } from '$lib/discoverFields';
 import { MATCH_KINDS } from '$lib/matchstickKinds';
 import { MATCH_LEVELS } from '$lib/matchstickLevels';
+import { MATCH_ANSWERS, answerSlug } from '$lib/matchAnswers';
 import { CHOSUNG_CATEGORIES } from '$lib/data/chosung';
 import { ARTICLES } from '$lib/articles';
 import type { RequestHandler } from './$types';
@@ -36,6 +37,8 @@ const PAGES: { path: string; freq: string; priority: string }[] = [
 	{ path: '/matchstick/guide', freq: 'monthly', priority: '0.8' },
 	// 성냥 정답 찾기(10/21) — 식을 검색해 들어오는 사람용 도구. 게임 화면과 달리 설명 글과 자주 찾는 식의 답이 HTML에 있다
 	{ path: '/matchstick/solve', freq: 'monthly', priority: '0.7' },
+	// 자주 찾는 성냥 식 정답 모음(10/29) — 식마다 답 그림과 손으로 쓴 풀이가 HTML에 있다
+	{ path: '/matchstick/answer', freq: 'monthly', priority: '0.7' },
 	// 초성 퀴즈 띄우기(10/26) — 수업 · 모임 진행 도구. 진행 요령 글이 HTML에 있다
 	{ path: '/chosung/show', freq: 'monthly', priority: '0.7' },
 	{ path: '/cubenet/guide', freq: 'monthly', priority: '0.8' },
@@ -74,11 +77,16 @@ export const GET: RequestHandler = () => {
 		freq: 'monthly',
 		priority: '0.7'
 	}));
+	const matchAnswers = MATCH_ANSWERS.map((a) => ({
+		path: `/matchstick/answer/${answerSlug(a.q)}`,
+		freq: 'monthly',
+		priority: '0.6'
+	}));
 	const articles = [
 		{ path: '/read', freq: 'weekly', priority: '0.7' },
 		...ARTICLES.map((a) => ({ path: `/read/${a.slug}`, freq: 'monthly', priority: '0.7' }))
 	];
-	const all = [...PAGES, ...triviaCats, ...discoverFields, ...matchKinds, ...chosungCats, ...articles];
+	const all = [...PAGES, ...triviaCats, ...discoverFields, ...matchKinds, ...matchAnswers, ...chosungCats, ...articles];
 	const body = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${all
