@@ -45,6 +45,8 @@ const PAGES: { path: string; freq: string; priority: string }[] = [
 	{ path: '/archive', freq: 'daily', priority: '0.8' },
 	{ path: '/guide', freq: 'monthly', priority: '0.6' },
 	{ path: '/about', freq: 'monthly', priority: '0.4' },
+	// 다듬은 기록(10/29) — 미리 풀기로 공개 전에 고친 것을 한 줄씩. 꾸준히 손보는 흔적이 HTML에 있다
+	{ path: '/news/fixes', freq: 'weekly', priority: '0.4' },
 	{ path: '/privacy', freq: 'monthly', priority: '0.3' },
 	{ path: '/terms', freq: 'monthly', priority: '0.3' }
 ];

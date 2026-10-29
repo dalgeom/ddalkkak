@@ -19,7 +19,7 @@
 
 <header class="cover">
 	<h1>새 소식</h1>
-	<p class="lead">딸깍에 새로 나온 퍼즐과 기능이에요.</p>
+	<p class="lead">딸깍에 새로 나온 퍼즐과 기능이에요. 공개 전에 고친 문제는 <a href="/news/fixes">다듬은 기록</a>에 따로 적어요.</p>
 </header>
 
 <ol class="nlist">
@@ -36,6 +36,10 @@
 <style>
 	.cover {
 		margin-bottom: 14px;
+	}
+	.lead a {
+		color: var(--accent-text);
+		font-weight: 700;
 	}
 	.nlist {
 		list-style: none;
