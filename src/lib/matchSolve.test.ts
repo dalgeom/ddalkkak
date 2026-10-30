@@ -46,6 +46,14 @@ describe('성냥 정답 찾기', () => {
 		expect(parseCells('1++2=3')).toHaveProperty('error');
 		expect(parseCells('가=1')).toHaveProperty('error');
 	});
+	it('못 읽은 까닭 — 계측 이름(msolve_bad_*)이 된다', () => {
+		expect(parseCells('3x3=9')).toMatchObject({ why: 'mul' });
+		expect(parseCells('가=1')).toMatchObject({ why: 'chars' });
+		expect(parseCells('1+2')).toMatchObject({ why: 'noeq' });
+		expect(parseCells('1=2=3')).toMatchObject({ why: 'eqs' });
+		expect(parseCells('1++2=3')).toMatchObject({ why: 'shape' });
+		expect(parseCells('1+1+1+1+1+1+1+1=8')).toMatchObject({ why: 'long' });
+	});
 	it('참 판정 — 0으로 시작하는 두 자리는 수가 아니다', () => {
 		expect(isTrueText('1+2+3=6')).toBe(true);
 		expect(isTrueText('08=8')).toBe(false);

@@ -77,6 +77,8 @@
 		const p = parseCells(input);
 		if ('error' in p) {
 			track('msolve_bad');
+			// 왜 못 읽었나도 — 10/29에 1명이 4번 걸렸는데 = 가 없었는지 × 를 넣었는지 가를 수 없었다
+			track(`msolve_bad_${p.why}`);
 			tried = true;
 			return;
 		}

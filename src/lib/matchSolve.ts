@@ -49,18 +49,20 @@ export function normalize(input: string): string {
  * 식 문자열을 칸으로. 못 읽으면 그 까닭을 사람 말로 돌려준다.
  * unfinished는 아직 쓰는 중일 수 있는 모양(= 가 없음 · 끝이 기호)이라 화면이 누르기 전까지 말하지 않는다.
  */
-export function parseCells(input: string): { cells: Cell[]; text: string } | { error: string; unfinished?: true } {
+export type BadWhy = 'empty' | 'mul' | 'chars' | 'long' | 'eqs' | 'noeq' | 'shape';
+
+export function parseCells(input: string): { cells: Cell[]; text: string } | { error: string; why: BadWhy; unfinished?: true } {
 	const s = normalize(input);
-	if (!s) return { error: '식을 넣어 주세요.', unfinished: true };
-	if (/[x×*/÷]/i.test(s)) return { error: '곱하기와 나누기는 아직 못 풀어요. + 와 − 만 넣어 주세요.' };
-	if (!/^[0-9+\-=]+$/.test(s)) return { error: '숫자와 + − = 만 넣을 수 있어요.' };
-	if (s.length > MAX_LEN) return { error: `식이 너무 길어요. ${MAX_LEN}글자까지 넣을 수 있어요.` };
+	if (!s) return { error: '식을 넣어 주세요.', why: 'empty', unfinished: true };
+	if (/[x×*/÷]/i.test(s)) return { error: '곱하기와 나누기는 아직 못 풀어요. + 와 − 만 넣어 주세요.', why: 'mul' };
+	if (!/^[0-9+\-=]+$/.test(s)) return { error: '숫자와 + − = 만 넣을 수 있어요.', why: 'chars' };
+	if (s.length > MAX_LEN) return { error: `식이 너무 길어요. ${MAX_LEN}글자까지 넣을 수 있어요.`, why: 'long' };
 	const eqs = (s.match(/=/g) ?? []).length;
-	if (eqs > 1) return { error: '= 는 하나만 넣어 주세요.' };
-	if (eqs === 0) return { error: '= 가 하나 있어야 해요.', unfinished: true };
+	if (eqs > 1) return { error: '= 는 하나만 넣어 주세요.', why: 'eqs' };
+	if (eqs === 0) return { error: '= 가 하나 있어야 해요.', why: 'noeq', unfinished: true };
 	const [l, r] = s.split('=');
 	if (!SIDE.test(l) || !SIDE.test(r))
-		return { error: '식 모양을 다시 봐 주세요. 예: 12-7=6', ...(/[+\-=]$/.test(s) || !r ? { unfinished: true as const } : {}) };
+		return { error: '식 모양을 다시 봐 주세요. 예: 12-7=6', why: 'shape', ...(/[+\-=]$/.test(s) || !r ? { unfinished: true as const } : {}) };
 	const cells: Cell[] = [...s].map((ch) =>
 		ch === '=' ? { k: 'e' } : ch === '+' || ch === '-' ? { k: 'o', plus: ch === '+' } : { k: 'd', m: DIGIT_MASKS[Number(ch)] }
 	);
