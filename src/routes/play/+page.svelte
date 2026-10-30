@@ -541,7 +541,7 @@
 					{#each current.cube.opposites as [a, b], k (k)}<span class="oppair"
 							>{CUBE_FACES[a].name} ↔ {CUBE_FACES[b].name}</span
 						>{k < current.cube.opposites.length - 1 ? ', ' : ''}{/each}
-					입니다. 마주 본 두 면은 한 화면에 같이 보이지 않아요.
+					세 쌍이에요. 마주 본 두 면은 한 화면에 같이 보이지 않아요. 마주 보는 면이 없는데도 틀린 보기는 정답의 거울상이에요 — 세 면이 도는 방향이 반대라 아무리 돌려도 못 만들어요.
 				{:else if shown}
 					{@html shown.explain}
 				{/if}

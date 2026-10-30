@@ -44,7 +44,9 @@ export const CHOSUNG_BATCHES: { fromDay: number; counts: Record<string, number> 
 	// 10/28 배포(새싹 5낱말: 기러기 · 달고나 · 탕후루 · 샤인머스캣 · 구사일생), 10/29(20755)부터 오늘의 초성이 354개 순서로 돈다
 	{ fromDay: 20755, counts: { animal: 79, food: 81, 'fruit-vegetable': 68, country: 63, idiom: 63 } },
 	// 10/29 배포(새싹 5낱말: 까마귀 · 매미 · 닭강정 · 자몽 · 백전백승), 10/30(20756)부터 오늘의 초성이 359개 순서로 돈다
-	{ fromDay: 20756, counts: { animal: 81, food: 82, 'fruit-vegetable': 69, country: 63, idiom: 64 } }
+	{ fromDay: 20756, counts: { animal: 81, food: 82, 'fruit-vegetable': 69, country: 63, idiom: 64 } },
+	// 10/30 배포(새싹 5낱말: 거위 · 고등어 · 계란찜 · 땅콩 · 이열치열), 10/31(20757)부터 오늘의 초성이 364개 순서로 돈다
+	{ fromDay: 20757, counts: { animal: 83, food: 83, 'fruit-vegetable': 70, country: 63, idiom: 65 } }
 ];
 
 const toWord = (slug: string) => ([word, hint, alts]: ChosungEntry) => ({ word, hint, alts: alts ?? [], category: slug });

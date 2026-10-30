@@ -16,24 +16,24 @@ const ending = (slug: string, tail: string) => words(slug).filter((w) => w.endsW
 const byLen = (slug: string, n: number) => words(slug).filter((w) => w.length === n);
 
 describe('초성 분야 두 번째 글의 수치', () => {
-	it('동물: 「리」 9 · 「이」 7 · 「어」 5 · 「새」 2 · 글자 수 38/38/5', () => {
-		expect(words('animal').length).toBe(81);
+	it('동물: 「리」 9 · 「이」 7 · 「어」 6 · 「새」 2 · 글자 수 39/39/5', () => {
+		expect(words('animal').length).toBe(83);
 		expect(ending('animal', '리').length).toBe(9);
 		expect(ending('animal', '이').length).toBe(7);
-		expect(ending('animal', '어').sort()).toEqual(['악어', '오징어', '문어', '상어', '금붕어'].sort());
+		expect(ending('animal', '어').sort()).toEqual(['악어', '오징어', '문어', '상어', '금붕어', '고등어'].sort());
 		expect(ending('animal', '새')).toEqual(['앵무새', '참새']);
-		expect([2, 3, 4].map((n) => byLen('animal', n).length)).toEqual([38, 38, 5]);
+		expect([2, 3, 4].map((n) => byLen('animal', n).length)).toEqual([39, 39, 5]);
 		expect(byLen('animal', 4).sort()).toEqual(['고슴도치', '불가사리', '반딧불이', '카멜레온', '하이에나'].sort());
 		expect(chosungOf('독수리')).toBe('ㄷㅅㄹ');
 		expect(chosungOf('부엉이')).toBe('ㅂㅇㅇ');
 	});
 
-	it('음식: 꼬리 찌개 4 · 밥 5 · 탕 4(솜사탕 뺌) · 면 5 · 국수 3 · 국 3 = 24, 세 글자 40, 두 글자 28, 다섯 글자 4', () => {
-		expect(words('food').length).toBe(82);
+	it('음식: 꼬리 찌개 4 · 밥 5 · 탕 4(솜사탕 뺌) · 면 5 · 국수 3 · 국 3 = 24, 세 글자 41, 두 글자 28, 다섯 글자 4', () => {
+		expect(words('food').length).toBe(83);
 		const tails = ['찌개', '밥', '탕', '면', '국수', '국'].map((t) => ending('food', t).filter((w) => w !== '솜사탕').length);
 		expect(tails).toEqual([4, 5, 4, 5, 3, 3]);
 		expect(tails.reduce((a, b) => a + b)).toBe(24);
-		expect(byLen('food', 3).length).toBe(40);
+		expect(byLen('food', 3).length).toBe(41);
 		expect(byLen('food', 2).length).toBe(28);
 		expect(chosungOf('칼국수')).toBe(chosungOf('콩국수'));
 		expect(byLen('food', 5).sort()).toEqual(['순두부찌개', '아이스크림', '오므라이스', '바나나우유'].sort());
@@ -41,10 +41,10 @@ describe('초성 분야 두 번째 글의 수치', () => {
 		expect(chosungOf('김치찌개')).toBe('ㄱㅊㅉㄱ');
 	});
 
-	it('과일·채소: 두 글자 41 · 네 글자 5 · 과일 34 + 토마토 · 방울토마토 + 채소 33 · 「추」 7', () => {
+	it('과일·채소: 두 글자 42 · 네 글자 5 · 과일 34 + 토마토 · 방울토마토 + 채소 34 · 「추」 7', () => {
 		const ws = words('fruit-vegetable');
-		expect(ws.length).toBe(69);
-		expect(byLen('fruit-vegetable', 2).length).toBe(41);
+		expect(ws.length).toBe(70);
+		expect(byLen('fruit-vegetable', 2).length).toBe(42);
 		expect(ending('fruit-vegetable', '추').length).toBe(7);
 		expect(byLen('fruit-vegetable', 4).sort()).toEqual(['파인애플', '블루베리', '브로콜리', '파프리카', '아보카도'].sort());
 		// 첫 묶음은 과일 20 → 토마토 → 채소 21, 10/15 묶음은 과일 10 → 채소 10 순서로 적혀 있다
@@ -55,11 +55,11 @@ describe('초성 분야 두 번째 글의 수치', () => {
 		expect(ws.slice(52, 62)).toContain('양상추');
 		// 10/23 묶음은 감귤(과일) → 방울토마토(헷갈리는 쪽) → 단호박(채소)
 		expect(ws.slice(62, 65)).toEqual(['감귤', '방울토마토', '단호박']);
-		// 10/26 묶음은 청포도(과일), 10/27 묶음은 완두콩(채소), 10/28 묶음은 샤인머스캣(과일), 10/29 묶음은 자몽(과일)
-		expect(ws.slice(65)).toEqual(['청포도', '완두콩', '샤인머스캣', '자몽']);
+		// 10/26 묶음은 청포도(과일), 10/27 묶음은 완두콩(채소), 10/28 묶음은 샤인머스캣(과일), 10/29 묶음은 자몽(과일), 10/30 묶음은 땅콩(채소)
+		expect(ws.slice(65)).toEqual(['청포도', '완두콩', '샤인머스캣', '자몽', '땅콩']);
 		expect(ws.slice(0, 20).length + ws.slice(42, 52).length + 1 + 1 + 1 + 1).toBe(34);
-		expect(ws.slice(21, 42).length + ws.slice(52, 62).length + 1 + 1).toBe(33);
-		expect(byLen('animal', 2).length).toBe(38);
+		expect(ws.slice(21, 42).length + ws.slice(52, 62).length + 1 + 1 + 1).toBe(34);
+		expect(byLen('animal', 2).length).toBe(39);
 	});
 
 	it('나라: 「아」 12 · 「국」 6 · 「드」 6 · 「아」 중 세 글자는 러시아뿐', () => {
@@ -73,9 +73,9 @@ describe('초성 분야 두 번째 글의 수치', () => {
 		expect(chosungOf('핀란드')).toBe(chosungOf('폴란드'));
 	});
 
-	it('사자성어: 첫 초성 ㅇ 18 · 되풀이 짝 · 첫 글자 묶음', () => {
+	it('사자성어: 첫 초성 ㅇ 19 · 되풀이 짝 · 첫 글자 묶음', () => {
 		const ws = words('idiom');
-		expect(ws.filter((w) => chosungOf(w)[0] === 'ㅇ').length).toBe(18);
+		expect(ws.filter((w) => chosungOf(w)[0] === 'ㅇ').length).toBe(19);
 		for (const w of ['우왕좌왕', '이심전심', '설상가상', '애지중지']) expect(w[1], w).toBe(w[3]);
 		for (const w of ['막상막하', '백발백중', '동고동락', '자업자득', '반신반의', '자화자찬']) expect(w[0], w).toBe(w[2]);
 		for (const w of ['시시비비', '전전긍긍', '유유상종']) expect(w[0], w).toBe(w[1]);
@@ -191,11 +191,11 @@ describe('글이 위 수치를 그대로 적고 있다', () => {
 	const guide = (slug: string) => CHOSUNG_CATEGORIES.find((c) => c.slug === slug)!.guide.body;
 	const extra = (slug: string) => [...MATCH_KINDS, ...MATCH_LEVELS].find((k) => k.slug === slug)!.extra.body;
 	it.each([
-		[guide('animal'), ['81개 중 16개', '두 글자가 38개, 세 글자가 38개']],
-		[guide('food'), ['스물네 개', '세 글자가 40개', '두 글자가 28개']],
-		[guide('fruit-vegetable'), ['69개 중 41개', '81개 중 38개', '과일이 34개, 채소가 33개', '「추」가 일곱']],
+		[guide('animal'), ['83개 중 16개', '두 글자가 39개, 세 글자가 39개']],
+		[guide('food'), ['스물네 개', '세 글자가 41개', '두 글자가 28개']],
+		[guide('fruit-vegetable'), ['70개 중 42개', '83개 중 39개', '과일이 34개, 채소가 34개', '「추」가 일곱']],
 		[guide('country'), ['「아」로 끝나는 나라가 열둘', '「국」이 여섯', '「드」가 여섯']],
-		[guide('idiom'), ['ㅇ인 것이 18개']],
+		[guide('idiom'), ['ㅇ인 것이 19개']],
 		[extra('self'), ['293문제', '36번씩', '21번', '190개', '103개']],
 		[extra('transfer'), ['237문제', '106번', '43번', '46번', '38번씩', '171문제', '98번', '73번', '66번']],
 		[extra('operator'), ['211문제 중 152문제', '59문제', '71번', '23번', '22번', '13번', '10번']],

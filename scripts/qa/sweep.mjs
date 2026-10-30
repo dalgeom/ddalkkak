@@ -39,7 +39,8 @@ for (const l of [...links].sort()) {
 	try {
 		const res = await fetch(BASE + l + (l.includes('?') ? '&' : '?') + 'nocache=' + Date.now(), { redirect: 'manual' });
 		const body = res.status === 200 ? await res.text() : '';
-		const notFound = res.status !== 200 || /<title>[^<]*(404|Not Found|찾을 수 없)/i.test(body);
+		// 「창의력 문제 404제」(발견형이 404문제인 날)는 없는 쪽이 아니다
+		const notFound = res.status !== 200 || /<title>[^<]*(404(?!제)|Not Found|찾을 수 없)/i.test(body);
 		status.push({ l, s: res.status, bad: notFound });
 	} catch (e) { status.push({ l, s: 'ERR ' + e.message, bad: true }); }
 	await sleep(60);

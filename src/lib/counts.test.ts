@@ -37,6 +37,8 @@ describe('문제 수는 화면에 박아두지 않는다', () => {
 				// 개수를 뜻하는 문맥에서만 본다 — 크기·시간 같은 CSS 숫자는 제외
 				if (!/문제|개\b|퍼즐|가지/.test(line)) continue;
 				if (/px|ms\b|%|width|height|margin|padding|font|delay|duration|rgba?\(/.test(line)) continue;
+				// 404는 HTTP 상태 번호다 — 발견형이 404문제가 된 날(10/31) 오류 쪽이 걸렸다
+				if (/is404/.test(line)) continue;
 				for (const b of banned) {
 					if (new RegExp(`(?<![0-9.,])${b}(?![0-9.,])`).test(line)) {
 						hits.push(`${f}: ${line.trim().slice(0, 90)}`);

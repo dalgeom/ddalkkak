@@ -414,6 +414,9 @@ export const DISCOVER_TIERS: Readonly<Record<string, Tier>> = {
 	'soccer-unbeaten-9': 1, // 10/29 새로 · 무패라는 한 마디가 3승 2패를 지운다
 	'cal-five-weekdays': 4, // 10/29 새로 · 365 − 12 × 28 = 29
 	'ladder-reverse-10': 5, // 10/29 새로 · 뒤바뀐 쌍마다 가로줄 하나
+	'apt-37th': 1, // 10/30 새로 · 예시에서 한 층 4집을 찾아 37번째 = 1001호
+	'paper-tear-2026': 4, // 10/30 새로 · 찢을 때마다 +3, 늘 3으로 나누면 1
+	'coin-flip-four': 5, // 10/30 새로 · 두 번으론 홀수 뒤집기가 안 맞는다
 };
 
 /**

@@ -2215,7 +2215,7 @@ export const PROBLEMS: Problem[] = [
 		chip: '종이접기',
 		blocks: [
 			{ kind: 'text', html: '점선을 접는 선으로 종이를 반 접으면, 물감 자국은 모두 몇 개가 될까요?' },
-			{ kind: 'figure', svg: '<svg viewBox=\'0 0 460 124\' role=\'img\' aria-label=\'종이를 접으면 물감자국이 몇 개\'><rect x=\'6\' y=\'12\' width=\'62\' height=\'74\' rx=\'3\' style=\'stroke:#2c2822;stroke-width:3;fill:none\'/><line x1=\'43\' y1=\'12\' x2=\'43\' y2=\'86\' style=\'stroke:#c0392b;stroke-width:2;stroke-dasharray:5 4\'/><circle cx=\'24\' cy=\'49\' r=\'11\' fill=\'#7fb2e6\'/><text x=\'37\' y=\'112\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:19px;font-weight:800;fill:#2c2822\'>= 2</text><rect x=\'96\' y=\'12\' width=\'62\' height=\'74\' rx=\'3\' style=\'stroke:#2c2822;stroke-width:3;fill:none\'/><line x1=\'133\' y1=\'12\' x2=\'133\' y2=\'86\' style=\'stroke:#c0392b;stroke-width:2;stroke-dasharray:5 4\'/><circle cx=\'128\' cy=\'49\' r=\'11\' fill=\'#7fb2e6\'/><text x=\'127\' y=\'112\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:19px;font-weight:800;fill:#2c2822\'>= 1</text><rect x=\'186\' y=\'12\' width=\'62\' height=\'74\' rx=\'3\' style=\'stroke:#2c2822;stroke-width:3;fill:none\'/><line x1=\'223\' y1=\'12\' x2=\'223\' y2=\'86\' style=\'stroke:#c0392b;stroke-width:2;stroke-dasharray:5 4\'/><circle cx=\'204\' cy=\'34\' r=\'11\' fill=\'#7fb2e6\'/><circle cx=\'204\' cy=\'66\' r=\'11\' fill=\'#7fb2e6\'/><text x=\'217\' y=\'112\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:19px;font-weight:800;fill:#2c2822\'>= 4</text><rect x=\'276\' y=\'12\' width=\'62\' height=\'74\' rx=\'3\' style=\'stroke:#2c2822;stroke-width:3;fill:none\'/><line x1=\'313\' y1=\'12\' x2=\'313\' y2=\'86\' style=\'stroke:#c0392b;stroke-width:2;stroke-dasharray:5 4\'/><circle cx=\'311\' cy=\'40\' r=\'11\' fill=\'#7fb2e6\'/><circle cx=\'292\' cy=\'68\' r=\'11\' fill=\'#7fb2e6\'/><text x=\'307\' y=\'112\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:19px;font-weight:800;fill:#2c2822\'>= 3</text><rect x=\'366\' y=\'12\' width=\'62\' height=\'74\' rx=\'3\' style=\'stroke:#2c2822;stroke-width:3;fill:none\'/><line x1=\'403\' y1=\'12\' x2=\'403\' y2=\'86\' style=\'stroke:#c0392b;stroke-width:2;stroke-dasharray:5 4\'/><circle cx=\'401\' cy=\'32\' r=\'11\' fill=\'#7fb2e6\'/><circle cx=\'401\' cy=\'62\' r=\'11\' fill=\'#7fb2e6\'/><circle cx=\'384\' cy=\'78\' r=\'11\' fill=\'#7fb2e6\'/><text x=\'397\' y=\'112\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:22px;font-weight:800;fill:#c0392b\'>= ?</text></svg>', caption: '접기 전 (물감은 왼쪽에만)' }
+			{ kind: 'figure', svg: '<svg viewBox=\'0 0 460 124\' role=\'img\' aria-label=\'종이를 접으면 물감자국이 몇 개\'><rect x=\'6\' y=\'12\' width=\'62\' height=\'74\' rx=\'3\' style=\'stroke:#2c2822;stroke-width:3;fill:none\'/><line x1=\'43\' y1=\'12\' x2=\'43\' y2=\'86\' style=\'stroke:#c0392b;stroke-width:2;stroke-dasharray:5 4\'/><circle cx=\'24\' cy=\'49\' r=\'11\' fill=\'#7fb2e6\'/><text x=\'37\' y=\'112\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:19px;font-weight:800;fill:#2c2822\'>= 2</text><rect x=\'96\' y=\'12\' width=\'62\' height=\'74\' rx=\'3\' style=\'stroke:#2c2822;stroke-width:3;fill:none\'/><line x1=\'133\' y1=\'12\' x2=\'133\' y2=\'86\' style=\'stroke:#c0392b;stroke-width:2;stroke-dasharray:5 4\'/><circle cx=\'128\' cy=\'49\' r=\'11\' fill=\'#7fb2e6\'/><text x=\'127\' y=\'112\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:19px;font-weight:800;fill:#2c2822\'>= 1</text><rect x=\'186\' y=\'12\' width=\'62\' height=\'74\' rx=\'3\' style=\'stroke:#2c2822;stroke-width:3;fill:none\'/><line x1=\'223\' y1=\'12\' x2=\'223\' y2=\'86\' style=\'stroke:#c0392b;stroke-width:2;stroke-dasharray:5 4\'/><circle cx=\'204\' cy=\'34\' r=\'11\' fill=\'#7fb2e6\'/><circle cx=\'204\' cy=\'66\' r=\'11\' fill=\'#7fb2e6\'/><text x=\'217\' y=\'112\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:19px;font-weight:800;fill:#2c2822\'>= 4</text><rect x=\'276\' y=\'12\' width=\'62\' height=\'74\' rx=\'3\' style=\'stroke:#2c2822;stroke-width:3;fill:none\'/><line x1=\'313\' y1=\'12\' x2=\'313\' y2=\'86\' style=\'stroke:#c0392b;stroke-width:2;stroke-dasharray:5 4\'/><circle cx=\'311\' cy=\'40\' r=\'11\' fill=\'#7fb2e6\'/><circle cx=\'292\' cy=\'68\' r=\'11\' fill=\'#7fb2e6\'/><text x=\'307\' y=\'112\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:19px;font-weight:800;fill:#2c2822\'>= 3</text><rect x=\'366\' y=\'12\' width=\'62\' height=\'74\' rx=\'3\' style=\'stroke:#2c2822;stroke-width:3;fill:none\'/><line x1=\'403\' y1=\'12\' x2=\'403\' y2=\'86\' style=\'stroke:#c0392b;stroke-width:2;stroke-dasharray:5 4\'/><circle cx=\'401\' cy=\'30\' r=\'11\' fill=\'#7fb2e6\'/><circle cx=\'401\' cy=\'68\' r=\'11\' fill=\'#7fb2e6\'/><circle cx=\'379\' cy=\'49\' r=\'11\' fill=\'#7fb2e6\'/><text x=\'397\' y=\'112\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:22px;font-weight:800;fill:#c0392b\'>= ?</text></svg>', caption: '접기 전 (물감은 왼쪽에만)' }
 		],
 		type: 'text',
 		answers: ['4', '4개', '넷'],
@@ -2311,7 +2311,7 @@ export const PROBLEMS: Problem[] = [
 		chip: '물길',
 		blocks: [
 			{ kind: 'text', html: '물은 어느 출구로 도착할까요? (A · B · C)' },
-			{ kind: 'figure', svg: '<svg viewBox=\'0 0 470 112\' role=\'img\' aria-label=\'물이 도착하는 곳\'><g transform=\'translate(4 0)\'><line x1=\'50\' y1=\'16\' x2=\'50\' y2=\'92\' style=\'stroke:#8a8f94;stroke-width:5;fill:none;stroke-linecap:round\'/><rect x=\'46\' y=\'49\' width=\'8\' height=\'10\' fill=\'#fdf6e9\'/><line x1=\'10\' y1=\'54\' x2=\'84\' y2=\'54\' style=\'stroke:#8a8f94;stroke-width:5;fill:none;stroke-linecap:round\'/><text x=\'10\' y=\'45\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:13px;font-weight:700;fill:#5f6368\'>시작</text><circle cx=\'10\' cy=\'54\' r=\'4\' fill=\'#c0392b\'/><circle cx=\'50\' cy=\'12\' r=\'7\' style=\'fill:#fff;stroke:#2c2822;stroke-width:1.2\'/><text x=\'50\' y=\'17\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:13px;font-weight:700;fill:#5f6368\'>A</text><circle cx=\'50\' cy=\'96\' r=\'7\' style=\'fill:#fff;stroke:#2c2822;stroke-width:1.2\'/><text x=\'50\' y=\'101\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:13px;font-weight:700;fill:#5f6368\'>B</text><circle cx=\'90\' cy=\'54\' r=\'7\' style=\'fill:#fff;stroke:#2c2822;stroke-width:1.2\'/><text x=\'90\' y=\'59\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:13px;font-weight:700;fill:#5f6368\'>C</text></g><g transform=\'translate(120 0)\'><line x1=\'10\' y1=\'54\' x2=\'52\' y2=\'54\' style=\'stroke:#8a8f94;stroke-width:5;fill:none;stroke-linecap:round\'/><line x1=\'52\' y1=\'16\' x2=\'52\' y2=\'92\' style=\'stroke:#8a8f94;stroke-width:5;fill:none;stroke-linecap:round\'/><circle cx=\'52\' cy=\'54\' r=\'4\' fill=\'#2c2822\'/><text x=\'10\' y=\'45\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:13px;font-weight:700;fill:#5f6368\'>시작</text><circle cx=\'10\' cy=\'54\' r=\'4\' fill=\'#c0392b\'/><circle cx=\'52\' cy=\'12\' r=\'7\' style=\'fill:#fff;stroke:#2c2822;stroke-width:1.2\'/><text x=\'52\' y=\'17\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:13px;font-weight:700;fill:#5f6368\'>A</text><circle cx=\'52\' cy=\'96\' r=\'7\' style=\'fill:#fff;stroke:#2c2822;stroke-width:1.2\'/><text x=\'52\' y=\'101\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:13px;font-weight:700;fill:#5f6368\'>B</text><circle cx=\'90\' cy=\'54\' r=\'7\' style=\'fill:#fff;stroke:#2c2822;stroke-width:1.2\'/><text x=\'90\' y=\'59\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:13px;font-weight:700;fill:#5f6368\'>C</text></g><g transform=\'translate(236 0)\'><line x1=\'66\' y1=\'16\' x2=\'66\' y2=\'92\' style=\'stroke:#8a8f94;stroke-width:5;fill:none;stroke-linecap:round\'/><rect x=\'62\' y=\'25\' width=\'8\' height=\'10\' fill=\'#fdf6e9\'/><polyline points=\'10 54 32 54 32 30 88 30\' style=\'stroke:#8a8f94;stroke-width:5;fill:none;stroke-linecap:round\'/><text x=\'10\' y=\'45\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:13px;font-weight:700;fill:#5f6368\'>시작</text><circle cx=\'10\' cy=\'54\' r=\'4\' fill=\'#c0392b\'/><circle cx=\'90\' cy=\'30\' r=\'7\' style=\'fill:#fff;stroke:#2c2822;stroke-width:1.2\'/><text x=\'90\' y=\'35\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:13px;font-weight:700;fill:#5f6368\'>A</text><circle cx=\'66\' cy=\'96\' r=\'7\' style=\'fill:#fff;stroke:#2c2822;stroke-width:1.2\'/><text x=\'66\' y=\'101\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:13px;font-weight:700;fill:#5f6368\'>B</text><circle cx=\'90\' cy=\'78\' r=\'7\' style=\'fill:#fff;stroke:#2c2822;stroke-width:1.2\'/><text x=\'90\' y=\'83\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:13px;font-weight:700;fill:#5f6368\'>C</text></g><g transform=\'translate(352 0)\'><line x1=\'34\' y1=\'16\' x2=\'34\' y2=\'92\' style=\'stroke:#8a8f94;stroke-width:5;fill:none;stroke-linecap:round\'/><line x1=\'78\' y1=\'16\' x2=\'78\' y2=\'60\' style=\'stroke:#8a8f94;stroke-width:5;fill:none;stroke-linecap:round\'/><rect x=\'30\' y=\'35\' width=\'8\' height=\'10\' fill=\'#fdf6e9\'/><polyline points=\'10 40 56 40 56 84 88 84\' style=\'stroke:#8a8f94;stroke-width:5;fill:none;stroke-linecap:round\'/><circle cx=\'56\' cy=\'40\' r=\'4\' fill=\'#2c2822\'/><text x=\'10\' y=\'31\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:13px;font-weight:700;fill:#5f6368\'>시작</text><circle cx=\'10\' cy=\'40\' r=\'4\' fill=\'#c0392b\'/><circle cx=\'34\' cy=\'12\' r=\'7\' style=\'fill:#fff;stroke:#2c2822;stroke-width:1.2\'/><text x=\'34\' y=\'17\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:13px;font-weight:700;fill:#5f6368\'>A</text><circle cx=\'90\' cy=\'84\' r=\'7\' style=\'fill:#fff;stroke:#2c2822;stroke-width:1.2\'/><text x=\'90\' y=\'89\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:13px;font-weight:700;fill:#5f6368\'>B</text><circle cx=\'78\' cy=\'12\' r=\'7\' style=\'fill:#fff;stroke:#2c2822;stroke-width:1.2\'/><text x=\'78\' y=\'17\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:13px;font-weight:700;fill:#5f6368\'>C</text><text x=\'20\' y=\'104\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:22px;font-weight:800;fill:#c0392b\'>?</text></g></svg>', caption: '검은 점(●)은 진짜 연결, 그냥 겹쳐 지나가면 다리' }
+			{ kind: 'figure', svg: '<svg viewBox=\'0 0 470 112\' role=\'img\' aria-label=\'물이 도착하는 곳\'><g transform=\'translate(4 0)\'><line x1=\'50\' y1=\'16\' x2=\'50\' y2=\'92\' style=\'stroke:#8a8f94;stroke-width:5;fill:none;stroke-linecap:round\'/><rect x=\'46\' y=\'49\' width=\'8\' height=\'10\' fill=\'#fdf6e9\'/><line x1=\'10\' y1=\'54\' x2=\'84\' y2=\'54\' style=\'stroke:#8a8f94;stroke-width:5;fill:none;stroke-linecap:round\'/><text x=\'10\' y=\'45\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:13px;font-weight:700;fill:#5f6368\'>시작</text><circle cx=\'10\' cy=\'54\' r=\'4\' fill=\'#c0392b\'/><circle cx=\'50\' cy=\'12\' r=\'7\' style=\'fill:#fff;stroke:#2c2822;stroke-width:1.2\'/><text x=\'50\' y=\'17\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:13px;font-weight:700;fill:#5f6368\'>A</text><circle cx=\'50\' cy=\'96\' r=\'7\' style=\'fill:#fff;stroke:#2c2822;stroke-width:1.2\'/><text x=\'50\' y=\'101\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:13px;font-weight:700;fill:#5f6368\'>B</text><circle cx=\'90\' cy=\'54\' r=\'7\' style=\'fill:#fff;stroke:#2c2822;stroke-width:1.2\'/><text x=\'90\' y=\'59\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:13px;font-weight:700;fill:#5f6368\'>C</text></g><g transform=\'translate(120 0)\'><line x1=\'10\' y1=\'54\' x2=\'52\' y2=\'54\' style=\'stroke:#8a8f94;stroke-width:5;fill:none;stroke-linecap:round\'/><line x1=\'52\' y1=\'16\' x2=\'52\' y2=\'92\' style=\'stroke:#8a8f94;stroke-width:5;fill:none;stroke-linecap:round\'/><circle cx=\'52\' cy=\'54\' r=\'4\' fill=\'#2c2822\'/><text x=\'10\' y=\'45\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:13px;font-weight:700;fill:#5f6368\'>시작</text><circle cx=\'10\' cy=\'54\' r=\'4\' fill=\'#c0392b\'/><circle cx=\'52\' cy=\'12\' r=\'7\' style=\'fill:#fff;stroke:#2c2822;stroke-width:1.2\'/><text x=\'52\' y=\'17\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:13px;font-weight:700;fill:#5f6368\'>A</text><circle cx=\'52\' cy=\'96\' r=\'7\' style=\'fill:#fff;stroke:#2c2822;stroke-width:1.2\'/><text x=\'52\' y=\'101\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:13px;font-weight:700;fill:#5f6368\'>B</text><circle cx=\'90\' cy=\'54\' r=\'7\' style=\'fill:#fff;stroke:#2c2822;stroke-width:1.2\'/><text x=\'90\' y=\'59\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:13px;font-weight:700;fill:#5f6368\'>C</text></g><g transform=\'translate(236 0)\'><line x1=\'66\' y1=\'16\' x2=\'66\' y2=\'92\' style=\'stroke:#8a8f94;stroke-width:5;fill:none;stroke-linecap:round\'/><rect x=\'62\' y=\'25\' width=\'8\' height=\'10\' fill=\'#fdf6e9\'/><polyline points=\'10 54 32 54 32 30 88 30\' style=\'stroke:#8a8f94;stroke-width:5;fill:none;stroke-linecap:round\'/><text x=\'10\' y=\'45\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:13px;font-weight:700;fill:#5f6368\'>시작</text><circle cx=\'10\' cy=\'54\' r=\'4\' fill=\'#c0392b\'/><circle cx=\'90\' cy=\'30\' r=\'7\' style=\'fill:#fff;stroke:#2c2822;stroke-width:1.2\'/><text x=\'90\' y=\'35\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:13px;font-weight:700;fill:#5f6368\'>A</text><circle cx=\'66\' cy=\'96\' r=\'7\' style=\'fill:#fff;stroke:#2c2822;stroke-width:1.2\'/><text x=\'66\' y=\'101\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:13px;font-weight:700;fill:#5f6368\'>B</text><circle cx=\'90\' cy=\'78\' r=\'7\' style=\'fill:#fff;stroke:#2c2822;stroke-width:1.2\'/><text x=\'90\' y=\'83\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:13px;font-weight:700;fill:#5f6368\'>C</text></g><g transform=\'translate(352 0)\'><line x1=\'34\' y1=\'16\' x2=\'34\' y2=\'92\' style=\'stroke:#8a8f94;stroke-width:5;fill:none;stroke-linecap:round\'/><line x1=\'78\' y1=\'16\' x2=\'78\' y2=\'60\' style=\'stroke:#8a8f94;stroke-width:5;fill:none;stroke-linecap:round\'/><rect x=\'30\' y=\'35\' width=\'8\' height=\'10\' fill=\'#fdf6e9\'/><polyline points=\'10 40 56 40 56 84 88 84\' style=\'stroke:#8a8f94;stroke-width:5;fill:none;stroke-linecap:round\'/><circle cx=\'56\' cy=\'40\' r=\'4\' fill=\'#2c2822\'/><text x=\'10\' y=\'31\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:13px;font-weight:700;fill:#5f6368\'>시작</text><circle cx=\'10\' cy=\'40\' r=\'4\' fill=\'#c0392b\'/><circle cx=\'34\' cy=\'12\' r=\'7\' style=\'fill:#fff;stroke:#2c2822;stroke-width:1.2\'/><text x=\'34\' y=\'17\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:13px;font-weight:700;fill:#5f6368\'>A</text><circle cx=\'90\' cy=\'84\' r=\'7\' style=\'fill:#fff;stroke:#2c2822;stroke-width:1.2\'/><text x=\'90\' y=\'89\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:13px;font-weight:700;fill:#5f6368\'>B</text><circle cx=\'78\' cy=\'12\' r=\'7\' style=\'fill:#fff;stroke:#2c2822;stroke-width:1.2\'/><text x=\'78\' y=\'17\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:13px;font-weight:700;fill:#5f6368\'>C</text><text x=\'106\' y=\'52\' text-anchor=\'middle\' style=\'font-family:Pretendard,sans-serif;font-size:22px;font-weight:800;fill:#c0392b\'>?</text></g></svg>', caption: '검은 점(●)은 진짜 연결, 그냥 겹쳐 지나가면 다리' }
 		],
 		type: 'text',
 		answers: ['B', 'b', '비'],
@@ -4089,7 +4089,7 @@ export const PROBLEMS: Problem[] = [
 			'12시간 동안 몇 번인지 먼저 세어 보세요.'
 		],
 		explain:
-			'12시간 동안 <b>11번</b> 겹쳐요(11시대에는 따로 겹치지 않고 12시에 겹침). 24시간이면 <b>22번</b>.'
+			'분침은 한 바퀴에 1시간, 시침보다 조금 더 가야 따라잡아서 약 <b>65분 27초</b>(12/11시간)마다 한 번 겹쳐요. 그래서 12시간 동안 <b>11번</b>(11시대에는 따로 겹치지 않고 12시에 겹침), 24시간이면 <b>22번</b>.'
 	},
 	{
 		id: 'cal-mirror-clock',
@@ -7745,5 +7745,85 @@ export const PROBLEMS: Problem[] = [
 		],
 		explain:
 			'가로줄 하나는 <b>이웃한 두 사람을 한 번 엇갈리게</b> 할 뿐이에요. 완전히 거꾸로가 되려면 다섯 명 중 <b>어떤 두 사람이든</b> 한 번은 서로 엇갈려야 하니, 두 사람을 고르는 가짓수 5 × 4 ÷ 2 = <b>10</b>개는 꼭 필요해요. 10개면 실제로 돼요. 맨 왼쪽 사람을 오른쪽 끝까지 4칸, 다음 사람을 3칸, 2칸, 1칸 보내면 4 + 3 + 2 + 1 = 10. 아무 두 자리나 한 번에 바꿀 수 있다면 1↔5, 2↔4 두 번이면 되지만, 사다리는 이웃끼리만 바꿔서 10개예요.'
+	},
+	{
+		id: 'apt-37th',
+		// 단계 1 새싹(2026-10-30). 한 층에 4집인 아파트에서 n번째 집의 호수. 한 층 집 수는 지문에 없고 예시에서 찾는다.
+		//   1 → 101 · 6 → 202 · 12 → 304 · 37 → 1001(37 = 4 × 9 + 1 → 10층 첫 집).
+		// 미끼: 901(37 ÷ 4 = 9.25를 9층으로) · 904(36번째) · 937(37을 그대로 붙임).
+		// 검산: 검수 python 한 층 1~29집 전수 — 세 줄을 다 맞히는 값은 4뿐(1 · 6줄만으로도 4).
+		// 킬 라인: 6 → 202가 한 층 10집(106) · 5집(201)을 죽이고, 12 → 304가 「딱 떨어지면 다음 층 첫 집」(401)을 죽인다.
+		// 아하: 「37번째인데 10층, 네 자리 호수 1001호!」
+		// 중복: stadium-seats(지그재그) · elevator-4(4층 생략) · num-floor-no-zero와 메커니즘 다름. 검수 조건부 → 처방(한 층 집 수를 지우고 예시로) 반영(10/30).
+		chip: '번호 매기기',
+		blocks: [
+			{
+				kind: 'text',
+				html: '어느 아파트 한 동은 1층 첫 집부터 차례로 번호를 붙여요.<br>1번째 집 → <b>101호</b><br>6번째 집 → <b>202호</b><br>12번째 집 → <b>304호</b><br>그렇다면 <b>37번째 집</b>은 몇 호일까요?'
+			}
+		],
+		type: 'choice',
+		choices: ['901호', '904호', '937호', '1001호'],
+		answerIndex: 3,
+		hints: [
+			'호수의 앞자리는 층, 뒷자리는 그 층에서 몇째 집인지예요.',
+			'6번째 집이 2층 둘째 집이에요. 1층에는 집이 몇 개 있을까요?',
+			'한 층에 4집이에요. 36번째 집은 9층의 마지막 집이에요.'
+		],
+		explain:
+			'6번째 집이 202호(2층 둘째 집)이니 1층에는 집이 <b>4개</b>예요. 12번째 집이 304호인 것도 맞아요(3층이 꽉 찬 마지막 집). 그러면 36번째 집은 9층 마지막 집 904호이고, <b>37번째 집</b>은 다음 층 첫 집이라 <b>1001호</b>예요. 「37 ÷ 4 = 9.25라서 9층」은 층이 꽉 찬 뒤 한 집이 넘친다는 걸 놓친 것이고, 37을 그대로 붙인 937호는 층을 셈하지 않은 거예요.'
+	},
+	{
+		id: 'paper-tear-2026',
+		// 단계 4(2026-10-30). 한 조각을 네 조각으로 찢으면 조각이 3개 는다 → 조각 수는 늘 1 + 3k(3으로 나눈 나머지 1).
+		//   2024 · 2025 · 2026 · 2027 중 나머지 1은 2026뿐(2026 = 1 + 3 × 675).
+		// 미끼: 2024(찢을 때마다 4개씩 는다고 읽으면 4의 배수) · 2025(3의 배수 착각) · 2027.
+		// 검산: 검수 python 1 + 3k 판정 — 2024 F · 2025 F · 2026 T · 2027 F.
+		// 경계 약속: 「그 조각 하나가 네 조각이 된다」(+3) · 「몇 번이든 하다가 멈춘다」를 지문에 고정.
+		// 아하: 「네 조각인데 늘어나는 건 3개 — 그래서 늘 3으로 나누면 1이 남는다」.
+		// 중복: ob-cups-parity(홀짝 불변)와 불변량 계열이지만 mod 3 · 조각 셈이라 다름. strip-fold-cut(+1 셈)과도 다름. 올림피아드 입문 불변량 예제와 메커니즘이 같아 단계 5 대신 4(검수 판단). 검수 조건부 → 문구 처방 반영(10/30).
+		chip: '수의 성질',
+		blocks: [
+			{
+				kind: 'text',
+				html: '종이 한 장을 찢어 <b>네 조각</b>으로 만들어요. 그다음 조각 하나를 골라 또 네 조각으로 찢어요. 이것을 몇 번이든 하다가 멈춰요.<br>멈췄을 때 조각은 모두 <b>몇 개</b>일 수 있을까요?'
+			}
+		],
+		type: 'choice',
+		choices: ['2024개', '2025개', '2026개', '2027개'],
+		answerIndex: 2,
+		hints: [
+			'처음 한 번 찢으면 4조각, 한 번 더 찢으면 몇 조각일까요? 8조각이 아니에요.',
+			'조각 하나가 네 조각이 되면, 하나가 없어지고 넷이 생겨요. 한 번에 몇 개씩 늘어날까요?',
+			'1에서 시작해 3씩 늘어나요. 4, 7, 10, … 이 수들을 3으로 나누면 나머지가 늘 얼마일까요?'
+		],
+		explain:
+			'조각 하나를 네 조각으로 찢으면 그 하나가 없어지고 넷이 생겨서 <b>3개씩</b> 늘어요. 1장에서 시작하니 조각 수는 4, 7, 10, 13, … 늘 <b>3으로 나누면 1이 남는 수</b>예요. 2024는 나머지 2, 2025는 0, 2027은 2이고, <b>2026</b>만 나머지 1이라 될 수 있어요(1 + 3 × 675). 「네 조각씩이니 4의 배수」로 읽으면 2024를 고르게 되는데, 4 다음이 8이 아니라 7이에요.'
+	},
+	{
+		id: 'coin-flip-four',
+		// 단계 5 고수(2026-10-30). 앞면 동전 6개, 한 번에 꼭 4개씩 뒤집어 모두 뒷면 — 최소 3번.
+		//   2번이면 뒤집기 8번을 6개에 나눠 각 동전 0~2번 → 홀수(=1)번이 6개면 합 6 ≠ 8이라 불가능. 3번: {A,B,C,D} · {A,B,C,E} · {A,B,C,F}.
+		// 미끼: 2(6 ÷ 4 올림) · 12(뒤집힌 횟수로 읽으면 — 지문이 「고르는 것을 한 번」으로 고정).
+		// 검산: 검수 BFS 전수 6·4 → 3. 대조 6·3 → 2 · 6·5 → 6 · 5·4 → 불가능 · 8·4 → 2.
+		// 경계 약속: 「같은 동전을 다음 차례에 또 골라도 된다」 · 「4개를 골라 뒤집는 것을 한 번」을 지문에 고정(검수 처방).
+		// 아하: 「두 번으론 절대 안 되고, 세 개를 세 번 다 뒤집으면 된다」.
+		// 중복: ob-cups-parity(정확히 두 개 뒤집기 가능 · 불가능)와 인접, 이쪽은 최소 횟수와 구성. 칩은 놀이 대신 수의 성질(홀짝). text형으로 찍기를 없앴다. 검수 조건부 → 처방 반영(10/30).
+		chip: '수의 성질',
+		blocks: [
+			{
+				kind: 'text',
+				html: '동전 6개가 모두 <b>앞면</b>으로 놓여 있어요. 한 번에 <b>꼭 4개</b>를 골라 뒤집어요(3개나 5개는 안 돼요). 한 번 뒤집은 동전을 다음 차례에 또 골라도 돼요.<br>4개를 골라 뒤집는 것을 한 번이라고 셀 때, 6개를 모두 <b>뒷면</b>으로 만들려면 <b>적어도 몇 번</b> 해야 할까요?'
+			}
+		],
+		type: 'text',
+		answers: ['3', '3번', '3 번', '세 번', '세번', '셋', '3회', '삼', '삼번', '3번이요', '세 번이요', '최소 3번', '적어도 3번'],
+		hints: [
+			'6 ÷ 4를 올림해서 2번이라고 생각했다면, 2번에 정말 되는지 직접 해 보세요.',
+			'2번이면 뒤집기가 모두 8번이에요. 모든 동전은 홀수 번 뒤집혀야 뒷면이 돼요. 8번을 6개에 나누면?',
+			'세 개를 매번 같이 뒤집으면 세 번 다 뒤집혀 뒷면이 돼요. 나머지 세 개는 한 번씩만 끼우면 돼요.'
+		],
+		explain:
+			'동전 하나하나가 뒷면이 되려면 <b>홀수 번</b> 뒤집혀야 해요. 2번 하면 뒤집기가 모두 8번인데, 한 동전이 많아야 2번이라 홀수는 1번뿐이에요. 6개가 1번씩이면 6번이라 8번이 안 맞아요. 그래서 2번으로는 <b>절대</b> 안 돼요. 3번이면 돼요. A · B · C를 매번 뒤집고 넷째 자리에 D, E, F를 하나씩 끼우면 A · B · C는 3번, D · E · F는 1번씩 뒤집혀 모두 뒷면이에요. 답은 <b>3번</b>. 「6 ÷ 4 올림 = 2」는 같은 동전이 두 번 뒤집혀 앞면으로 돌아오는 걸 놓친 거예요.'
 	}
 ];
