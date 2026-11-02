@@ -3,7 +3,7 @@ import { launch, BASE, sleep, OUT } from './cdp.mjs';
 import { writeFileSync } from 'node:fs';
 
 const sm = await (await fetch(BASE + '/sitemap.xml?nocache=' + Date.now())).text();
-const fromMap = [...sm.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1].replace(BASE, '') || '/');
+const fromMap = [...sm.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1].replace('https://ddalkkak.app', '').replace(BASE, '') || '/');
 const extra = ['/games', '/news', '/record', '/today', '/play', '/play?filter=cube', '/play?filter=trivia', '/play?filter=puzzle', '/play?filter=match',
 	'/matchstick', '/matchstick/picture', '/chosung', '/cubenet', '/trivia/duel', '/trivia/duel?s=4242&n=7&t=80', '/matchstick/duel', '/matchstick/duel?s=4242&n=3&t=60', '/matchstick/duel?s=4242&n=3&t=60&a=4&b=50', '/trivia/stages', '/trivia/stages/1-1', '/trivia/stages/2-2', '/discover/stages', '/discover/stages/1-1', '/discover/stages/5-1', '/chosung/stages', '/chosung/stages/1-1', '/cubenet/stages', '/cubenet/stages/3-1'];
 const pages = [...new Set([...fromMap, ...extra])];
