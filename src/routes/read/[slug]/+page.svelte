@@ -151,7 +151,7 @@
 	.body :global(b) {
 		font-weight: 700;
 	}
-	.body :global(a) {
+	.body :global(p a) {
 		color: var(--accent-text);
 		font-weight: 700;
 	}

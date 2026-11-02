@@ -11,6 +11,8 @@ for (const [w, h] of [[390, 844], [320, 568]]) {
 	await b.go('/read/clock-angle', 800);
 	ok(`${w} 카드 없는 글엔 안 뜸`, (await b.ev(`return document.querySelectorAll('a.play').length;`)) === 0);
 	await b.go('/read/magic-square', 800);
+	const cta = await b.ev(`const c = getComputedStyle(document.querySelector('a.cta')); return [c.color, c.backgroundColor].join(' / ');`);
+	ok(`${w} 글 버튼 글자가 흰색(본문 링크 색이 번지지 않음)`, cta.startsWith('rgb(255, 255, 255)'), cta);
 	const r = await b.ev(`const n = document.querySelector('a.play'); if (!n) return null; n.scrollIntoView({ block: 'center' }); const x = n.getBoundingClientRect();
 		return { left: x.left, right: x.right, over: document.documentElement.scrollWidth - innerWidth, href: n.getAttribute('href') };`);
 	ok(`${w} 글 끝 카드 · 폭 안`, !!r && r.left >= 0 && r.right <= w && r.over <= 0, JSON.stringify(r));
