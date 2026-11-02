@@ -151,6 +151,10 @@
 	.body :global(b) {
 		font-weight: 700;
 	}
+	.body :global(a) {
+		color: var(--accent-text);
+		font-weight: 700;
+	}
 	.body :global(ul) {
 		margin: 0 2px 14px;
 		padding-left: 20px;

@@ -25,6 +25,7 @@
 	<p class="lead">
 		딸깍은 매일 <b>다음 날 10문제를 먼저 직접 풀어 봐요.</b> 그림이 답을 알려 주거나, 답이 둘로 읽히거나, 해설이
 		헷갈리는 것을 찾으면 공개 전에 고쳐요. 무엇을 왜 고쳤는지 여기에 남겨요. 이미 공개된 문제의 정답은 적지 않아요.
+		왜 이런 것을 고치는지는 <a href="/read/answer-leaks">문제가 답을 흘리는 자리</a>에 적어 두었어요.
 	</p>
 </header>
 
@@ -44,6 +45,10 @@
 	}
 	.lead b {
 		color: var(--text);
+	}
+	.lead a {
+		color: var(--accent-text);
+		font-weight: 700;
 	}
 	.nlist {
 		list-style: none;
