@@ -23,6 +23,8 @@ export type Article = {
 	body: string;
 	/** 글 끝에 붙는 실전 링크 */
 	cta: { href: string; label: string };
+	/** 글에서 배운 것을 바로 써 보는 문제 하나(/q/문제id?from=read) */
+	play?: { href: string; lead: string; label: string };
 };
 
 /* ── 성냥개비 보드 SVG — MatchstickBoard.svelte와 같은 좌표계 ── */
@@ -292,6 +294,7 @@ export const ARTICLES: Article[] = [
 		date: '2026-09-14',
 		tag: '규칙·분류',
 		cta: { href: '/discover/rule', label: '규칙·분류 문제 풀어보기' },
+		play: { href: '/q/card-15-fork?from=read', lead: '1부터 9까지 카드를 번갈아 가져가 세 장의 합 15를 먼저 만드는 놀이가 있어요. 이 글의 표를 떠올리면 어느 카드를 가져가야 할지 보여요.', label: '합 15 놀이 한 수 두어 보기' },
 		body: `
 <p>딸깍에 이런 문제가 있어요. <b>물음표에 들어갈 수는 무엇일까요?</b></p>
 <div class="ex"><pre>2  7  6

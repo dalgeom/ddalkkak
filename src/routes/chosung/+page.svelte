@@ -202,7 +202,7 @@
 						<p class="t-done">
 							{todayWon ? '오늘 초성을 풀었어요.' : '오늘 초성은 정답을 봤어요.'} 내일 자정에 새 문제가 열려요.
 						</p>
-						<DailyNext pitch="다음은 오늘의 10문제 어때요? 상식 · 발견형 · 성냥개비가 섞여 나와요" />
+						<DailyNext pitch="초성처럼 떠올려 맞히는 상식 2문제가 오늘의 10문제에 있어요" />
 					{:else}
 						<div class="tiles small">
 							{#each [...chosungOf(todayWord.word)] as ch, i (i)}<span class="tile">{ch}</span>{/each}
@@ -318,7 +318,7 @@
 				<p class="t-after">
 					{#if todayWon}🔥 <b>{daily?.streak}일 연속</b> · 내일 자정에 새 문제{:else}내일 문제를 맞히면 연속 기록이 시작돼요{/if}
 				</p>
-				<DailyNext pitch="다음은 오늘의 10문제 어때요? 상식 · 발견형 · 성냥개비가 섞여 나와요" bind:shown={nextShown} />
+				<DailyNext pitch="초성처럼 떠올려 맞히는 상식 2문제가 오늘의 10문제에 있어요" bind:shown={nextShown} />
 				<PushPrompt dayNum={day} streak={daily?.streak ?? 0} tomorrow={tomorrowPeek} slot="chosung" />
 				<button class="btn wide" class:ghost={nextShown} onclick={() => start({ type: 'free', cat: cur.category })}>
 					{curCat?.name} 이어서 풀기 →
@@ -330,7 +330,7 @@
 				{/if}
 				<!-- 초성 분야로 검색해 들어온 세션은 2%만 오늘의 10문제를 시작했다(10/1~10/13) — 다섯 문제째에 한 번 -->
 				{#if freeWins === 5 && status === 'won'}
-					<DailyNext pitch="다음은 오늘의 10문제 어때요? 상식 · 발견형 · 성냥개비가 섞여 나와요" />
+					<DailyNext pitch="초성처럼 떠올려 맞히는 상식 2문제가 오늘의 10문제에 있어요" />
 				{:else if todayWord && !todayDone && !(freeWins === 3 && status === 'won')}
 					<!-- 분야 쪽(?c=)에서 곧장 풀이로 들어온 사람은 메뉴의 「오늘의 초성」을 못 본다 — 다시 올 이유(매일 새 문제 · 연속)를 여기서 알린다. 2026-10-27 -->
 					<button class="todaynudge" onclick={() => { track('chosung_free_today'); start({ type: 'today' }); }}>

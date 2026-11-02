@@ -18,7 +18,7 @@
 	 * 데일리 진행·기록(localStorage)은 건드리지 않는다 — 여기서 푼 것은 오늘의 10문제와 따로다.
 	 * 다 풀면 할 일은 둘: 되돌려 보내기, 오늘의 10문제로 넘어가기.
 	 */
-	let { data }: { data: { problem: Problem; friend: Mark | null; preview: string } } = $props();
+	let { data }: { data: { problem: Problem; friend: Mark | null; fromRead: boolean; preview: string } } = $props();
 
 	let p = $derived(displayChoices(data.problem));
 
@@ -102,7 +102,7 @@
 	<meta property="og:url" content="https://ddalkkak.app/q/{p.id}" />
 </svelte:head>
 
-<p class="from">{friendLine(data.friend)}</p>
+<p class="from">{data.fromRead ? '글에서 이어지는 문제예요.' : friendLine(data.friend)}</p>
 
 <section class="card">
 	<span class="cat-chip">{playChip(p)}</span>

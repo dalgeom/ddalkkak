@@ -139,3 +139,9 @@
 .mode:active {
 	transform: translateY(1px);
 }
+
+/* 해설은 {@html}이라 화면별 scoped CSS가 안 닿는다 — 해설 속 글 링크(card-15-fork)가 브라우저 기본 파랑으로 뜨던 것 */
+.explain a {
+	color: var(--accent-text);
+	font-weight: 700;
+}

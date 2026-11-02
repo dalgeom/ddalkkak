@@ -33,7 +33,7 @@ export function track(name: string, params?: Params): void {
  */
 export function ctaTrack(
 	node: HTMLElement,
-	slot: 'band' | 'foot' | 'share' | 'teaser' | 'send' | 'read_top' | 'read_end' | 'new_stage' | 'new_pic' | 'other' | 'next'
+	slot: 'band' | 'foot' | 'share' | 'teaser' | 'send' | 'read_top' | 'read_end' | 'read_play' | 'new_stage' | 'new_pic' | 'other' | 'next'
 ) {
 	const onClick = () => {
 		track(`cta_${slot}_click`);

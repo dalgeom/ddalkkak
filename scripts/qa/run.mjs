@@ -25,7 +25,8 @@ const ALL = [
 	['lock', '시트 열린 동안 뒤 화면 스크롤 잠금'],
 	['webkit', '아이폰 엔진(WebKit) — 깜빡임 · 스플래시 · 작은 화면 넘침'],
 	['show', '초성 퀴즈 띄우기 — 화면 덮기 · 초성 크기 · 리모컨 · 뒤로가기 · 입구'],
-	['chotoday', '초성 분야 풀이 → 오늘의 초성 카드 — 뜨는 때 · 이동 · 끝낸 뒤 숨김 · 폭']
+	['chotoday', '초성 분야 풀이 → 오늘의 초성 카드 — 뜨는 때 · 이동 · 끝낸 뒤 숨김 · 폭'],
+	['readplay', '글 → 문제 → 글 왕복 — 마방진 글 끝 카드 · 출처 문구 · 해설 링크 · 폭']
 ];
 const oi = process.argv.indexOf('--only');
 const only = oi > 0 ? process.argv[oi + 1].split(',') : null;

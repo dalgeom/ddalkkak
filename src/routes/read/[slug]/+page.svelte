@@ -87,6 +87,16 @@
 		{@html rest}
 	</div>
 
+	{#if data.article.play}
+		<!-- 글에서 배운 것을 바로 써 보는 문제. 위아래 초록 버튼은 분야로 가니 테두리 카드로 구분한다(초록 큰 버튼은 하나) -->
+		<section class="sec">
+			<a class="play" href={data.article.play.href} use:ctaTrack={'read_play'}>
+				<span>{data.article.play.lead}</span>
+				<b>{data.article.play.label} <span aria-hidden="true">→</span></b>
+			</a>
+		</section>
+	{/if}
+
 	<section class="sec ctas">
 		<a class="cta" href={data.article.cta.href} use:ctaTrack={'read_end'}
 			>{data.article.cta.label} <span aria-hidden="true">→</span></a
@@ -293,6 +303,23 @@
 		margin-right: 4px;
 	}
 
+	.play {
+		display: grid;
+		gap: 8px;
+		padding: 15px 16px;
+		border-radius: 14px;
+		background: var(--panel);
+		border: 1.5px solid var(--accent);
+		color: var(--text);
+		font-size: 14px;
+		line-height: 1.75;
+		text-decoration: none;
+		word-break: keep-all;
+	}
+	.play b {
+		font-size: 15px;
+		color: var(--accent-text);
+	}
 	.ctas {
 		display: flex;
 	}

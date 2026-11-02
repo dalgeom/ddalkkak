@@ -19,6 +19,7 @@ export function load({ params, url }) {
 	return {
 		problem,
 		friend: parseMark(url.searchParams.get('r')),
+		fromRead: url.searchParams.get('from') === 'read',
 		preview: previewOf(problem)
 	};
 }
