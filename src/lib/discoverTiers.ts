@@ -420,6 +420,9 @@ export const DISCOVER_TIERS: Readonly<Record<string, Tier>> = {
 	'club-jaru': 1, // 11/2 새로 · 「한 자루」로 세는 것
 	'card-15-fork': 5, // 11/2 새로 · 합 15 놀이 = 마방진 위 틱택토, 8이 두 갈래
 	'cup-pack-17': 5, // 11/2 새로 · 4 · 7 묶음으로 못 사는 가장 큰 수
+	'club-honorific': 1, // 11/3 새로 · 어른께 쓰는 높임말이 따로 있는 낱말
+	'election-min-9': 4, // 11/3 새로 · 모둠 다수로 뽑는 반장의 최소 득표
+	'tray-line-3': 5, // 11/3 새로 · 선반이 비지 않는 줄 모양 세기
 };
 
 /**

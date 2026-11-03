@@ -48,7 +48,9 @@ export const CHOSUNG_BATCHES: { fromDay: number; counts: Record<string, number> 
 	// 10/30 배포(새싹 5낱말: 거위 · 고등어 · 계란찜 · 땅콩 · 이열치열), 10/31(20757)부터 오늘의 초성이 364개 순서로 돈다
 	{ fromDay: 20757, counts: { animal: 83, food: 83, 'fruit-vegetable': 70, country: 63, idiom: 65 } },
 	// 11/2 묶음 — 노루 · 붕어 · 참치 · 곶감 · 쑥갓 (새싹 채우기)
-	{ fromDay: 20760, counts: { animal: 85, food: 85, 'fruit-vegetable': 71, country: 63, idiom: 65 } }
+	{ fromDay: 20760, counts: { animal: 85, food: 85, 'fruit-vegetable': 71, country: 63, idiom: 65 } },
+	// 11/3 묶음 — 지렁이 · 무당벌레 · 깍두기 · 수정과 · 토란 (새싹 채우기)
+	{ fromDay: 20761, counts: { animal: 87, food: 87, 'fruit-vegetable': 72, country: 63, idiom: 65 } }
 ];
 
 const toWord = (slug: string) => ([word, hint, alts]: ChosungEntry) => ({ word, hint, alts: alts ?? [], category: slug });
