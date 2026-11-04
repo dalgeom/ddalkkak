@@ -24,7 +24,7 @@ let m = await b.ev(`
 	const dbl = [...document.querySelectorAll('section')].filter(s=>{const c=getComputedStyle(s);const inner=s.querySelector(':scope > * ');return c.borderTopWidth!=='0px' && inner && getComputedStyle(inner).borderTopWidth!=='0px' && getComputedStyle(inner).backgroundColor===c.backgroundColor;}).length;
 	return { cards, sheet, bar, tabs, dbl, start: document.querySelector('.cta')?.textContent.trim() };
 `);
-ok('메인 놀이 카드 6장 모두 링크', m.cards.length === 6 && m.cards.every(Boolean), m.cards.join(' '));
+ok('메인 놀이 카드 7장 모두 링크(11/4 끝말잇기)', m.cards.length === 7 && m.cards.every(Boolean), m.cards.join(' '));
 ok('처음 온 사람에게 새 소식 시트 안 뜸', !m.sheet);
 ok('하단 탭 오늘·놀이·기록', m.tabs.length >= 3, m.tabs.join(' '));
 ok('메인 카드 속 카드 없음', m.dbl === 0, 'dbl=' + m.dbl);

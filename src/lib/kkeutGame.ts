@@ -7,12 +7,13 @@ import { best, bestMoves, check, last, movesFrom, pickMove, type Dict, type Reje
  * 사람이 정답 길(line)대로 두는 동안은 길의 컴퓨터 말이 최선 수 후보 안에 있으면 그 말을 낸다 — 해설의 길과 실제 판이 같게.
  * 대결: 단계별 pickMove. 무승부 글자가 188종이라 사람이 DUEL_LIMIT수를 버티면 사람 승리로 끝낸다.
  * 컴퓨터가 낼 말이 없으면(새싹 · 쉬움은 쉬운 말만 알아서 막힐 수 있다) 사람 승리.
+ * 진검승부(free, 11/4): 고수(5단계) 컴퓨터와 수 제한 없이 누가 먼저 막히나 — 20수에서 끝나 심심한 사람을 위해.
  */
 export const DUEL_LIMIT = 20;
 
 export type Turn = { who: 'me' | 'cpu'; word: string };
 export type Game = {
-	mode: 'puzzle' | 'duel';
+	mode: 'puzzle' | 'duel' | 'free';
 	tier: Tier;
 	n: number;
 	line: string[];
@@ -33,6 +34,7 @@ const make = (mode: Game['mode'], tier: Tier, n: number, start: string, line: st
 
 export const newPuzzle = (start: string, n: number, line: string[] = []) => make('puzzle', 5, n, start, line);
 export const newDuel = (tier: Tier, start: string) => make('duel', tier, 0, start);
+export const newFree = (start: string) => make('free', 5, 0, start);
 
 /** 대결 첫 단어 — 쉬운 말 중 사람이 처음부터 지지 않고, 이을 말이 다섯 개 넘는 글자로 끝나는 것 */
 export function firstWord(d: Dict, t: Table, tier: Tier, rand: () => number = Math.random): string {

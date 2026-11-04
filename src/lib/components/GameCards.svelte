@@ -48,24 +48,20 @@
 				{ label: '화면에 띄우기', href: '/chosung/show' }
 			]
 		},
-		// 끝말잇기(11/3) — 11/9~16 초성 착지 판정이 끝날 때까지 /games(full)에서만 보인다(메인 「놀이 고르기」에는 11/17)
-		...(full
-			? [
-					{
-						key: 'kkeut',
-						name: '끝말잇기',
-						count: KKEUT_WORDS,
-						unit: '낱말',
-						line: '컴퓨터와 끝말잇기, 매일 퍼즐',
-						href: '/kkeut',
-						sub: [
-							{ label: '오늘의 끝말잇기', href: '/kkeut' },
-							{ label: '컴퓨터와 대결', href: '/kkeut#duel' }
-						],
-						fresh: true
-					}
-				]
-			: []),
+		// 끝말잇기(11/3) — 11/4 사용자 지시로 메인 「놀이 고르기」에도 넣었다(원래 11/17 예정, 초성 착지 판정과 겹친다 — 지표-기록 참고)
+		{
+			key: 'kkeut',
+			name: '끝말잇기',
+			count: KKEUT_WORDS,
+			unit: '낱말',
+			line: '컴퓨터와 끝말잇기, 매일 퍼즐',
+			href: '/kkeut',
+			sub: [
+				{ label: '오늘의 끝말잇기', href: '/kkeut' },
+				{ label: '컴퓨터와 대결', href: '/kkeut#duel' }
+			],
+			fresh: true
+		},
 		{
 			key: 'trivia',
 			name: '상식 퀴즈',

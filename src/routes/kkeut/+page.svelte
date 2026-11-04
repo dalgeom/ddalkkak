@@ -5,7 +5,7 @@
 	import { kstDayNumber } from '$lib/game';
 	import { TIERS, tierName, type Tier } from '$lib/tiers';
 	import { charTable, makeDict, last, type Dict, type Reject, type Table } from '$lib/kkeut';
-	import { firstWord, giveUp, newDuel, newPuzzle, play, DUEL_LIMIT, type Game } from '$lib/kkeutGame';
+	import { firstWord, giveUp, newDuel, newFree, newPuzzle, play, DUEL_LIMIT, type Game } from '$lib/kkeutGame';
 	import { KKEUT_FIRST_DAY, puzzleFor, type KkeutPuzzle } from '$lib/data/kkeutPuzzles';
 	import { nextStreak, shownStreak, type DayStreak } from '$lib/dailyStreak';
 	import { KKEUT_WORDS } from '$lib/data/kkeutMeta';
@@ -18,6 +18,7 @@
 	const DAILY_KEY = 'ddal.kkeut.daily';
 	const TIER_KEY = 'ddal.kkeut.tier';
 	const TRIES_KEY = 'ddal.kkeut.tries';
+	const FREE_KEY = 'ddal.kkeut.free'; // 진검승부 최고 기록(받아친 수)
 	const WHY: Record<Reject, string> = {
 		short: '두 글자 이상으로 써 주세요.',
 		first: '앞말의 끝 글자로 시작해야 해요.',
@@ -33,6 +34,8 @@
 	let day = $state(0);
 	let streak = $state<DayStreak | null>(null);
 	let cleared = $state(0); // 깬 단계 수(0 = 아무것도)
+	let freeBest = $state(0);
+	let freeNew = $state(false); // 이번 판이 최고 기록을 넘었나
 	let game = $state<Game | null>(null);
 	let tries = $state(0);
 	let hint = $state(false);
@@ -60,6 +63,7 @@
 		puzzle = puzzleFor(day);
 		streak = read<DayStreak>(DAILY_KEY);
 		cleared = read<number>(TIER_KEY) ?? 0;
+		freeBest = read<number>(FREE_KEY) ?? 0;
 		const t = read<{ day: number; tries: number }>(TRIES_KEY);
 		if (t && t.day === day) tries = t.tries;
 		try {
@@ -80,6 +84,9 @@
 	let answer = $derived(ansDay >= KKEUT_FIRST_DAY ? puzzleFor(ansDay) : null);
 	let mineCount = $derived(game ? game.chain.filter((x) => x.who === 'me').length : 0);
 	let pn = $derived(puzzle ? (puzzle.line.length + 1) / 2 : 0); // 오늘 퍼즐의 내 수
+	let goal = $derived(!game ? 0 : game.mode === 'puzzle' ? game.n : game.mode === 'duel' ? DUEL_LIMIT : 0); // 0 = 제한 없음
+	let now = $derived(game ? game.chain[game.chain.length - 1] : null); // 가운데 크게 보이는 지금 말
+	let trail = $derived(game ? game.chain.slice(-7, -1) : []); // 지난 말 — 최근 여섯만 한 줄로
 
 	function startPuzzle() {
 		if (!puzzle) return;
@@ -96,11 +103,20 @@
 		track('kkeut_duel_start', { tier });
 		focus();
 	}
+	function startFree() {
+		if (!dict || !table) return;
+		game = newFree(firstWord(dict, table, 5));
+		msg = '';
+		giveHints = [];
+		freeNew = false;
+		track('kkeut_free_start', { best: freeBest });
+		focus();
+	}
 	const focus = () => setTimeout(() => field?.focus(), 50);
 	/** 긴 판에서 새 말 · 거절 문구가 화면 밖으로 밀리지 않게 마지막 말을 입력창 위로 — 판이 끝났으면 결과(.end)를 */
 	async function toEnd() {
 		await tick();
-		(document.querySelector('.end') ?? document.querySelector('.chain li:last-child'))?.scrollIntoView({ block: 'nearest' });
+		(document.querySelector('.end') ?? document.querySelector('.now'))?.scrollIntoView({ block: 'nearest' });
 	}
 
 	async function submit(e: SubmitEvent) {
@@ -130,6 +146,8 @@
 				write(DAILY_KEY, streak);
 				track('kkeut_daily_solve', { n: game.n, tries: tries + 1 });
 			} else miss();
+		} else if (game.mode === 'free') {
+			endFree(game.end ?? 'lose');
 		} else {
 			track(`kkeut_duel_${game.end}`, { tier: game.tier, moves });
 			if (game.end === 'win' && game.tier > cleared) {
@@ -153,10 +171,21 @@
 		if (puzzle) loadDefs([puzzle.start, ...puzzle.line]);
 	}
 
+	function endFree(result: string) {
+		const moves = mineCount;
+		freeNew = moves > freeBest;
+		if (freeNew) {
+			freeBest = moves;
+			write(FREE_KEY, moves);
+		}
+		track('kkeut_free_end', { result, moves, best: freeBest });
+	}
+
 	function quit() {
 		if (!game || !dict) return;
 		giveHints = giveUp(game, dict);
-		track('kkeut_duel_giveup', { tier: game.tier, moves: mineCount });
+		if (game.mode === 'free') endFree('giveup');
+		else track('kkeut_duel_giveup', { tier: game.tier, moves: mineCount });
 		loadDefs(game.chain.map((x) => x.word));
 		toEnd();
 	}
@@ -240,6 +269,12 @@
 			</div>
 		</section>
 
+		<section class="card free">
+			<h2>진검승부</h2>
+			<p class="note">수 제한 없이 고수 컴퓨터와 겨뤄요. 먼저 막히는 쪽이 져요.{#if freeBest} 내 최고 기록은 <b>{freeBest}수</b>예요.{/if}</p>
+			<button class="big" disabled={!dict} onclick={startFree}>진검승부 시작</button>
+		</section>
+
 		<section class="card rules">
 			<h2>끝말잇기 규칙</h2>
 			<ul class="note">
@@ -257,20 +292,28 @@
 				컴퓨터가 {DUEL_LIMIT}번 받아칠 때까지 버티면 이겨요. 새싹 · 쉬움은 쉬운 낱말만 쓰고, 새싹은 받아칠 말이 없는 「한방 단어」를 되도록 내지 않아요.
 				보통부터는 사전 전체를 쓰고, 어려움은 한방 단어를 먼저 노리고, 고수는 수를 읽어 가장 받기 어려운 말을 골라요.
 			</p>
+			<h2>진검승부</h2>
+			<p class="note">
+				{DUEL_LIMIT}수 제한이 없어요. 고수와 같은 컴퓨터가 끝까지 받아치니, 누가 먼저 이을 말이 없어지는지 겨뤄요. 내가 받아친 수가 기록으로 남아요.
+			</p>
 		</section>
 	{:else}
 		<div class="playing">
 			<div class="bar">
 				<button class="ghost" onclick={back}>← 나가기</button>
-				<span>{game.mode === 'puzzle' ? `오늘의 퍼즐 · ${mineCount}/${game.n}수` : `${tierName(game.tier)} · ${mineCount}/${DUEL_LIMIT}`}</span>
+				<span>{game.mode === 'puzzle' ? `오늘의 퍼즐 · ${mineCount}/${game.n}수` : game.mode === 'duel' ? `${tierName(game.tier)} · ${mineCount}/${DUEL_LIMIT}` : `진검승부 · ${mineCount}수${freeBest ? ` · 최고 ${freeBest}` : ''}`}</span>
 			</div>
-			<ol class="chain">
-				{#each game.chain as x, i (i)}
-					<li class:me={x.who === 'me'}><b>{x.word}</b>{#if game.end && defs[x.word]}<span>{defs[x.word]}</span>{/if}</li>
-				{/each}
-			</ol>
+			{#if goal}<div class="prog" role="progressbar" aria-valuemin="0" aria-valuemax={goal} aria-valuenow={mineCount} aria-label="받아친 수"><i style="width:{(mineCount / goal) * 100}%"></i></div>{/if}
 
-			{#if !game.end}
+			{#if !game.end && now}
+				<ol class="trail" aria-label="지난 말">
+					{#if game.chain.length > 7}<li class="more">…</li>{/if}
+					{#each trail as x, i (game.chain.length - 7 + i)}<li class:me={x.who === 'me'}>{x.word}</li>{/each}
+				</ol>
+				<div class="now">
+					<span>{now.who === 'cpu' ? '컴퓨터' : '나'}</span>
+					<b>{now.word.slice(0, -1)}<u>{last(now.word)}</u></b>
+				</div>
 				<div class="dock">
 					<form onsubmit={submit}>
 						<input
@@ -281,7 +324,7 @@
 							autocapitalize="off"
 							spellcheck="false"
 							enterkeyhint="send"
-							placeholder="「{last(game.chain[game.chain.length - 1].word)}」(으)로 시작하는 말"
+							placeholder="「{last(now.word)}」(으)로 시작하는 말"
 							aria-label="이을 말 입력"
 						/>
 						<button class="big" type="submit" onpointerdown={(e) => e.preventDefault()}>내기</button>
@@ -292,11 +335,27 @@
 					{#if hint}<p class="note">힌트: 내 첫 말의 끝 글자는 「{last(puzzle.line[0])}」예요.</p>
 					{:else}<button class="ghost" onclick={() => (hint = true)}>힌트 보기</button>{/if}
 				{/if}
-				{#if game.mode === 'duel'}<button class="ghost" onclick={quit}>모르겠어요</button>{/if}
+				{#if game.mode !== 'puzzle'}<button class="ghost" onclick={quit}>모르겠어요</button>{/if}
 			{:else}
 				<section class="end">
 					{#if game.mode === 'puzzle'}
 						<h2>{game.end === 'win' ? '막았어요!' : '컴퓨터가 받아쳤어요'}</h2>
+					{:else if game.mode === 'duel'}
+						<h2>{game.end === 'win' ? `${tierName(game.tier)} 단계를 이겼어요!` : game.end === 'lose' ? '이을 말이 없어요, 졌어요' : '이런 말이 있었어요'}</h2>
+					{:else}
+						<h2>{game.end === 'win' ? `컴퓨터가 막혔어요! ${mineCount}수로 이겼어요` : `${mineCount}번 받아쳤어요`}</h2>
+						{#if freeBest}<p class="note">{freeNew ? '새 최고 기록이에요!' : `최고 기록은 ${freeBest}수예요.`}</p>{/if}
+					{/if}
+					{#if giveHints.length}<p class="note">낼 수 있었던 말: {giveHints.join(' · ')}</p>{/if}
+
+					<h3>이번 판 흐름 · {game.chain.length}마디</h3>
+					<ol class="chain">
+						{#each game.chain as x, i (i)}
+							<li class:me={x.who === 'me'}><b>{x.word}</b>{#if defs[x.word]}<span>{defs[x.word]}</span>{/if}</li>
+						{/each}
+					</ol>
+
+					{#if game.mode === 'puzzle'}
 						{#if game.end === 'win'}
 							<button class="big" onclick={back}>처음으로</button>
 						{:else if tries < 3}
@@ -306,14 +365,16 @@
 							<button class="big" onclick={back}>정답 길 보기</button>
 						{/if}
 						{#if answer}<a class="ghost" href="/kkeut/answer/{answer.date}" onclick={() => track('kkeut_answer_open', { from: 'end' })}>어제 퍼즐 해설 보기</a>{/if}
-					{:else}
-						<h2>{game.end === 'win' ? `${tierName(game.tier)} 단계를 이겼어요!` : game.end === 'lose' ? '이을 말이 없어요, 졌어요' : '이런 말이 있었어요'}</h2>
-						{#if giveHints.length}<p class="note">{giveHints.join(' · ')}</p>{/if}
+					{:else if game.mode === 'duel'}
 						<div class="row">
 							<button class="big" onclick={() => game && startDuel(game.tier)}>다시 하기</button>
 							{#if game.end === 'win' && game.tier < 5}<button class="big alt" onclick={() => game && startDuel((game.tier + 1) as Tier)}>다음 단계</button>{/if}
 						</div>
+						{#if game.end === 'win' && game.tier === 5}<button class="big alt" onclick={startFree}>진검승부 하기</button>{/if}
 						<button class="ghost" onclick={back}>오늘의 퍼즐 · 다른 단계</button>
+					{:else}
+						<button class="big" onclick={startFree}>다시 겨루기</button>
+						<button class="ghost" onclick={back}>오늘의 퍼즐 · 단계 대결</button>
 					{/if}
 					<a class="ghost" href="/games">다른 놀이</a>
 				</section>
@@ -354,10 +415,22 @@
 	.bar .ghost { width: auto; margin: 0; }
 	.chain, .line { list-style: none; padding: 0; margin: 12px 0; display: flex; flex-direction: column; gap: 6px; }
 	.chain li, .line li { align-self: flex-start; max-width: 85%; padding: 8px 12px; border-radius: 14px; background: var(--panel-2); overflow-wrap: anywhere; }
-	.chain li { scroll-margin: 12px 0 calc(var(--tab-h, 0px) + 120px); } /* 아래 sticky 입력 묶음 · 하단 탭에 가리지 않게 */
 	.chain li.me, .line li.me { align-self: flex-end; background: var(--accent); color: #fff; }
 	.chain li span, .line li span { display: block; font-size: 13px; opacity: 0.85; margin-top: 2px; }
-	.dock { position: sticky; bottom: var(--tab-h, 0px); padding: 8px 0; background: var(--bg); }
+	/* 진행 중은 한 화면 — 지난 말은 위에 한 줄(최근 여섯), 지금 말은 가운데 크게, 입력은 그 아래. 전체 흐름은 판 끝에 */
+	.prog { height: 6px; margin-top: 8px; border-radius: 3px; background: var(--panel-2); overflow: hidden; }
+	.prog i { display: block; height: 100%; background: var(--accent); border-radius: 3px; transition: width 0.3s; }
+	.trail { list-style: none; padding: 0; margin: 16px auto 0; width: max-content; max-width: 100%; display: flex; justify-content: flex-end; align-items: center; gap: 4px; min-height: 28px; overflow: hidden; font-size: 13px; color: var(--muted); white-space: nowrap; }
+	.trail li { flex: none; padding: 3px 8px; border-radius: 10px; background: var(--panel-2); }
+	.trail li.me { color: var(--accent); font-weight: 700; }
+	.trail li.more { background: none; padding: 0; }
+	.trail:has(.more) { -webkit-mask-image: linear-gradient(to right, transparent, #000 32px); mask-image: linear-gradient(to right, transparent, #000 32px); } /* 좁으면 오래된 쪽(왼쪽)이 잘린다 — 최근 말은 늘 다 보인다 */
+	.now { margin-top: 14px; padding: 22px 12px 26px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--panel); text-align: center; scroll-margin: 12px; }
+	.now span { display: block; font-size: 13px; font-weight: 800; color: var(--muted); }
+	.now b { display: block; margin-top: 6px; font-size: clamp(30px, 11vw, 44px); font-weight: 900; line-height: 1.2; overflow-wrap: anywhere; }
+	.now u { color: var(--accent); text-decoration: underline; text-decoration-color: var(--accent); text-decoration-thickness: 4px; text-underline-offset: 8px; }
+	.end h3 { font-size: 15px; font-weight: 800; margin-top: 16px; color: var(--muted); }
+	.dock { position: sticky; bottom: var(--tab-h, 0px); padding: 12px 0 8px; background: var(--bg); }
 	form { display: flex; gap: 8px; }
 	form input { flex: 1; min-width: 0; min-height: 48px; padding: 0 12px; border: 1px solid var(--border); border-radius: 12px; font-size: 17px; background: var(--panel); color: var(--text); }
 	form .big { width: auto; margin: 0; padding: 0 18px; }

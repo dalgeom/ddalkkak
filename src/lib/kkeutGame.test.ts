@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { charTable, makeDict } from './kkeut';
-import { DUEL_LIMIT, firstWord, giveUp, newDuel, newPuzzle, play } from './kkeutGame';
+import { DUEL_LIMIT, firstWord, giveUp, newDuel, newFree, newPuzzle, play } from './kkeutGame';
 
 const r0 = () => 0;
 
@@ -130,5 +130,32 @@ describe('대결', () => {
 	it('첫 단어는 사람이 처음부터 지는 글자로 끝나지 않는다', () => {
 		const w = firstWord(d, t, 1, r0);
 		expect(t.lose.has(w.at(-1)!)).toBe(false);
+	});
+});
+
+describe('진검승부', () => {
+	const words = ['가나', '나라', '라디오', '오리', '이사', '사자', '자두'];
+	const d = makeDict(words, words);
+	const t = charTable(d);
+	it(`${DUEL_LIMIT}수를 넘어도 끝나지 않는다`, () => {
+		const g = newFree('가나');
+		for (let i = 0; i < DUEL_LIMIT + 5; i++) g.chain.push({ who: 'me', word: `x${i}` }, { who: 'cpu', word: `y${i}오` });
+		g.chain.push({ who: 'cpu', word: '라디오' });
+		play(g, d, t, '오리', r0); // 컴퓨터: 이사
+		expect(g.chain.at(-1)?.word).toBe('이사');
+		expect(g.end).toBeNull();
+	});
+	it('컴퓨터는 고수처럼 사전 전체로 둔다', () => {
+		const d2 = makeDict(['가나', '나비', '비누'], ['가나', '나비']);
+		const g = newFree('가나');
+		play(g, d2, charTable(d2), '나비', r0); // 비누는 쉬운 말이 아니지만 고수는 안다
+		expect(g.chain.at(-1)).toEqual({ who: 'cpu', word: '비누' });
+		expect(g.tier).toBe(5);
+	});
+	it('누가 막히면 끝난다', () => {
+		const g = newFree('오리');
+		play(g, d, t, '이사', r0);
+		play(g, d, t, '자두', r0);
+		expect(g.end).toBe('win');
 	});
 });
