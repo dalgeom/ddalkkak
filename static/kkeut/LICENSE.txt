@@ -1,0 +1,4 @@
+words.json · defs/*.json 은 한국어기초사전(국립국어원, https://krdict.korean.go.kr) 2026-10-19판에서 뽑은 것입니다.
+원저작물과 같은 크리에이티브 커먼즈 저작자표시-동일조건변경허락 2.0 대한민국(CC BY-SA 2.0 KR) 라이선스를 따릅니다.
+https://creativecommons.org/licenses/by-sa/2.0/kr/
+뽑은 조건: 단위 「단어」 · 품사 「명사」 · 한글 두 글자 이상. 쉬운 말 = 어휘 등급 초급 · 중급. 뜻풀이 = 첫 뜻의 첫 문장(80자까지).

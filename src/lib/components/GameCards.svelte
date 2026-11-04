@@ -2,6 +2,7 @@
 	import MatchstickBoard from '$lib/components/MatchstickBoard.svelte';
 	import CubeDie from '$lib/components/CubeDie.svelte';
 	import { parseEq } from '$lib/matchstick';
+	import { KKEUT_WORDS } from '$lib/data/kkeutMeta';
 
 	/**
 	 * 놀이 카드(v2, 2026-10-14) — 메인 「놀이 고르기」와 /games가 같은 카드를 쓴다.
@@ -47,6 +48,24 @@
 				{ label: '화면에 띄우기', href: '/chosung/show' }
 			]
 		},
+		// 끝말잇기(11/3) — 11/9~16 초성 착지 판정이 끝날 때까지 /games(full)에서만 보인다(메인 「놀이 고르기」에는 11/17)
+		...(full
+			? [
+					{
+						key: 'kkeut',
+						name: '끝말잇기',
+						count: KKEUT_WORDS,
+						unit: '낱말',
+						line: '컴퓨터와 끝말잇기, 매일 퍼즐',
+						href: '/kkeut',
+						sub: [
+							{ label: '오늘의 끝말잇기', href: '/kkeut' },
+							{ label: '컴퓨터와 대결', href: '/kkeut#duel' }
+						],
+						fresh: true
+					}
+				]
+			: []),
 		{
 			key: 'trivia',
 			name: '상식 퀴즈',
@@ -112,6 +131,8 @@
 						<span class="rr">나무 → 2</span>
 						<span class="rr">가나다 → 1</span>
 						<span class="rr">고구마 → <b>?</b></span>
+					{:else if g.key === 'kkeut'}
+						<span class="tile">기</span><span class="tile on">차</span><span class="arr">→</span><span class="tile on">차</span><span class="tile">표</span>
 					{:else if g.key === 'cube'}
 						<CubeDie view={[2, 3, 4]} size={52} />
 					{:else}
@@ -120,7 +141,7 @@
 				</div>
 				<div class="txt">
 					<b>{g.name}{#if g.fresh}<i>새 놀이</i>{/if}</b>
-					<span class="cnt">{g.count.toLocaleString()}문제</span>
+					<span class="cnt">{g.count.toLocaleString()}{g.unit ?? '문제'}</span>
 					<span class="line">{g.line}</span>
 				</div>
 			</a>
@@ -200,6 +221,24 @@
 		justify-content: center;
 		font-weight: 900;
 		font-size: 15px;
+	}
+	.vis.kkeut {
+		gap: 3px;
+		white-space: nowrap;
+	}
+	.vis.kkeut .tile {
+		width: 20px;
+		font-size: 13px;
+	}
+	.tile.on {
+		border-color: var(--accent);
+		color: var(--accent-text);
+		background: var(--accent-soft);
+	}
+	.arr {
+		font-size: 12px;
+		font-weight: 800;
+		color: var(--muted);
 	}
 	.vis.trivia {
 		display: grid;

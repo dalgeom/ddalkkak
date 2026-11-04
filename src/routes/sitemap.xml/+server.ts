@@ -1,3 +1,4 @@
+import { version } from '$app/environment';
 import { kstDayNumber } from '$lib/game';
 import { TRIVIA_CATEGORIES } from '$lib/triviaCategories';
 import { DISCOVER_FIELD_META } from '$lib/discoverFields';
@@ -5,6 +6,7 @@ import { MATCH_KINDS } from '$lib/matchstickKinds';
 import { MATCH_LEVELS } from '$lib/matchstickLevels';
 import { MATCH_ANSWERS, answerSlug } from '$lib/matchAnswers';
 import { CHOSUNG_CATEGORIES } from '$lib/data/chosung';
+import { KKEUT_FIRST_DAY, KKEUT_PUZZLES } from '$lib/data/kkeutPuzzles';
 import { ARTICLES } from '$lib/articles';
 import type { RequestHandler } from './$types';
 
@@ -84,11 +86,18 @@ export const GET: RequestHandler = () => {
 		freq: 'monthly',
 		priority: '0.6'
 	}));
+	// 지난 오늘의 끝말잇기 해설(11/3) — 오간 말과 뜻풀이가 HTML에 있다. /kkeut(게임 화면)는 /matchstick과 같은 이유로 뺀다
+	// 해설 쪽은 빌드한 날까지만 구워지므로 요청 날짜(today)가 아니라 빌드 날짜로 거른다 — version 기본값이 빌드 시각(Date.now())이다
+	const kkeutAnswers = KKEUT_PUZZLES.filter((_, i) => KKEUT_FIRST_DAY + i < kstDayNumber(Number(version))).map((p) => ({
+		path: `/kkeut/answer/${p.date}`,
+		freq: 'yearly',
+		priority: '0.5'
+	}));
 	const articles = [
 		{ path: '/read', freq: 'weekly', priority: '0.7' },
 		...ARTICLES.map((a) => ({ path: `/read/${a.slug}`, freq: 'monthly', priority: '0.7' }))
 	];
-	const all = [...PAGES, ...triviaCats, ...discoverFields, ...matchKinds, ...matchAnswers, ...chosungCats, ...articles];
+	const all = [...PAGES, ...triviaCats, ...discoverFields, ...matchKinds, ...matchAnswers, ...kkeutAnswers, ...chosungCats, ...articles];
 	const body = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${all
