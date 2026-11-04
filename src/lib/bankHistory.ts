@@ -67,7 +67,7 @@ const BANK_HISTORY: ({ fromDay: number } & BankSizes)[] = [
 	{ fromDay: 20757, discover: 404, trivia: 526 }, // 10/30 단계 채우기(발견형 3개: 새싹 아파트 37번째 집 · 4단계 종이 찢기 2026 · 고수 동전 4개씩 뒤집기 / 상식 5개: 고수 tv-550~554 / 초성 새싹 5낱말), 10/31부터 적용
 	{ fromDay: 20760, discover: 407, trivia: 531 }, // 11/2 단계 채우기(발견형 3개: 새싹 club-jaru, 고수 card-15-fork · cup-pack-17 / 상식 고수 5개)
 	{ fromDay: 20761, discover: 410, trivia: 536 }, // 11/3 단계 채우기(발견형 3개: 새싹 club-honorific, 4단계 election-min-9, 고수 tray-line-3, 상식 고수 5개)
-	{ fromDay: 20763, discover: 413, trivia: 541 } // 11/4 단계 채우기(발견형 3개: 새싹 scale-zero-55 · 어려움 corridor-robots-18 · 고수 ktx-meet-9, 상식 고수 5개 tv-565~569)
+	{ fromDay: 20762, discover: 413, trivia: 541 } // 11/4 단계 채우기(발견형 3개: 새싹 scale-zero-55 · 어려움 corridor-robots-18 · 고수 ktx-meet-9, 상식 고수 5개 tv-565~569)
 ];
 
 /** day의 세트를 계산할 때 쓸 은행 크기 — fromDay가 day 이하인 마지막 엔트리 */
