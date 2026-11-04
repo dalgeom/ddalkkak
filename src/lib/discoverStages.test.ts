@@ -16,7 +16,7 @@ describe('발견형 단계 도전', () => {
 		expect(new Set(DISCOVER_STAGES.map((s) => s.key)).size).toBe(DISCOVER_STAGES.length);
 	});
 	it('판 구성 고정(기기에 진행이 남는다)', () => {
-		expect(DISCOVER_STAGES.length).toMatchInlineSnapshot(`80`); // 10/22 새싹 2 · 고수 1 추가로 74 → 75, 10/23 새싹 1 · 고수 2 추가로 76, 10/28 새싹 1 · 고수 2 추가로 78
+		expect(DISCOVER_STAGES.length).toMatchInlineSnapshot(`81`); // 11/4 새싹 1 · 어려움 1 · 고수 1 추가로 80 → 81(다섯이 찬 단계만 판이 된다), 10/22 새싹 2 · 고수 1 추가로 74 → 75, 10/23 새싹 1 · 고수 2 추가로 76, 10/28 새싹 1 · 고수 2 추가로 78
 		expect(DISCOVER_STAGES[0].ids).toMatchInlineSnapshot(`
 			[
 			  "cal-mirror-clock",

@@ -423,6 +423,9 @@ export const DISCOVER_TIERS: Readonly<Record<string, Tier>> = {
 	'club-honorific': 1, // 11/3 새로 · 어른께 쓰는 높임말이 따로 있는 낱말
 	'election-min-9': 4, // 11/3 새로 · 모둠 다수로 뽑는 반장의 최소 득표
 	'tray-line-3': 5, // 11/3 새로 · 선반이 비지 않는 줄 모양 세기
+	'scale-zero-55': 1, // 11/4 새로 · 영점 어긋난 체중계, 어긋남은 한 번만
+	'corridor-robots-18': 4, // 11/4 새로 · 부딪혀 돌아서기 = 지나치기
+	'ktx-meet-9': 5, // 11/4 새로 · 이미 길 위에 있는 열차까지 세기
 };
 
 /**
