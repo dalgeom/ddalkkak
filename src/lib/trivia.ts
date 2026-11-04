@@ -5447,7 +5447,7 @@ export const TRIVIA: Problem[] = [
 		category: '맞춤법',
 		grade: '중등',
 		chip: '맞춤법',
-		blocks: [{ kind: 'text', html: '방금 끓인 라면이 창가에 두었더니 <b>___</b> 식어 버렸어요.' }],
+		blocks: [{ kind: 'text', html: '방금 끓인 라면을 창가에 두었더니 <b>___</b> 식어 버렸어요.' }],
 		type: 'choice',
 		choices: ['금세', '금새', '금쌔', '긍새'],
 		answerIndex: 0,
