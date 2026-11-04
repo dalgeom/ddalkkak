@@ -34,11 +34,11 @@
 	<title>소개 — 딸깍 퍼즐</title>
 	<meta
 		name="description"
-		content="딸깍은 매일 10문제가 새로 열리는 두뇌 퍼즐 사이트예요. 발견형 퍼즐·상식 퀴즈·성냥개비·전개도를 매일 자정에 새로, 모두가 같은 문제로 풀어요."
+		content="딸깍은 한 사람이 직접 설계하고 검수하는 두뇌 퍼즐 사이트예요. 매일 10문제와 함께, 수업·모임에서 화면에 띄우는 퀴즈, 성냥개비 정답 찾기·문제 만들기, 끝말잇기 단어 찾기 같은 무료 도구를 만들어요."
 	/>
 	<link rel="canonical" href="https://ddalkkak.app/about" />
 	<meta property="og:title" content="소개 — 딸깍 퍼즐" />
-	<meta property="og:description" content="매일 10문제가 새로 열리는 두뇌 퍼즐 사이트, 딸깍." />
+	<meta property="og:description" content="매일 10문제와 무료 퀴즈 도구를 만드는 두뇌 퍼즐 사이트, 딸깍." />
 	<meta property="og:url" content="https://ddalkkak.app/about" />
 </svelte:head>
 
@@ -99,7 +99,7 @@
 			</div>
 		</div>
 		<p class="note">
-			매일 10문제와 따로 즐기는 <a href="/chosung">초성 퀴즈</a>도 있어요. 발견형 푸는 법은
+			매일 10문제와 따로 즐기는 <a href="/chosung">초성 퀴즈</a>와 <a href="/kkeut">끝말잇기</a>도 있어요. 발견형 푸는 법은
 			<a href="/guide">발견형 푸는 법</a>에 단계별로 정리해 두었어요.
 		</p>
 	</section>
@@ -169,6 +169,22 @@
 			쓰고 검수해요. 성냥개비와 전개도는 규칙이 명확해서 프로그램이 만들고, 대신 <b>사람이 손으로
 			적으면 반드시 틀린다</b>는 것을 전제로 검증을 붙였어요. 전개도를 손으로 24개 적었을 때 그중
 			여섯 개가 접히지 않는 가짜였던 경험에서 나온 방식이에요.
+		</p>
+	</section>
+
+	<!-- 11/4: 매일 10문제만 내는 곳이 아니라는 것을 소개에 적는다 — 도구는 /tools에 모았다 -->
+	<section class="sec maker">
+		<h2 class="sh">문제 말고 도구도 만들어요</h2>
+		<p>
+			퍼즐을 만들다 보니 쓸모 있는 것이 같이 생겼어요. 수업이나 모임에서 TV·빔프로젝터에 크게 띄워
+			다 같이 맞히는 <a href="/chosung/show">초성 퀴즈 띄우기</a>와 <a href="/trivia/show">상식 퀴즈 띄우기</a>,
+			막힌 식을 넣으면 답을 찾아 주는 <a href="/matchstick/solve">성냥개비 정답 찾기</a>, 맞는 식에서 문제를
+			뽑아 주는 <a href="/matchstick/make">성냥개비 문제 만들기</a>, 글자 하나로 이을 말을 찾는
+			<a href="/kkeut/words">끝말잇기 단어 찾기</a>, A4로 뽑는 <a href="/print">인쇄용 학습지</a>예요.
+		</p>
+		<p>
+			모두 가입 없이 무료로 써요. 퍼즐 문제를 만들 때 쓰는 검산기와 사전을 그대로 꺼내 놓은 것이라,
+			문제에 쓰는 기준이 도구에도 똑같이 걸려 있어요. 전부 <a href="/tools">도구 모음</a>에 모아 두었어요.
 		</p>
 	</section>
 

@@ -48,6 +48,12 @@ const PAGES: Entry[] = [
 	{ path: '/matchstick/answer', freq: 'monthly', priority: '0.7', lastmod: '2026-10-29' },
 	// 초성 퀴즈 띄우기(10/26) — 수업 · 모임 진행 도구. 진행 요령 글이 HTML에 있다
 	{ path: '/chosung/show', freq: 'monthly', priority: '0.7', lastmod: '2026-10-26' },
+	// 도구 모음(11/4) — 띄우기 · 만들기 · 학습지 · 찾기를 쓰임새별로 묶은 쪽과 그 도구들. 쪽마다 쓰는 법 글이 HTML에 있다
+	{ path: '/tools', freq: 'monthly', priority: '0.8', lastmod: '2026-11-04' },
+	{ path: '/trivia/show', freq: 'monthly', priority: '0.7', lastmod: '2026-11-04' },
+	{ path: '/matchstick/make', freq: 'monthly', priority: '0.7', lastmod: '2026-11-04' },
+	{ path: '/print', freq: 'monthly', priority: '0.7', lastmod: '2026-11-04' },
+	{ path: '/kkeut/words', freq: 'monthly', priority: '0.7', lastmod: '2026-11-04' },
 	{ path: '/cubenet/guide', freq: 'monthly', priority: '0.8' },
 	{ path: '/archive', freq: 'daily', priority: '0.8' },
 	{ path: '/guide', freq: 'monthly', priority: '0.6' },

@@ -22,6 +22,14 @@ export interface Notice {
 
 export const NOTICES: Notice[] = [
 	{
+		id: '2026-11-04-tools',
+		date: '2026-11-04',
+		title: '수업 · 모임에 쓰는 도구가 늘었어요',
+		body: '상식 퀴즈도 TV에 띄울 수 있고, 맞는 식만 넣으면 성냥개비 문제를 만들어 줘요. 초성 · 성냥 문제를 A4 학습지로 인쇄하고, 끝말잇기에서 막힌 글자로 이을 말도 찾아요. 한 쪽에 모아 두었어요.',
+		href: '/tools',
+		cta: '도구 모음 보기'
+	},
+	{
 		id: '2026-11-04-kkeut',
 		date: '2026-11-04',
 		title: '끝말잇기가 생겼어요',

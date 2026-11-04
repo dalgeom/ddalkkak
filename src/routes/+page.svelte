@@ -206,12 +206,6 @@
 	const demoBoard = parseEq('8 - 0 = 8');
 
 	/** 오늘 구성 — 유형이 늘어도 문구가 저절로 따라오게 계산해서 쓴다 */
-	const LONG_LABEL: Record<DailyKind, string> = {
-		discover: '발견형 퍼즐',
-		trivia: '상식 퀴즈',
-		match: '성냥개비',
-		cube: '전개도'
-	};
 	let todayCounts = $derived.by(() => {
 		const order = dailyKindOrder(dayNum);
 		const c: Partial<Record<DailyKind, number>> = {};
@@ -220,9 +214,6 @@
 	});
 	let compositionShort = $derived(
 		todayCounts.map((x) => `${KIND_LABEL[x.kind]} ${x.n}`).join(' · ') + ' · 보너스 1'
-	);
-	let compositionLong = $derived(
-		todayCounts.map((x) => `${LONG_LABEL[x.kind]} ${x.n}`).join(' · ') + ' · 보너스 1'
 	);
 
 	/** 상단 유형 칩: "발견 · 2/3" — 같은 유형 안에서 몇 번째인지 */
@@ -1005,17 +996,17 @@
 </script>
 
 <svelte:head>
-	<title>딸깍 퍼즐 — 매일 새로 열리는 두뇌 퍼즐 10문제</title>
+	<title>딸깍 퍼즐 — 매일 두뇌 퍼즐 10문제 · 퀴즈 띄우기 · 성냥개비 · 끝말잇기 도구</title>
 	<meta
 		name="description"
-		content="하루 10문제. {compositionLong}. 매일 자정에 새로 열리고, 그날은 모두 같은 문제를 풀어요."
+		content="매일 자정 새로 열리는 두뇌 퍼즐 10문제(발견형·상식·성냥개비·전개도). 수업·모임에서 TV로 띄우는 퀴즈, 성냥개비 정답 찾기, 끝말잇기 단어 찾기 같은 무료 도구도 있어요. 문제마다 검수하고 해설을 달아요."
 	/>
 	<link rel="canonical" href="https://ddalkkak.app/" />
 	<meta property="og:url" content="https://ddalkkak.app/" />
-	<meta property="og:title" content="딸깍 퍼즐 — 매일 새로 열리는 두뇌 퍼즐 10문제" />
+	<meta property="og:title" content="딸깍 퍼즐 — 매일 두뇌 퍼즐 10문제와 무료 퀴즈 도구" />
 	<meta
 		property="og:description"
-		content="하루 10문제. {compositionLong}."
+		content="하루 10문제와 퀴즈 띄우기 · 성냥개비 정답 찾기 · 끝말잇기 단어 찾기 도구."
 	/>
 </svelte:head>
 
@@ -1096,6 +1087,11 @@
 	<section class="hsec reveal d2">
 		<h2 class="sec-h">놀이 고르기</h2>
 		<GameCards counts={KIND_COUNT} />
+		<!-- 도구 모음(11/4) — 띄우기 · 만들기 · 학습지 · 찾기. 놀이 카드 아래 한 줄로 들어가는 길 -->
+		<a class="tools-in" href="/tools" onclick={() => track('tools_in_home')}>
+			<span><b>수업 · 모임에 쓰는 도구</b>퀴즈 띄우기 · 문제 만들기 · 학습지 인쇄</span>
+			<span class="ar" aria-hidden="true">→</span>
+		</a>
 	</section>
 
 	<div class="adwrap reveal d2"><AdSlot label="랜딩 하단" /></div>
@@ -1741,6 +1737,35 @@
 	/* ── 섹션 공통 ── */
 	.hsec {
 		margin-top: 26px;
+	}
+	.tools-in {
+		margin-top: 10px;
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 10px;
+		padding: 14px 16px;
+		border: 1px solid var(--border-strong);
+		border-radius: 14px;
+		background: var(--panel);
+		color: var(--text);
+		text-decoration: none;
+	}
+	.tools-in span:first-child {
+		display: flex;
+		flex-direction: column;
+		gap: 3px;
+		font-size: 13px;
+		color: var(--muted);
+		word-break: keep-all;
+	}
+	.tools-in b {
+		font-size: 15px;
+		color: var(--text);
+	}
+	.tools-in .ar {
+		color: var(--accent);
+		font-weight: 800;
 	}
 	.sec-h {
 		display: flex;

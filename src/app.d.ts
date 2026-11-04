@@ -8,6 +8,10 @@ declare global {
 			sheet?: string;
 			/** 초성 퀴즈 띄우기 진행 화면이 열려 있다(chosung/show — 뒤로가기로 닫기) */
 			show?: boolean;
+			/** 성냥 문제 만들기 띄우기 진행 화면(matchstick/make) */
+			mshow?: boolean;
+			/** 상식 퀴즈 띄우기 진행 화면(trivia/show) */
+			tshow?: boolean;
 		}
 
 		/**
