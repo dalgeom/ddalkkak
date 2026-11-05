@@ -1,4 +1,4 @@
-// 도구 쪽(2026-11-04) — 끝말잇기 단어 찾기 · 성냥 문제 만들기 · 상식 퀴즈 띄우기 · 학습지 · 도구 모음.
+// 도구 쪽(2026-11-04) — 끝말잇기 단어 찾기 · 초성으로 단어 찾기(11/5) · 성냥 문제 만들기 · 상식 퀴즈 띄우기 · 학습지 · 도구 모음.
 // 결과가 실제로 나오는지(양성), 가로 넘침, 스크린샷.
 import { launch, sleep, OUT } from './cdp.mjs';
 const b = await launch('tools');
@@ -21,6 +21,17 @@ for (const [w, h] of [[390, 844], [320, 568]]) {
 	await until(`document.querySelectorAll('ul.words li').length > 0`);
 	const hb = await b.ev(`document.querySelectorAll('.tabs button')[1].click(); await new Promise(r => setTimeout(r, 200)); const li = [...document.querySelectorAll('ul.words li')]; return { n: li.length, all: li.every(l => l.querySelector('.badge')) };`);
 	ok(`${w} 「이」 한방 단어만 보기 — 전부 한방 배지`, hb.n > 0 && hb.all, JSON.stringify(hb));
+
+	// 초성으로 단어 찾기 — ㅅㄱ에 결과 · 뜻풀이가 나오고, 초성 퀴즈 정답(사과)은 빠진다
+	await b.go('/chosung/find?q=' + encodeURIComponent('ㅅㄱ'), 800);
+	const cg = await until(`document.querySelectorAll('ul.words li').length > 0`);
+	await until(`document.querySelector('ul.words .def')`);
+	const cf = await b.ev(`const w = [...document.querySelectorAll('ul.words .w')].map(e => e.innerText); return { n: w.length, siege: w.includes('시계'), apple: w.includes('사과'), def: [...document.querySelectorAll('ul.words .def')].filter(e => e.innerText.trim()).length, common: document.querySelectorAll('.hb .hc').length };`);
+	ok(`${w} 초성 찾기 — ㅅㄱ에 시계가 나오고 사과는 빠짐`, cg && cf.siege && !cf.apple && cf.def > 0 && cf.common > 0, JSON.stringify(cf));
+	const cm = await b.ev(`const i = document.querySelector('.field input'); i.value = '사ㄱ'; i.dispatchEvent(new Event('input', {bubbles:true})); await new Promise(r => setTimeout(r, 300)); return [...document.querySelectorAll('ul.words .w')].map(e => e.innerText);`);
+	ok(`${w} 초성 찾기 — 사ㄱ은 「사」로 시작하는 두 글자만`, cm.length > 0 && cm.every((x) => x.length === 2 && x[0] === '사'), JSON.stringify(cm));
+	ok(`${w} 초성 찾기 가로 넘침 없음`, (await over()) <= 0);
+	await b.shot(`${OUT}tools-chosung-find-${w}.jpg`);
 
 	// 성냥 문제 만들기 — 링크로 들어오면 바로 문제가 나온다
 	await b.go('/matchstick/make?q=13-7%3D6&r=move1', 800);
@@ -66,10 +77,10 @@ for (const [w, h] of [[390, 844], [320, 568]]) {
 	await b.send('Emulation.setEmulatedMedia', { media: '' });
 	ok(`${w} 인쇄할 때 학습지만 보임`, pr.sheet && pr.app === 0, JSON.stringify(pr));
 
-	// 도구 모음 — 도구 카드 9개, 링크가 모두 열리고, 홈에서 들어가는 길이 있다
+	// 도구 모음 — 도구 카드 10개, 링크가 모두 열리고, 홈에서 들어가는 길이 있다
 	await b.go('/tools', 800);
 	const tl = await b.ev(`const a = [...document.querySelectorAll('.tl a')]; const st = await Promise.all(a.map(x => fetch(x.href).then(r => r.status))); return { n: a.length, bad: st.filter(s => s !== 200).length, ld: !!document.querySelector('script[type="application/ld+json"]') };`);
-	ok(`${w} 도구 모음 — 카드 9개 · 링크 모두 200 · JSON-LD`, tl.n === 9 && tl.bad === 0 && tl.ld, JSON.stringify(tl));
+	ok(`${w} 도구 모음 — 카드 10개 · 링크 모두 200 · JSON-LD`, tl.n === 10 && tl.bad === 0 && tl.ld, JSON.stringify(tl));
 	ok(`${w} 도구 모음 가로 넘침 없음`, (await over()) <= 0);
 	await b.shot(`${OUT}tools-hub-${w}.jpg`);
 	await b.go('/', 800);

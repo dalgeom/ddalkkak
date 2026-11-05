@@ -229,6 +229,13 @@
 				<a class="stagego" href="/chosung/show" onclick={() => track('chosung_show_in_hub')}>띄우기 화면 열기 <span class="arr" aria-hidden="true">→</span></a>
 			</section>
 
+			<!-- 11/5 초성으로 단어 찾기: 초성을 넣으면 사전에서 맞는 말을 찾는 도구 -->
+			<section class="sec">
+				<h2 class="mh">초성으로 단어 찾기</h2>
+				<p class="mp">초성을 넣으면 그 초성으로 된 낱말을 사전에서 찾아 줘요. 퀴즈를 낼 때 답이 몇 개나 되는지 볼 수 있어요.</p>
+				<a class="stagego" href="/chosung/find" onclick={() => track('chosung_find_in_hub')}>단어 찾기 열기 <span class="arr" aria-hidden="true">→</span></a>
+			</section>
+
 			<section class="sec" id="fields">
 				<h2 class="mh">분야 골라 풀기</h2>
 				<p class="mp">시간 제한 없이 계속 나옵니다. 푼 낱말은 한 바퀴 돌 때까지 다시 안 나와요.</p>
