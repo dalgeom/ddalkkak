@@ -427,6 +427,7 @@ export const DISCOVER_TIERS: Readonly<Record<string, Tier>> = {
 	'corridor-robots-18': 4, // 11/4 새로 · 부딪혀 돌아서기 = 지나치기
 	'ktx-meet-9': 5, // 11/4 새로 · 이미 길 위에 있는 열차까지 세기
 	'cal-monday-80': 5, // 11/5 새로 · 월요일 다섯 번이라야 합이 맞는다
+	'apt-floor-stops': 3, // 11/5 새로 · 아파트 호수에서 층을 뽑아 엘리베이터가 서는 층 수
 };
 
 /**
