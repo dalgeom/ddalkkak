@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte';
 	import { page } from '$app/state';
 	import { replaceState } from '$app/navigation';
-	import { parsePattern, matchWords, firstCho } from '$lib/chosungFind';
+	import { parsePattern, matchWords, firstCho, FIELDS } from '$lib/chosungFind';
 	import { track } from '$lib/analytics';
 	import OtherGames from '$lib/components/OtherGames.svelte';
 
@@ -19,6 +19,9 @@
 	let loadErr = $state(false);
 	let q = $state('');
 	let onlyEasy = $state(false);
+	let field = $state(''); // 분야 거르기(11/5) — '' = 전체
+	let fieldSet = $derived(field ? new Set(data.fields[field]) : null);
+	let fieldName = $derived(FIELDS.find((f) => f.slug === field)?.name ?? '');
 	let shown = $state(PAGE);
 	let defs = $state<Record<string, string>>({});
 	const loadedDefs = new Set<number>();
@@ -27,7 +30,8 @@
 	let all = $derived.by(() => {
 		if (!words || !pat) return [];
 		const e = easy;
-		const ws = matchWords(words, pat);
+		const fs = fieldSet;
+		const ws = matchWords(words, pat).filter((w) => !fs || fs.has(w));
 		return [...ws.filter((w) => e.has(w)), ...ws.filter((w) => !e.has(w))];
 	});
 	let list = $derived(onlyEasy ? all.filter((w) => easy.has(w)) : all);
@@ -37,6 +41,8 @@
 	onMount(async () => {
 		const p = page.url.searchParams.get('q');
 		if (p) q = p.slice(0, 12);
+		const c = page.url.searchParams.get('c');
+		if (c && data.fields[c]) field = c;
 		try {
 			const res = await fetch('/kkeut/words.json');
 			if (!res.ok) throw new Error(String(res.status));
@@ -54,17 +60,18 @@
 	$effect(() => {
 		const t = typed;
 		const p = pat;
-		if (!words || t === lastQ) return;
-		lastQ = t;
+		const f = field;
+		if (!words || t + '|' + f === lastQ) return;
+		lastQ = t + '|' + f;
 		shown = PAGE;
 		if (!p) return;
 		try {
-			replaceState(`/chosung/find?q=${encodeURIComponent(t)}`, {});
+			replaceState(`/chosung/find?q=${encodeURIComponent(t)}${f ? '&c=' + f : ''}`, {});
 		} catch {
 			/* 첫 진입 직후에는 라우터가 아직일 수 있다 */
 		}
 		const n = all.length;
-		track(n ? 'chosung_find_search' : 'chosung_find_none', { n, len: p.length });
+		track(n ? 'chosung_find_search' : 'chosung_find_none', { n, len: p.length, field: f || 'all' });
 		loadDefs(firstCho(p));
 	});
 
@@ -135,6 +142,13 @@
 			/>
 		</label>
 
+		<div class="fields" role="group" aria-label="분야">
+			<button class:on={!field} aria-pressed={!field} onclick={() => (field = '')}>전체</button>
+			{#each FIELDS as f (f.slug)}
+				<button class:on={field === f.slug} aria-pressed={field === f.slug} onclick={() => (field = f.slug)}>{f.name}</button>
+			{/each}
+		</div>
+
 		{#if loadErr}
 			<p class="msg">사전을 불러오지 못했어요. 잠시 뒤 새로 고쳐 주세요.</p>
 		{:else if !words}
@@ -145,7 +159,7 @@
 			<p class="msg">초성(ㄱ~ㅎ)이 한 자리 이상 있어야 찾아요. ㄳ · ㄺ 같은 겹받침, 모음, 영문은 초성이 될 수 없어요.</p>
 		{:else}
 			<p class="sum">
-				<b>{typed}</b>에 맞는 {pat.length}글자 말 <b>{all.length.toLocaleString()}</b>개
+				<b>{typed}</b>에 맞는 {pat.length}글자 {fieldName ? fieldName + ' 이름' : '말'} <b>{all.length.toLocaleString()}</b>개
 				{#if easyCount}· 쉬운 말 <b class="em">{easyCount}</b>개{/if}
 			</p>
 			{#if all.length}
@@ -167,10 +181,14 @@
 					<p class="msg">쉬운 말 중에는 맞는 말이 없어요. 「쉬운 말만」을 끄면 나와요.</p>
 				{/if}
 			{:else}
+				{#if field}
+					<p class="msg">{fieldName} 이름 중에는 맞는 말이 없어요. 분야를 「전체」로 바꾸면 다른 말이 나올 수 있어요.</p>
+				{:else}
 				<p class="msg">
 					사전에 맞는 명사가 없어요. 글자 수가 맞는지 보세요 — 「금요일」은 ㄱㅇㅇ처럼 세 자리예요. 사람 이름 · 상품 이름 · 신조어는 이
 					사전에 없어요.
 				</p>
+				{/if}
 			{/if}
 		{/if}
 	</section>
@@ -271,6 +289,29 @@
 	}
 	.em {
 		color: var(--accent);
+	}
+	.fields {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 6px;
+		margin-top: 10px;
+	}
+	.fields button {
+		font: inherit;
+		font-size: 14px;
+		font-weight: 700;
+		min-height: 38px;
+		padding: 0 14px;
+		border-radius: 999px;
+		border: 1px solid var(--border-strong);
+		background: transparent;
+		color: var(--text);
+		cursor: pointer;
+	}
+	.fields button.on {
+		background: var(--accent);
+		border-color: var(--accent);
+		color: #fff;
 	}
 	.chk {
 		display: inline-flex;

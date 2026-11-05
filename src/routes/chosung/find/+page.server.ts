@@ -1,4 +1,5 @@
 import { CHOSUNG_WORDS, chosungOf } from '$lib/chosung';
+import { FIELDS, fieldOf } from '$lib/chosungFind';
 
 // 초성으로 단어 찾기(2026-11-05) — 검색은 브라우저에서 한다. 「자주 쓰는 초성」 표는 빌드에 구워 HTML에 남긴다.
 export const prerender = true;
@@ -24,5 +25,18 @@ export async function load({ fetch }) {
 		.sort((a, b) => b[1].length - a[1].length)
 		.slice(0, 24)
 		.map(([cho, ws]) => ({ cho, n: ws.length, ex: ws.slice(0, 3) }));
-	return { total: j.words.length - j.words.filter((w) => hidden.has(w)).length, hide, common };
+	// 분야 거르기(11/5) — 뜻풀이 조각 19개를 읽어 분야마다 낱말을 모은다
+	const defs: Record<string, string> = {};
+	for (let n = 0; n < 19; n++) {
+		const d = await fetch(`/kkeut/defs/${n}.json`);
+		if (d.ok) Object.assign(defs, await d.json());
+	}
+	const fields: Record<string, string[]> = Object.fromEntries(FIELDS.map((f) => [f.slug, []]));
+	for (const w of j.words) {
+		if (hidden.has(w)) continue;
+		const f = fieldOf(w, defs[w]);
+		if (f) fields[f].push(w);
+	}
+	if (fields.animal.length < 100) throw new Error('분야 낱말이 너무 적음 — 뜻풀이 조각을 못 읽었나');
+	return { fields, total: j.words.length - j.words.filter((w) => hidden.has(w)).length, hide, common };
 }

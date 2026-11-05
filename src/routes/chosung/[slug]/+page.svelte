@@ -1,11 +1,13 @@
 <script lang="ts">
 	import OtherGames from '$lib/components/OtherGames.svelte';
 	import { track } from '$lib/analytics';
+	import { FIELDS } from '$lib/chosungFind';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
 
 	const url = $derived(`https://ddalkkak.app/chosung/${data.category.slug}`);
+	const findable = $derived(FIELDS.some((f) => f.slug === data.category.slug));
 	const heading = $derived(`${data.category.title} ${data.count}문제`);
 </script>
 
@@ -91,6 +93,13 @@
 			<b>{data.category.name} 초성, 화면에 띄워 다 같이</b>
 			<span>수업 · 모임에서 TV에 크게 띄우고 힌트 · 정답을 눌러 넘겨요</span>
 		</a>
+		{#if findable}
+			<!-- 11/5 사용자 의견 「초성글자로 동물이름 알려주세요」 — 사전에서 그 분야 이름만 찾는다(퀴즈 정답은 빠짐) -->
+			<a class="show" href="/chosung/find?c={data.category.slug}" onclick={() => track('chosung_find_in_cat')}>
+				<b>초성으로 {data.category.name} 이름 찾기</b>
+				<span>초성을 넣으면 사전에서 {data.category.name} 이름만 골라 보여 줘요</span>
+			</a>
+		{/if}
 		<div class="cats">
 			{#each data.others as c (c.slug)}
 				<a class="cat" href="/chosung/{c.slug}">{c.title} <b>{c.count}</b></a>

@@ -30,6 +30,13 @@ for (const [w, h] of [[390, 844], [320, 568]]) {
 	ok(`${w} 초성 찾기 — ㅅㄱ에 시계가 나오고 사과는 빠짐`, cg && cf.siege && !cf.apple && cf.def > 0 && cf.common > 0, JSON.stringify(cf));
 	const cm = await b.ev(`const i = document.querySelector('.field input'); i.value = '사ㄱ'; i.dispatchEvent(new Event('input', {bubbles:true})); await new Promise(r => setTimeout(r, 300)); return [...document.querySelectorAll('ul.words .w')].map(e => e.innerText);`);
 	ok(`${w} 초성 찾기 — 사ㄱ은 「사」로 시작하는 두 글자만`, cm.length > 0 && cm.every((x) => x.length === 2 && x[0] === '사'), JSON.stringify(cm));
+	// 분야 거르기(11/5) — ?c=animal이면 동물 이름만(가재), 동물 아닌 ㄱㅈ 말(가족)은 빠진다
+	await b.go('/chosung/find?c=animal&q=' + encodeURIComponent('ㄱㅈ'), 800);
+	await until(`document.querySelectorAll('ul.words li').length > 0`);
+	const fa = await b.ev(`const w = [...document.querySelectorAll('ul.words .w')].map(e => e.innerText); return { w, on: document.querySelector('.fields button.on')?.innerText };`);
+	ok(`${w} 초성 찾기 분야 — ㄱㅈ 동물에 가재가 나오고 가족은 빠짐`, fa.on === '동물' && fa.w.includes('가재') && !fa.w.includes('가족') && fa.w.length < 30, JSON.stringify(fa));
+	const fb = await b.ev(`document.querySelector('.fields button').click(); await new Promise(r => setTimeout(r, 300)); return { n: document.querySelectorAll('ul.words li').length, url: location.search };`);
+	ok(`${w} 초성 찾기 분야 — 「전체」로 돌리면 늘어나고 주소에서 c가 빠짐`, fb.n > fa.w.length && !fb.url.includes('c='), JSON.stringify(fb));
 	ok(`${w} 초성 찾기 가로 넘침 없음`, (await over()) <= 0);
 	await b.shot(`${OUT}tools-chosung-find-${w}.jpg`);
 
@@ -78,6 +85,8 @@ for (const [w, h] of [[390, 844], [320, 568]]) {
 	ok(`${w} 인쇄할 때 학습지만 보임`, pr.sheet && pr.app === 0, JSON.stringify(pr));
 
 	// 도구 모음 — 도구 카드 10개, 링크가 모두 열리고, 홈에서 들어가는 길이 있다
+	await b.go('/chosung/animal', 800);
+	ok(`${w} 동물 분야 쪽에 「초성으로 동물 이름 찾기」 입구`, await b.ev(`return !!document.querySelector('a.show[href="/chosung/find?c=animal"]');`));
 	await b.go('/tools', 800);
 	const tl = await b.ev(`const a = [...document.querySelectorAll('.tl a')]; const st = await Promise.all(a.map(x => fetch(x.href).then(r => r.status))); return { n: a.length, bad: st.filter(s => s !== 200).length, ld: !!document.querySelector('script[type="application/ld+json"]') };`);
 	ok(`${w} 도구 모음 — 카드 10개 · 링크 모두 200 · JSON-LD`, tl.n === 10 && tl.bad === 0 && tl.ld, JSON.stringify(tl));

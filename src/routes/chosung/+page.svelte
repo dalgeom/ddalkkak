@@ -232,7 +232,7 @@
 			<!-- 11/5 초성으로 단어 찾기: 초성을 넣으면 사전에서 맞는 말을 찾는 도구 -->
 			<section class="sec">
 				<h2 class="mh">초성으로 단어 찾기</h2>
-				<p class="mp">초성을 넣으면 그 초성으로 된 낱말을 사전에서 찾아 줘요. 퀴즈를 낼 때 답이 몇 개나 되는지 볼 수 있어요.</p>
+				<p class="mp">초성을 넣으면 그 초성으로 된 낱말을 사전에서 찾아 줘요. 동물 · 과일과 채소 · 나라만 골라 볼 수도 있어요.</p>
 				<a class="stagego" href="/chosung/find" onclick={() => track('chosung_find_in_hub')}>단어 찾기 열기 <span class="arr" aria-hidden="true">→</span></a>
 			</section>
 
