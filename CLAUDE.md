@@ -104,6 +104,14 @@ python scripts/ga-yesterday.py
 
 1. 로컬: `npx vite dev --port 5231` → `QA_BASE=http://localhost:5231 npm run qa`
 2. 배포 뒤 운영: `npm run qa` (GA · 광고는 막고 서버 기록은 가로채므로 숫자 오염 없음)
+   **바꾼 범위만큼만 돌린다**(11/5 사용자 승인 — 전체는 약 17~19분, sweep · flow · gaps가 12분). 로컬 실패가 운영에서 통과하면 dev 흔들림이다(11/5 sheet · readplay).
+
+   | 바꾼 것 | 돌릴 시험 | 약 |
+   |---|---|---|
+   | 문구 · 해설 · 문제 내용만 | `npm run qa -- --only flow` | 4분 |
+   | 한 화면의 모양 · 배치 | 그 화면 시험(kkeut · tools · show 등) + `sweep,gaps` | 8분 |
+   | 공통 컴포넌트 · 레이아웃 · 시트 · 탭 · 스플래시 | 전체 `npm run qa` | 17분 |
+   어느 칸인지 헷갈리면 아래 칸으로 간다.
 3. `docs/qa-checklist.md`의 「눈으로」 항목 대조 — 휴대폰 기본 동작 · 모양 · 문구 · 들어가는 길 · 개인정보
 4. 하나라도 실패면 고치고 다시. 보고에는 몇 개 중 몇 개 통과인지 숫자로 적는다
 5. 새 기능을 만들면 그 기능의 시험을 `scripts/qa/`에 더한다. 지적받은 문제와 같은 종류가 다른 화면에도 있는지 먼저 찾는다
