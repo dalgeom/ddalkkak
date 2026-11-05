@@ -63,6 +63,7 @@
 	import { platformOf } from '$lib/pwa';
 	import InstallHint from '$lib/components/InstallHint.svelte';
 	import SendProblem from '$lib/components/SendProblem.svelte';
+	import Confetti from '$lib/components/Confetti.svelte';
 
 	let {
 		data
@@ -156,6 +157,27 @@
 	);
 	let shownHints = $derived(hintList ? hintList.slice(0, hintsUsed) : []);
 	let correctCount = $derived(marks.filter((m) => m !== 'miss').length);
+	/* 완주 순간(11/5) — 방금 마지막 문제를 끝낸 때만 점수가 0부터 올라가고(600ms) 결과 줄이 차례로 뜬다.
+	   다시 들어와 결과를 보는 때는 그대로 보여 준다. 모션 줄이기면 올라가기 없이 바로 끝 숫자. */
+	let justDone = $state(false);
+	let shownScore = $state(0);
+	$effect(() => {
+		if (phase !== 'done' || !justDone) return;
+		const target = correctCount;
+		if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
+			shownScore = target;
+			return;
+		}
+		let raf = 0;
+		const t0 = performance.now();
+		const step = (t: number) => {
+			const k = Math.min(1, (t - t0) / 600);
+			shownScore = Math.round(target * (1 - (1 - k) ** 3));
+			if (k < 1) raf = requestAnimationFrame(step);
+		};
+		raf = requestAnimationFrame(step);
+		return () => cancelAnimationFrame(raf);
+	});
 	/** 딸깍 5단계(10/20) — 지금 문제의 단계, 오늘 맞힌 문제 중 가장 높은 단계(다 풀고 새로고침하면 queue가 없어 안 뜬다) */
 	let cardTier = $derived(tierOf(queue[pos]?.problem));
 	let reachedTier = $derived.by(() => {
@@ -622,6 +644,7 @@
 			resetProblem();
 			startTimer();
 		} else {
+			justDone = true;
 			phase = 'done';
 			persist(true);
 			completeDailySession(dayNum);
@@ -1343,18 +1366,22 @@
 	{/key}
 {:else if phase === 'done'}
 	<div class="title">오늘의 결과</div>
-	<div class="score">
-		<span class="num">{correctCount}</span><span class="rest"> / {DAILY_SIZE} 정답</span>
+	<div class="score" aria-label="{correctCount} / {DAILY_SIZE} 정답">
+		<span class="num" class:landed={justDone && shownScore === correctCount} aria-hidden="true">{justDone ? shownScore : correctCount}</span><span class="rest" aria-hidden="true"> / {DAILY_SIZE} 정답</span>
 	</div>
+	<!-- 8개 이상 맞힌 날 완주 순간에만, 점수가 다 올라간 뒤 한 번 -->
+	{#if justDone && correctCount >= 8}
+		<Confetti delay={600} />
+	{/if}
 	<!-- 딸깍 5단계: 몇 개 틀렸는지보다 어디까지 올라갔는지 — 중간에 멈춰도 자기 단계를 찾은 것으로 읽히게 -->
 	{#if reachedTier}
-		<p class="reached">오늘은 <b>{tierName(reachedTier)}</b> 문제까지 맞혔어요</p>
+		<p class="reached" class:rise-in={justDone} style="--i: 1">오늘은 <b>{tierName(reachedTier)}</b> 문제까지 맞혔어요</p>
 	{/if}
 
 	<!-- 걸린 시간은 푸는 동안 숨겨 두었다가 여기서만 공개한다.
 	     보면서 풀면 쫓기는 기분이 들어 발견형 퍼즐과 안 맞는다. -->
 	{#if timeLabel}
-		<div class="took">
+		<div class="took" class:rise-in={justDone} style="--i: 2">
 			<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
 				<circle cx="12" cy="13" r="8" />
 				<path d="M12 9v4l2.5 2M9 2h6" />
@@ -1376,7 +1403,7 @@
 	{/if}
 
 	<!-- v2(10/14): 유형별 정오표 5줄이 결과 화면 한 장을 차지했다 — 한 줄로 -->
-	<div class="rows">
+	<div class="rows" class:rise-in={justDone} style="--i: 3">
 		{#each resultRows as r (r.label)}
 			<span class="row" class:ok={r.ok === r.total}>
 				{r.label} <b>{r.ok}/{r.total}</b>
@@ -2431,6 +2458,32 @@
 	}
 	.score .num {
 		color: var(--accent-text);
+		display: inline-block;
+	}
+	/* 완주 순간(11/5) — 점수가 끝 숫자에 닿으면 한 번 튀고, 아래 줄은 60ms씩 차례로 올라온다 */
+	.score .num.landed {
+		animation: score-pop 260ms ease-out;
+	}
+	@keyframes score-pop {
+		50% {
+			transform: scale(1.18);
+		}
+	}
+	.rise-in {
+		animation: rise-in 320ms ease-out both;
+		animation-delay: calc(var(--i) * 60ms + 100ms);
+	}
+	@keyframes rise-in {
+		from {
+			opacity: 0;
+			transform: translateY(8px);
+		}
+	}
+	@media (prefers-reduced-motion: reduce) {
+		.score .num.landed,
+		.rise-in {
+			animation: none;
+		}
 	}
 	.score .rest {
 		color: var(--muted-2);

@@ -10,8 +10,22 @@
 	import { freshNotices, loadSeen, seenTick } from '$lib/notices';
 	import { captureInstallPrompt } from '$lib/pwa';
 	import { page } from '$app/state';
+	import { onNavigate } from '$app/navigation';
 
 	let { children, data } = $props();
+
+	// 쪽 넘김(11/5) — 다른 쪽으로 갈 때만 200ms 겹쳐 바뀐다. 같은 쪽 안의 ?c= 거르기 같은 이동은 그대로.
+	// 지원하지 않는 브라우저(파이어폭스 일부)와 모션 줄이기는 바로 바뀐다.
+	onNavigate((nav) => {
+		if (!document.startViewTransition || nav.from?.url.pathname === nav.to?.url.pathname) return;
+		if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+		return new Promise((resolve) => {
+			document.startViewTransition(async () => {
+				resolve();
+				await nav.complete;
+			});
+		});
+	});
 	const year = new Date().getFullYear();
 	/** 안 본 새 소식이 있으면 헤더 종에 점 */
 	let newsDot = $state(false);
@@ -178,6 +192,10 @@
 			transition-duration: 0.001ms !important;
 			scroll-behavior: auto !important;
 		}
+	}
+	:global(::view-transition-old(root)),
+	:global(::view-transition-new(root)) {
+		animation-duration: 200ms;
 	}
 	:global(*) {
 		margin: 0;

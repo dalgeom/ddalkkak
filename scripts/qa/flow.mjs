@@ -103,6 +103,18 @@ ok('전부 넘겨도 「완주」라 안 함', !m.wanju && m.took);
 ok('결과 화면 알림 권유 하나', m.notify.length <= 1, m.notify.join(' / '));
 ok('결과 화면 초록 큰 버튼 하나 이하', m.green.length <= 1, m.green.join(' / '));
 ok('결과 화면 「다음 놀이」로 이어짐', m.other);
+// 11/5 결과 화면 움직임 — 점수 올라감 · 줄마다 차례로 · 8개 미만이면 종이 조각 없음 · 모션 줄이기면 멈춤
+m = await b.ev(`
+	const num = document.querySelector('.score .num');
+	const rise = [...document.querySelectorAll('.rise-in')].map(e=>getComputedStyle(e).animationName);
+	return { num: num?.textContent.trim(), aria: document.querySelector('.score')?.getAttribute('aria-label'), rise, confetti: !!document.querySelector('canvas.confetti') };`);
+ok('결과 점수가 맞힌 개수(0)에서 멈춤 · 읽기 이름은 「0 / 10 정답」', m.num === '0' && (m.aria ?? '').startsWith('0 / 10'), JSON.stringify(m));
+ok('결과 줄이 차례로 떠오름(rise-in, 단계 줄은 맞힌 게 있을 때만)', m.rise.length >= 2 && m.rise.every((n) => /rise-in$/.test(n)), m.rise.join(','));
+ok('8개 미만이면 종이 조각 없음', !m.confetti);
+await b.send('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-reduced-motion', value: 'reduce' }] });
+m = await b.ev(`return [...document.querySelectorAll('.rise-in, .score .num')].map(e=>getComputedStyle(e).animationName);`);
+ok('모션 줄이기면 결과 화면 움직임 없음', m.length >= 3 && m.every((n) => n === 'none'), m.join(','));
+await b.send('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-reduced-motion', value: 'no-preference' }] });
 // 오늘의 10문제를 끝낸 뒤에는 성냥 화면의 「오늘의 10문제」 카드가 숨는다
 await b.go('/matchstick', 2500);
 ok('데일리를 끝낸 뒤에는 「오늘의 10문제」 카드 숨김', !(await b.ev(`return !!document.querySelector('.dnext');`)));
@@ -122,6 +134,17 @@ m = await b.ev(`return { sheet: !!document.querySelector('[role=dialog]'), resul
 ok('완주한 사람의 메인은 결과 화면, 새 소식 시트가 가리지 않음', m.result && !m.sheet, JSON.stringify(m));
 m = await b.ev(`return [...document.querySelectorAll('.react .opt')].map(x=>x.textContent.trim());`);
 ok('결과 화면에 한 번 누름 반응 셋(10/16)', m.length === 3, m.join(' '));
+m = await b.ev(`return { rise: document.querySelectorAll('.rise-in').length, num: document.querySelector('.score .num')?.textContent.trim() };`);
+ok('다시 연 결과 화면은 움직임 없이 바로(11/5)', m.rise === 0 && m.num === '0', JSON.stringify(m));
+// 쪽 넘김(11/5) — 다른 쪽으로 가면 View Transition 한 번
+m = await b.ev(`
+	if (!document.startViewTransition) return { skip: true };
+	let n = 0; const orig = document.startViewTransition.bind(document);
+	document.startViewTransition = (cb) => { n++; return orig(cb); };
+	[...document.querySelectorAll('nav a')].find(a=>/기록/.test(a.textContent)).click();
+	await new Promise(r=>setTimeout(r,1500));
+	return { n, path: location.pathname };`);
+ok('다른 쪽으로 가면 쪽 넘김 한 번', m.skip || (m.n === 1 && m.path === '/record'), JSON.stringify(m));
 // 다시 온 사람(오늘 아직 안 풂) — 기록을 지우고 방문 흔적만 남긴다
 await b.ev(`localStorage.clear(); localStorage.setItem('ddal.visit','1'); return 1;`);
 await b.go('/', 3500);
