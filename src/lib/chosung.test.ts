@@ -88,7 +88,7 @@ describe('오늘의 초성', () => {
 
 	it('낱말을 늘려도 지난 날의 오늘의 초성은 그대로다(10/15 이전 공식과 같은 낱말)', () => {
 		const old = seededOrder(224, 20260404);
-		const oldWords = CHOSUNG_CATEGORIES.flatMap((c) => c.words.slice(0, CHOSUNG_BATCHES[0].counts[c.slug]).map((w) => w[0]));
+		const oldWords = CHOSUNG_CATEGORIES.flatMap((c) => c.words.slice(0, CHOSUNG_BATCHES[0].counts[c.slug] ?? 0).map((w) => w[0]));
 		for (let d = 20725; d <= 20741; d++) {
 			expect(CHOSUNG_WORDS[chosungOfDay(d)].word, String(d)).toBe(oldWords[old[(d - SITE_START_DAY) % 224]]);
 		}

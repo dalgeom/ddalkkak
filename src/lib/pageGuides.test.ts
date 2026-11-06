@@ -183,6 +183,29 @@ describe('성냥개비 두 번째 글의 수치', () => {
 		const ct = CHOSUNG_CATEGORIES.map((c) => c.guide.title);
 		expect(new Set(ct).size).toBe(ct.length);
 	});
+	it('과자: 61개 · 글자 수 14/33/12/2 · 「칩」 6 · 「스」 7 · 된소리 12 · 「과」 3', () => {
+		expect(words('snack').length).toBe(61);
+		expect([2, 3, 4, 5].map((n) => byLen('snack', n).length)).toEqual([14, 33, 12, 2]);
+		expect(byLen('snack', 5).sort()).toEqual(['허니버터칩', '후렌치파이'].sort());
+		expect(ending('snack', '칩').length).toBe(6);
+		expect(ending('snack', '스').length).toBe(7);
+		expect(words('snack').filter((w) => /[ㄲㄸㅃㅆㅉ]/.test(chosungOf(w))).length).toBe(12);
+		expect(ending('snack', '과').sort()).toEqual(['약과', '유과', '한과'].sort());
+		expect(chosungOf('약과')).toBe(chosungOf('유과'));
+	});
+
+	it('영화: 68개 · 글자 수 17/15/18/18 · 첫 초성 ㅇ 14 · ㄱ 11 · 「의」 4 · 「량」 2', () => {
+		const ws = words('movie');
+		expect(ws.length).toBe(68);
+		expect([2, 3, 4].map((n) => byLen('movie', n).length)).toEqual([17, 15, 18]);
+		expect(ws.filter((w) => w.length >= 5).length).toBe(18);
+		expect(byLen('movie', 7).sort()).toEqual(['태극기휘날리며', '보헤미안랩소디'].sort());
+		expect(byLen('movie', 6).sort()).toEqual(['엽기적인그녀', '인사이드아웃', '이웃집토토로'].sort());
+		expect(ws.filter((w) => chosungOf(w)[0] === 'ㅇ').length).toBe(14);
+		expect(ws.filter((w) => chosungOf(w)[0] === 'ㄱ').length).toBe(11);
+		expect(ws.filter((w) => w.includes('의')).sort()).toEqual(['왕의남자', '서울의봄', '살인의추억', '반지의제왕'].sort());
+		expect(ending('movie', '량').sort()).toEqual(['명량', '노량'].sort());
+	});
 });
 
 // 위 검사는 데이터만 센다. 글이 그 숫자를 실제로 말하고 있는지도 묶어 둔다 —
@@ -196,6 +219,8 @@ describe('글이 위 수치를 그대로 적고 있다', () => {
 		[guide('fruit-vegetable'), ['75개 중 47개', '91개 중 43개', '과일이 34개, 채소가 39개', '「추」가 일곱']],
 		[guide('country'), ['「아」로 끝나는 나라가 열둘', '「국」이 여섯', '「드」가 여섯']],
 		[guide('idiom'), ['ㅇ인 것이 19개']],
+		[guide('snack'), ['61개 가운데 세 글자가 33개', '6개(', '7개(', '12개']],
+		[guide('movie'), ['68개', '두 글자가 17개', '다섯 글자 이상이 18개', 'ㅇ이 14개', 'ㄱ이 11개']],
 		[extra('self'), ['293문제', '36번씩', '21번', '190개', '103개']],
 		[extra('transfer'), ['237문제', '106번', '43번', '46번', '38번씩', '171문제', '98번', '73번', '66번']],
 		[extra('operator'), ['211문제 중 152문제', '59문제', '71번', '23번', '22번', '13번', '10번']],

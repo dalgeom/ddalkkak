@@ -22,6 +22,14 @@ export interface Notice {
 
 export const NOTICES: Notice[] = [
 	{
+		id: '2026-11-06-chosung-snack-movie',
+		date: '2026-11-06',
+		title: '초성 퀴즈에 과자 · 영화 분야가 생겼어요',
+		body: '새우깡 · 허니버터칩 같은 과자 61개, 기생충 · 서울의봄 같은 영화 68개를 초성으로 맞혀요. 단계 도전 판도 35판 늘었어요.',
+		href: '/chosung/movie',
+		cta: '영화 초성 풀러 가기'
+	},
+	{
 		id: '2026-11-04-tools',
 		date: '2026-11-04',
 		title: '수업 · 모임에 쓰는 도구가 늘었어요',

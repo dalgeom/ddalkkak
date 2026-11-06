@@ -54,14 +54,16 @@ export const CHOSUNG_BATCHES: { fromDay: number; counts: Record<string, number> 
 	// 11/4 묶음 — 올챙이 · 조개 · 김치전 · 냉이 · 쪽파 (새싹 채우기)
 	{ fromDay: 20762, counts: { animal: 89, food: 88, 'fruit-vegetable': 74, country: 63, idiom: 65 } },
 	// 11/5 묶음 — 멸치 · 미꾸라지 · 꽈배기 · 부침개 · 열무 (새싹 채우기)
-	{ fromDay: 20763, counts: { animal: 91, food: 90, 'fruit-vegetable': 75, country: 63, idiom: 65 } }
+	{ fromDay: 20763, counts: { animal: 91, food: 90, 'fruit-vegetable': 75, country: 63, idiom: 65 } },
+	// 11/6 묶음 — 과자 · 영화 분야 새로 (과자 61 · 영화 68)
+	{ fromDay: 20764, counts: { animal: 91, food: 90, 'fruit-vegetable': 75, country: 63, idiom: 65, snack: 61, movie: 68 } }
 ];
 
 const toWord = (slug: string) => ([word, hint, alts]: ChosungEntry) => ({ word, hint, alts: alts ?? [], category: slug });
 
 export const CHOSUNG_WORDS: ChosungWord[] = CHOSUNG_BATCHES.flatMap((b, bi) =>
 	CHOSUNG_CATEGORIES.flatMap((c) =>
-		c.words.slice(bi ? CHOSUNG_BATCHES[bi - 1].counts[c.slug] : 0, b.counts[c.slug]).map(toWord(c.slug))
+		c.words.slice(bi ? CHOSUNG_BATCHES[bi - 1].counts[c.slug] ?? 0 : 0, b.counts[c.slug] ?? 0).map(toWord(c.slug))
 	)
 );
 
