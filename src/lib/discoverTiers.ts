@@ -430,6 +430,8 @@ export const DISCOVER_TIERS: Readonly<Record<string, Tier>> = {
 	'apt-floor-stops': 3, // 11/5 새로 · 아파트 호수에서 층을 뽑아 엘리베이터가 서는 층 수
 	'club-joined-pair': 1, // 11/6 새로 · 두 쪽이 한 몸으로 붙은 것
 	'microwave-seconds': 2, // 11/6 새로 · 전자레인지에 누른 수가 몇 초인가
+	'club-wears-down': 1, // 11/6 새로 · 쓸수록 닳아 작아지는 것
+	'finger-count-bounce': 5, // 11/6 새로 · 엄지↔새끼 왕복 세기, 한 바퀴 8
 };
 
 /**
