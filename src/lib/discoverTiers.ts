@@ -428,6 +428,8 @@ export const DISCOVER_TIERS: Readonly<Record<string, Tier>> = {
 	'ktx-meet-9': 5, // 11/4 새로 · 이미 길 위에 있는 열차까지 세기
 	'cal-monday-80': 5, // 11/5 새로 · 월요일 다섯 번이라야 합이 맞는다
 	'apt-floor-stops': 3, // 11/5 새로 · 아파트 호수에서 층을 뽑아 엘리베이터가 서는 층 수
+	'club-joined-pair': 1, // 11/6 새로 · 두 쪽이 한 몸으로 붙은 것
+	'microwave-seconds': 2, // 11/6 새로 · 전자레인지에 누른 수가 몇 초인가
 };
 
 /**
