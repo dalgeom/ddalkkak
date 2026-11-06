@@ -25,11 +25,22 @@
 	<ol>
 		<li><b>컴퓨터 · {data.p.start}</b>{#if data.defs[data.p.start]}<span>{data.defs[data.p.start]}</span>{/if}</li>
 		{#each data.p.line as w, i (w)}
-			<li class:me={i % 2 === 0}><b>{i % 2 === 0 ? '나' : '컴퓨터'} · {w}</b>{#if data.defs[w]}<span>{data.defs[w]}</span>{/if}</li>
+			<li class:me={i % 2 === 0}><b>{i % 2 === 0 ? '나' : '컴퓨터'} · {w}</b>{#if data.defs[w]}<span>{data.defs[w]}</span>{/if}<small>{i % 2 === 0 ? '낼 수 있던 말' : '받을 수 있던 말'} {data.options[i].toLocaleString()}개{i % 2 === 1 ? ' 중 가장 오래 버티는 말' : ''}</small></li>
 		{/each}
 	</ol>
 	<p>마지막 말 「{data.p.line[data.p.line.length - 1]}」의 끝 글자 ‘{data.end}’{data.du ? '(두음법칙으로 바뀌는 글자 포함)' : ''}{ro(data.end)} 시작하는 명사가 사전에 없어 컴퓨터가 막혀요.
 		{#if data.n > 1}컴퓨터는 가장 오래 버티는 말로 받아쳤고, 다른 길로 막아도 정답이에요.{/if}</p>
+	{#if data.n === 1 && data.traps.length}
+		<h2>먼저 떠오르는 말의 함정</h2>
+		<p>「{data.p.start}」 다음에 쉽게 떠오르는 말은 컴퓨터가 바로 받아쳐요.</p>
+		<ul class="traps">
+			{#each data.traps as t (t.w)}<li>{t.w} → 컴퓨터 「{t.r}」</li>{/each}
+		</ul>
+	{/if}
+	<h2>마지막 수, 다른 정답</h2>
+	<p>마지막 자리에서 낼 수 있던 말 {data.options[data.options.length - 1].toLocaleString()}개 중 컴퓨터를 그 자리에서 막는 말은 {data.blockCount}개예요.
+		{#if data.others.length}「{data.p.line[data.p.line.length - 1]}」 말고도 이 말들이 통해요.{:else}「{data.p.line[data.p.line.length - 1]}」 하나뿐이에요.{/if}</p>
+	{#if data.others.length}<p class="alt">{data.others.join(' · ')}{data.othersMore ? ` 외 ${data.othersMore}개` : ''}</p>{/if}
 	<a class="go" href="/kkeut" onclick={() => track('kanswer_play')}>오늘의 끝말잇기 풀기 →</a>
 	<nav aria-label="다른 날 해설">
 		{#if data.prev}<a href="/kkeut/answer/{data.prev}">← {data.prev}</a>{/if}
@@ -46,6 +57,11 @@
 	li { padding: 10px 12px; border-radius: 12px; background: var(--panel-2); }
 	li.me { background: var(--panel); border: 1px solid var(--accent); }
 	li span { display: block; font-size: 14px; color: var(--muted); }
+	li small { display: block; margin-top: 2px; font-size: 12px; color: var(--muted-2); }
+	h2 { font-size: 17px; margin: 22px 0 6px; }
+	.alt { font-weight: 700; overflow-wrap: anywhere; }
+	.traps { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 4px; }
+	.traps li { padding: 0; background: none; }
 	.go { display: block; margin: 18px 0; padding: 14px 16px; border-radius: 14px; background: var(--accent); color: #fff; font-weight: 800; text-decoration: none; text-align: center; }
 	nav { display: flex; justify-content: space-between; }
 	nav a { display: inline-flex; align-items: center; min-height: 44px; padding: 0 4px; color: var(--accent-text); }
