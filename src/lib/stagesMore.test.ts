@@ -19,7 +19,7 @@ describe('초성 단계', () => {
 		}
 		expect([1, 2, 3, 4].map((t) => CHOSUNG_STAGES.filter((s) => s.tier === t).length)).toMatchInlineSnapshot(`
 			[
-			  21,
+			  22,
 			  31,
 			  34,
 			  15,
