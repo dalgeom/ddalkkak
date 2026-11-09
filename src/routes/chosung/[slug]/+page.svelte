@@ -12,10 +12,10 @@
 </script>
 
 <svelte:head>
-	<title>{heading} — 정답·뜻 포함 | 딸깍 퍼즐</title>
-	<meta name="description" content="{heading}. {data.category.intro}" />
+	<title>{heading} — 초성 보고 바로 풀기, 막히면 힌트 | 딸깍</title>
+	<meta name="description" content="{heading}를 지금 바로 풀어 보세요. {data.category.intro}" />
 	<link rel="canonical" href={url} />
-	<meta property="og:title" content="{heading} — 정답·뜻 포함 | 딸깍 퍼즐" />
+	<meta property="og:title" content="{heading} — 초성 보고 바로 풀기, 막히면 힌트 | 딸깍" />
 	<meta property="og:description" content={data.category.intro} />
 	<meta property="og:url" content={url} />
 </svelte:head>
