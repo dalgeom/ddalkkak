@@ -434,6 +434,7 @@ export const DISCOVER_TIERS: Readonly<Record<string, Tier>> = {
 	'club-air-filled': 1, // 11/9 새로 · 바람을 넣어 부풀려 쓰는 것
 	'club-dissolves': 1, // 11/9 새로 · 물에 녹아 안 보이게 되는 것
 	'finger-count-bounce': 5, // 11/6 새로 · 엄지↔새끼 왕복 세기, 한 바퀴 8
+	'seat-fill-13': 5, // 11/9 새로 · 계산형 — 거리 최대 착석이 몇 명에서 멈추나
 };
 
 /**
