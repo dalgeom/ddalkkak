@@ -28,6 +28,8 @@
 	let status = $state<'no' | 'won' | 'revealed'>('no');
 	/** 분야 골라 풀기에서 맞힌 수. 세 번째 직후 한 번 내일 알림을 권한다(matchstick freeWins와 같다) */
 	let freeWins = $state(0);
+	/** 네이버 앱 등에서 「크롬으로 열고 알림 받기」로 넘어온 사람 — 메뉴 맨 위에서 바로 권한다(PushPrompt inAppBack) */
+	let pushReturn = $state(false);
 	let feedback = $state('');
 	let shaking = $state(false);
 	let inputEl = $state<HTMLInputElement | null>(null);
@@ -156,6 +158,7 @@
 		day = kstDayNumber(Date.now());
 		track('chosung_daily_seen', { done: todayDone, streak: dailyStreak });
 		// 분야 페이지의 「이 분야 풀기」가 ?c=<분야>로 들어온다
+		pushReturn = page.url.searchParams.get('push') === '1';
 		const c = page.url.searchParams.get('c');
 		if (c && categoryBySlug(c)) start({ type: 'free', cat: c });
 	});
@@ -191,6 +194,10 @@
 					<div class="fact"><b>{CHOSUNG_CATEGORIES.length}</b><span>분야</span></div>
 				</div>
 			</header>
+
+			{#if pushReturn}
+				<PushPrompt dayNum={day} tomorrow={tomorrowPeek} slot="chosung_return" />
+			{/if}
 
 			{#if todayWord}
 				<section class="today" class:done={todayDone}>
@@ -326,14 +333,14 @@
 					{#if todayWon}🔥 <b>{daily?.streak}일 연속</b> · 내일 자정에 새 문제{:else}내일 문제를 맞히면 연속 기록이 시작돼요{/if}
 				</p>
 				<DailyNext pitch="초성처럼 떠올려 맞히는 상식 2문제가 오늘의 10문제에 있어요" bind:shown={nextShown} />
-				<PushPrompt dayNum={day} streak={daily?.streak ?? 0} tomorrow={tomorrowPeek} slot="chosung" />
+				<PushPrompt dayNum={day} streak={daily?.streak ?? 0} tomorrow={tomorrowPeek} slot="chosung" inAppBack="/chosung?push=1" />
 				<button class="btn wide" class:ghost={nextShown} onclick={() => start({ type: 'free', cat: cur.category })}>
 					{curCat?.name} 이어서 풀기 →
 				</button>
 				<button class="btn ghost wide" onclick={toMenu}>분야 선택으로</button>
 			{:else}
 				{#if freeWins === 3 && status === 'won'}
-					<PushPrompt dayNum={day} tomorrow={tomorrowPeek} slot="chosung_free" />
+					<PushPrompt dayNum={day} tomorrow={tomorrowPeek} slot="chosung_free" inAppBack="/chosung?push=1" />
 				{/if}
 				<!-- 초성 분야로 검색해 들어온 세션은 2%만 오늘의 10문제를 시작했다(10/1~10/13) — 다섯 문제째에 한 번 -->
 				{#if freeWins === 5 && status === 'won'}

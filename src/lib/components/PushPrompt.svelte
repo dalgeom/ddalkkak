@@ -1,6 +1,13 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { shouldOfferPush, notePushDismissed, stopOfferingPush, enablePush } from '$lib/push';
+	import {
+		shouldOfferPush,
+		notePushDismissed,
+		stopOfferingPush,
+		enablePush,
+		inAppPushUrl
+	} from '$lib/push';
+	import { detectInApp, APP_LABEL } from '$lib/inapp';
 	import { track, seenOnce } from '$lib/analytics';
 	import type { Teaser } from '$lib/teaser';
 
@@ -16,24 +23,45 @@
 	 *
 	 * slot — 어느 자리에서 권했나. 이벤트 이름에 붙인다(push_offer_match). 파라미터로 나누면
 	 * GA 등록 전 데이터가 (not set)으로만 남는다(analytics.ts ctaTrack 주석).
+	 *
+	 * inAppBack — 주면, 알림을 못 거는 Android 인앱(네이버 앱 등)에서 이 주소를 크롬으로 여는 카드를
+	 * 대신 띄운다(push.ts inAppPushUrl). 받는 쪽이 ?push=1을 보고 카드를 바로 띄워야 한다.
 	 */
 	let {
 		dayNum,
 		streak = 0,
 		tomorrow = null,
-		slot = ''
-	}: { dayNum: number; streak?: number; tomorrow?: Teaser | null; slot?: string } = $props();
+		slot = '',
+		inAppBack = ''
+	}: {
+		dayNum: number;
+		streak?: number;
+		tomorrow?: Teaser | null;
+		slot?: string;
+		inAppBack?: string;
+	} = $props();
 
 	const ev = (name: string) => (slot ? `${name}_${slot}` : name);
 
 	let show = $state(false);
 	let busy = $state(false);
 	let done = $state(false);
+	/** 크롬으로 넘기는 intent 주소와 지금 앱 이름 — 있으면 인앱 카드다 */
+	let inApp = $state<{ url: string; app: string } | null>(null);
 
 	onMount(() => {
-		if (!shouldOfferPush(dayNum)) return;
+		if (shouldOfferPush(dayNum)) {
+			show = true;
+			track(ev('push_offer'), { streak });
+			return;
+		}
+		if (!inAppBack) return;
+		const url = inAppPushUrl(dayNum, new URL(inAppBack, location.href).href);
+		const app = detectInApp(navigator.userAgent);
+		if (!url || !app) return;
+		inApp = { url, app: APP_LABEL[app] };
 		show = true;
-		track(ev('push_offer'), { streak });
+		track(ev('push_inapp_offer'));
 	});
 
 	async function allow() {
@@ -83,12 +111,21 @@
 			{#if peek}
 				<p class="peek"><span>내일의 {peek.chip}</span><b>{peek.line}</b></p>
 			{/if}
-			<p class="why">
-				하루 한 번, 새 문제가 올라왔을 때만 보냅니다. 그 외에는 아무것도 보내지 않아요.
-			</p>
-			<button class="go" onclick={allow} disabled={busy}>
-				{busy ? '설정하는 중…' : '내일 아침에 알림 받기'}
-			</button>
+			{#if inApp}
+				<p class="why">
+					{inApp.app} 안에서는 알림을 받을 수 없어요. 크롬으로 열면 바로 켤 수 있어요.
+				</p>
+				<a class="go" href={inApp.url} onclick={() => track(ev('push_inapp_open'))}>
+					크롬으로 열고 알림 받기
+				</a>
+			{:else}
+				<p class="why">
+					하루 한 번, 새 문제가 올라왔을 때만 보냅니다. 그 외에는 아무것도 보내지 않아요.
+				</p>
+				<button class="go" onclick={allow} disabled={busy}>
+					{busy ? '설정하는 중…' : '내일 아침에 알림 받기'}
+				</button>
+			{/if}
 		{/if}
 	</section>
 {/if}
@@ -177,6 +214,12 @@
 		box-shadow: 0 5px 0 var(--accent-press);
 		cursor: pointer;
 		font-family: inherit;
+	}
+	a.go {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		text-decoration: none;
 	}
 	.go:disabled {
 		opacity: 0.6;

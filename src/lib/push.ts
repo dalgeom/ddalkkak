@@ -11,6 +11,7 @@
  */
 
 import { isStandalone, platformOf } from './pwa';
+import { detectInApp, externalUrl, isIOS } from './inapp';
 
 /** VAPID 공개키. 이름 그대로 공개용이라 소스에 두어도 된다 — 비밀키만 서버에 있다. */
 export const VAPID_PUBLIC_KEY =
@@ -100,6 +101,27 @@ export function pushSkipReason(dayNum: number, ua = '', touch = 0): PushSkip {
 	if (d.n >= MAX_SHOWS) return 'max-shows';
 	if (dayNum - d.at < GAP_DAYS) return 'gap';
 	return null;
+}
+
+/**
+ * 알림을 못 거는 Android 인앱에서, 크롬으로 넘겨 알림을 켜게 하는 주소. 못 넘기면 null.
+ *
+ * 11/9 초성 분야를 푼 사람 13명 중 제안을 본 사람은 2명이었다. 14일치를 브라우저로 쪼개 보니
+ * 분야 시작 133명 중 66명이 Android 「Whale Browser」(네이버 앱 안)였고 맞힘 653회를 냈는데
+ * 제안 노출은 0이었다 — 완주자 기록으로 보면 그 브라우저는 5명 모두 unsupported다.
+ * 가장 많이 푸는 사람들에게 내일 돌아올 장치가 하나도 없었다.
+ * 크롬으로 넘기는 길(InAppGate의 intent)은 네이버 Android에서 안내를 본 14명 중 7명이 눌렀다.
+ *
+ * back — 크롬에서 열 주소(?push=1을 붙여 그쪽에서 카드가 바로 뜨게 한다).
+ * 거절 간격(MAX_SHOWS · GAP_DAYS)은 보통 카드와 같은 기록을 쓴다.
+ */
+export function inAppPushUrl(dayNum: number, back: string, ua = ''): string | null {
+	if (pushSupported()) return null;
+	const s = ua || (typeof navigator === 'undefined' ? '' : navigator.userAgent);
+	if (!detectInApp(s) || isIOS(s)) return null;
+	const d = readDismiss();
+	if (d.n >= MAX_SHOWS || dayNum - d.at < GAP_DAYS) return null;
+	return externalUrl('android', back);
 }
 
 export function shouldOfferPush(dayNum: number, ua = '', touch = 0): boolean {

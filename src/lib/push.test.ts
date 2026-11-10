@@ -29,3 +29,29 @@ describe('VAPID 키', () => {
 		expect(bytes[0]).not.toBe(4);
 	});
 });
+
+/**
+ * 네이버 앱 같은 Android 인앱은 알림 API가 없어 제안이 아예 안 떴다(11/9 초성 분야 Android 웨일 66명 · 노출 0).
+ * 그 자리에서만 크롬으로 넘기는 주소를 낸다 — 정식 브라우저나 iOS 인앱에서 엉뚱하게 뜨면 안 된다.
+ */
+describe('인앱 → 크롬 알림 주소', () => {
+	const NAVER_ANDROID =
+		'Mozilla/5.0 (Linux; Android 14; SM-S918N; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/129.0 Mobile Safari/537.36 NAVER(inapp; search; 2000; 12.10.1)';
+	const NAVER_IOS =
+		'Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 NAVER(inapp; search; 2000; 12.6.4)';
+	const CHROME_ANDROID =
+		'Mozilla/5.0 (Linux; Android 14; SM-S918N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0 Mobile Safari/537.36';
+	const back = 'https://ddalkkak.app/chosung?push=1';
+
+	it('Android 네이버 앱에서는 크롬 intent 주소를 낸다', async () => {
+		const { inAppPushUrl } = await import('./push');
+		const url = inAppPushUrl(20768, back, NAVER_ANDROID);
+		expect(url).toContain('intent://ddalkkak.app/chosung?push=1#Intent;scheme=https;package=com.android.chrome;');
+	});
+
+	it('iOS 인앱 · 정식 브라우저에서는 내지 않는다', async () => {
+		const { inAppPushUrl } = await import('./push');
+		expect(inAppPushUrl(20768, back, NAVER_IOS)).toBeNull();
+		expect(inAppPushUrl(20768, back, CHROME_ANDROID)).toBeNull();
+	});
+});
