@@ -435,6 +435,9 @@ export const DISCOVER_TIERS: Readonly<Record<string, Tier>> = {
 	'club-dissolves': 1, // 11/9 새로 · 물에 녹아 안 보이게 되는 것
 	'finger-count-bounce': 5, // 11/6 새로 · 엄지↔새끼 왕복 세기, 한 바퀴 8
 	'seat-fill-13': 5, // 11/9 새로 · 계산형 — 거리 최대 착석이 몇 명에서 멈추나
+	'club-twist-open': 1, // 11/10 새로 · 손으로 돌려서 쓰는 것
+	'club-floats': 1, // 11/10 새로 · 물에 뜨는 것
+	'faro-shuffle-16': 5, // 11/10 새로 · 번갈아 끼우는 섞기 16장은 몇 번에 제자리
 };
 
 /**
