@@ -7,11 +7,13 @@
 	 * 그래서 띠를 걷고 맨 아래에 「오늘의 10문제」와 다른 놀이를 함께 둔다. 초성으로 들어온 사람의
 	 * 2%만 홈까지 갔던 것처럼(10/14 점검) 유형끼리 이어지는 길이 없었다.
 	 */
-	let { current = '' }: { current?: 'match' | 'cho' | 'trivia' | 'discover' | 'cube' | '' } = $props();
+	let { current = '' }: { current?: 'match' | 'cho' | 'kkeut' | 'trivia' | 'discover' | 'cube' | '' } = $props();
 
 	const ALL = [
 		{ key: 'match', name: '성냥개비', href: '/matchstick' },
 		{ key: 'cho', name: '초성 퀴즈', href: '/chosung' },
+		// 끝말잇기(11/3)가 빠져 있었다 — 읽을거리·유형 화면 맨 아래에서 갈 길이 없었다(11/11 점검)
+		{ key: 'kkeut', name: '끝말잇기', href: '/kkeut' },
 		{ key: 'trivia', name: '상식 퀴즈', href: '/trivia' },
 		{ key: 'discover', name: '발견형', href: '/discover' },
 		{ key: 'cube', name: '전개도', href: '/cubenet' }

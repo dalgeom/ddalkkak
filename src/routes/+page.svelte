@@ -1119,7 +1119,7 @@
 	     「유형으로 들어가기」였다. 오늘의 미션 + 놀이 고르기 카드 6장 하나로 합친다. 카드는 어디서 눌러도
 	     그 유형의 홈으로 간다(GameCards). 상식 분야 19개는 상식 홈(/trivia#fields)에 있다. -->
 	<section class="hsec reveal d1">
-		<Missions />
+		<Missions ondaily={startOrResume} />
 	</section>
 
 	<div class="adwrap reveal d1"><AdSlot label="랜딩 중단" /></div>
@@ -1558,7 +1558,7 @@
 	<!-- 다 푼 사람이 갈 곳 — 오늘의 성냥 · 초성과 다른 놀이, 그리고 약했던 유형 연습 한 줄 -->
 	<section class="nextplay">
 		<h2 class="np-h">다음 놀이</h2>
-		<Missions />
+		<Missions ondaily={() => scrollTo({ top: 0, behavior: 'smooth' })} />
 		{#if weakest}
 			<a class="np-practice" href="/play?filter={FILTER_OF[weakest.label]}">
 				오늘 {weakest.label} <b>{weakest.ok}/{weakest.total}</b> — {weakest.label} 연습하러 가기 <span aria-hidden="true">→</span>

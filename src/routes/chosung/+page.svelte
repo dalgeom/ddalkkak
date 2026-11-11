@@ -1,6 +1,6 @@
 <script lang="ts">
 	import OtherGames from '$lib/components/OtherGames.svelte';
-	import { onMount } from 'svelte';
+	import { onMount, tick } from 'svelte';
 	import { browser } from '$app/environment';
 	import { page } from '$app/state';
 	import { track } from '$lib/analytics';
@@ -127,7 +127,8 @@
 			track('chosung_solve', { tries: tries + 1, hint: hintOpen });
 		} else {
 			tries++;
-			feedback = '아니에요!';
+			const mine = chosungOf(input.replace(/\s+/g, ''));
+			feedback = mine !== chosungOf(cur.word) ? `초성이 달라요 — 넣은 낱말은 ${mine}` : '아니에요!';
 			shaking = true;
 			setTimeout(() => (shaking = false), 420);
 		}
@@ -151,6 +152,12 @@
 
 	function toMenu() {
 		screen = 'menu';
+	}
+	/** 「분야 선택으로」가 메뉴 맨 위로 가서 단계 · 띄우기 · 단어 찾기를 지나 내려가야 분야가 보였다(11/11 점검) */
+	async function toFields() {
+		screen = 'menu';
+		await tick();
+		document.getElementById('fields')?.scrollIntoView({ block: 'start' });
 	}
 
 	onMount(() => {
@@ -336,7 +343,7 @@
 				<button class="btn wide" class:ghost={nextShown} onclick={() => start({ type: 'free', cat: cur.category })}>
 					{curCat?.name} 이어서 풀기 →
 				</button>
-				<button class="btn ghost wide" onclick={toMenu}>분야 선택으로</button>
+				<button class="btn ghost wide" onclick={toFields}>분야 선택으로</button>
 			{:else}
 				{#if freeWins === 3 && status === 'won'}
 					<PushPrompt dayNum={day} tomorrow={tomorrowPeek} slot="chosung_free" inAppBack="/chosung?push=1" />
@@ -353,7 +360,7 @@
 					</button>
 				{/if}
 				<button class="btn wide" onclick={next}>다음 문제 →</button>
-				<button class="btn ghost wide" onclick={toMenu}>분야 선택으로</button>
+				<button class="btn ghost wide" onclick={toFields}>분야 선택으로</button>
 			{/if}
 		</div>
 	{/if}

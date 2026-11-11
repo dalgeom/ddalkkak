@@ -32,7 +32,9 @@
 			onsettle(true);
 		} else {
 			tries++;
-			msg = '아직이에요 — 힌트를 열어 볼까요?';
+			// 코끼리(ㅋㄲㄹ)를 ㅋㄱㄹ에 넣고 「아직이에요」만 봤다 — 초성이 다르면 그렇게 말한다(11/11 점검)
+			const mine = chosungOf(value.replace(/\s+/g, ''));
+			msg = mine !== chosungOf(word.word) ? `초성이 달라요 — 넣은 낱말은 ${mine}` : '아직이에요 — 힌트를 열어 볼까요?';
 		}
 	}
 	function giveUp() {

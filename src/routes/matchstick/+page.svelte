@@ -478,7 +478,7 @@
 	<div class="menu">
 		<header class="cover">
 						<h1><span class="kicker">성냥개비 문제</span>성냥 <b>하나만</b> 옮겨<br />틀린 식을 참으로</h1>
-			<p class="lead">획을 눌러 집고 빈 자리를 눌러 놓아요. 마우스로 끌어 옮겨도 돼요. 문제는 {problems.length}개 준비돼 있어요.</p>
+			<p class="lead">성냥을 눌러 집고 빈 자리를 눌러 놓아요. PC에서는 마우스로 끌어 옮겨도 돼요. 문제는 {problems.length}개 준비돼 있어요.</p>
 			<div class="facts">
 				<div class="fact"><b>{stats.solved}</b><span>푼 판</span></div>
 				<div class="fact"><b>{stats.best}</b><span>최고 연속</span></div>
@@ -675,6 +675,16 @@
 					label={prob.displayed || undefined}
 				/>
 			</div>
+		{/if}
+
+		<!-- 처음 온 사람이 풀이 화면에서 무엇을 누를지 몰랐다 — 집은 뒤에도 「놓을 곳」 안내가 없었다(11/11 점검) -->
+		{#if !feedback && solvedThis === 'no'}
+			<p class="howto">
+				{#if prob.rule === 'remove1'}빼야 할 성냥을 눌러요
+				{:else if prob.rule === 'add1'}성냥을 꽂을 빈 자리를 눌러요
+				{:else if picked}집었어요 — 놓을 빈 자리를 눌러요
+				{:else}옮길 성냥을 눌러 집어요{/if}
+			</p>
 		{/if}
 
 		{#if feedback}
@@ -1056,6 +1066,14 @@
 	.stat-box b {
 		font-size: 16px;
 		color: var(--accent-text);
+	}
+	.howto {
+		margin: 12px 0 0;
+		text-align: center;
+		font-size: 14px;
+		font-weight: 700;
+		color: var(--muted);
+		word-break: keep-all;
 	}
 	.feedback {
 		margin-top: 14px;

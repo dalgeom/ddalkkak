@@ -152,7 +152,8 @@
 				<div class="fact"><b>{summary.days}일</b><span>완주</span></div>
 				<div class="fact"><b>{summary.totalCorrect}</b><span>맞춘 문제</span></div>
 				{#if summary.avgMs > 0}
-					<div class="fact"><b>{formatDuration(summary.avgMs)}</b><span>평균 완주</span></div>
+					<!-- 다섯 칸 한 줄이라 칸이 62px — 「4분 3초」가 「4분 …」으로 잘렸다(11/11 점검). 평균은 분 단위로 -->
+					<div class="fact"><b>{summary.avgMs < 60000 ? `${Math.round(summary.avgMs / 1000)}초` : `${Math.round(summary.avgMs / 60000)}분`}</b><span>평균 완주</span></div>
 				{/if}
 			</div>
 		{:else if summary}

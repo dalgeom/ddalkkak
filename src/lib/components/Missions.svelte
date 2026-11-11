@@ -10,6 +10,8 @@
 		{ key: 'match', label: '오늘의 성냥개비', href: '/matchstick', done: false },
 		{ key: 'cho', label: '오늘의 초성', href: '/chosung', done: false }
 	];
+	/** 메인에서는 「오늘의 10문제」가 지금 이 화면(/)이라 눌러도 아무 일이 없었다(11/11 점검) — 바로 시작하게 넘겨받는다 */
+	let { ondaily }: { ondaily?: () => void } = $props();
 	let missions = $state<Mission[]>([]);
 	let left = $derived(missions.filter((m) => !m.done).length);
 
@@ -22,7 +24,16 @@
 	<h2>오늘의 미션 <span>{missions.length ? (left ? `${left}개 남았어요` : '오늘은 다 했어요') : ''}</span></h2>
 	<div class="mrow">
 		{#each missions.length ? missions : BLANK as m (m.key)}
-			<a href={m.href} class:done={m.done}>
+			<a
+				href={m.href}
+				class:done={m.done}
+				onclick={(e) => {
+					if (m.key === 'daily' && ondaily) {
+						e.preventDefault();
+						ondaily();
+					}
+				}}
+			>
 				<span class="ck" aria-hidden="true">{m.done ? '✓' : ''}</span>{m.label}
 			</a>
 		{/each}

@@ -103,7 +103,7 @@
 		<!-- v2(10/14): 링크 13개가 한 줄로 이어져 있던 것을 놀이 · 읽을거리 · 사이트 세 줄로 묶는다 -->
 		<footer>
 			<nav class="flinks" aria-label="놀이">
-				<a href="/matchstick">성냥개비</a><a href="/chosung">초성 퀴즈</a><a href="/trivia">상식 퀴즈</a><a href="/discover">발견형</a><a href="/cubenet">전개도</a><a href="/play">무한 연습</a><a href="/tools">도구 모음</a>
+				<a href="/matchstick">성냥개비</a><a href="/chosung">초성 퀴즈</a><a href="/kkeut">끝말잇기</a><a href="/trivia">상식 퀴즈</a><a href="/discover">발견형</a><a href="/cubenet">전개도</a><a href="/play">무한 연습</a><a href="/tools">도구 모음</a>
 			</nav>
 			<nav class="flinks" aria-label="읽을거리">
 				<a href="/read">읽을거리</a><a href="/guide">발견형 푸는 법</a><a href="/matchstick/guide">성냥개비 푸는 법</a><a href="/cubenet/guide">전개도 푸는 법</a><a href="/archive">지난 문제</a><a href="/news">새 소식</a>

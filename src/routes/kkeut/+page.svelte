@@ -9,6 +9,7 @@
 	import { KKEUT_FIRST_DAY, puzzleFor, type KkeutPuzzle } from '$lib/data/kkeutPuzzles';
 	import { nextStreak, shownStreak, type DayStreak } from '$lib/dailyStreak';
 	import { KKEUT_WORDS } from '$lib/data/kkeutMeta';
+	import DailyNext from '$lib/components/DailyNext.svelte';
 
 	/*
 	 * 끝말잇기(2026-11-03) — 오늘의 퍼즐(N수 안에 컴퓨터 막기)과 컴퓨터 대결 5단계.
@@ -207,6 +208,12 @@
 		msg = '';
 		giveHints = [];
 	}
+
+	async function toDuel() {
+		back();
+		await tick();
+		document.getElementById('duel')?.scrollIntoView({ block: 'start' });
+	}
 </script>
 
 <svelte:head>
@@ -304,6 +311,10 @@
 			</div>
 			{#if goal}<div class="prog" role="progressbar" aria-valuemin="0" aria-valuemax={goal} aria-valuenow={mineCount} aria-label="받아친 수"><i style="width:{(mineCount / goal) * 100}%"></i></div>{/if}
 
+			<!-- 풀이 화면에 「0/1수」만 있어 무엇을 하라는지 몰랐다 — 첫 화면의 목표를 여기서도 말한다(11/11 점검) -->
+			{#if !game.end && game.mode === 'puzzle'}
+				<p class="note goal">{game.n === 1 ? '컴퓨터가 더 이을 말이 없는 한 마디를 내세요.' : `내 말 ${game.n}개 안에 컴퓨터가 더 이을 말이 없게 만드세요.`}</p>
+			{/if}
 			{#if !game.end && now}
 				<ol class="trail" aria-label="지난 말">
 					{#if game.chain.length > 7}<li class="more">…</li>{/if}
@@ -356,7 +367,10 @@
 
 					{#if game.mode === 'puzzle'}
 						{#if game.end === 'win'}
-							<button class="big" onclick={back}>처음으로</button>
+							<!-- 막은 뒤 「처음으로」뿐이었다 — 성냥 · 초성처럼 연속 기록 · 오늘의 10문제로 잇는다(11/11 점검) -->
+							<p class="note">🔥 <b>{streak?.streak ?? 1}일 연속</b> · 내일 자정에 새 퍼즐이 열려요</p>
+							<DailyNext pitch="오늘의 10문제도 풀어 볼까요?" />
+							<button class="big" onclick={toDuel}>컴퓨터와 대결하러 가기</button>
 						{:else if tries < 3}
 							<button class="big" onclick={startPuzzle}>다시 풀기 ({3 - tries}번 남음)</button>
 						{:else}
@@ -394,6 +408,7 @@
 	.kicker { font-size: 13px; font-weight: 800; color: var(--accent); }
 	.lead, .note { color: var(--muted); font-size: 15px; line-height: 1.6; }
 	.rules h2 + .note { margin-bottom: 14px; }
+.goal { margin: 10px 0 0; text-align: center; font-size: 14px; }
 	.rules ul { padding-left: 18px; }
 	.rules li + li { margin-top: 4px; }
 	.note em { display: block; font-style: normal; color: var(--text); margin-top: 4px; }

@@ -8,7 +8,8 @@
 	 */
 	let { variant = 'bottom' }: { variant?: 'bottom' | 'top' } = $props();
 
-	const PLAY = ['/games', '/play', '/matchstick', '/chosung', '/trivia', '/cubenet', '/discover', '/guide'];
+	// 끝말잇기(11/3)가 빠져 /kkeut에서는 아무 탭도 켜지지 않았다(11/11 점검)
+	const PLAY = ['/games', '/play', '/matchstick', '/chosung', '/kkeut', '/trivia', '/cubenet', '/discover', '/guide'];
 	let path = $derived(page.url.pathname);
 	let tab = $derived(
 		path === '/' || path.startsWith('/today')

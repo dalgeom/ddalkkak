@@ -162,6 +162,10 @@
 	.games.full {
 		grid-template-columns: 1fr;
 	}
+	/* 메인 2열에서 일곱째 「무한 연습」이 혼자 남아 오른쪽이 비었다(11/11 점검) — 홀수 끝 칸은 한 줄을 다 쓴다 */
+	.games:not(.full) .game:last-child:nth-child(odd) {
+		grid-column: span 2;
+	}
 	.game {
 		background: var(--panel);
 		border: 1px solid var(--border-strong);

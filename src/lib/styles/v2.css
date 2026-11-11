@@ -79,7 +79,8 @@
 	padding: 11px 4px 10px;
 	text-align: center;
 }
-.fact b {
+/* 직계만 — 문장 속 <b>까지 block·nowrap이 되어 /matchstick/guide 「자릿수가 바뀌는」이 잘렸다(11/11 점검) */
+.fact > b {
 	display: block;
 	font-size: 18px;
 	font-weight: 900;

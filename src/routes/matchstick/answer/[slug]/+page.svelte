@@ -18,6 +18,8 @@
 	const url = $derived(`https://ddalkkak.app/matchstick/answer/${answerSlug(data.q)}`);
 	const head = $derived(`${pretty(data.q)} 성냥개비 ${RULE_LABEL[rule]} 정답`);
 	const ansText = $derived(answers.map((s) => pretty(s.text)).join(', '));
+	// 「= 6예요」처럼 받침 있는 숫자 뒤 조사가 틀렸다(11/11 점검) — 0·1·3·6·7·8은 받침이 있다
+	const josa = $derived(/[013678]$/.test(ansText) ? '이에요' : '예요');
 </script>
 
 <svelte:head>
@@ -37,7 +39,7 @@
 			><span>{pretty(data.q)}</span>
 		</nav>
 		<h1>{pretty(data.q)}<br /><b>성냥 {RULE_LABEL[rule]} 정답</b></h1>
-		<p class="lead">답은 <b>{ansText}</b>예요.</p>
+		<p class="lead">답은 <b>{ansText}</b>{josa}.</p>
 	</header>
 
 	<section class="sec">
