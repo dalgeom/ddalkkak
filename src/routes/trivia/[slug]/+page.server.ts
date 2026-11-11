@@ -66,6 +66,7 @@ export function load({ params }) {
 			id: t.id,
 			grade: t.grade ?? '',
 			question: t.blocks[0]?.kind === 'text' ? t.blocks[0].html : '',
+			figure: t.blocks.find((b) => b.kind === 'figure') as { svg: string; caption?: string } | undefined,
 			choices: t.choices ?? [],
 			// 객관식은 보기 중 하나, 주관식은 대표 답안 하나만 보여준다
 			answer: t.type === 'choice' ? (t.choices?.[t.answerIndex ?? 0] ?? '') : (t.answers?.[0] ?? ''),

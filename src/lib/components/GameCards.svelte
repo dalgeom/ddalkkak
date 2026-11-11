@@ -66,7 +66,7 @@
 			key: 'trivia',
 			name: '상식 퀴즈',
 			count: counts.trivia,
-			line: '19개 분야, 해설과 함께',
+			line: '21개 분야, 해설과 함께',
 			href: '/trivia',
 			sub: [
 				{ label: '바로 풀기', href: '/play?filter=trivia' },

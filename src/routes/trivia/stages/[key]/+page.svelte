@@ -4,6 +4,7 @@
 	import OtherGames from '$lib/components/OtherGames.svelte';
 	import PushPrompt from '$lib/components/PushPrompt.svelte';
 	import TierEndNote from '$lib/components/TierEndNote.svelte';
+	import Figure from '$lib/components/Figure.svelte';
 	import { kstDayNumber } from '$lib/game';
 	import { starsByScore, isOpen, isTierEnd, loadProgress, saveProgress, STAGE_SIZE, type StageProgress } from '$lib/stages';
 	import { TRIVIA_STAGE_KEY, TRIVIA_LEGACY } from '$lib/triviaStages';
@@ -96,6 +97,7 @@
 		<div class="chips"><span class="lv lv{data.tier}">{tierName(data.tier)}</span><span>{q.category}</span></div>
 		<!-- eslint-disable-next-line svelte/no-at-html-tags -- 문제 문장은 우리 데이터(trivia.ts)다 -->
 		<h2 class="q">{@html q.html}</h2>
+		{#if q.figure}<Figure svg={q.figure.svg} caption={q.figure.caption} />{/if}
 		<div class="choices">
 			{#each q.choices as c, i (i)}
 				<button

@@ -43,6 +43,7 @@ export function stageQuestions(key: string) {
 			id: p.id,
 			category: p.category ?? '',
 			html: p.blocks.find((b) => b.kind === 'text')?.html ?? '',
+			figure: p.blocks.find((b) => b.kind === 'figure') as { svg: string; caption?: string } | undefined,
 			choices: p.choices ?? [],
 			answerIndex: p.answerIndex ?? 0,
 			explain: p.explain

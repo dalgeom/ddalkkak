@@ -1,6 +1,7 @@
 <script lang="ts">
 	import OtherGames from '$lib/components/OtherGames.svelte';
 	import Fold from '$lib/components/Fold.svelte';
+	import Figure from '$lib/components/Figure.svelte';
 	import type { PageData } from './$types';
 	import { ctaTrack } from '$lib/analytics';
 
@@ -66,6 +67,7 @@
 						<span class="chip">{q.grade}</span>
 					</div>
 					<p class="ask">{@html q.question}</p>
+					{#if q.figure}<Figure svg={q.figure.svg} caption={q.figure.caption} />{/if}
 					{#if q.choices.length}
 						<ul class="choices">
 							{#each q.choices as c, ci (ci)}
@@ -96,6 +98,7 @@
 							<span class="chip">{q.grade}</span>
 						</div>
 						<p class="ask">{@html q.question}</p>
+						{#if q.figure}<Figure svg={q.figure.svg} caption={q.figure.caption} />{/if}
 						{#if q.choices.length}
 							<ul class="choices">
 								{#each q.choices as c, ci (ci)}

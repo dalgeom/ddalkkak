@@ -1110,6 +1110,17 @@
 	<section class="hsec reveal d2">
 		<h2 class="sec-h">놀이 고르기</h2>
 		<GameCards counts={KIND_COUNT} />
+		<!-- 상식 새 분야(11/12) — 카드는 상식 홈으로만 가서 새 분야까지 두 번 눌러야 했다 -->
+		<div class="new-fields">
+			<a class="tools-in" href="/trivia/flag" onclick={() => track('new_field_home', { field: 'flag' })}>
+				<span><b>국기 퀴즈</b>새 분야 · 20문제</span>
+				<span class="ar" aria-hidden="true">→</span>
+			</a>
+			<a class="tools-in" href="/trivia/capital" onclick={() => track('new_field_home', { field: 'capital' })}>
+				<span><b>수도 퀴즈</b>새 분야 · 20문제</span>
+				<span class="ar" aria-hidden="true">→</span>
+			</a>
+		</div>
 		<!-- 도구 모음(11/4) — 띄우기 · 만들기 · 학습지 · 찾기. 놀이 카드 아래 한 줄로 들어가는 길 -->
 		<a class="tools-in" href="/tools" onclick={() => track('tools_in_home')}>
 			<span><b>수업 · 모임에 쓰는 도구</b>퀴즈 띄우기 · 문제 만들기 · 학습지 인쇄</span>
@@ -1764,6 +1775,11 @@
 	/* ── 섹션 공통 ── */
 	.hsec {
 		margin-top: 26px;
+	}
+	.new-fields {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 10px;
 	}
 	.tools-in {
 		margin-top: 10px;
