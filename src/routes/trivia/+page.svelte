@@ -44,7 +44,7 @@
 
 	<ModeTiles
 		modes={[
-			{ name: '바로 풀기', sub: '섞어서 계속, 해설과 함께', href: '/play?filter=trivia', main: true },
+			{ name: '바로 풀기', sub: '분야를 섞거나 골라서 계속', href: '/play?filter=trivia', main: true },
 			// 10/20: 4칸을 지키려고 「오늘의 10문제」 타일을 뺐다 — 하단 「오늘」 탭과 아래 「다른 놀이」 칸에 있다
 			{ name: '단계 도전', sub: '쉬운 것부터 한 판씩', href: '/trivia/stages' },
 			{ name: '친구와 대결', sub: '같은 10문제로 점수 비교', href: '/trivia/duel' },
@@ -95,8 +95,8 @@
 	<section class="sec" id="fields">
 		<h2 class="sh">{data.categories.length}개 분야, 골라 푸는 재미</h2>
 		<p class="sub">
-			분야를 누르면 그 분야 문제 전체를 정답·해설과 함께 볼 수 있습니다. 직접 풀고 싶다면 무한
-			연습에서 분야·난이도를 골라 원하는 만큼 풀 수 있어요.
+			분야를 누르면 그 분야 문제를 정답·해설과 함께 볼 수 있고, 그 쪽 맨 위 「바로 풀기」를 누르면
+			그 분야 문제만 이어서 풀 수 있어요.
 		</p>
 		<div class="cats">
 			{#each data.categories as c (c.name)}

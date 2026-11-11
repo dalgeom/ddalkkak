@@ -103,7 +103,7 @@
 			key: 'mix',
 			name: '무한 연습',
 			count: counts.discover + counts.trivia + counts.match + counts.cube,
-			line: '네 유형을 섞어서 계속',
+			line: '유형 · 분야 골라 계속',
 			href: '/play',
 			sub: []
 		}

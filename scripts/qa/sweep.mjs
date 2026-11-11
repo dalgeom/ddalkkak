@@ -20,7 +20,9 @@ for (const w of [390, 320]) {
 		const r = await b.ev(`
 			await new Promise(r=>setTimeout(r,300));
 			const W = innerWidth;
-			const over = [...document.querySelectorAll('body *')].filter(e=>{const r=e.getBoundingClientRect(); return r.width>0 && (r.right>W+1 || r.left< -1) && getComputedStyle(e).position!=='fixed' && !e.closest('.fold,.mboard,svg,ins,.adslot,[class*=ad]');}).slice(0,3).map(e=>e.tagName+'.'+[...e.classList].join('.')+' '+Math.round(e.getBoundingClientRect().right));
+			// 가로로 넘겨 보는 칩 줄(/play 상식 분야 등) 안쪽은 넘침이 아니다 — 상자 자체가 화면 안이면 된다(11/11)
+			const scrollerOf = (e) => { for (let a = e.parentElement; a && a !== document.body; a = a.parentElement) { const o = getComputedStyle(a).overflowX; if ((o === 'auto' || o === 'scroll') && a.getBoundingClientRect().right <= W + 1) return a; } return null; };
+			const over = [...document.querySelectorAll('body *')].filter(e=>{const r=e.getBoundingClientRect(); return r.width>0 && (r.right>W+1 || r.left< -1) && getComputedStyle(e).position!=='fixed' && !e.closest('.fold,.mboard,svg,ins,.adslot,[class*=ad]') && !scrollerOf(e);}).slice(0,3).map(e=>e.tagName+'.'+[...e.classList].join('.')+' '+Math.round(e.getBoundingClientRect().right));
 			const imgs = [...document.images].filter(i=>i.complete && i.naturalWidth===0 && !/google|doubleclick/.test(i.src)).map(i=>i.src).slice(0,3);
 			const hrefs = [...document.querySelectorAll('a[href]')].map(a=>a.getAttribute('href')).filter(h=>h.startsWith('/') && !h.startsWith('//'));
 			return { w: W, sw: document.documentElement.scrollWidth, h: document.documentElement.scrollHeight, over, imgs, hrefs,

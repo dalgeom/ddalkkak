@@ -26,7 +26,7 @@ export const NOTICES: Notice[] = [
 		date: '2026-11-12',
 		title: '상식 퀴즈에 수도 · 국기 분야가 생겼어요',
 		body: '캐나다 · 튀르키예처럼 큰 도시와 헷갈리는 수도 20문제, 성조기 줄무늬 수 · 앞뒤가 다른 국기 같은 국기 20문제가 새로 생겼어요. 국기 문제는 국기 그림과 함께 나와요.',
-		href: '/trivia/flag',
+		href: '/play?filter=trivia&field=flag',
 		cta: '국기 퀴즈 풀러 가기'
 	},
 	{

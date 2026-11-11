@@ -36,7 +36,7 @@
 				<div class="fact"><b>{g.count}</b><span>{g.name}</span></div>
 			{/each}
 		</div>
-		<a class="cta top" href="/play?filter=trivia">상식 퀴즈 바로 풀기 <span aria-hidden="true">→</span></a>
+		<a class="cta top" href="/play?filter=trivia&field={data.category.slug}">{data.category.name} 문제만 바로 풀기 <span aria-hidden="true">→</span></a>
 	</header>
 
 	<!-- 문제 목록만 늘어놓으면 어디서나 볼 수 있는 상식 퀴즈와 구분이 안 된다.
@@ -121,7 +121,7 @@
 		<a class="cta" href="/" use:ctaTrack={'foot'}>
 			오늘의 10문제 풀러 가기 <span aria-hidden="true">→</span>
 		</a>
-		<a class="cta ghost" href="/play?filter=trivia">상식 퀴즈 바로 풀기</a>
+		<a class="cta ghost" href="/play?filter=trivia&field={data.category.slug}">{data.category.name} 문제만 바로 풀기</a>
 	</section>
 
 	<section class="sec">

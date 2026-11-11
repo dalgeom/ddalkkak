@@ -132,6 +132,13 @@
 	let inputEl = $state<HTMLInputElement | null>(null);
 	let feedback = $state<{ msg: string; ok: boolean } | null>(null);
 	let picked = $state<number | null>(null);
+	// 판정 줄이 화면 밖이면 끌어온다 — 전개도 · 그림 문제는 보기가 길어 답을 골라도 「맞았어요」가 아래에 숨었다(11/11 휴대폰 점검)
+	let feedbackEl = $state<HTMLDivElement | null>(null);
+	$effect(() => {
+		if (!feedback || !feedbackEl) return;
+		const r = feedbackEl.getBoundingClientRect();
+		if (r.top < 0 || r.bottom > window.innerHeight - 80) feedbackEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+	});
 
 	// 성냥개비 전용
 	let mOrig = $state<Board | null>(null);
@@ -1112,11 +1119,11 @@
 		<GameCards counts={KIND_COUNT} />
 		<!-- 상식 새 분야(11/12) — 카드는 상식 홈으로만 가서 새 분야까지 두 번 눌러야 했다 -->
 		<div class="new-fields">
-			<a class="tools-in" href="/trivia/flag" onclick={() => track('new_field_home', { field: 'flag' })}>
+			<a class="tools-in" href="/play?filter=trivia&field=flag" onclick={() => track('new_field_home', { field: 'flag' })}>
 				<span><b>국기 퀴즈</b>새 분야 · 20문제</span>
 				<span class="ar" aria-hidden="true">→</span>
 			</a>
-			<a class="tools-in" href="/trivia/capital" onclick={() => track('new_field_home', { field: 'capital' })}>
+			<a class="tools-in" href="/play?filter=trivia&field=capital" onclick={() => track('new_field_home', { field: 'capital' })}>
 				<span><b>수도 퀴즈</b>새 분야 · 20문제</span>
 				<span class="ar" aria-hidden="true">→</span>
 			</a>
@@ -1294,7 +1301,7 @@
 			{/each}
 
 			{#if feedback}
-				<div class="feedback" class:ok={feedback.ok}>
+				<div class="feedback" class:ok={feedback.ok} bind:this={feedbackEl}>
 					<span class="fmark">{feedback.ok ? '✓' : '✕'}</span>
 					<span>{feedback.msg}</span>
 				</div>

@@ -21,6 +21,7 @@
 	import { CUBE_TOTAL, kstDayNumber } from '$lib/game';
 	import SendProblem from '$lib/components/SendProblem.svelte';
 	import PushPrompt from '$lib/components/PushPrompt.svelte';
+	import { TRIVIA_FIELDS, fieldName } from '$lib/triviaFields';
 
 	/**
 	 * '전체'는 문제 수에 비례해 뽑고 있었다. 그러면 은행이 큰 유형이 화면을 다 차지한다 —
@@ -45,6 +46,17 @@
 	];
 
 	let filter = $state<Filter>('all');
+	/** 상식 분야 슬러그(null = 모든 분야). 11/11: 분야만 골라 풀 길이 없었다 */
+	let field = $state<string | null>(null);
+	let fieldLabel = $derived(fieldName(field));
+	let fieldCount = $derived(fieldLabel && bank ? bank.trivia.filter((t) => t.category === fieldLabel).length : 0);
+	let fieldsEl = $state<HTMLElement>();
+	// 고른 분야 칩이 줄 끝(국기 · 수도)이면 화면 밖에 숨는다 — 가로로만 당겨 보이게 한다
+	$effect(() => {
+		if (!field || !fieldsEl) return;
+		const b = fieldsEl.querySelector<HTMLElement>('.fchip.active');
+		if (b) fieldsEl.scrollLeft = b.offsetLeft - fieldsEl.offsetLeft - (fieldsEl.clientWidth - b.offsetWidth) / 2;
+	});
 	let combo = $state(0);
 	let loading = $state(true);
 	let loadFailed = $state(false);
@@ -77,6 +89,13 @@
 	let inputEl = $state<HTMLInputElement | null>(null);
 	let feedback = $state<{ msg: string; ok: boolean } | null>(null);
 	let picked = $state<number | null>(null);
+	// 판정 줄이 화면 밖이면 끌어온다 — 메인 10문제와 같은 이유(11/11)
+	let feedbackEl = $state<HTMLDivElement | null>(null);
+	$effect(() => {
+		if (!feedback || !feedbackEl) return;
+		const r = feedbackEl.getBoundingClientRect();
+		if (r.top < 0 || r.bottom > window.innerHeight - 80) feedbackEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+	});
 
 	// 성냥개비
 	let mOrig = $state<Board | null>(null);
@@ -96,7 +115,9 @@
 		filter === 'puzzle'
 			? data.counts.discover
 			: filter === 'trivia'
-				? data.counts.trivia
+				? fieldLabel
+					? fieldCount
+					: data.counts.trivia
 				: filter === 'match'
 					? data.counts.match
 					: filter === 'cube'
@@ -120,6 +141,7 @@
 	/** 현재 필터의 전체 후보 수 */
 	function kindLen(k: Kind): number {
 		if (!bank) return 0;
+		if (k === 'trivia' && fieldLabel) return fieldIdx().length;
 		if (k === 'puzzle') return bank.puzzle.length;
 		if (k === 'trivia') return bank.trivia.length;
 		if (k === 'match') return bank.match.length;
@@ -129,9 +151,15 @@
 	function itemOf(k: Kind, i: number): Item {
 		if (!bank) return {};
 		if (k === 'puzzle') return { problem: bank.puzzle[i] };
-		if (k === 'trivia') return { problem: bank.trivia[i] };
+		if (k === 'trivia') return { problem: bank.trivia[fieldLabel ? fieldIdx()[i] : i] };
 		if (k === 'match') return { eq: bank.match[i] };
 		return { cube: cubeAt(i) };
+	}
+
+	/** 고른 분야 문제의 은행 번호 */
+	function fieldIdx(): number[] {
+		if (!bank) return [];
+		return bank.trivia.flatMap((t, i) => (t.category === fieldLabel ? [i] : []));
 	}
 
 	function shuffle<T>(a: T[]): T[] {
@@ -191,11 +219,33 @@
 	}
 
 	function pickFilter(f: Filter) {
-		if (filter === f) return;
+		if (filter === f && !field) return;
 		filter = f;
+		field = null;
 		combo = 0;
 		refillBag();
 		nextProblem();
+		// 분야로 들어온 주소(?field=flag)가 남으면 새로고침 때 그 분야로 되돌아간다
+		const u = new URL(location.href);
+		if (u.searchParams.has('field')) {
+			u.searchParams.delete('field');
+			u.searchParams.set('filter', f);
+			history.replaceState(history.state, '', u);
+		}
+	}
+
+	function pickField(slug: string | null) {
+		if (field === slug) return;
+		field = slug;
+		combo = 0;
+		refillBag('trivia');
+		nextProblem();
+		const u = new URL(location.href);
+		if (slug) u.searchParams.set('field', slug);
+		else u.searchParams.delete('field');
+		u.searchParams.set('filter', 'trivia');
+		history.replaceState(history.state, '', u);
+		track('practice_field', { field: slug ?? 'all' });
 	}
 
 	/* ── 판정 ── */
@@ -336,12 +386,17 @@
 	onMount(() => {
 		const f = page.url.searchParams.get('filter');
 		if (f === 'all' || f === 'puzzle' || f === 'trivia' || f === 'match' || f === 'cube') filter = f;
+		const fd = page.url.searchParams.get('field');
+		if (fieldName(fd)) {
+			filter = 'trivia';
+			field = fd;
+		}
 		loadBank()
 			.then(() => {
 				loading = false;
 				refillBag();
 				nextProblem();
-				track('practice_start', { filter });
+				track('practice_start', { filter, ...(field ? { field } : {}) });
 			})
 			.catch(() => {
 				// 문제은행 동적 로드 실패 — 영원한 스켈레톤 대신 안내와 재시도를 준다
@@ -382,6 +437,16 @@
 		</button>
 	{/each}
 </div>
+
+{#if filter === 'trivia'}
+	<!-- 상식 분야 고르기(11/11) — 국기 · 수도처럼 한 분야만 이어서 푼다 -->
+	<div class="fields" bind:this={fieldsEl} role="group" aria-label="상식 분야">
+		<button class="fchip" class:active={!field} onclick={() => pickField(null)}>모든 분야</button>
+		{#each TRIVIA_FIELDS as [slug, name] (slug)}
+			<button class="fchip" class:active={field === slug} onclick={() => pickField(slug)}>{name}</button>
+		{/each}
+	</div>
+{/if}
 
 <!-- 서버 렌더 소개문 — 문제는 클라이언트에서 로드되므로 정적 HTML에 최소한의 본문을 남긴다 -->
 <p class="intro">
@@ -522,7 +587,7 @@
 		{/if}
 
 		{#if feedback}
-			<div class="feedback" class:ok={feedback.ok}>
+			<div class="feedback" class:ok={feedback.ok} bind:this={feedbackEl}>
 				<span class="fmark">{feedback.ok ? '✓' : '✕'}</span>
 				<span>{feedback.msg}</span>
 			</div>
@@ -596,7 +661,7 @@
 		{/if}
 	</section>
 
-	<p class="poolnote">{FILTERS.find((f) => f.key === filter)?.label} {poolSize.toLocaleString()}문제 중에서 무작위로 나와요</p>
+	<p class="poolnote">{fieldLabel ? `상식 · ${fieldLabel}` : FILTERS.find((f) => f.key === filter)?.label} {poolSize.toLocaleString()}문제 중에서 무작위로 나와요</p>
 {/if}
 
 <!-- v2(10/14): /play로 들어온 세션의 86%가 이 화면만 보고 끝났다 — 다른 놀이로 이어지는 길 -->
@@ -643,6 +708,33 @@
 		color: var(--text);
 		cursor: pointer;
 		font-family: inherit;
+	}
+	.fields {
+		display: flex;
+		gap: 6px;
+		overflow-x: auto;
+		margin: -6px -16px 16px;
+		padding: 0 16px 4px;
+		scrollbar-width: none;
+	}
+	.fchip {
+		flex: none;
+		padding: 6px 11px;
+		border-radius: 999px;
+		font-size: 12.5px;
+		font-weight: 600;
+		border: 1px solid var(--border);
+		background: var(--panel);
+		color: var(--text);
+		cursor: pointer;
+		font-family: inherit;
+		white-space: nowrap;
+	}
+	.fchip.active {
+		background: var(--accent-soft);
+		border-color: var(--accent);
+		color: var(--accent-text);
+		font-weight: 800;
 	}
 	.filter.active {
 		background: var(--accent);

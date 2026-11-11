@@ -31,6 +31,13 @@
 	let answerValue = $state('');
 	let inputEl = $state<HTMLInputElement | null>(null);
 	let feedback = $state<{ msg: string; ok: boolean } | null>(null);
+	// 판정 줄이 휴대폰 화면 아래로 빠지면 맞았는지 몰라 다시 누른다(11/11 점검) — 메인 · 무한 연습과 같은 처리
+	let feedbackEl = $state<HTMLDivElement | null>(null);
+	$effect(() => {
+		if (!feedback || !feedbackEl) return;
+		const r = feedbackEl.getBoundingClientRect();
+		if (r.top < 0 || r.bottom > window.innerHeight - 80) feedbackEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+	});
 	let picked = $state<number | null>(null);
 
 	let shownHints = $derived(p.hints ? p.hints.slice(0, hintsUsed) : []);
@@ -174,7 +181,7 @@
 	{/each}
 
 	{#if feedback}
-		<div class="feedback" class:ok={feedback.ok}>
+		<div class="feedback" class:ok={feedback.ok} bind:this={feedbackEl}>
 			<span class="fmark">{feedback.ok ? '✓' : '✕'}</span>
 			<span>{feedback.msg}</span>
 		</div>
