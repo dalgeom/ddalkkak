@@ -25,6 +25,13 @@
 	letter-spacing: -0.6px;
 	word-break: keep-all;
 }
+/* 머리 눈썹을 h1 안에 둔 쪽(11/11) — 구글이 크게 보는 h1에 검색어(「성냥개비 문제」)를 넣되 모양은 그대로 */
+.cover h1 .kicker {
+	display: block;
+	margin-bottom: 4px;
+	line-height: 1.5;
+	letter-spacing: 0;
+}
 .cover h1 b {
 	color: var(--accent-text);
 	font-weight: 900;

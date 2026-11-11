@@ -224,8 +224,7 @@
 <div class="kroot">
 	{#if !game}
 		<header class="cover">
-			<span class="kicker">끝말잇기</span>
-			<h1>컴퓨터와<br /><b>끝말잇기</b></h1>
+						<h1><span class="kicker">끝말잇기 게임</span>컴퓨터와<br /><b>끝말잇기</b></h1>
 			<p class="lead">두 글자 이상 명사로, 두음법칙은 인정해요. 사전에 있는 말 {KKEUT_WORDS.toLocaleString()}개를 받아요.</p>
 		</header>
 

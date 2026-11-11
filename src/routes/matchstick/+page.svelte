@@ -477,8 +477,7 @@
 {#if screen === 'menu'}
 	<div class="menu">
 		<header class="cover">
-			<span class="kicker">성냥개비</span>
-			<h1>성냥 <b>하나만</b> 옮겨<br />틀린 식을 참으로</h1>
+						<h1><span class="kicker">성냥개비 문제</span>성냥 <b>하나만</b> 옮겨<br />틀린 식을 참으로</h1>
 			<p class="lead">획을 눌러 집고 빈 자리를 눌러 놓아요. 마우스로 끌어 옮겨도 돼요. 문제는 {problems.length}개 준비돼 있어요.</p>
 			<div class="facts">
 				<div class="fact"><b>{stats.solved}</b><span>푼 판</span></div>
@@ -614,6 +613,14 @@
 				</p>
 			</div>
 			<a class="glink" href="/matchstick/guide">전체 숫자표와 4단계 풀이법 보기 →</a>
+			<!-- 11/11: 정답 모음이 이 쪽에서 링크가 없었다 — 구글은 안쪽 링크로 쪽의 무게를 잰다 -->
+			<h3 class="kh">성냥개비 문제 정답</h3>
+			<p class="mp">
+				12−7=6, 8−2=8처럼 자주 검색되는 성냥개비 문제는 정답과 옮기는 자리를 그림으로 모아 두었습니다.
+				목록에 없는 식은 숫자를 넣으면 성냥 하나로 되는 답을 모두 찾아 드려요.
+			</p>
+			<p><a class="glink" href="/matchstick/answer">자주 찾는 성냥개비 문제 정답 모음 →</a></p>
+			<p><a class="glink" href="/matchstick/solve">성냥개비 문제 정답 찾기(식 넣기) →</a></p>
 			<h3 class="kh">해법별로 모아 보기</h3>
 			<p class="mp">
 				{problems.length}개를 성냥이 어디로 가는지에 따라 셋으로 나눠 두었습니다. 유형마다 요령과 정답이

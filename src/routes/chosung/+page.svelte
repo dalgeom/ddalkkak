@@ -182,8 +182,7 @@
 	{#if screen === 'menu'}
 		<div class="menu">
 			<header class="cover">
-				<span class="kicker">초성 퀴즈</span>
-				<h1>초성만 보고<br /><b>낱말을 맞히세요</b></h1>
+								<h1><span class="kicker">초성 퀴즈</span>초성만 보고<br /><b>낱말을 맞히세요</b></h1>
 				<p class="lead">
 					ㄱㅇㅇ는 무엇일까요? 분야를 고르면 초성이 나옵니다. 막히면 뜻 힌트가 한 줄 열려요. 준비된
 					문제 {total}개.

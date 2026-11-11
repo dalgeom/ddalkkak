@@ -89,8 +89,7 @@
 
 <article>
 	<header class="cover">
-		<span class="kicker">전개도</span>
-		<h1>이 전개도를 접으면<br /><b>어떤 주사위가 될까?</b></h1>
+				<h1><span class="kicker">전개도 문제</span>이 전개도를 접으면<br /><b>어떤 주사위가 될까?</b></h1>
 		<p class="lead">
 			머릿속에서 종이를 접어 보는 문제입니다. 규칙을 외워서 푸는 게 아니라 도형을 실제로 돌려봐야
 			풀려요. 틀리면 <b>진짜로 접히는 과정</b>을 보여주니, 몇 번만 해보면 감이 옵니다.

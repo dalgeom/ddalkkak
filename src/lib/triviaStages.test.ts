@@ -4,9 +4,9 @@ import { TRIVIA } from './trivia';
 import { starsByScore, isOpen, nextOpen, isTierEnd, loadProgress, buildTierStages, STAGE_SIZE } from './stages';
 
 describe('상식 단계 도전', () => {
-	it('새싹 21 · 쉬움 22 · 보통 21 · 어려움 17 · 고수 16(11/10 수도 분야로 새싹 1 · 쉬움 1 · 보통 2 추가), 판마다 5문제, 겹침 없음', () => {
+	it('새싹 22 · 쉬움 23 · 보통 22 · 어려움 18 · 고수 16(11/10 수도 · 11/11 국기 분야로 늘었다), 판마다 5문제, 겹침 없음', () => {
 		const per = [1, 2, 3, 4, 5].map((t) => TRIVIA_STAGES.filter((s) => s.tier === t).length);
-		expect(per).toEqual([21, 22, 21, 17, 16]);
+		expect(per).toEqual([22, 23, 22, 18, 16]);
 		const all = TRIVIA_STAGES.flatMap((s) => s.ids);
 		expect(TRIVIA_STAGES.every((s) => s.ids.length === STAGE_SIZE)).toBe(true);
 		expect(new Set(all).size).toBe(all.length);
@@ -69,8 +69,8 @@ describe('단계 공통 규칙', () => {
 		expect(nextOpen(TRIVIA_STAGES, {}, 2)).toBe('2-1');
 	});
 	it('단계 끝 판 — 그 단계에 뒤 판이 없으면 끝', () => {
-		expect(isTierEnd(TRIVIA_STAGES, '1-21')).toBe(true);
-		expect(isTierEnd(TRIVIA_STAGES, '1-20')).toBe(false);
+		expect(isTierEnd(TRIVIA_STAGES, '1-22')).toBe(true);
+		expect(isTierEnd(TRIVIA_STAGES, '1-21')).toBe(false);
 	});
 });
 

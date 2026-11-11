@@ -39,6 +39,13 @@ const PAGES: Entry[] = [
      하지 마라.
    애드센스가 가치 없는 콘텐츠로 두 번 반려한 뒤(8/11·8/21) 정리한 것이다. */
 	{ path: '/', freq: 'daily', priority: '1.0' },
+	// 11/11: 유형 첫 화면 넷을 도로 넣는다. 위 「이미 1위」는 네이버 이야기다 — 구글에서 「성냥개비 문제」는
+	// 15~20위(2쪽)이고 사이트 노출이 주 30회 안팎이다. 넷 다 SSR 본문 960~1,300자에 noindex가 없고,
+	// 사람이 검색해 들어오는 문 자체라 구글에 「이 쪽이 대표」라고 알려 줄 이유가 생겼다.
+	{ path: '/matchstick', freq: 'daily', priority: '0.9', lastmod: '2026-11-11' },
+	{ path: '/chosung', freq: 'daily', priority: '0.9', lastmod: '2026-11-11' },
+	{ path: '/cubenet', freq: 'daily', priority: '0.8', lastmod: '2026-11-11' },
+	{ path: '/kkeut', freq: 'daily', priority: '0.8', lastmod: '2026-11-11' },
 	{ path: '/discover', freq: 'monthly', priority: '0.8' },
 	{ path: '/trivia', freq: 'monthly', priority: '0.8' },
 	{ path: '/matchstick/guide', freq: 'monthly', priority: '0.8' },
