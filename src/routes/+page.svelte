@@ -384,6 +384,16 @@
 			marks = saved.marks.slice(0, queue.length);
 			sessionMs = saved.elapsedMs ?? 0;
 			phase = saved.done ? 'done' : 'play';
+			// 답을 내고 「다음」 전에 나갔다 오면 판정은 저장됐는데 그 문제가 빈칸으로 다시 떠
+			// 답을 고쳐 낼 수 있었다(11/11 점검). 이미 판정한 문제는 넘긴다 — 마지막 문제면 결과로.
+			if (phase === 'play' && marks.length > pos) {
+				if (pos + 1 >= queue.length) {
+					next();
+					return;
+				}
+				pos += 1;
+				persist();
+			}
 			if (phase === 'play') {
 				resetProblem();
 				startTimer();
@@ -1090,7 +1100,7 @@
 				오늘의 결과 보기 <span class="arr" aria-hidden="true">→</span>
 			{:else if resumable}
 				<span class="cta-main">이어서 풀기 <span class="arr" aria-hidden="true">→</span></span>
-				<span class="cta-sub">{savedProgress.pos} / {DAILY_SIZE}문제 진행 중</span>
+				<span class="cta-sub">{Math.min(savedProgress.marks.length, DAILY_SIZE)} / {DAILY_SIZE}문제 풀었어요</span>
 			{:else if challenge}
 				도전 받고 10문제 시작 <span class="arr" aria-hidden="true">→</span>
 			{:else}
