@@ -717,6 +717,15 @@
 		padding: 0 16px 4px;
 		scrollbar-width: none;
 	}
+	/* 마우스로는 끌어 넘길 수 없고 스크롤바도 숨겨 뒤쪽 분야가 안 보였다(11/11 사용자 PC) — 마우스 화면은 줄바꿈해 다 펼친다 */
+	@media (hover: hover) and (pointer: fine) {
+		.fields {
+			flex-wrap: wrap;
+			overflow-x: visible;
+			margin: -6px 0 16px;
+			padding: 0 0 4px;
+		}
+	}
 	.fchip {
 		flex: none;
 		padding: 6px 11px;
