@@ -438,6 +438,9 @@ export const DISCOVER_TIERS: Readonly<Record<string, Tier>> = {
 	'club-twist-open': 1, // 11/10 새로 · 손으로 돌려서 쓰는 것
 	'club-floats': 1, // 11/10 새로 · 물에 뜨는 것
 	'faro-shuffle-16': 5, // 11/10 새로 · 번갈아 끼우는 섞기 16장은 몇 번에 제자리
+	'club-magnet': 1, // 11/11 새로 · 자석에 붙는 것, 알루미늄은 금속이어도 거절
+	'club-grows-back': 1, // 11/11 새로 · 잘라 내도 다시 자라는 것
+	'ruler-marks-9': 4, // 11/11 새로 · 눈금 셋으로 1~9cm, 두 눈금 사이 거리
 };
 
 /**

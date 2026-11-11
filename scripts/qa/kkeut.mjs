@@ -85,6 +85,7 @@ for (const [w, h] of [[390, 844], [320, 568]]) {
 	ok(`${w} 판 끝 결과가 화면 안으로`, sc.y1 > sc.y0 && sc.top >= 0 && sc.top < sc.vh, JSON.stringify(sc));
 	await b.ev(`document.querySelector('.playing').style.paddingTop = ''; return 1;`);
 	await sleep(800);
+	await until(`document.querySelectorAll('.chain li span').length > 0`); // 뜻풀이는 늦게 올 수 있다(11/11 운영 390에서 0개로 한 번 실패, 다시 돌리면 통과)
 
 	const r = await b.ev(`const over = document.documentElement.scrollWidth - innerWidth;
 		const cut = [...document.querySelectorAll('.chain li')].some((li) => li.scrollWidth > li.clientWidth + 1);

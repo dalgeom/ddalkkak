@@ -183,21 +183,21 @@ describe('성냥개비 두 번째 글의 수치', () => {
 		const ct = CHOSUNG_CATEGORIES.map((c) => c.guide.title);
 		expect(new Set(ct).size).toBe(ct.length);
 	});
-	it('과자: 61개 · 글자 수 14/33/12/2 · 「칩」 6 · 「스」 7 · 된소리 12 · 「과」 3', () => {
-		expect(words('snack').length).toBe(61);
-		expect([2, 3, 4, 5].map((n) => byLen('snack', n).length)).toEqual([14, 33, 12, 2]);
+	it('과자: 63개 · 글자 수 14/35/12/2 · 「칩」 6 · 「스」 8 · 된소리 12 · 「과」 3', () => {
+		expect(words('snack').length).toBe(63);
+		expect([2, 3, 4, 5].map((n) => byLen('snack', n).length)).toEqual([14, 35, 12, 2]);
 		expect(byLen('snack', 5).sort()).toEqual(['허니버터칩', '후렌치파이'].sort());
 		expect(ending('snack', '칩').length).toBe(6);
-		expect(ending('snack', '스').length).toBe(7);
+		expect(ending('snack', '스').length).toBe(8);
 		expect(words('snack').filter((w) => /[ㄲㄸㅃㅆㅉ]/.test(chosungOf(w))).length).toBe(12);
 		expect(ending('snack', '과').sort()).toEqual(['약과', '유과', '한과'].sort());
 		expect(chosungOf('약과')).toBe(chosungOf('유과'));
 	});
 
-	it('영화: 71개 · 글자 수 17/15/21/18 · 첫 초성 ㅇ 15 · ㄱ 11 · 「의」 4 · 「량」 2', () => {
+	it('영화: 73개 · 글자 수 17/16/22/18 · 첫 초성 ㅇ 15 · ㄱ 11 · 「의」 4 · 「량」 2', () => {
 		const ws = words('movie');
-		expect(ws.length).toBe(71);
-		expect([2, 3, 4].map((n) => byLen('movie', n).length)).toEqual([17, 15, 21]);
+		expect(ws.length).toBe(73);
+		expect([2, 3, 4].map((n) => byLen('movie', n).length)).toEqual([17, 16, 22]);
 		expect(ws.filter((w) => w.length >= 5).length).toBe(18);
 		expect(byLen('movie', 7).sort()).toEqual(['태극기휘날리며', '보헤미안랩소디'].sort());
 		expect(byLen('movie', 6).sort()).toEqual(['엽기적인그녀', '인사이드아웃', '이웃집토토로'].sort());
@@ -219,8 +219,8 @@ describe('글이 위 수치를 그대로 적고 있다', () => {
 		[guide('fruit-vegetable'), ['76개 중 47개', '93개 중 43개', '과일이 34개, 채소가 40개', '「추」가 일곱']],
 		[guide('country'), ['「아」로 끝나는 나라가 열둘', '「국」이 여섯', '「드」가 여섯']],
 		[guide('idiom'), ['ㅇ인 것이 19개']],
-		[guide('snack'), ['61개 가운데 세 글자가 33개', '6개(', '7개(', '12개']],
-		[guide('movie'), ['71개', '두 글자가 17개', '네 글자가 21개', '다섯 글자 이상이 18개', 'ㅇ이 15개', 'ㄱ이 11개']],
+		[guide('snack'), ['63개 가운데 세 글자가 35개', '6개(', '8개(', '12개']],
+		[guide('movie'), ['73개', '두 글자가 17개', '네 글자가 22개', '다섯 글자 이상이 18개', 'ㅇ이 15개', 'ㄱ이 11개']],
 		[extra('self'), ['293문제', '36번씩', '21번', '190개', '103개']],
 		[extra('transfer'), ['237문제', '106번', '43번', '46번', '38번씩', '171문제', '98번', '73번', '66번']],
 		[extra('operator'), ['211문제 중 152문제', '59문제', '71번', '23번', '22번', '13번', '10번']],
