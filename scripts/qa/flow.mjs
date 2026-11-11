@@ -179,7 +179,7 @@ for (const [f, want] of [['cube', 'cube'], ['match', 'match'], ['trivia', 'choic
 	const kinds = [];
 	for (let i = 0; i < 4; i++) {
 		const k = await b.ev(`
-			const chip = document.querySelector('.chip, .cat-chip, [class*=chip]')?.textContent ?? '';
+			const chip = (document.querySelector('.cat-chip') ?? document.querySelector('.chip, [class*=chip]:not(.fchip)'))?.textContent ?? ''; // .fchip = 상식 분야 칩 줄(11/11) — 문제 칩이 아니다
 			const k = document.querySelector('.cubeopt, .cube') ? 'cube' : document.querySelector('.mboard') ? 'match' : (document.querySelector('.choice') || /초등|중등|고등|어른/.test(chip)) ? 'choice' : 'other';
 			const give=[...document.querySelectorAll('button')].find(b=>/^(모르겠어요|건너뛰기)$/.test(b.textContent.trim())); give?.click(); await new Promise(r=>setTimeout(r,400));
 			const nx=[...document.querySelectorAll('button')].find(b=>/다음/.test(b.textContent) && b.offsetParent); nx?.click(); await new Promise(r=>setTimeout(r,700)); return k;`);

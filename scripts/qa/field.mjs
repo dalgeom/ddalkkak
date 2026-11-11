@@ -16,7 +16,7 @@ for (const [w, h] of [[390, 844], [320, 568]]) {
 	const href = await b.ev(`return document.querySelector('a.cta.top')?.getAttribute('href');`);
 	ok(`${w} 국기 쪽 버튼이 국기만 풀기로`, href === '/play?filter=trivia&field=flag', href);
 	await b.ev(`document.querySelector('a.cta.top').click(); return 1;`);
-	ok(`${w} 누르면 무한 연습`, await until(`location.pathname === '/play' && document.querySelector('.fchip.active')`));
+	ok(`${w} 누르면 무한 연습`, await until(`location.pathname === '/play' && document.querySelector('.fchip.active') && document.querySelector('.cat-chip')`)); // 칩 줄은 문제보다 먼저 뜬다 — 문제까지 기다린다
 	await sleep(400);
 	const chip = await b.ev(`const c = document.querySelector('.fchip.active'); const r = c.getBoundingClientRect(); return { t: c.textContent, left: r.left, right: r.right, over: document.documentElement.scrollWidth - innerWidth };`);
 	ok(`${w} 고른 칩 「국기」가 화면 안 · 가로 넘침 없음`, chip.t === '국기' && chip.left >= 0 && chip.right <= w && chip.over <= 0, JSON.stringify(chip));
