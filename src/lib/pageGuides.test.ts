@@ -194,10 +194,10 @@ describe('성냥개비 두 번째 글의 수치', () => {
 		expect(chosungOf('약과')).toBe(chosungOf('유과'));
 	});
 
-	it('영화: 73개 · 글자 수 17/16/22/18 · 첫 초성 ㅇ 15 · ㄱ 11 · 「의」 4 · 「량」 2', () => {
+	it('영화: 75개 · 글자 수 17/17/23/18 · 첫 초성 ㅇ 15 · ㄱ 11 · 「의」 4 · 「량」 2', () => {
 		const ws = words('movie');
-		expect(ws.length).toBe(73);
-		expect([2, 3, 4].map((n) => byLen('movie', n).length)).toEqual([17, 16, 22]);
+		expect(ws.length).toBe(75);
+		expect([2, 3, 4].map((n) => byLen('movie', n).length)).toEqual([17, 17, 23]);
 		expect(ws.filter((w) => w.length >= 5).length).toBe(18);
 		expect(byLen('movie', 7).sort()).toEqual(['태극기휘날리며', '보헤미안랩소디'].sort());
 		expect(byLen('movie', 6).sort()).toEqual(['엽기적인그녀', '인사이드아웃', '이웃집토토로'].sort());
@@ -220,7 +220,7 @@ describe('글이 위 수치를 그대로 적고 있다', () => {
 		[guide('country'), ['「아」로 끝나는 나라가 열둘', '「국」이 여섯', '「드」가 여섯']],
 		[guide('idiom'), ['ㅇ인 것이 19개']],
 		[guide('snack'), ['63개 가운데 세 글자가 35개', '6개(', '8개(', '12개']],
-		[guide('movie'), ['73개', '두 글자가 17개', '네 글자가 22개', '다섯 글자 이상이 18개', 'ㅇ이 15개', 'ㄱ이 11개']],
+		[guide('movie'), ['75개', '두 글자가 17개', '네 글자가 23개', '다섯 글자 이상이 18개', 'ㅇ이 15개', 'ㄱ이 11개']],
 		[extra('self'), ['293문제', '36번씩', '21번', '190개', '103개']],
 		[extra('transfer'), ['237문제', '106번', '43번', '46번', '38번씩', '171문제', '98번', '73번', '66번']],
 		[extra('operator'), ['211문제 중 152문제', '59문제', '71번', '23번', '22번', '13번', '10번']],

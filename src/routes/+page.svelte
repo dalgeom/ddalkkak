@@ -241,6 +241,8 @@
 		for (const k of order.slice(0, -1)) c[k] = (c[k] ?? 0) + 1;
 		return order.slice(0, -1).filter((k, i, a) => a.indexOf(k) === i).map((k) => ({ kind: k, n: c[k]! }));
 	});
+	/** 콘텐츠 쪽 버튼에서 곧장 1번으로 온 사람에게만 1번 위 안내 한 줄(11/12 실험) */
+	let goIntro = $state(false);
 	let compositionShort = $derived(
 		todayCounts.map((x) => `${KIND_LABEL[x.kind]} ${x.n}`).join(' · ') + ' · 보너스 1'
 	);
@@ -969,7 +971,15 @@
 		// startOrResume이 갈라 준다. cta_go는 「버튼에서 와서 곧장 넘어갔다」의 분모다.
 		if (takeGoDaily()) {
 			track('cta_go', { done: savedProgress.done ? 1 : 0 });
-			if (!savedProgress.done) startOrResume();
+			if (!savedProgress.done) {
+				startOrResume();
+				// 11/12 판정: 곧장 온 시작자는 1번에서 58%가 떠났고(홈에서 시작 21%) 95%가 10초 안이었다 —
+				// 소개를 건너뛰어 「이게 뭔지」를 못 본 채 1번을 만난다. 1번 위에 오늘 구성 한 줄을 보인다(판정 11/26)
+				if (pos === 0) {
+					goIntro = true;
+					track('p1_intro_seen');
+				}
+			}
 		}
 
 		/* 탭을 떠나면 타이머를 멈춘다. 이게 없으면 앱을 닫아둔 시간까지 다 세어져
@@ -1175,6 +1185,10 @@
 			<span class="tick" class:done={!!marks[i]} class:current={i === pos}></span>
 		{/each}
 	</div>
+
+	{#if goIntro && pos === 0 && !judged}
+		<p class="go-intro">오늘의 10문제 · {compositionShort}</p>
+	{/if}
 
 	{#key pos}
 		<section
@@ -2000,6 +2014,13 @@
 		color: var(--text);
 		padding: 4px 10px;
 		border-radius: 7px;
+	}
+	.go-intro {
+		margin: -4px 0 10px;
+		text-align: center;
+		font-size: 13px;
+		font-weight: 700;
+		color: var(--muted);
 	}
 	.type-chip.bonus {
 		background: var(--gold-bg);

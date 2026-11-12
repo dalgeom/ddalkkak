@@ -25,6 +25,7 @@ export const KKEUT_PUZZLES: KkeutPuzzle[] = [
 	{ date: '2026-11-16', start: '벌꿀', line: ['꿀팁'] },
 	{ date: '2026-11-17', start: '강북', line: ['북녘'] },
 	{ date: '2026-11-18', start: '개밥', line: ['밥그릇'] },
+	{ date: '2026-11-19', start: '강낭콩', line: ['콩기름'] },
 ];
 
 export function puzzleFor(day: number): KkeutPuzzle | null {

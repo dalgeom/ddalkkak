@@ -4,7 +4,7 @@
 	import { track } from '$lib/analytics';
 	import { kstDayNumber } from '$lib/game';
 	import { TIERS, tierName, type Tier } from '$lib/tiers';
-	import { charTable, makeDict, last, type Dict, type Reject, type Table } from '$lib/kkeut';
+	import { charTable, makeDict, last, movesFrom, type Dict, type Reject, type Table } from '$lib/kkeut';
 	import { firstWord, giveUp, newDuel, newFree, newPuzzle, play, DUEL_LIMIT, type Game } from '$lib/kkeutGame';
 	import { KKEUT_FIRST_DAY, puzzleFor, type KkeutPuzzle } from '$lib/data/kkeutPuzzles';
 	import { nextStreak, shownStreak, type DayStreak } from '$lib/dailyStreak';
@@ -44,6 +44,14 @@
 	let input = $state('');
 	let msg = $state('');
 	let giveHints: string[] = $state([]);
+	/** 퍼즐을 놓친 까닭 — 끝 화면이 「받아쳤어요」만 말해서 왜 끝났는지 몰랐다(11/12 미리 풀기) */
+	const failWhy = $derived.by(() => {
+		if (!game || game.mode !== 'puzzle' || game.end !== 'fail' || !dict) return '';
+		const c = last(game.chain[game.chain.length - 1].word);
+		return movesFrom(dict, c, game.used).length
+			? `${game.n}수 안에 컴퓨터를 막지 못했어요.`
+			: `「${c}」(으)로 시작하는 말이 없어요. 컴퓨터가 이을 수 없는 끝 글자로 막았어요.`;
+	});
 	let defs: Record<string, string> = $state({});
 	let field: HTMLInputElement | undefined = $state();
 
@@ -367,6 +375,7 @@
 				<section class="end">
 					{#if game.mode === 'puzzle'}
 						<h2>{game.end === 'win' ? '막았어요!' : '컴퓨터가 받아쳤어요'}</h2>
+						{#if failWhy}<p class="note">{failWhy}</p>{/if}
 					{:else if game.mode === 'duel'}
 						<h2>{game.end === 'win' ? `${tierName(game.tier)} 단계를 이겼어요!` : game.end === 'lose' ? '이을 말이 없어요, 졌어요' : '이런 말이 있었어요'}</h2>
 					{:else}

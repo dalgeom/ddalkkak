@@ -16,6 +16,7 @@ await b.ev(`const d = Math.floor((Date.now() + 32400000) / 86400000);
 	localStorage.removeItem('ddal.match.daily'); localStorage.removeItem('ddal.cho.daily'); return 1;`);
 
 await b.go('/record', 1200);
+await until(`document.querySelector('.cta')`);
 const c1 = await b.ev(cta);
 ok('기록 탭: 10문제 끝내면 남은 미션으로', /\/matchstick\?today=1/.test(c1), c1);
 
@@ -41,6 +42,7 @@ ok('초성: 정답 보기 뒤 칸이 낱말로', !!tiles && !/[ㄱ-ㅎ]/.test(ti
 ok('미션 다 하면 이어가기 카드 없음', !(await b.ev(`return !!document.querySelector('.dnext');`)));
 
 await b.go('/record', 1200);
+await until(`document.querySelector('.cta')`);
 const c2 = await b.ev(cta);
 ok('기록 탭: 다 하면 지난 문제로', /\/archive/.test(c2) && !/^\/ /.test(c2), c2);
 

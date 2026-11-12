@@ -62,7 +62,9 @@ export const CHOSUNG_BATCHES: { fromDay: number; counts: Record<string, number> 
 	// 11/11 묶음 — 십시일반 · 팔방미인 · 신데렐라 · 인어공주 · 백설공주 (새싹 채우기 — 사자성어 · 영화가 얇다)
 	{ fromDay: 20768, counts: { animal: 93, food: 92, 'fruit-vegetable': 76, country: 63, idiom: 67, snack: 61, movie: 71 } },
 	// 11/12 묶음 — 천차만별 · 마들렌 · 츄러스 · 피노키오 · 라푼젤 (새싹 채우기 — 사자성어 · 과자 · 영화가 얇다)
-	{ fromDay: 20769, counts: { animal: 93, food: 92, 'fruit-vegetable': 76, country: 63, idiom: 68, snack: 63, movie: 73 } }
+	{ fromDay: 20769, counts: { animal: 93, food: 92, 'fruit-vegetable': 76, country: 63, idiom: 68, snack: 63, movie: 73 } },
+	// 11/13 묶음 — 동상이몽 · 소탐대실 · 박장대소 · 모아나 · 쿵푸팬더 (새싹 채우기)
+	{ fromDay: 20770, counts: { animal: 93, food: 92, 'fruit-vegetable': 76, country: 63, idiom: 71, snack: 63, movie: 75 } }
 ];
 
 const toWord = (slug: string) => ([word, hint, alts]: ChosungEntry) => ({ word, hint, alts: alts ?? [], category: slug });

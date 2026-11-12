@@ -441,6 +441,9 @@ export const DISCOVER_TIERS: Readonly<Record<string, Tier>> = {
 	'club-magnet': 1, // 11/11 새로 · 자석에 붙는 것, 알루미늄은 금속이어도 거절
 	'club-grows-back': 1, // 11/11 새로 · 잘라 내도 다시 자라는 것
 	'ruler-marks-9': 4, // 11/11 새로 · 눈금 셋으로 1~9cm, 두 눈금 사이 거리
+	'club-wheels': 1, // 11/13 새로 · 바퀴로 굴러가는 것, 아이스 스케이트가 함정
+	'club-sound-alert': 1, // 11/13 새로 · 소리를 내서 알리는 것, 자동차 경적
+	'double-plus-100': 5, // 11/13 새로 · ×2 · +1로 100까지 8번, 거꾸로 내려오기
 };
 
 /**
