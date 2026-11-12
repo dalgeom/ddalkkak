@@ -7,7 +7,7 @@
 	import { track } from '$lib/analytics';
 	import { kstDayNumber } from '$lib/game';
 	import { CHOSUNG_CATEGORIES } from '$lib/data/chosung';
-	import { CHOSUNG_WORDS, chosungOf, isCorrect, chosungOfDay, categoryBySlug } from '$lib/chosung';
+	import { CHOSUNG_WORDS, chosungOf, isCorrect, chosungOfDay, categoryBySlug, shownWord } from '$lib/chosung';
 	import { nextStreak, shownStreak, type DayStreak } from '$lib/dailyStreak';
 	import PushPrompt from '$lib/components/PushPrompt.svelte';
 	import DailyNext from '$lib/components/DailyNext.svelte';
@@ -135,7 +135,7 @@
 				? tries === 0
 					? '딸깍! 한 번에 맞혔어요'
 					: `딸깍! ${tries + 1}번 만에 맞혔어요`
-				: `딸깍! 정답이에요 — 준비한 답은 「${cur.word}」`;
+				: `딸깍! 정답이에요 — 준비한 답은 「${shownWord(cur.word)}」`;
 			track('chosung_solve', { tries: tries + 1, hint: hintOpen });
 		} else {
 			tries++;
@@ -158,7 +158,7 @@
 		if (!done.includes(idx)) done = [...done, idx];
 		if (mode.type === 'today') finishToday('revealed');
 		persist();
-		feedback = `정답: ${cur.word}`;
+		feedback = `정답: ${shownWord(cur.word)}`;
 		track('chosung_reveal');
 	}
 
@@ -332,7 +332,7 @@ ${location.origin}/chosung?ref=cho
 		<div class="card">
 			<!-- 맞히거나 정답을 보면 칸이 낱말로 바뀐다 — 끝나도 초성만 남아 있었다(11/12 점검) -->
 			<div class="tiles" class:shaking>
-				{#each [...(status === 'no' ? chosungOf(cur.word) : cur.word)] as ch, i (i)}<span class="tile" class:open={status !== 'no'}>{ch}</span>{/each}
+				{#each [...(status === 'no' ? chosungOf(cur.word) : shownWord(cur.word).replace(',', ''))] as ch, i (i)}{#if ch === ' '}<span class="gap"></span>{:else}<span class="tile" class:open={status !== 'no'}>{ch}</span>{/if}{/each}
 			</div>
 
 			{#if hintOpen || status !== 'no'}
@@ -509,6 +509,9 @@ ${location.origin}/chosung?ref=cho
 		font-size: 30px;
 		font-weight: 800;
 		color: var(--text);
+	}
+	.gap {
+		width: 12px;
 	}
 	.tile.open {
 		border-color: var(--accent);

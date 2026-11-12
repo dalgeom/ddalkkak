@@ -2,6 +2,7 @@
 	import OtherGames from '$lib/components/OtherGames.svelte';
 	import { track } from '$lib/analytics';
 	import { FIELDS } from '$lib/chosungFind';
+	import { shownWord } from '$lib/chosung';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
@@ -61,7 +62,7 @@
 					<span class="cho">{q.cho}</span>
 					<details>
 						<summary>정답 보기</summary>
-						<p class="ans"><b>{q.word}</b> — {q.hint}</p>
+						<p class="ans"><b>{shownWord(q.word)}</b> — {q.hint}</p>
 						{#if q.why}<p class="why">{q.why}</p>{/if}
 					</details>
 				</li>
@@ -79,7 +80,7 @@
 			<p class="sub">이 분야에서 초성이 똑같은 낱말들입니다. 어느 쪽을 써도 정답으로 받습니다.</p>
 			<ul class="coll">
 				{#each data.collisions as g (g.cho)}
-					<li><span class="cho">{g.cho}</span>{g.words.join(' · ')}</li>
+					<li><span class="cho">{g.cho}</span>{g.words.map(shownWord).join(' · ')}</li>
 				{/each}
 			</ul>
 		</section>

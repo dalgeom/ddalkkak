@@ -4,7 +4,7 @@
 	import { page } from '$app/state';
 	import { track } from '$lib/analytics';
 	import { kstDayNumber } from '$lib/game';
-	import { CHOSUNG_WORDS, chosungOf, chosungOfDay, categoryBySlug, type ChosungWord } from '$lib/chosung';
+	import { CHOSUNG_WORDS, chosungOf, chosungOfDay, categoryBySlug, shownWord, type ChosungWord } from '$lib/chosung';
 	import { CHOSUNG_TIERS } from '$lib/chosungTiers';
 	import OtherGames from '$lib/components/OtherGames.svelte';
 
@@ -261,7 +261,7 @@
 				<span class="cho" class:long={cur.word.length >= 5}>{chosungOf(cur.word)}</span>
 				<span class="meta">{cur.word.length}글자 · {categoryBySlug(cur.category)?.name}</span>
 				<span class="hint" class:show={step >= 1}>{cur.hint}</span>
-				<span class="answer" class:show={step >= 2}>{cur.word}</span>
+				<span class="answer" class:show={step >= 2}>{shownWord(cur.word)}</span>
 				{#if step >= 2 && alsoOk.length}<span class="also">같은 초성 · {alsoOk.join(' · ')}</span>{/if}
 			</button>
 			<div class="ctl">

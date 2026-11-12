@@ -449,6 +449,19 @@
 		if (msg) toast(msg);
 	}
 
+	// 무한 연습에서 푼 문제를 그대로 친구에게(11/12 점검 — 기록 공유만 있고 「이 문제」를 보낼 길이 없었다).
+	// 받은 쪽은 ?p=번호로 같은 문제가 곧장 열린다. 정답은 적지 않는다.
+	async function sendThis() {
+		track('problem_send_click', { from: 'match', id: String(pIdx) });
+		const text = `딸깍! 성냥개비 — ${prob.displayed} ${RULE_LABEL[prob.rule]}. 너는 풀 수 있어?
+${location.origin}/matchstick?p=${pIdx}&ref=match_send
+#딸깍`;
+		const outcome = await shareCardResult({ title: '성냥개비 한 문제', scoreLabel: prob.displayed, subLine: RULE_LABEL[prob.rule], cta: '너는 풀 수 있어?' }, text);
+		track('problem_send_result', { from: 'match', outcome });
+		const msg = outcome === 'copied-text' ? '링크를 복사했어요. 대화방에 붙여 넣으세요.' : outcomeMessage(outcome);
+		if (msg) toast(msg);
+	}
+
 	onMount(() => {
 		load();
 		stageProgress = loadStages();
@@ -682,6 +695,8 @@
 	</div>
 
 	<div class="card">
+				<!-- 링크로 곧장 온 사람은 메뉴의 규칙 설명을 못 봤다(11/12 점검) — 무엇을 하는 문제인지 한 줄 -->
+				{#if mode.type === 'free'}<p class="rule goal">{#if page.url.searchParams.get('ref') === 'match_send' && pIdx === Number(page.url.searchParams.get('p'))}{'친구가 보낸 문제 · '}{/if}{RULE_LABEL[prob.rule]} — 식이 맞게</p>{/if}
 		{#if cur}
 			<div class:shaking>
 				<MatchstickBoard
@@ -748,6 +763,7 @@
 				<DailyNext skip="match" pitch="오늘의 10문제에 성냥개비 2문제가 더 있어요" />
 			{/if}
 			<button class="btn wide" onclick={() => nextProblem()}>다음 문제 →</button>
+			{#if pIdx >= 0}<button class="btn ghost wide" onclick={sendThis}>🤔 친구는 풀까요? 이 문제 보내기</button>{/if}
 			<button class="btn ghost wide" onclick={share}>기록 공유하기</button>
 			<button class="btn ghost wide" onclick={toMenu}>모드 선택으로</button>
 		{:else if mode.type === 'stage'}
@@ -1159,6 +1175,11 @@
 	.stile:disabled {
 		opacity: 0.35;
 		cursor: default;
+	}
+	.goal {
+		margin: 0 0 10px;
+		text-align: center;
+		word-break: keep-all;
 	}
 	.rule {
 		font-size: 13px;

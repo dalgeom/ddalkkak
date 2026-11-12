@@ -20,6 +20,31 @@ export function chosungOf(word: string): string {
 		.join('');
 }
 
+/**
+ * 화면에 보일 때만 띄어 쓰는 낱말(11/12 점검 — 「헤어질결심」처럼 영화 제목이 붙어 보였다).
+ * 채점 · 초성 · 기록 키는 붙인 낱말 그대로 쓴다. 띄어 쓴 글자를 빼면 원래 낱말과 같아야 한다(chosung.test.ts).
+ */
+export const SPACED: Record<string, string> = {
+	태극기휘날리며: '태극기 휘날리며',
+	왕의남자: '왕의 남자',
+	서울의봄: '서울의 봄',
+	광해왕이된남자: '광해, 왕이 된 남자',
+	살인의추억: '살인의 추억',
+	헤어질결심: '헤어질 결심',
+	엽기적인그녀: '엽기적인 그녀',
+	수상한그녀: '수상한 그녀',
+	인사이드아웃: '인사이드 아웃',
+	쥬라기공원: '쥬라기 공원',
+	쥐라기공원: '쥐라기 공원',
+	보헤미안랩소디: '보헤미안 랩소디',
+	나홀로집에: '나 홀로 집에',
+	이웃집토토로: '이웃집 토토로',
+	반지의제왕: '반지의 제왕',
+	미녀와야수: '미녀와 야수',
+	토이스토리: '토이 스토리'
+};
+export const shownWord = (word: string) => SPACED[word] ?? word;
+
 export type ChosungWord = { word: string; hint: string; alts: string[]; category: string };
 
 /**

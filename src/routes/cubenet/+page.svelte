@@ -9,6 +9,7 @@
 	import CubeFold from '$lib/components/CubeFold.svelte';
 	import AdSlot from '$lib/components/AdSlot.svelte';
 	import { track } from '$lib/analytics';
+	import { playHistory } from '$lib/playHistory.svelte';
 
 	/* 전개도 연습. 다른 유형과 같은 규모(CUBE_TOTAL)로 끊어 돌린다. */
 
@@ -51,9 +52,12 @@
 		return [left, right, m.get(left)!, m.get(right)!];
 	});
 
+	// 푸는 중 휴대폰 뒤로가기는 이 메뉴로(11/12 점검 — 전에는 직전 페이지로 나가 버렸다)
+	const ph = playHistory(() => (started = false));
 	function start() {
 		started = true;
 		track('practice_start', { filter: 'cube' });
+		ph.enter();
 	}
 	function pick(i: number) {
 		if (answered) return;

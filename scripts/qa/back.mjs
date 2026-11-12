@@ -37,6 +37,24 @@ ok('성냥: 무한 연습을 누르면 푸는 화면', await until(`!document.qu
 await back();
 ok('성냥: 뒤로가기는 성냥 메뉴로', (await path()) === '/matchstick' && (await until(`document.querySelector('button.mode')`)), await path());
 
+// 끝말잇기 — 오늘의 퍼즐을 열었다가 뒤로가기(11/12 점검에서 찾음)
+await b.go('/news', 1500);
+await b.go('/kkeut', 1500);
+await until(`[...document.querySelectorAll('button')].some((x) => x.textContent.includes('풀어 보기') && !x.disabled)`);
+await b.ev(`[...document.querySelectorAll('button')].find((x) => x.textContent.includes('풀어 보기')).click(); return 1;`);
+ok('끝말잇기: 풀어 보기를 누르면 푸는 화면', await until(`[...document.querySelectorAll('button')].some((x) => x.textContent.includes('나가기'))`));
+await back();
+ok('끝말잇기: 뒤로가기는 끝말잇기 메뉴로', (await path()) === '/kkeut' && (await until(`document.getElementById('duel')`)), await path());
+
+// 전개도 — 연습 시작 뒤 뒤로가기
+await b.go('/news', 1500);
+await b.go('/cubenet', 1500);
+await sleep(800);
+await b.ev(`[...document.querySelectorAll('a,button')].find((x) => x.textContent.includes('연습 시작')).click(); return 1;`);
+ok('전개도: 연습 시작을 누르면 푸는 화면', await until(`document.querySelector('.opts')`));
+await back();
+ok('전개도: 뒤로가기는 전개도 메뉴로', (await path()) === '/cubenet' && (await until(`!document.querySelector('.opts')`)), await path());
+
 await b.close();
 console.log('오류', b.errors.length ? b.errors : '없음');
 if (fail || b.errors.length) process.exitCode = 1;

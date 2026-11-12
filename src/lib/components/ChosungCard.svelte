@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount, tick } from 'svelte';
 	import { browser } from '$app/environment';
-	import { chosungOf, isCorrect, categoryBySlug, type ChosungWord } from '$lib/chosung';
+	import { chosungOf, isCorrect, categoryBySlug, shownWord, type ChosungWord } from '$lib/chosung';
 	import { track } from '$lib/analytics';
 
 	/**
@@ -56,7 +56,7 @@
 {/if}
 
 {#if result}
-	<p class="answer" class:ok={result === 'won'}>{msg} · 정답은 <b>{word.word}</b></p>
+	<p class="answer" class:ok={result === 'won'}>{msg} · 정답은 <b>{shownWord(word.word)}</b></p>
 {:else}
 	<input
 		type="text"

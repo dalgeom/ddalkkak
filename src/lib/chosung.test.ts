@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { chosungOf, isCorrect, collisionsOf, chosungOfDay, CHOSUNG_WORDS, CHOSUNG_BATCHES } from './chosung';
+import { chosungOf, isCorrect, collisionsOf, chosungOfDay, CHOSUNG_WORDS, CHOSUNG_BATCHES, SPACED } from './chosung';
 import { seededOrder, SITE_START_DAY } from './game';
 import { CHOSUNG_CATEGORIES } from './data/chosung';
 
@@ -98,5 +98,15 @@ describe('오늘의 초성', () => {
 		const last = CHOSUNG_BATCHES[CHOSUNG_BATCHES.length - 1].counts;
 		for (const c of CHOSUNG_CATEGORIES) expect(last[c.slug], c.slug).toBe(c.words.length);
 		expect(new Set(CHOSUNG_WORDS.map((w) => w.category + w.word)).size).toBe(CHOSUNG_WORDS.length);
+	});
+});
+
+describe('띄어 보이는 낱말', () => {
+	it('띄어 쓴 글자를 빼면 원래 낱말이고, 그 낱말은 은행에 있다', () => {
+		const all = new Set(CHOSUNG_WORDS.flatMap((w) => [w.word, ...w.alts]));
+		for (const [k, v] of Object.entries(SPACED)) {
+			expect(v.replace(/[\s,]/g, '')).toBe(k);
+			expect(all.has(k)).toBe(true);
+		}
 	});
 });

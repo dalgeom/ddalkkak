@@ -11,6 +11,7 @@
 	import { KKEUT_WORDS } from '$lib/data/kkeutMeta';
 	import DailyNext from '$lib/components/DailyNext.svelte';
 	import { shareResult as shareCardResult, outcomeMessage } from '$lib/shareCard';
+	import { playHistory } from '$lib/playHistory.svelte';
 
 	/*
 	 * 끝말잇기(2026-11-03) — 오늘의 퍼즐(N수 안에 컴퓨터 막기)과 컴퓨터 대결 5단계.
@@ -103,6 +104,7 @@
 		game = newPuzzle(puzzle.start, pn, puzzle.line);
 		msg = '';
 		track('kkeut_daily_start', { n: game.n });
+		ph.enter();
 		focus();
 	}
 	function startDuel(tier: Tier) {
@@ -111,6 +113,7 @@
 		msg = '';
 		giveHints = [];
 		track('kkeut_duel_start', { tier });
+		ph.enter();
 		focus();
 	}
 	function startFree() {
@@ -120,6 +123,7 @@
 		giveHints = [];
 		freeNew = false;
 		track('kkeut_free_start', { best: freeBest });
+		ph.enter();
 		focus();
 	}
 	const focus = () => setTimeout(() => field?.focus(), 50);
@@ -209,7 +213,13 @@
 		defs = { ...defs, ...out }; // 세 번째 실패 때 reveal(정답 길)과 finish(이번 판)가 함께 부른다 — 늦게 온 쪽이 덮지 않게
 	}
 
-	function back() {
+	// 푸는 중 휴대폰 뒤로가기도 이 메뉴로(11/12 점검 — 전에는 직전 페이지로 나가 버렸다)
+	const ph = playHistory(() => {
+		if (!game) return;
+		leaveGame();
+	});
+	const back = () => ph.leave();
+	function leaveGame() {
 		// 퍼즐을 한 수라도 둔 뒤 나가면 한 번 놓친 것 — 질 것 같을 때 나갔다 다시 들어오는 길을 막는다
 		if (game?.mode === 'puzzle' && !game.end && mineCount > 0) miss();
 		game = null;
@@ -236,6 +246,8 @@
 
 	async function toDuel() {
 		back();
+		// 나가기는 기록 칸을 되돌려(history.back) 메뉴로 가므로 메뉴가 그려질 때까지 기다린다
+		for (let i = 0; i < 40 && game; i++) await new Promise((r) => setTimeout(r, 25));
 		await tick();
 		document.getElementById('duel')?.scrollIntoView({ block: 'start' });
 	}

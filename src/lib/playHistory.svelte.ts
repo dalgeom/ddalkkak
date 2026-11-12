@@ -1,4 +1,4 @@
-import { pushState } from '$app/navigation';
+import { pushState, replaceState } from '$app/navigation';
 import { page } from '$app/state';
 import { untrack } from 'svelte';
 
@@ -24,6 +24,8 @@ export function playHistory(onBack: () => void) {
 	function push(n: number) {
 		if (page.state.play) return;
 		try {
+			// 푸는 중에 새로 고침하면 브라우저가 이 칸의 play 표시를 남긴다. 그 위에 또 쌓으면 뒤로가기가 play 칸으로만 돌아가 메뉴로 못 나온다
+			if (history.state?.['sveltekit:states']?.play) replaceState('', {});
 			pushState('', { play: true });
 		} catch {
 			if (n < 500) setTimeout(() => push(n + 1), 20);
