@@ -146,7 +146,7 @@ m = await b.ev(`
 	return { n, path: location.pathname };`);
 ok('다른 쪽으로 가면 쪽 넘김 한 번', m.skip || (m.n === 1 && m.path === '/record'), JSON.stringify(m));
 // 다시 온 사람(오늘 아직 안 풂) — 기록을 지우고 방문 흔적만 남긴다
-await b.ev(`localStorage.clear(); localStorage.setItem('ddal.visit','1'); return 1;`);
+await b.ev(`localStorage.clear(); sessionStorage.clear(); localStorage.setItem('ddal.visit','1'); return 1;`);
 await b.go('/', 3500);
 m = await b.ev(`const s=document.querySelector('[role=dialog]'); return { sheet: !!s, text: s?.textContent.replace(/\\s+/g,' ').slice(0,60) };`);
 ok('다시 온 사람에게 새 소식 시트 한 번', m.sheet, m.text);

@@ -2,7 +2,8 @@
 	import { onMount, onDestroy, tick } from 'svelte';
 	import { browser } from '$app/environment';
 	import type { Problem } from '$lib/problems';
-	import { isCorrectText, answerPlaceholder, isCloseAnswer, hintUnlocked, displayChoices } from '$lib/game';
+	import { isCorrectText, answerPlaceholder, pickOptions, isCloseAnswer, hintUnlocked, displayChoices } from '$lib/game';
+	import PickChips from '$lib/components/PickChips.svelte';
 	import SevenSeg from '$lib/components/SevenSeg.svelte';
 	import ColorBlocks from '$lib/components/ColorBlocks.svelte';
 	import Glyph from '$lib/components/Glyph.svelte';
@@ -114,6 +115,7 @@
 		disabled={judged}
 		onkeydown={(e) => e.key === 'Enter' && submitText()}
 	/>
+	{#if pickOptions(p)}<PickChips options={pickOptions(p)!} bind:value={answerValue} disabled={judged} />{/if}
 {/if}
 
 {#if !judged && p.hints}

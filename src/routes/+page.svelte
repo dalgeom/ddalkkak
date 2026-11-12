@@ -10,7 +10,7 @@
 		buildDailySetStable,
 		DAILY_SIZE,
 		MATCH_TOTAL,
-		isCorrectText, answerPlaceholder,
+		isCorrectText, answerPlaceholder, pickOptions,
 		isCloseAnswer,
 		hintUnlocked,
 		displayChoices,
@@ -29,6 +29,8 @@
 		type Mark,
 		type DailyKind
 	} from '$lib/game';
+	import PickChips from '$lib/components/PickChips.svelte';
+	import { playHistory } from '$lib/playHistory.svelte';
 	import { shareResult, outcomeMessage } from '$lib/shareCard';
 	import { ctaTrack, takeGoDaily, leaveEventName, openDwellEventName } from '$lib/analytics';
 	import { parseChallenge, judgeChallenge, type Challenge } from '$lib/challenge';
@@ -386,6 +388,7 @@
 			marks = saved.marks.slice(0, queue.length);
 			sessionMs = saved.elapsedMs ?? 0;
 			phase = saved.done ? 'done' : 'play';
+			ph.enter();
 			// 답을 내고 「다음」 전에 나갔다 오면 판정은 저장됐는데 그 문제가 빈칸으로 다시 떠
 			// 답을 고쳐 낼 수 있었다(11/11 점검). 이미 판정한 문제는 넘긴다 — 마지막 문제면 결과로.
 			if (phase === 'play' && marks.length > pos) {
@@ -713,6 +716,16 @@
 		leftAt = null;
 	}
 
+	// 푸는 화면 · 결과에서 뒤로가기(휴대폰)나 나가기 · 로고는 홈 화면으로 — 페이지를 떠나지 않는다(11/12 점검)
+	const ph = playHistory(() => {
+		if (phase === 'play') quit();
+		else if (phase === 'done') {
+			phase = 'home';
+			savedProgress = readDailyProgress(dayNum);
+			if (browser) window.scrollTo({ top: 0 });
+		}
+	});
+
 	function quit() {
 		// 로고를 눌러 홈으로 나가는 것도 푸는 화면을 떠난 것이다 — 이어 풀면 startOrResume이 back을 찍는다
 		markLeave();
@@ -885,12 +898,7 @@
 		}
 		if (n === logoSeen) return;
 		logoSeen = n;
-		if (phase === 'play') quit();
-		else if (phase === 'done') {
-			phase = 'home';
-			savedProgress = readDailyProgress(dayNum);
-			if (browser) window.scrollTo({ top: 0 });
-		}
+		if (phase !== 'home') ph.leave();
 	});
 
 	/** 오늘 이전에 푼 적이 있는가 — 재방문자에게만 홈 설치 안내를 띄우는 판단에 쓴다 */
@@ -1176,7 +1184,7 @@
 	</section>
 {:else if phase === 'play' && current}
 	<div class="topbar">
-		<button class="exit" onclick={quit}><span class="ar" aria-hidden="true">←</span>나가기</button>
+		<button class="exit" onclick={ph.leave}><span class="ar" aria-hidden="true">←</span>나가기</button>
 		<span class="type-chip" class:bonus={current.bonus}>{typeChip}</span>
 	</div>
 
@@ -1299,6 +1307,7 @@
 						disabled={judged}
 						onkeydown={(e) => e.key === 'Enter' && submitText()}
 					/>
+					{#if pickOptions(current.problem)}<PickChips options={pickOptions(current.problem)!} bind:value={answerValue} disabled={judged} />{/if}
 				{/if}
 			{/if}
 

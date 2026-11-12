@@ -115,7 +115,7 @@ export function moveSentence(p: MatchProblem): string {
 	const segOf = (m: number) => SEG_KEYS.find((k) => m & bit(k))!;
 	// 해설용 짧은 자리 이름(10/22 미리 풀기: 「= 뒤 「16」의 뒷자리 「6」의」가 딱딱했다). 힌트는 spotName 그대로
 	const at = (gi: number) =>
-		gi === 0 ? `맨 앞 「${od[0]}」` : gi === 1 ? `기호 뒤 「${od[1]}」` : o.cLen === 1 ? `답 「${od[2]}」` : `답 ${gi === 2 ? '첫자리' : '끝자리'} 「${od[gi]}」`;
+		gi === 0 ? `맨 앞 「${od[0]}」` : gi === 1 ? `기호 뒤 「${od[1]}」` : o.cLen === 1 ? `등호 뒤 「${od[2]}」` : `등호 뒤 ${gi === 2 ? '첫자리' : '끝자리'} 「${od[gi]}」`;
 	const fi = o.glyphs.findIndex((m, i) => m & ~s.glyphs[i]);
 	const ti = o.glyphs.findIndex((m, i) => s.glyphs[i] & ~m);
 	if (o.opPlus && !s.opPlus)

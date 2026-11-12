@@ -29,6 +29,7 @@
 	import OtherGames from '$lib/components/OtherGames.svelte';
 	import Icon from '$lib/components/Icon.svelte';
 	import SolveEntry from '$lib/components/SolveEntry.svelte';
+	import { playHistory } from '$lib/playHistory.svelte';
 
 	type Mode =
 		| { type: 'free' }
@@ -144,6 +145,7 @@
 		runSolved = 0;
 		runResults = [];
 		screen = 'play';
+		ph.enter();
 		if (m.type === 'time') {
 			timeLeft = m.seconds;
 			timerId = setInterval(() => {
@@ -167,12 +169,15 @@
 		screen = 'result';
 	}
 
-	function toMenu() {
+	// 푸는 화면 · 결과에서 뒤로가기(휴대폰)는 성냥 메뉴로 — 홈으로 나가지 않는다(11/12 점검)
+	const ph = playHistory(() => {
+		if (screen === 'menu') return;
 		clearInterval(timerId);
 		timerId = undefined;
 		level = null;
 		screen = 'menu';
-	}
+	});
+	const toMenu = () => ph.leave();
 
 	function resetBoard() {
 		orig = parseEq(prob.displayed);

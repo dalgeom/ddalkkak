@@ -22,6 +22,16 @@ export function answerPlaceholder(p: Problem | null | undefined): string {
 	return multi ? '여러 개면 쉼표로 (예: 1, 3)' : '답을 입력하세요';
 }
 
+/** 「모두 고르시오」 문제의 보기(① 바다 ② 강 …)를 꺼낸다 — 휴대폰에서 「1, 3」을 쉼표로 치기가 번거로워
+    눌러 고르는 칸을 붙인다(11/12 점검). 그런 문제가 아니면 null */
+export function pickOptions(p: Problem | null | undefined): string[] | null {
+	const text = p?.blocks.map((b) => ('text' in b ? String(b.text) : '')).find((t) => /모두 고르/.test(t));
+	if (!text) return null;
+	const tail = text.slice(text.search(/모두 고르/));
+	const opts = [...tail.matchAll(/[①②③④⑤⑥⑦⑧⑨⑩]\s*([^①②③④⑤⑥⑦⑧⑨⑩\n]+)/g)].map((m) => m[1].trim());
+	return opts.length >= 2 ? opts : null;
+}
+
 /** ①②③… 를 ' 1 ' ' 2 ' 로 풀어준다 — 보기 번호로 답하는 입력을 살리기 위해 */
 function expandCircled(s: string): string {
 	const CIRCLED = '①②③④⑤⑥⑦⑧⑨⑩';

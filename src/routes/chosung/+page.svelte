@@ -3,6 +3,7 @@
 	import { onMount, tick } from 'svelte';
 	import { browser } from '$app/environment';
 	import { page } from '$app/state';
+	import { playHistory } from '$lib/playHistory.svelte';
 	import { track } from '$lib/analytics';
 	import { kstDayNumber } from '$lib/game';
 	import { CHOSUNG_CATEGORIES } from '$lib/data/chosung';
@@ -15,6 +16,15 @@
 	type Mode = { type: 'today' } | { type: 'free'; cat: string };
 
 	let screen = $state<'menu' | 'play'>('menu');
+	let scrollFields = false;
+	/** 푸는 화면은 기록 한 칸을 차지한다 — 휴대폰 뒤로가기가 홈으로 튕기지 않고 초성 메뉴로 온다(11/12 점검) */
+	const ph = playHistory(() => {
+		if (screen === 'menu') return;
+		screen = 'menu';
+		if (!scrollFields) return;
+		scrollFields = false;
+		tick().then(() => document.getElementById('fields')?.scrollIntoView({ block: 'start' }));
+	});
 	let mode = $state<Mode>({ type: 'free', cat: 'all' });
 
 	let done = $state<number[]>([]);
@@ -87,6 +97,7 @@
 	function start(m: Mode) {
 		mode = m;
 		screen = 'play';
+		ph.enter();
 		next();
 		track(m.type === 'today' ? 'chosung_daily_start' : 'chosung_start', {
 			cat: m.type === 'free' ? m.cat : 'today'
@@ -152,13 +163,12 @@
 	}
 
 	function toMenu() {
-		screen = 'menu';
+		ph.leave();
 	}
 	/** 「분야 선택으로」가 메뉴 맨 위로 가서 단계 · 띄우기 · 단어 찾기를 지나 내려가야 분야가 보였다(11/11 점검) */
-	async function toFields() {
-		screen = 'menu';
-		await tick();
-		document.getElementById('fields')?.scrollIntoView({ block: 'start' });
+	function toFields() {
+		scrollFields = true;
+		ph.leave();
 	}
 
 	onMount(() => {

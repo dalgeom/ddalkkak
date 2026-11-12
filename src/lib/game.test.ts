@@ -34,7 +34,8 @@ import {
 	writeDailyProgress,
 	CUBE_START_DAY,
 	DAILY_COUNTS,
-	DAILY_COUNTS_LEGACY
+	DAILY_COUNTS_LEGACY,
+	pickOptions
 } from './game';
 import { PROBLEMS, type Problem } from './problems';
 
@@ -624,5 +625,31 @@ describe('걸린 시간 저장·비교', () => {
 
 	it('비교할 기록이 없으면 null', () => {
 		expect(bestDailyTime(100)).toBeNull();
+	});
+});
+
+describe('pickOptions — 「모두 고르시오」 눌러 고르기', () => {
+	const multi = PROBLEMS.filter((p) => p.blocks.some((b) => 'text' in b && /모두 고르/.test(String(b.text))));
+
+	it('그런 문제가 있다(양성 대조)', () => {
+		expect(multi.length).toBeGreaterThan(10);
+	});
+
+	it('모든 「모두 고르」 문제에서 보기 4개를 꺼내고, 고른 번호(「1, 3」)가 정답으로 판정된다', () => {
+		for (const p of multi) {
+			const opts = pickOptions(p);
+			expect(opts, p.id).toHaveLength(4);
+			// 칸이 만드는 값(「1, 3」)으로 정답이 되는 고르기가 꼭 하나 있어야 한다
+			const ok: string[] = [];
+			for (let m = 1; m < 16; m++) {
+				const v = [1, 2, 3, 4].filter((n) => m & (1 << (n - 1))).join(', ');
+				if (isCorrectText(p, v)) ok.push(v);
+			}
+			expect(ok, p.id).toHaveLength(1);
+		}
+	});
+
+	it('보통 문제는 null', () => {
+		expect(pickOptions(PROBLEMS.find((p) => !multi.includes(p)))).toBeNull();
 	});
 });

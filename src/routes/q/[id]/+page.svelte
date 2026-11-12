@@ -2,7 +2,8 @@
 	import { playChip } from '$lib/chipField';
 	import { onMount, tick } from 'svelte';
 	import type { Problem } from '$lib/problems';
-	import { isCorrectText, answerPlaceholder, isCloseAnswer, hintUnlocked, displayChoices, type Mark } from '$lib/game';
+	import { isCorrectText, answerPlaceholder, pickOptions, isCloseAnswer, hintUnlocked, displayChoices, type Mark } from '$lib/game';
+	import PickChips from '$lib/components/PickChips.svelte';
 	import { track } from '$lib/analytics';
 	import { friendLine, compareLine, previewTitle, markParam } from '$lib/sendProblem';
 	import SevenSeg from '$lib/components/SevenSeg.svelte';
@@ -158,6 +159,7 @@
 			disabled={judged}
 			onkeydown={(e) => e.key === 'Enter' && submitText()}
 		/>
+		{#if pickOptions(p)}<PickChips options={pickOptions(p)!} bind:value={answerValue} disabled={judged} />{/if}
 	{/if}
 
 	{#if !judged && p.hints?.length}

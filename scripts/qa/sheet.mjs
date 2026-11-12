@@ -121,7 +121,7 @@ await sleep(600);
 ok('Esc 로 닫힘', !(await isOpen(b)));
 
 // I. 새 소식 시트 — 다시 온 사람, 링크로 이동 뒤 뒤로가기
-await b.ev(`localStorage.clear(); localStorage.setItem('ddal.visit','1'); return 1;`);
+await b.ev(`localStorage.clear(); sessionStorage.clear(); localStorage.setItem('ddal.visit','1'); return 1;`);
 await b.go('/games', 1500);
 await b.go('/', 3800);
 ok('I 새 소식 시트가 올라옴', await isOpen(b));
@@ -132,7 +132,7 @@ await b.ev(`document.querySelector('.dim').click(); return 1;`);
 await sleep(800);
 ok('I1b 시트를 닫으면 띠 · 종의 점이 바로 사라짐', !(await b.ev(`return !!document.querySelector('.nbar') || !!document.querySelector('.bell .dot');`)));
 // 링크 이동 시험을 위해 다시 안 본 상태로
-await b.ev(`localStorage.clear(); localStorage.setItem('ddal.visit','1'); return 1;`);
+await b.ev(`localStorage.clear(); sessionStorage.clear(); localStorage.setItem('ddal.visit','1'); return 1;`);
 await b.go('/games', 1500);
 await b.go('/', 3800);
 // 시트는 안 본 소식 셋만 보인다 — 특정 소식을 찾지 말고 첫 링크로 잰다(10/20: 새 소식이 늘어 대결 링크가 밀려났다)

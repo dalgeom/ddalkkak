@@ -186,15 +186,21 @@ export function markSeen(ids: string[]): void {
 	seenTick.update((n) => n + 1);
 }
 
-/** 새 소식 말고 딸깍 기록이 하나라도 있으면 다시 온 사람 */
+/** 새 소식 말고 딸깍 기록이 하나라도 있으면 다시 온 사람.
+    이번 방문을 시작할 때 한 번만 판정한다 — 처음 온 사람도 한 문제를 풀면 기록이 생겨서,
+    홈으로 돌아오면 「다시 온 사람」이 되어 새 소식 시트가 이어서 풀기를 가렸다(11/12 점검) */
 export function isReturning(): boolean {
 	try {
+		const memo = sessionStorage.getItem('ddal-returning');
+		if (memo) return memo === '1';
+		let r = false;
 		for (let i = 0; i < localStorage.length; i++) {
 			const k = localStorage.key(i) ?? '';
-			if (k.startsWith('ddal.') && !k.startsWith('ddal.news')) return true;
+			if (k.startsWith('ddal.') && !k.startsWith('ddal.news')) r = true;
 		}
+		sessionStorage.setItem('ddal-returning', r ? '1' : '0');
+		return r;
 	} catch {
-		/* 무시 */
+		return false;
 	}
-	return false;
 }

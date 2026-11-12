@@ -5,7 +5,8 @@
 	import { browser } from '$app/environment';
 	import { page } from '$app/state';
 	import type { Problem } from '$lib/problems';
-	import { isCorrectText, answerPlaceholder, isCloseAnswer, hintUnlocked, displayChoices, recordSolve } from '$lib/game';
+	import { isCorrectText, answerPlaceholder, pickOptions, isCloseAnswer, hintUnlocked, displayChoices, recordSolve } from '$lib/game';
+	import PickChips from '$lib/components/PickChips.svelte';
 	import { track } from '$lib/analytics';
 	import { parseEq, cloneBoard, isSolved, bit, type Board } from '$lib/matchstick';
 	import MatchstickBoard, { type PickLoc } from '$lib/components/MatchstickBoard.svelte';
@@ -541,6 +542,7 @@
 					disabled={judged}
 					onkeydown={(e) => e.key === 'Enter' && submitText()}
 				/>
+				{#if pickOptions(shown)}<PickChips options={pickOptions(shown)!} bind:value={answerValue} disabled={judged} />{/if}
 			{/if}
 		{/if}
 

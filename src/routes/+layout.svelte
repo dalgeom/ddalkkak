@@ -7,7 +7,7 @@
 	import { logoClicks, focusMode } from '$lib/nav';
 	import TabBar from '$lib/components/TabBar.svelte';
 	import FeedbackSheet from '$lib/components/FeedbackSheet.svelte';
-	import { freshNotices, loadSeen, seenTick } from '$lib/notices';
+	import { freshNotices, loadSeen, seenTick, isReturning } from '$lib/notices';
 	import { captureInstallPrompt } from '$lib/pwa';
 	import { page } from '$app/state';
 	import { onNavigate } from '$app/navigation';
@@ -48,6 +48,8 @@
 		captureInstallPrompt();
 		// 첫 화면이 떴다 — 이 뒤로 메인에 와도 스플래시는 없다
 		markBooted();
+		// 다시 온 사람인지 방문 첫 화면에서 정해 둔다 — 홈이 아닌 쪽으로 들어와 풀고 홈에 와도 처음 온 사람이다
+		isReturning();
 	});
 	// 안 본 소식이 남았는지 — 시트 · 띠에서 보면(seenTick) 점이 바로 꺼진다
 	$effect(() => {
