@@ -7,8 +7,8 @@
 	/** 서버 렌더·첫 그림 — 저장소를 읽기 전에도 같은 자리에 같은 세 칸이 보이게 */
 	const BLANK: Mission[] = [
 		{ key: 'daily', label: '오늘의 10문제', href: '/', done: false },
-		{ key: 'match', label: '오늘의 성냥개비', href: '/matchstick', done: false },
-		{ key: 'cho', label: '오늘의 초성', href: '/chosung', done: false }
+		{ key: 'match', label: '오늘의 성냥개비', href: '/matchstick?today=1', done: false },
+		{ key: 'cho', label: '오늘의 초성', href: '/chosung?today=1', done: false }
 	];
 	/** 메인에서는 「오늘의 10문제」가 지금 이 화면(/)이라 눌러도 아무 일이 없었다(11/11 점검) — 바로 시작하게 넘겨받는다 */
 	let { ondaily }: { ondaily?: () => void } = $props();

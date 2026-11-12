@@ -2,7 +2,7 @@
 	import { onMount, onDestroy, tick } from 'svelte';
 	import { browser } from '$app/environment';
 	import type { Problem } from '$lib/problems';
-	import { isCorrectText, isCloseAnswer, hintUnlocked, displayChoices } from '$lib/game';
+	import { isCorrectText, answerPlaceholder, isCloseAnswer, hintUnlocked, displayChoices } from '$lib/game';
 	import SevenSeg from '$lib/components/SevenSeg.svelte';
 	import ColorBlocks from '$lib/components/ColorBlocks.svelte';
 	import Glyph from '$lib/components/Glyph.svelte';
@@ -108,7 +108,7 @@
 		type="text"
 		bind:this={inputEl}
 		bind:value={answerValue}
-		placeholder="답을 입력하세요"
+		placeholder={answerPlaceholder(p)}
 		aria-label="정답 입력"
 		autocomplete="off"
 		disabled={judged}

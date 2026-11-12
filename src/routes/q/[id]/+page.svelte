@@ -2,7 +2,7 @@
 	import { playChip } from '$lib/chipField';
 	import { onMount, tick } from 'svelte';
 	import type { Problem } from '$lib/problems';
-	import { isCorrectText, isCloseAnswer, hintUnlocked, displayChoices, type Mark } from '$lib/game';
+	import { isCorrectText, answerPlaceholder, isCloseAnswer, hintUnlocked, displayChoices, type Mark } from '$lib/game';
 	import { track } from '$lib/analytics';
 	import { friendLine, compareLine, previewTitle, markParam } from '$lib/sendProblem';
 	import SevenSeg from '$lib/components/SevenSeg.svelte';
@@ -152,7 +152,7 @@
 			type="text"
 			bind:this={inputEl}
 			bind:value={answerValue}
-			placeholder="답을 입력하세요"
+			placeholder={answerPlaceholder(p)}
 			aria-label="정답 입력"
 			autocomplete="off"
 			disabled={judged}

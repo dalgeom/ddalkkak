@@ -10,7 +10,7 @@
 		buildDailySetStable,
 		DAILY_SIZE,
 		MATCH_TOTAL,
-		isCorrectText,
+		isCorrectText, answerPlaceholder,
 		isCloseAnswer,
 		hintUnlocked,
 		displayChoices,
@@ -1212,9 +1212,12 @@
 							label={current.eq.displayed.replace('-', '−')}
 						/>
 					</div>
-					<p class="guide" class:on={mPicked}>
-						{mPicked ? '이제 빈 자리를 눌러 놓으세요' : '옮길 획을 눌러 집으세요'}
-					</p>
+					<!-- 풀고 나서도 「집으세요」가 남았고, 성냥 쪽(/matchstick)과 말이 달랐다(11/12 점검) -->
+					{#if !judged}
+						<p class="guide" class:on={mPicked}>
+							{mPicked ? '집었어요 — 놓을 빈 자리를 눌러요' : '옮길 성냥을 눌러 집어요'}
+						</p>
+					{/if}
 				{:else if current.problem}
 					{#each current.problem.blocks as b, i (i)}
 						{#if b.kind === 'text'}
@@ -1276,7 +1279,7 @@
 						type="text"
 						bind:this={inputEl}
 						bind:value={answerValue}
-						placeholder="답을 입력하세요"
+						placeholder={answerPlaceholder(current.problem)}
 						aria-label="정답 입력"
 						autocomplete="off"
 						disabled={judged}
@@ -1403,7 +1406,11 @@
 	{/if}
 	<!-- 딸깍 5단계: 몇 개 틀렸는지보다 어디까지 올라갔는지 — 중간에 멈춰도 자기 단계를 찾은 것으로 읽히게 -->
 	{#if reachedTier}
-		<p class="reached" class:rise-in={justDone} style="--i: 1">오늘은 <b>{tierName(reachedTier)}</b> 문제까지 맞혔어요</p>
+		<!-- 10/10인데 「보통 문제까지」라 모자란 것처럼 읽혔다 — 그날 가장 어려운 문제가 보통이었을 뿐이다(11/12 점검) -->
+		<p class="reached" class:rise-in={justDone} style="--i: 1">
+			{#if marks.length && marks.every((m) => m && m !== 'miss')}오늘 문제를 모두 맞혔어요 · 가장 어려운 문제 <b>{tierName(reachedTier)}</b>
+			{:else}오늘은 <b>{tierName(reachedTier)}</b> 문제까지 맞혔어요{/if}
+		</p>
 	{/if}
 
 	<!-- 걸린 시간은 푸는 동안 숨겨 두었다가 여기서만 공개한다.

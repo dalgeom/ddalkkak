@@ -5,7 +5,7 @@
 	import { browser } from '$app/environment';
 	import { page } from '$app/state';
 	import type { Problem } from '$lib/problems';
-	import { isCorrectText, isCloseAnswer, hintUnlocked, displayChoices, recordSolve } from '$lib/game';
+	import { isCorrectText, answerPlaceholder, isCloseAnswer, hintUnlocked, displayChoices, recordSolve } from '$lib/game';
 	import { track } from '$lib/analytics';
 	import { parseEq, cloneBoard, isSolved, bit, type Board } from '$lib/matchstick';
 	import MatchstickBoard, { type PickLoc } from '$lib/components/MatchstickBoard.svelte';
@@ -492,7 +492,7 @@
 					animateFrom={mAnimFrom}
 					label={current.eq.displayed.replace('-', '−')}
 				/>
-				<p class="guide">{mPicked ? '빈 자리를 짚어 내려놓으세요.' : '옮길 획을 짚어보세요.'}</p>
+				{#if !judged}<p class="guide">{mPicked ? '집었어요 — 놓을 빈 자리를 눌러요' : '옮길 성냥을 눌러 집어요'}</p>{/if}
 			{:else if shown}
 				{#each shown.blocks as b, i (i)}
 					{#if b.kind === 'text'}
@@ -535,7 +535,7 @@
 					type="text"
 					bind:this={inputEl}
 					bind:value={answerValue}
-					placeholder="답을 입력하세요"
+					placeholder={answerPlaceholder(shown)}
 					aria-label="정답 입력"
 					autocomplete="off"
 					disabled={judged}

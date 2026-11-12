@@ -16,6 +16,12 @@ export function normalize(s: string): string {
 		.replace(/[\s.,:·×*=+-]/g, '');
 }
 
+/** 답 입력칸 안내 — 「모두 고르시오」는 몇 개를 어떻게 적는지 몰라 헤맸다(11/12 점검). 판정은 번호 · 단어 · 순서 모두 받는다 */
+export function answerPlaceholder(p: Problem | null | undefined): string {
+	const multi = p?.blocks.some((b) => 'text' in b && /모두 고르/.test(String(b.text)));
+	return multi ? '여러 개면 쉼표로 (예: 1, 3)' : '답을 입력하세요';
+}
+
 /** ①②③… 를 ' 1 ' ' 2 ' 로 풀어준다 — 보기 번호로 답하는 입력을 살리기 위해 */
 function expandCircled(s: string): string {
 	const CIRCLED = '①②③④⑤⑥⑦⑧⑨⑩';

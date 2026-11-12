@@ -117,7 +117,7 @@ ok('모션 줄이기면 결과 화면 움직임 없음', m.length >= 3 && m.ever
 await b.send('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-reduced-motion', value: 'no-preference' }] });
 // 오늘의 10문제를 끝낸 뒤에는 성냥 화면의 「오늘의 10문제」 카드가 숨는다
 await b.go('/matchstick', 2500);
-ok('데일리를 끝낸 뒤에는 「오늘의 10문제」 카드 숨김', !(await b.ev(`return !!document.querySelector('.dnext');`)));
+ok('데일리를 끝낸 뒤에는 「오늘의 10문제」 카드 숨김', !(await b.ev(`return /오늘의 10문제/.test(document.querySelector('.dnext')?.innerText ?? '');`)), await b.ev(`return document.querySelector('.dnext')?.innerText ?? '';`));
 await b.go('/', 3000);
 
 // 11. 기록·오늘 다시 보기(완주 뒤라 열려야 함)

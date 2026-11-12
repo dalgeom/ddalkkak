@@ -30,6 +30,11 @@
 	</ol>
 	<p>마지막 말 「{data.p.line[data.p.line.length - 1]}」의 끝 글자 ‘{data.end}’{data.du ? '(두음법칙으로 바뀌는 글자 포함)' : ''}{ro(data.end)} 시작하는 명사가 사전에 없어 컴퓨터가 막혀요.
 		{#if data.n > 1}컴퓨터는 가장 오래 버티는 말로 받아쳤고, 다른 길로 막아도 정답이에요.{/if}</p>
+	{#if data.n === 1}
+		<h2>이렇게 찾아요</h2>
+		<p>「{data.p.start}」 다음에 낼 수 있는 명사는 {data.options[0].toLocaleString()}개예요. 하나씩 떠올리며 그 말의 끝 글자로 시작하는 명사가
+			사전에 있는지 따져 보면 돼요. 이어 갈 말이 하나도 없는 글자로 끝나는 말을 찾으면 컴퓨터는 한 수 만에 막혀요.</p>
+	{/if}
 	{#if data.n === 1 && data.traps.length}
 		<h2>먼저 떠오르는 말의 함정</h2>
 		<p>「{data.p.start}」 다음에 쉽게 떠오르는 말은 컴퓨터가 바로 받아쳐요.</p>

@@ -449,6 +449,8 @@
 			level = lv;
 			startMode({ type: 'free' });
 		} else if (page.url.searchParams.has('p')) startMode({ type: 'free' });
+		// 오늘의 미션에서 왔으면 허브에서 「풀어 보기」를 한 번 더 누르지 않게 곧장 연다(11/12 점검)
+		else if (page.url.searchParams.get('today') === '1' && todayIdx >= 0 && !todayDone) startToday();
 	});
 	onDestroy(() => clearInterval(timerId));
 </script>
@@ -500,7 +502,7 @@
 					<p class="t-done">
 						{todayWon ? '오늘 문제를 풀었어요.' : '오늘 문제는 정답을 봤어요.'} 내일 자정에 새 문제가 열려요.
 					</p>
-					<DailyNext pitch="오늘의 10문제에 성냥개비 2문제가 더 있어요" />
+					<DailyNext skip="match" pitch="오늘의 10문제에 성냥개비 2문제가 더 있어요" />
 				{:else}
 					<div class="t-board">
 						<MatchstickBoard
@@ -717,7 +719,7 @@
 				{#if todayWon}🔥 <b>{daily?.streak}일 연속</b> · 내일 자정에 새 문제{:else}내일 문제를 맞히면 연속 기록이 시작돼요{/if}
 			</p>
 			<!-- 10/15: 오늘의 성냥을 끝낸 순간이 오늘의 10문제로 잇기 가장 좋은 때다(DailyNext 주석의 숫자) -->
-			<DailyNext pitch="오늘의 10문제에 성냥개비 2문제가 더 있어요" bind:shown={nextShown} />
+			<DailyNext skip="match" pitch="오늘의 10문제에 성냥개비 2문제가 더 있어요" bind:shown={nextShown} />
 			<PushPrompt dayNum={day} streak={daily?.streak ?? 0} tomorrow={tomorrowPeek} slot="match" />
 			<button class="btn wide" class:ghost={nextShown} onclick={() => startMode({ type: 'free' })}>무한 연습 이어서 →</button>
 			<button class="btn ghost wide" onclick={toMenu}>모드 선택으로</button>
@@ -727,7 +729,7 @@
 			{/if}
 			<!-- 검색으로 와서 무한 연습만 하는 사람(10/1~10/13 /matchstick 랜딩의 92%)에게 다섯 문제째에 한 번 -->
 			{#if freeWins === 5 && solvedThis === 'won'}
-				<DailyNext pitch="오늘의 10문제에 성냥개비 2문제가 더 있어요" />
+				<DailyNext skip="match" pitch="오늘의 10문제에 성냥개비 2문제가 더 있어요" />
 			{/if}
 			<button class="btn wide" onclick={() => nextProblem()}>다음 문제 →</button>
 			<button class="btn ghost wide" onclick={share}>기록 공유하기</button>

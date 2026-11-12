@@ -24,7 +24,7 @@ function dayOf(key: string): number | null {
 export function todayMissions(day: number): Mission[] {
 	return [
 		{ key: 'daily', label: '오늘의 10문제', href: '/', done: !!readDayRecord(day) },
-		{ key: 'match', label: '오늘의 성냥개비', href: '/matchstick', done: dayOf('ddal.match.daily') === day },
-		{ key: 'cho', label: '오늘의 초성', href: '/chosung', done: dayOf('ddal.cho.daily') === day }
+		{ key: 'match', label: '오늘의 성냥개비', href: '/matchstick?today=1', done: dayOf('ddal.match.daily') === day },
+		{ key: 'cho', label: '오늘의 초성', href: '/chosung?today=1', done: dayOf('ddal.cho.daily') === day }
 	];
 }
