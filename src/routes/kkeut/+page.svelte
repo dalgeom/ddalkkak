@@ -10,6 +10,7 @@
 	import { nextStreak, shownStreak, type DayStreak } from '$lib/dailyStreak';
 	import { KKEUT_WORDS } from '$lib/data/kkeutMeta';
 	import DailyNext from '$lib/components/DailyNext.svelte';
+	import { shareResult as shareCardResult, outcomeMessage } from '$lib/shareCard';
 
 	/*
 	 * 끝말잇기(2026-11-03) — 오늘의 퍼즐(N수 안에 컴퓨터 막기)과 컴퓨터 대결 5단계.
@@ -209,6 +210,22 @@
 		giveHints = [];
 	}
 
+	// 막은 뒤 공유가 없었다(11/12 점검) — 성냥 · 초성과 같은 카드, 정답 낱말은 적지 않는다
+	let toastMsg = $state('');
+	let toastTimer: ReturnType<typeof setTimeout>;
+	async function share() {
+		const n = streak?.streak ?? 1;
+		const sub = tries === 0 ? '한 번에 막았어요' : `${tries + 1}번 만에 막았어요`;
+		const text = `딸깍! 오늘의 끝말잇기 · ${sub} · 🔥 ${n}일 연속\n${location.origin}/kkeut?ref=kkeut\n#딸깍`;
+		const msgText = outcomeMessage(
+			await shareCardResult({ title: '오늘의 끝말잇기', scoreLabel: `${n}일 연속`, emojiRow: '🔥'.repeat(Math.min(n, 10)), subLine: sub, cta: '너도 도전해봐!' }, text)
+		);
+		if (!msgText) return;
+		toastMsg = msgText;
+		clearTimeout(toastTimer);
+		toastTimer = setTimeout(() => (toastMsg = ''), 2200);
+	}
+
 	async function toDuel() {
 		back();
 		await tick();
@@ -369,6 +386,7 @@
 						{#if game.end === 'win'}
 							<!-- 막은 뒤 「처음으로」뿐이었다 — 성냥 · 초성처럼 연속 기록 · 오늘의 10문제로 잇는다(11/11 점검) -->
 							<p class="note">🔥 <b>{streak?.streak ?? 1}일 연속</b> · 내일 자정에 새 퍼즐이 열려요</p>
+							<button class="big alt" onclick={share}>기록 공유하기</button>
 							<DailyNext pitch="오늘의 10문제도 풀어 볼까요?" />
 							<button class="big" onclick={toDuel}>컴퓨터와 대결하러 가기</button>
 						{:else if tries < 3}
@@ -394,6 +412,8 @@
 			{/if}
 		</div>
 	{/if}
+
+	{#if toastMsg}<div class="toast" role="status" aria-live="polite">{toastMsg}</div>{/if}
 
 	<p class="src">
 		낱말과 뜻풀이: <a href="https://krdict.korean.go.kr" rel="noopener">한국어기초사전(국립국어원)</a>,
@@ -452,6 +472,7 @@
 	.msg:empty { margin: 0; }
 	.row { display: flex; gap: 8px; }
 	.row .big { flex: 1; }
+	.toast { position: fixed; bottom: calc(24px + var(--tab-h, 0px)); left: 50%; transform: translateX(-50%); width: max-content; max-width: calc(100vw - 32px); background: var(--text); color: #fff; border-radius: 12px; padding: 12px 20px; font-size: 14px; z-index: 30; box-shadow: 0 8px 30px rgba(44, 40, 34, 0.3); }
 	.end { margin-top: 12px; }
 	.end a.ghost { margin-top: 8px; }
 	.src { margin-top: 28px; font-size: 12px; color: var(--muted-2); line-height: 1.6; }

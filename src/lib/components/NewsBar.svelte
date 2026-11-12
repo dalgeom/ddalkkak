@@ -70,9 +70,12 @@
 	b {
 		font-size: 14px;
 		font-weight: 800;
-		white-space: nowrap;
+		line-height: 1.35;
+		/* 휴대폰에서 한 줄 말줄임이라 제목이 잘렸다 — 두 줄까지 보인다(11/12 점검) */
+		display: -webkit-box;
+		-webkit-line-clamp: 2;
+		-webkit-box-orient: vertical;
 		overflow: hidden;
-		text-overflow: ellipsis;
 	}
 	.arr {
 		color: var(--accent-text);

@@ -10,6 +10,7 @@
 	import { nextStreak, shownStreak, type DayStreak } from '$lib/dailyStreak';
 	import PushPrompt from '$lib/components/PushPrompt.svelte';
 	import DailyNext from '$lib/components/DailyNext.svelte';
+	import { shareResult as shareCardResult, outcomeMessage } from '$lib/shareCard';
 
 	type Mode = { type: 'today' } | { type: 'free'; cat: string };
 
@@ -173,6 +174,24 @@
 	});
 
 	const total = CHOSUNG_WORDS.length;
+
+	// 오늘 초성을 맞힌 화면에 공유가 없었다(11/12 점검) — 성냥 · 끝말잇기와 같은 카드, 정답은 적지 않는다
+	let toastMsg = $state('');
+	let toastTimer: ReturnType<typeof setTimeout>;
+	async function share() {
+		const n = daily?.streak ?? 1;
+		const sub = tries === 0 ? '한 번에 맞혔어요' : `${tries + 1}번 만에 맞혔어요`;
+		const text = `딸깍! 오늘의 초성 · ${sub} · 🔥 ${n}일 연속
+${location.origin}/chosung?ref=cho
+#딸깍`;
+		const m = outcomeMessage(
+			await shareCardResult({ title: '오늘의 초성', scoreLabel: `${n}일 연속`, emojiRow: '🔥'.repeat(Math.min(n, 10)), subLine: sub, cta: '너도 도전해봐!' }, text)
+		);
+		if (!m) return;
+		toastMsg = m;
+		clearTimeout(toastTimer);
+		toastTimer = setTimeout(() => (toastMsg = ''), 2200);
+	}
 </script>
 
 <svelte:head>
@@ -301,8 +320,9 @@
 		</div>
 
 		<div class="card">
+			<!-- 맞히거나 정답을 보면 칸이 낱말로 바뀐다 — 끝나도 초성만 남아 있었다(11/12 점검) -->
 			<div class="tiles" class:shaking>
-				{#each [...chosungOf(cur.word)] as ch, i (i)}<span class="tile">{ch}</span>{/each}
+				{#each [...(status === 'no' ? chosungOf(cur.word) : cur.word)] as ch, i (i)}<span class="tile" class:open={status !== 'no'}>{ch}</span>{/each}
 			</div>
 
 			{#if hintOpen || status !== 'no'}
@@ -340,6 +360,7 @@
 				<p class="t-after">
 					{#if todayWon}🔥 <b>{daily?.streak}일 연속</b> · 내일 자정에 새 문제{:else}내일 문제를 맞히면 연속 기록이 시작돼요{/if}
 				</p>
+				{#if todayWon}<button class="btn ghost wide" onclick={share}>기록 공유하기</button>{/if}
 				<DailyNext skip="cho" pitch="초성처럼 떠올려 맞히는 상식 2문제가 오늘의 10문제에 있어요" bind:shown={nextShown} />
 				<PushPrompt dayNum={day} streak={daily?.streak ?? 0} tomorrow={tomorrowPeek} slot="chosung" inAppBack="/chosung?push=1" />
 				<button class="btn wide" class:ghost={nextShown} onclick={() => start({ type: 'free', cat: cur.category })}>
@@ -366,6 +387,7 @@
 			{/if}
 		</div>
 	{/if}
+	{#if toastMsg}<div class="toast" role="status" aria-live="polite">{toastMsg}</div>{/if}
 </div>
 
 <style>
@@ -477,6 +499,9 @@
 		font-size: 30px;
 		font-weight: 800;
 		color: var(--text);
+	}
+	.tile.open {
+		border-color: var(--accent);
 	}
 	.tiles.small {
 		margin: 14px 0;
@@ -711,5 +736,20 @@
 	}
 	.btn.wide {
 		width: 100%;
+	}
+	.toast {
+		position: fixed;
+		bottom: calc(24px + var(--tab-h, 0px));
+		left: 50%;
+		transform: translateX(-50%);
+		width: max-content;
+		max-width: calc(100vw - 32px);
+		background: var(--text);
+		color: #fff;
+		border-radius: 12px;
+		padding: 12px 20px;
+		font-size: 14px;
+		z-index: 30;
+		box-shadow: 0 8px 30px rgba(44, 40, 34, 0.3);
 	}
 </style>

@@ -5,7 +5,7 @@
 	import { browser } from '$app/environment';
 	import { page } from '$app/state';
 	import problems from '$lib/data/matchstick-problems.json';
-	import { parseEq, cloneBoard, bit, judgeRule, ruleHints, moveSentence, type Board } from '$lib/matchstick';
+	import { parseEq, cloneBoard, bit, judgeRule, ruleHints, moveSentence, eqString, type Board } from '$lib/matchstick';
 	import {
 		STAGES,
 		RULE_LABEL,
@@ -286,6 +286,8 @@
 		if (mode.type === 'free' || mode.type === 'today') {
 			// 점수 시스템은 없다 — 있지도 않은 점수를 암시하지 말고 시도 횟수만 알려준다
 			feedback = attempts === 0 ? '딸깍! 한 번에 맞혔어요' : `딸깍! ${attempts + 1}번 만에 맞혔어요`;
+			// 다른 길로 맞혔으면 준비한 답도 보여 준다 — 맞히고도 해설이 없었다(11/12 점검, 초성과 같은 꼴)
+			if (cur && eqString(cur) !== prob.solution) feedback += ` — 준비한 답은 「${prob.solution.replace('-', '−')}」`;
 		} else {
 			runSolved++;
 			if (mode.type === 'count') runResults = [...runResults, 'win'];
@@ -402,7 +404,15 @@
 		let emojiRow: string;
 		let subLine: string;
 		let text: string;
-		if (mode.type === 'time') {
+		if (mode.type === 'today') {
+			// 오늘의 성냥을 끝낸 화면에 공유가 없었다(11/12 점검) — 정답은 적지 않는다
+			const n = daily?.streak ?? 1;
+			title = '오늘의 성냥개비';
+			scoreLabel = `${n}일 연속`;
+			emojiRow = '🔥'.repeat(Math.min(n, 10));
+			subLine = attempts === 0 ? '한 번에 맞혔어요' : `${attempts + 1}번 만에 맞혔어요`;
+			text = `딸깍! 오늘의 성냥개비 · ${subLine} · 🔥 ${n}일 연속`;
+		} else if (mode.type === 'time') {
 			title = `성냥개비 타임어택 ${mode.seconds / 60}분`;
 			scoreLabel = `${runSolved}문제`;
 			emojiRow = '🔥'.repeat(Math.min(Math.max(runSolved, 1), 10));
@@ -721,6 +731,7 @@
 			<!-- 10/15: 오늘의 성냥을 끝낸 순간이 오늘의 10문제로 잇기 가장 좋은 때다(DailyNext 주석의 숫자) -->
 			<DailyNext skip="match" pitch="오늘의 10문제에 성냥개비 2문제가 더 있어요" bind:shown={nextShown} />
 			<PushPrompt dayNum={day} streak={daily?.streak ?? 0} tomorrow={tomorrowPeek} slot="match" />
+			{#if todayWon}<button class="btn ghost wide" onclick={share}>기록 공유하기</button>{/if}
 			<button class="btn wide" class:ghost={nextShown} onclick={() => startMode({ type: 'free' })}>무한 연습 이어서 →</button>
 			<button class="btn ghost wide" onclick={toMenu}>모드 선택으로</button>
 		{:else if mode.type === 'free'}

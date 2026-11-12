@@ -36,6 +36,8 @@ const cho = await until(`location.pathname === '/chosung' && /오늘의 초성/.
 ok('카드 누르면 오늘의 초성이 곧장 열림', cho);
 await b.ev(reveal);
 await sleep(800);
+const tiles = await b.ev(`return [...document.querySelectorAll('.tile')].map((t) => t.innerText).join('');`);
+ok('초성: 정답 보기 뒤 칸이 낱말로', !!tiles && !/[ㄱ-ㅎ]/.test(tiles), tiles);
 ok('미션 다 하면 이어가기 카드 없음', !(await b.ev(`return !!document.querySelector('.dnext');`)));
 
 await b.go('/record', 1200);

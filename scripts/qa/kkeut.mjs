@@ -37,6 +37,7 @@ for (const [w, h] of [[390, 844], [320, 568]]) {
 		ok(`${w} 입력창이 화면 안`, inView);
 		for (let i = 0; i < p.line.length; i += 2) { await say(p.line[i]); await sleep(300); }
 		ok(`${w} 정답 길로 막음`, await until(`/막았어요/.test(document.querySelector('.end h2')?.innerText ?? '')`), p.line.join('→'));
+		ok(`${w} 막은 뒤 기록 공유 버튼`, await b.ev(`return [...document.querySelectorAll('.end button')].some((x) => x.innerText.trim() === '기록 공유하기');`));
 		await b.go(`/kkeut${q}`, 800);
 		ok(`${w} 새로 고침 뒤 풀었음 · 연속`, await until(`/풀었어요/.test(document.body.innerText) && /1일 연속/.test(document.body.innerText)`));
 	}
