@@ -145,7 +145,7 @@
 						마주 보는 면:
 						{#each p.opposites as [a, b], k (k)}<span class="pair"
 								>{FACES[a].name} ↔ {FACES[b].name}</span
-							>{k < p.opposites.length - 1 ? ',' : ''}{/each}
+							>{k < p.opposites.length - 1 ? ', ' : ''}{/each}
 					</p>
 					<p class="ringline">
 						<b>{short(p.options[p.answer][0])}</b>{objectParticle(short(p.options[p.answer][0]))} 위로 두면 옆면은 항상
@@ -179,6 +179,8 @@
 				</div>
 
 				<button class="cta" onclick={next}>다음 문제 <span aria-hidden="true">→</span></button>
+				<!-- 연습을 시작하면 위 타일이 사라져 단계 도전으로 갈 길이 없었다(11/12 점검) -->
+				<p class="stagego"><a class="glink" href="/cubenet/stages">쉬운 것부터 한 판씩 — 단계 도전 →</a></p>
 			{/if}
 		</section>
 	{/if}
@@ -430,6 +432,10 @@
 	}
 	.glink:hover {
 		text-decoration: underline;
+	}
+	.stagego {
+		margin: 12px 0 0;
+		text-align: center;
 	}
 
 	.cta {

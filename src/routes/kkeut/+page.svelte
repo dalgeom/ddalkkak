@@ -320,7 +320,7 @@
 			</p>
 			<h2>대결 단계</h2>
 			<p class="note">
-				컴퓨터가 {DUEL_LIMIT}번 받아칠 때까지 버티면 이겨요. 새싹 · 쉬움은 쉬운 낱말만 쓰고, 새싹은 받아칠 말이 없는 「한방 단어」를 되도록 내지 않아요.
+				내가 {DUEL_LIMIT}번 받아치면 이겨요(그 전에 컴퓨터가 막혀도 이겨요). 새싹 · 쉬움은 쉬운 낱말만 쓰고, 새싹은 받아칠 말이 없는 「한방 단어」를 되도록 내지 않아요.
 				보통부터는 사전 전체를 쓰고, 어려움은 한방 단어를 먼저 노리고, 고수는 수를 읽어 가장 받기 어려운 말을 골라요.
 			</p>
 			<h2>진검승부</h2>
@@ -339,6 +339,10 @@
 			<!-- 풀이 화면에 「0/1수」만 있어 무엇을 하라는지 몰랐다 — 첫 화면의 목표를 여기서도 말한다(11/11 점검) -->
 			{#if !game.end && game.mode === 'puzzle'}
 				<p class="note goal">{game.n === 1 ? '컴퓨터가 더 이을 말이 없는 한 마디를 내세요.' : `내 말 ${game.n}개 안에 컴퓨터가 더 이을 말이 없게 만드세요.`}</p>
+			{/if}
+			<!-- 대결도 「새싹 · 0/20」만 있어 20이 무엇인지 몰랐다 — 목표를 같은 자리에서 말한다(11/12 점검) -->
+			{#if !game.end && game.mode === 'duel' && mineCount === 0}
+				<p class="note goal">{DUEL_LIMIT}번 받아치면 이겨요. 막히면 「모르겠어요」.</p>
 			{/if}
 			{#if !game.end && now}
 				<ol class="trail" aria-label="지난 말">
@@ -411,6 +415,8 @@
 							{#if game.end === 'win' && game.tier < 5}<button class="big alt" onclick={() => game && startDuel((game.tier + 1) as Tier)}>다음 단계</button>{/if}
 						</div>
 						{#if game.end === 'win' && game.tier === 5}<button class="big alt" onclick={startFree}>진검승부 하기</button>{/if}
+						<!-- 대결이 끝나면 다시 하기 · 다른 단계뿐이라 검색 · 지식iN으로 온 사람이 10문제로 못 갔다(11/12 점검) -->
+						<DailyNext pitch="오늘의 10문제도 풀어 볼까요?" />
 						<button class="ghost" onclick={back}>오늘의 퍼즐 · 다른 단계</button>
 					{:else}
 						<button class="big" onclick={startFree}>다시 겨루기</button>
