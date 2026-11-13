@@ -409,7 +409,30 @@
 		}, 1000);
 		return () => clearInterval(iv);
 	});
+
+	/* 키보드 단축키(11/13 의견) — 숫자로 보기 고르기, 판정 뒤 Enter · Space로 다음 문제 */
+	function onKey(e: KeyboardEvent) {
+		if (e.isComposing || e.repeat || e.ctrlKey || e.altKey || e.metaKey) return;
+		if (!current || document.querySelector('[aria-modal="true"]')) return;
+		const t = e.target as HTMLElement | null;
+		if (t?.closest?.('input, textarea, select, [contenteditable]')) return;
+		if (judged) {
+			if (e.key !== 'Enter' && e.key !== ' ') return;
+			if (t?.closest?.('button:not(:disabled), a')) return;
+			e.preventDefault();
+			skip();
+			return;
+		}
+		const n = Number(e.key) - 1;
+		if (!Number.isInteger(n) || n < 0) return;
+		if (current.cube) {
+			if (n < current.cube.options.length) submitCube(n);
+		} else if (!current.eq && shown?.type === 'choice' && n < (shown.choices?.length ?? 0)) submitChoice(n);
+	}
+	const keyCount = $derived(current?.cube ? current.cube.options.length : shown?.type === 'choice' && !current?.eq ? (shown.choices?.length ?? 0) : 0);
 </script>
+
+<svelte:window onkeydown={onKey} />
 
 <svelte:head>
 	<title>무한 연습 — 딸깍 퍼즐</title>
@@ -661,6 +684,7 @@
 				{/if}
 			</div>
 		{/if}
+		<p class="keyhint">{keyCount ? `키보드: 1~${keyCount}로 고르고, Enter나 Space로 다음 문제` : current.eq ? '키보드: 판정 뒤 Enter나 Space로 다음 문제' : '키보드: Enter로 확인하고, 한 번 더 Enter로 다음 문제'}</p>
 	</section>
 
 	<p class="poolnote">{fieldLabel ? `상식 · ${fieldLabel}` : FILTERS.find((f) => f.key === filter)?.label} {poolSize.toLocaleString()}문제 중에서 무작위로 나와요</p>
@@ -1116,6 +1140,19 @@
 	.btn-primary.wide {
 		width: 100%;
 		margin-top: 16px;
+	}
+	/* 단축키 안내 — 마우스를 쓰는 컴퓨터에서만 */
+	.keyhint {
+		display: none;
+		margin: 10px 0 0;
+		text-align: center;
+		font-size: 12px;
+		color: var(--muted-2);
+	}
+	@media (hover: hover) and (pointer: fine) {
+		.keyhint {
+			display: block;
+		}
 	}
 	.poolnote {
 		margin-top: 14px;
