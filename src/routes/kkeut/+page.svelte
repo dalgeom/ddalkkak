@@ -51,7 +51,7 @@
 		const c = last(game.chain[game.chain.length - 1].word);
 		return movesFrom(dict, c, game.used).length
 			? `${game.n}수 안에 컴퓨터를 막지 못했어요.`
-			: `「${c}」(으)로 시작하는 말이 없어요. 컴퓨터가 이을 수 없는 끝 글자로 막았어요.`;
+			: `컴퓨터가 「${c}」(으)로 끝나는 말로 막았어요. 「${c}」(으)로 시작하는 말이 없어요.`;
 	});
 	let defs: Record<string, string> = $state({});
 	let field: HTMLInputElement | undefined = $state();
