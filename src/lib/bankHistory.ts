@@ -74,7 +74,8 @@ const BANK_HISTORY: ({ fromDay: number } & BankSizes)[] = [
 	// + 11/9 단계 채우기(발견형 2개: 새싹 club-air-filled · club-dissolves — 고수 후보 둘 반려, 상식 고수 5개 tv-580~584)
 	{ fromDay: 20768, discover: 425, trivia: 561 }, // 11/9 저녁 추가(발견형 1개: 고수 seat-fill-13) — 미리 푼 11/10 세트를 지키려고 11/11부터 + 11/10 단계 채우기(발견형 club-twist-open · club-floats · faro-shuffle-16, 상식 고수 5개 tv-585~589)
 	{ fromDay: 20769, discover: 428, trivia: 606 }, // 11/11 단계 채우기(발견형 3 · 상식 고수 5 tv-630~634) + 국기 분야 신설(상식 20개 tv-610~629, /trivia/flag) · 11/10 수도 분야 신설(상식 20개 tv-590~609, /trivia/capital) — 미리 푼 11/11 세트를 지키려고 11/12부터
-	{ fromDay: 20770, discover: 431, trivia: 611 } // 11/12 단계 채우기(발견형 3 club-wheels · club-sound-alert · double-plus-100 · 상식 고수 5 tv-635~639) — 11/13부터
+	{ fromDay: 20770, discover: 431, trivia: 611 }, // 11/12 단계 채우기(발견형 3 club-wheels · club-sound-alert · double-plus-100 · 상식 고수 5 tv-635~639) — 11/13부터
+	{ fromDay: 20771, discover: 432, trivia: 616 } // 11/13 단계 채우기(발견형 1 club-heats-up — club-sticky 반려, 상식 고수 5 tv-640~644) — 11/14부터
 ];
 
 /** day의 세트를 계산할 때 쓸 은행 크기 — fromDay가 day 이하인 마지막 엔트리 */

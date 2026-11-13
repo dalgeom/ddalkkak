@@ -444,6 +444,7 @@ export const DISCOVER_TIERS: Readonly<Record<string, Tier>> = {
 	'club-wheels': 1, // 11/13 새로 · 바퀴로 굴러가는 것, 아이스 스케이트가 함정
 	'club-sound-alert': 1, // 11/13 새로 · 소리를 내서 알리는 것, 자동차 경적
 	'double-plus-100': 5, // 11/13 새로 · ×2 · +1로 100까지 8번, 거꾸로 내려오기
+	'club-heats-up': 1, // 11/14 새로 · 뜨거운 열로 일하는 것, 선풍기는 바람이어도 거절
 };
 
 /**

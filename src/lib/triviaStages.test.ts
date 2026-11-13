@@ -4,9 +4,9 @@ import { TRIVIA } from './trivia';
 import { starsByScore, isOpen, nextOpen, isTierEnd, loadProgress, buildTierStages, STAGE_SIZE } from './stages';
 
 describe('상식 단계 도전', () => {
-	it('새싹 22 · 쉬움 23 · 보통 22 · 어려움 18 · 고수 18(11/10 수도 · 11/11 국기 분야 · 11/11 · 11/13 고수 5문제씩 늘었다), 판마다 5문제, 겹침 없음', () => {
+	it('새싹 22 · 쉬움 23 · 보통 22 · 어려움 18 · 고수 19(11/10 수도 · 11/11 국기 분야 · 11/11 · 11/13 · 11/14 고수 5문제씩 늘었다), 판마다 5문제, 겹침 없음', () => {
 		const per = [1, 2, 3, 4, 5].map((t) => TRIVIA_STAGES.filter((s) => s.tier === t).length);
-		expect(per).toEqual([22, 23, 22, 18, 18]);
+		expect(per).toEqual([22, 23, 22, 18, 19]);
 		const all = TRIVIA_STAGES.flatMap((s) => s.ids);
 		expect(TRIVIA_STAGES.every((s) => s.ids.length === STAGE_SIZE)).toBe(true);
 		expect(new Set(all).size).toBe(all.length);
