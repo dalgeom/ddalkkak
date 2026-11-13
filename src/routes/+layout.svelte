@@ -107,6 +107,9 @@
 			<nav class="flinks" aria-label="놀이">
 				<a href="/matchstick">성냥개비</a><a href="/chosung">초성 퀴즈</a><a href="/kkeut">끝말잇기</a><a href="/trivia">상식 퀴즈</a><a href="/discover">발견형</a><a href="/cubenet">전개도</a><a href="/play">무한 연습</a><a href="/tools">도구 모음</a>
 			</nav>
+			<nav class="flinks" aria-label="분야별 퀴즈">
+				<a href="/trivia/spelling">맞춤법 퀴즈</a><a href="/trivia/idiom">사자성어 퀴즈</a><a href="/trivia/proverb">속담 퀴즈</a><a href="/trivia/korean-history">한국사 퀴즈</a><a href="/trivia/animal">동물 퀴즈</a><a href="/trivia/movie-drama">영화 퀴즈</a><a href="/trivia/music">음악 퀴즈</a>
+			</nav>
 			<nav class="flinks" aria-label="읽을거리">
 				<a href="/read">읽을거리</a><a href="/guide">발견형 푸는 법</a><a href="/matchstick/guide">성냥개비 푸는 법</a><a href="/cubenet/guide">전개도 푸는 법</a><a href="/archive">지난 문제</a><a href="/news">새 소식</a>
 			</nav>
