@@ -350,6 +350,15 @@ export const CUBE_STAIR_DAY = 20749;
  */
 export const MATCH_DEDUP_DAY = 20755;
 const MATCH_SWAP_AHEAD = 185;
+/**
+ * 성냥 「x ± 0 = x」 꼴은 하루에 하나만 — 2026-11-17(KST)부터. 그 전 날은 그대로다.
+ *
+ * 왜: 11/16에 내일 것을 미리 풀어 보니 성냥 셋(9 + 0 = 9 · 9 - 0 = 9 · 2 + 0 = 2)이 모두 0을 더하고 빼는 꼴이었다.
+ * 답 문자열이 달라 MATCH_DEDUP_DAY에 안 걸렸다. 0 꼴은 한 열쇠('±0')로 묶어 같은 답처럼 바꾼다.
+ * 90일 안에 바뀌는 날: 20774 · 20834 · 20842 · 20855 (11/16 계산).
+ */
+export const MATCH_ZERO_DAY = 20774;
+const MATCH_ZERO = /^(\d+) [+-] 0 = \1$|^0 \+ (\d+) = \2$/;
 const crossNet = (i: number) => problemAt(i).net.rows.map((r) => (r.match(/#/g) || []).length).join('-') === '1-4-1';
 
 function laneOrder(d: number, kinds: DailyKind[]): DailyKind[] {
@@ -785,16 +794,22 @@ export function buildDailySetStable<D, T>(
 	// 성냥 같은 답(MATCH_DEDUP_DAY 주석) — 뒤에 나온 쪽을 멀리 떨어진 다른 답으로
 	if (d >= MATCH_DEDUP_DAY && matchSolOf) {
 		const order = seededOrder(matchTotal, 20260303);
+		const solOf = matchSolOf;
+		// 0 꼴 묶기(MATCH_ZERO_DAY 주석)
+		const mKey = (i: number) => {
+			const s = solOf(i);
+			return d >= MATCH_ZERO_DAY && MATCH_ZERO.test(s) ? '±0' : s;
+		};
 		const seen = new Set<string>();
 		let p = cursorAt('match', d) + MATCH_SWAP_AHEAD;
 		for (let k = 0; k < mAll.length; k++) {
-			if (!seen.has(matchSolOf(mAll[k]))) {
-				seen.add(matchSolOf(mAll[k]));
+			if (!seen.has(mKey(mAll[k]))) {
+				seen.add(mKey(mAll[k]));
 				continue;
 			}
-			while (seen.has(matchSolOf(order[p % matchTotal])) || mAll.includes(order[p % matchTotal])) p++;
+			while (seen.has(mKey(order[p % matchTotal])) || mAll.includes(order[p % matchTotal])) p++;
 			mAll[k] = order[p % matchTotal];
-			seen.add(matchSolOf(mAll[k]));
+			seen.add(mKey(mAll[k]));
 		}
 	}
 	const cStart = cursorAt('cube', d);
