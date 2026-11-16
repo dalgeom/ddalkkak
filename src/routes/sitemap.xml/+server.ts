@@ -53,6 +53,8 @@ const PAGES: Entry[] = [
 	{ path: '/matchstick/solve', freq: 'monthly', priority: '0.7', lastmod: '2026-10-30' },
 	// 자주 찾는 성냥 식 정답 모음(10/29) — 식마다 답 그림과 손으로 쓴 풀이가 HTML에 있다
 	{ path: '/matchstick/answer', freq: 'monthly', priority: '0.7', lastmod: '2026-10-29' },
+	// 그림 성냥 10문제(11/16) — 본문 한글 406자(thin 기준 200 통과), 문제마다 조건 글이 HTML에 있다. 11/16 블로그 matchpic1 착지인데 구글이 모르는 쪽이라 넣는다
+	{ path: '/matchstick/picture', freq: 'monthly', priority: '0.7', lastmod: '2026-10-14' },
 	// 초성 퀴즈 띄우기(10/26) — 수업 · 모임 진행 도구. 진행 요령 글이 HTML에 있다
 	{ path: '/chosung/show', freq: 'monthly', priority: '0.7', lastmod: '2026-10-26' },
 	// 도구 모음(11/4) — 띄우기 · 만들기 · 학습지 · 찾기를 쓰임새별로 묶은 쪽과 그 도구들. 쪽마다 쓰는 법 글이 HTML에 있다
