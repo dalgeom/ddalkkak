@@ -104,10 +104,10 @@
 </script>
 
 <svelte:head>
-	<title>끝말잇기 단어 찾기 — ○으로 시작하는 말 · 한방 단어 목록 | 딸깍</title>
+	<title>끝말잇기 단어 찾기 — ○으로 시작하는 말 · 글자별 한방 단어 목록 | 딸깍</title>
 	<meta
 		name="description"
-		content="글자나 낱말을 넣으면 끝말잇기로 이을 말을 사전에서 찾아 줘요. 두음법칙(력→역, 리→이)도 함께 따지고, 받을 말이 없는 한방 단어는 따로 표시해요. 한국어기초사전 명사 {data.total.toLocaleString()}개."
+		content="글자나 낱말을 넣으면 끝말잇기로 이을 말을 사전에서 찾아 줘요. 두음법칙(력→역, 리→이)도 함께 따지고, 받을 말이 없는 한방 단어는 끝 글자별 · 첫 글자별로 모아 뒀어요. 한국어기초사전 명사 {data.total.toLocaleString()}개."
 	/>
 	<link rel="canonical" href="https://ddalkkak.app/kkeut/words" />
 	<meta property="og:title" content="끝말잇기 단어 찾기 — 이을 말 · 한방 단어 | 딸깍" />
@@ -224,6 +224,28 @@
 				</li>
 			{/each}
 		</ul>
+
+		<h2 class="sh">첫 글자별 한방 단어</h2>
+		<p class="deep">
+			같은 {data.hanbangWords.toLocaleString()}개를 이번에는 <b>시작하는 글자</b>로 묶었어요. 「장으로 시작하는 한방 단어」처럼 내 차례에
+			받은 글자로 상대를 막을 말을 찾을 때 봐요. 첫 글자는 {data.firstChars}가지이고, 초성을 누르면 펼쳐져요. 글자를 누르면 그 글자로
+			시작하는 말 전체를 찾아요.
+		</p>
+		<div class="fg">
+			{#each data.firstGroups as g (g.g)}
+				<details>
+					<summary>{g.g} <span class="hn">{g.rows.length}글자 · {g.n}개</span></summary>
+					<ul class="fl">
+						{#each g.rows as r (r.c)}
+							<li>
+								<button class="fc" onclick={() => pick(r.c)} aria-label="{r.c}로 시작하는 말 찾기">{r.c}</button>
+								<span>{r.ws.join(' · ')}</span>
+							</li>
+						{/each}
+					</ul>
+				</details>
+			{/each}
+		</div>
 
 		<h2 class="sh">직접 겨뤄 보기</h2>
 		<p class="deep">
@@ -438,5 +460,52 @@
 		text-overflow: ellipsis;
 		white-space: nowrap;
 		min-width: 0;
+	}
+	.fg {
+		margin-top: 10px;
+		display: flex;
+		flex-direction: column;
+		gap: 6px;
+	}
+	.fg details {
+		background: var(--panel);
+		border: 1px solid var(--border-strong);
+		border-radius: 10px;
+	}
+	.fg summary {
+		padding: 10px 12px;
+		min-height: 44px;
+		box-sizing: border-box;
+		font-size: 16px;
+		font-weight: 800;
+		cursor: pointer;
+	}
+	.fl {
+		list-style: none;
+		margin: 0;
+		padding: 0 12px 10px;
+		display: flex;
+		flex-direction: column;
+		gap: 4px;
+		font-size: 14px;
+		line-height: 1.6;
+		word-break: keep-all;
+	}
+	.fl li {
+		display: flex;
+		align-items: baseline;
+		gap: 8px;
+	}
+	.fc {
+		flex: none;
+		font: inherit;
+		font-weight: 800;
+		min-width: 36px;
+		min-height: 32px;
+		border-radius: 8px;
+		border: 1px solid var(--border-strong);
+		background: transparent;
+		color: var(--accent);
+		cursor: pointer;
 	}
 </style>

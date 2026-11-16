@@ -62,7 +62,7 @@ const PAGES: Entry[] = [
 	{ path: '/trivia/show', freq: 'monthly', priority: '0.7', lastmod: '2026-11-04' },
 	{ path: '/matchstick/make', freq: 'monthly', priority: '0.7', lastmod: '2026-11-04' },
 	{ path: '/print', freq: 'monthly', priority: '0.7', lastmod: '2026-11-04' },
-	{ path: '/kkeut/words', freq: 'monthly', priority: '0.7', lastmod: '2026-11-04' },
+	{ path: '/kkeut/words', freq: 'monthly', priority: '0.7', lastmod: '2026-11-16' },
 	{ path: '/chosung/find', freq: 'monthly', priority: '0.7', lastmod: '2026-11-05' },
 	{ path: '/cubenet/guide', freq: 'monthly', priority: '0.8' },
 	{ path: '/archive', freq: 'daily', priority: '0.8' },

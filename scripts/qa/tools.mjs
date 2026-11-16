@@ -21,6 +21,9 @@ for (const [w, h] of [[390, 844], [320, 568]]) {
 	await until(`document.querySelectorAll('ul.words li').length > 0`);
 	const hb = await b.ev(`document.querySelectorAll('.tabs button')[1].click(); await new Promise(r => setTimeout(r, 200)); const li = [...document.querySelectorAll('ul.words li')]; return { n: li.length, all: li.every(l => l.querySelector('.badge')) };`);
 	ok(`${w} 「이」 한방 단어만 보기 — 전부 한방 배지`, hb.n > 0 && hb.all, JSON.stringify(hb));
+	// 첫 글자별 한방 단어(11/16) — 묶음 총수가 끝 글자 표의 「모두 N개」와 같고, 펼치면 장사꾼이 보이고 가로 넘침이 없다
+	const fg = await b.ev(`const ds = [...document.querySelectorAll('.fg details')]; ds.forEach(d => d.open = true); await new Promise(r => setTimeout(r, 200)); const sum = ds.reduce((s, d) => s + +d.querySelector('summary .hn').innerText.match(/(\\d+)개/)[1], 0); const all = +[...document.querySelectorAll('.deep')].map(e => e.innerText).join(' ').match(/모두 ([\\d,]+)개/)[1].replace(/,/g, ''); const jang = [...document.querySelectorAll('.fl li')].some(l => l.innerText.includes('장사꾼')); const ov = document.documentElement.scrollWidth - innerWidth; ds.forEach(d => d.open = false); return { n: ds.length, sum, all, jang, ov };`);
+	ok(`${w} 첫 글자별 한방 단어 — 총수 일치 · 장사꾼 · 넘침 없음`, fg.n > 0 && fg.sum === fg.all && fg.jang && fg.ov <= 0, JSON.stringify(fg));
 
 	// 초성으로 단어 찾기 — ㅅㄱ에 결과 · 뜻풀이가 나오고, 초성 퀴즈 정답(사과)은 빠진다
 	await b.go('/chosung/find?q=' + encodeURIComponent('ㅅㄱ'), 800);
