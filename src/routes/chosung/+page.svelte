@@ -39,6 +39,8 @@
 	let status = $state<'no' | 'won' | 'revealed'>('no');
 	/** 분야 골라 풀기에서 맞힌 수. 세 번째 직후 한 번 내일 알림을 권한다(matchstick freeWins와 같다) */
 	let freeWins = $state(0);
+	/** 분야 골라 풀기에서 끝낸 수(맞힘 + 정답 보기). 다섯 번째에 한 번 오늘의 10문제를 권한다(11/16 — 정답 보기만 누르는 사람이 맞히는 사람의 두 배) */
+	let freeDone = $state(0);
 	/** 네이버 앱 등에서 「크롬으로 열고 알림 받기」로 넘어온 사람 — 메뉴 맨 위에서 바로 권한다(PushPrompt inAppBack) */
 	let pushReturn = $state(false);
 	let feedback = $state('');
@@ -126,7 +128,10 @@
 		if (isCorrect(cur, input)) {
 			status = 'won';
 			solved++;
-			if (mode.type === 'free') freeWins++;
+			if (mode.type === 'free') {
+				freeWins++;
+				freeDone++;
+			}
 			if (!done.includes(idx)) done = [...done, idx];
 			if (mode.type === 'today') finishToday('won');
 			persist();
@@ -155,6 +160,7 @@
 	function reveal() {
 		if (!cur || status !== 'no') return;
 		status = 'revealed';
+		if (mode.type === 'free') freeDone++;
 		if (!done.includes(idx)) done = [...done, idx];
 		if (mode.type === 'today') finishToday('revealed');
 		persist();
@@ -378,11 +384,12 @@ ${location.origin}/chosung?ref=cho
 				</button>
 				<button class="btn ghost wide" onclick={toFields}>분야 선택으로</button>
 			{:else}
-				{#if freeWins === 3 && status === 'won'}
+				{#if freeWins === 3 && status === 'won' && freeDone !== 5}
 					<PushPrompt dayNum={day} tomorrow={tomorrowPeek} slot="chosung_free" inAppBack="/chosung?push=1" />
 				{/if}
-				<!-- 초성 분야로 검색해 들어온 세션은 2%만 오늘의 10문제를 시작했다(10/1~10/13) — 다섯 문제째에 한 번 -->
-				{#if freeWins === 5 && status === 'won'}
+				<!-- 초성 분야로 검색해 들어온 세션은 2%만 오늘의 10문제를 시작했다(10/1~10/13) — 다섯 문제째에 한 번.
+				     11/16부터 맞힘만이 아니라 정답 보기로 넘긴 것도 센다(착지 11/2~11/15: 정답 보기 60명 · 맞힘 31명) -->
+				{#if freeDone === 5}
 					<DailyNext skip="cho" pitch="초성처럼 떠올려 맞히는 상식 2문제가 오늘의 10문제에 있어요" />
 				{:else if todayWord && !todayDone && !(freeWins === 3 && status === 'won')}
 					<!-- 분야 쪽(?c=)에서 곧장 풀이로 들어온 사람은 메뉴의 「오늘의 초성」을 못 본다 — 다시 올 이유(매일 새 문제 · 연속)를 여기서 알린다. 2026-10-27 -->
