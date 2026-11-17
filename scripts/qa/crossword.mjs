@@ -23,6 +23,32 @@ const curText = () => b.ev(`return document.querySelector('.cur')?.innerText ?? 
 const over = () => b.ev(`return document.documentElement.scrollWidth - innerWidth;`);
 const local = process.env.QA_BASE?.includes('localhost');
 
+// 휴대폰 키보드가 열린 높이(390x470) — 판 · 지금 열쇠 · 입력창이 스크롤 없이 한 화면에(11/17 사용자: 「위아래위아래 스크롤」). 운영에서도 돈다
+{
+	await b.viewport(390, 470, true);
+	const q = local ? `?day=${FIRST_DAY}` : '';
+	await b.go(`/crossword${q}`, 800);
+	await b.ev(`Object.keys(localStorage).filter((k) => k.startsWith('ddal.cw.')).forEach((k) => localStorage.removeItem(k)); return 1;`);
+	await b.go(`/crossword${q}`, 800);
+	if (await until(`document.querySelectorAll('.grid > *').length === 25`)) {
+		await b.ev(`document.querySelectorAll('.clues button')[1].click(); return 1;`);
+		await sleep(400);
+		const m = await b.ev(`const g = document.querySelector('.grid').getBoundingClientRect(), i = document.querySelector('.dock form input')?.getBoundingClientRect(),
+			t = document.querySelector('nav.tabs:not(.top)')?.getBoundingClientRect();
+			const low = Math.min(innerHeight, t && t.height ? t.top : innerHeight);
+			return { gTop: Math.round(g.top), gBot: Math.round(g.bottom), iTop: Math.round(i?.top ?? -1), iBot: Math.round(i?.bottom ?? 9999), low: Math.round(low) };`);
+		ok('390x470 판 · 입력창이 한 화면', m.gTop >= 0 && m.gBot <= m.iTop && m.iBot <= m.low, JSON.stringify(m));
+		const c0 = await curText();
+		await b.ev(`document.querySelector('button[aria-label="다음 낱말"]')?.click(); return 1;`);
+		await sleep(150);
+		const c1 = await curText();
+		await b.ev(`document.querySelector('button[aria-label="이전 낱말"]')?.click(); return 1;`);
+		await sleep(150);
+		const c2 = await curText();
+		ok('390x470 ▶ 다음 · ◀ 이전 낱말', c0 && c1 !== c0 && c2 === c0, `${c0} / ${c1} / ${c2}`);
+	} else ok('390x470 판', await b.ev(`return !!document.querySelector('a.big.link[href="/kkeut"]');`), '판도 준비 중 카드도 없음');
+}
+
 for (const [w, h] of [[390, 844], [320, 568]]) {
 	await b.viewport(w, h, true);
 	const q = local ? `?day=${FIRST_DAY}` : '';

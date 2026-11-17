@@ -34,6 +34,17 @@
 	let streak = $state<DayStreak | null>(null);
 	let defs: Record<string, string> = $state({});
 	let field: HTMLInputElement | undefined = $state();
+	let board: HTMLElement | undefined = $state();
+	let vvh = $state(0); // 키보드를 뺀 보이는 높이 — 판 크기를 여기에 맞춘다
+	// 판 · 지금 열쇠 · 입력창이 한 화면에 들도록 판 카드를 맨 위로(11/17 「위아래 스크롤」)
+	const toBoard = () => {
+	board?.scrollIntoView({ block: 'start' });
+	// 판과 입력창이 다 안 들어가는 아주 낮은 화면에선 입력창이 먼저 — 판 위쪽이 잘리는 쪽을 고른다
+	const f = field?.getBoundingClientRect();
+	const t = document.querySelector('nav.tabs:not(.top)')?.getBoundingClientRect();
+	const low = Math.min(visualViewport?.height ?? innerHeight, t?.height ? t.top : innerHeight);
+	if (f && f.bottom > low) scrollBy(0, f.bottom - low + 8);
+};
 
 	const read = <T,>(k: string): T | null => {
 		try {
@@ -56,11 +67,20 @@
 		day = q && canOpenDay(q, realToday, dev) ? q : realToday;
 		puzzle = crosswordFor(day);
 		streak = read<DayStreak>(DAILY_KEY);
-		if (!puzzle) return;
+		const vv = window.visualViewport;
+		const onResize = () => {
+			vvh = vv?.height ?? innerHeight;
+			if (document.activeElement === field) toBoard();
+		};
+		onResize();
+		vv?.addEventListener('resize', onResize);
+		const off = () => vv?.removeEventListener('resize', onResize);
+		if (!puzzle) return off;
 		g = parseGrid(puzzle.rows);
 		const s = read<Saved>(key());
 		if (s) ({ cells, opened, hints, start, sec, done } = s);
 		if (done) loadDefs(g.words.map((w) => w.answer));
+		return off;
 	});
 
 	let word = $derived<Word | null>(g?.words[sel] ?? null);
@@ -78,8 +98,11 @@
 		if (focus) {
 			await tick();
 			field?.focus({ preventScroll: true });
+			toBoard();
 		}
 	}
+	/** ◀ ▶ — 열쇠 목록으로 내려가지 않고 앞뒤 낱말로 */
+	const step = (d: number) => g && choose((sel + d + g.words.length) % g.words.length);
 
 	/** 칸을 누르면 그 칸의 낱말을 고른다. 고른 낱말의 칸을 다시 누르면 반대 방향으로 */
 	function tapCell(i: number) {
@@ -206,7 +229,7 @@
 	<meta property="og:url" content="https://ddalkkak.app/crossword" />
 </svelte:head>
 
-<div class="kroot">
+<div class="kroot" style={vvh ? `--vvh: ${vvh}px` : undefined}>
 	<header class="cover">
 		<h1><span class="kicker">가로세로 낱말퍼즐</span>오늘의 <b>낱말퍼즐</b></h1>
 		<p class="lead">열쇠를 읽고 낱말을 통째로 써 넣어요. 매일 자정에 새 판.</p>
@@ -219,7 +242,7 @@
 			<a class="big link" href="/kkeut">끝말잇기 하러 가기</a>
 		</section>
 	{:else if g && puzzle}
-		<section class="card today">
+		<section class="card today" bind:this={board}>
 			<div class="top">
 				<span class="kicker">{puzzle.date.slice(5).replace('-', '월 ')}일 · 낱말 {g.words.length}개</span>
 				{#if shownStreak(streak, day) > 0}<span class="streak">🔥 {shownStreak(streak, day)}일 연속</span>{/if}
@@ -244,6 +267,30 @@
 					{/if}
 				{/each}
 			</div>
+			{#if !done}
+				<div class="dock">
+					<div class="curbar">
+						<button class="nav" type="button" aria-label="이전 낱말" onclick={() => step(-1)} onpointerdown={(e) => e.preventDefault()}>◀</button>
+						{#if word}<p class="cur"><b>{word.num} {dirName(word)}</b> {puzzle.clues[word.answer]} <em>({word.cells.length}글자)</em></p>{/if}
+						<button class="nav" type="button" aria-label="다음 낱말" onclick={() => step(1)} onpointerdown={(e) => e.preventDefault()}>▶</button>
+					</div>
+					<form onsubmit={submit}>
+						<input
+							bind:this={field}
+							bind:value={input}
+							placeholder={word ? `${word.cells.length}글자 낱말` : '낱말'}
+							aria-label="낱말 입력"
+							autocomplete="off"
+							autocapitalize="off"
+							spellcheck="false"
+							enterkeyhint="send"
+							onfocus={toBoard}
+						/>
+						<button class="big" type="submit" onpointerdown={(e) => e.preventDefault()}>넣기</button>
+					</form>
+					<p class="msg" aria-live="assertive">{msg}</p>
+				</div>
+			{/if}
 		</section>
 
 		{#if done}
@@ -284,7 +331,7 @@
 		<h2>어떻게 푸나요</h2>
 		<p class="note">
 			판의 흰 칸을 누르거나 아래 열쇠를 누르면 그 낱말이 골라져요. 같은 칸을 한 번 더 누르면 가로와 세로가 바뀌어요. 열쇠를 읽고 떠오른
-			낱말을 아래 칸에 통째로 써 넣으면 판에 들어가요. 가로 낱말과 세로 낱말은 글자 하나를 나눠 쓰니, 쉬운 낱말부터 채우면 엇갈리는 칸이
+			낱말을 판 바로 아래 칸에 통째로 써 넣으면 판에 들어가요. 열쇠 옆 ◀ ▶로 앞뒤 낱말을 넘길 수도 있어요. 가로 낱말과 세로 낱말은 글자 하나를 나눠 쓰니, 쉬운 낱말부터 채우면 엇갈리는 칸이
 			다음 낱말의 실마리가 돼요.
 		</p>
 		<p class="note">
@@ -293,26 +340,6 @@
 			다 풀면 사전 뜻풀이를 함께 보여 드려요.
 		</p>
 	</section>
-
-	{#if g && !done}
-		<div class="dock">
-			{#if word && puzzle}<p class="cur"><b>{word.num} {dirName(word)}</b> {puzzle.clues[word.answer]} <em>({word.cells.length}글자)</em></p>{/if}
-			<form onsubmit={submit}>
-				<input
-					bind:this={field}
-					bind:value={input}
-					placeholder={word ? `${word.cells.length}글자 낱말` : '낱말'}
-					aria-label="낱말 입력"
-					autocomplete="off"
-					autocapitalize="off"
-					spellcheck="false"
-					enterkeyhint="send"
-				/>
-				<button class="big" type="submit" onpointerdown={(e) => e.preventDefault()}>넣기</button>
-			</form>
-			<p class="msg" aria-live="assertive">{msg}</p>
-		</div>
-	{/if}
 
 	{#if toastMsg}<div class="toast" role="status">{toastMsg}</div>{/if}
 
@@ -334,8 +361,8 @@
 	.card h2 { font-size: 18px; font-weight: 900; margin-bottom: 6px; }
 	.top { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 	.streak { font-size: 13px; font-weight: 800; }
-	/* 아래 입력창(약 170px)과 머리 · 하단 탭을 뺀 높이 안에 판이 다 보이게 — 작은 폰에서도 220px 아래로는 안 줄인다 */
-	.grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; width: min(100%, 340px, calc(100svh - 430px)); min-width: 220px; margin: 8px auto 0; }
+	/* 판 아래 열쇠 · 입력창(약 200px)과 하단 탭을 뺀 높이(키보드가 열리면 그만큼 뺀다) 안에 판 · 입력창이 함께 보이게 */
+	.grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; width: min(100%, 340px, calc(var(--vvh, 100svh) - 200px - var(--tab-h, 0px))); min-width: 180px; margin: 8px auto 0; }
 	.cell {
 		position: relative; aspect-ratio: 1; display: flex; align-items: center; justify-content: center;
 		border: 1px solid var(--border); border-radius: 8px; background: var(--bg); color: var(--text);
@@ -363,8 +390,10 @@
 	.words { list-style: none; padding: 0; margin: 8px 0 0; }
 	.words li + li { margin-top: 8px; }
 	.words li span { display: block; font-size: 13px; color: var(--muted); margin-top: 2px; line-height: 1.5; }
-	.dock { position: sticky; bottom: var(--tab-h, 0px); padding: 8px 0 6px; background: var(--bg); }
-	.cur { font-size: 15px; line-height: 1.5; margin-bottom: 8px; word-break: keep-all; }
+	.dock { margin-top: 10px; }
+	.curbar { display: flex; align-items: center; gap: 4px; margin-bottom: 8px; }
+	.nav { flex: none; width: 44px; height: 44px; border: 1px solid var(--border); border-radius: 10px; background: var(--bg); color: var(--text); font-size: 14px; }
+	.cur { flex: 1; min-width: 0; font-size: 15px; line-height: 1.4; word-break: keep-all; }
 	form { display: flex; gap: 8px; }
 	form input { flex: 1; min-width: 0; min-height: 48px; padding: 0 12px; border: 1px solid var(--border); border-radius: 12px; font-size: 17px; background: var(--panel); color: var(--text); }
 	form .big { width: auto; margin: 0; padding: 0 18px; }
