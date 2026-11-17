@@ -30,6 +30,13 @@ export const KKEUT_PUZZLES: KkeutPuzzle[] = [
 	{ date: '2026-11-21', start: '계절', line: ['절벽', '벽면', '면접시험', '험구', '구름'] },
 	{ date: '2026-11-22', start: '건너편', line: ['편지글', '글러브', '브리핑', '핑계', '계이름'] },
 	{ date: '2026-11-23', start: '가정용', line: ['용띠'] },
+	{ date: '2026-11-24', start: '가죽옷', line: ['옷고름'] },
+	{ date: '2026-11-25', start: '감독', line: ['독버섯'] },
+	{ date: '2026-11-26', start: '간병', line: ['병뚜껑'] },
+	{ date: '2026-11-27', start: '가이드', line: ['드럼', '넘버', '버릇'] },
+	{ date: '2026-11-28', start: '거의', line: ['의혹', '혹평', '평균값', '값어치', '치읓'] },
+	{ date: '2026-11-29', start: '구월', line: ['월드컵', '컵라면', '면접시험', '험구', '구레나룻'] },
+	{ date: '2026-11-30', start: '가로줄', line: ['줄무늬'] },
 ];
 
 export function puzzleFor(day: number): KkeutPuzzle | null {
