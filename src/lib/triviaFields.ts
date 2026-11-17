@@ -26,7 +26,8 @@ export const TRIVIA_FIELDS: [slug: string, name: string][] = [
 	['space', '우주'],
 	['movie-drama', '영화드라마'],
 	['capital', '수도'],
-	['flag', '국기']
+	['flag', '국기'],
+	['pure-korean', '순우리말']
 ];
 
 export function fieldName(slug: string | null): string | null {

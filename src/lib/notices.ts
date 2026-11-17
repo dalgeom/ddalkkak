@@ -22,6 +22,14 @@ export interface Notice {
 
 export const NOTICES: Notice[] = [
 	{
+		id: '2026-11-17-trivia-pure-korean',
+		date: '2026-11-17',
+		title: '상식 퀴즈에 순우리말 분야가 생겼어요',
+		body: '사흘은 며칠일까요, 고등어 한 손은 몇 마리일까요? 날짜 세기부터 여우비 · 상고대 · 하릴없이까지, 순우리말의 뜻을 묻는 20문제가 새로 생겼어요. 해설마다 표준국어대사전 뜻풀이를 함께 적었어요.',
+		href: '/play?filter=trivia&field=pure-korean',
+		cta: '순우리말 퀴즈 풀러 가기'
+	},
+	{
 		id: '2026-11-12-trivia-capital-flag',
 		date: '2026-11-12',
 		title: '상식 퀴즈에 수도 · 국기 분야가 생겼어요',
