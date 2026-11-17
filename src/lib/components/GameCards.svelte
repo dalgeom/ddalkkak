@@ -28,7 +28,7 @@
 			line: '성냥을 옮겨 식을 참으로',
 			href: '/matchstick',
 			sub: [
-				{ label: '오늘의 성냥개비', href: '/matchstick' },
+				{ label: '바로 풀기', href: '/matchstick' },
 				{ label: '단계 도전', href: '/matchstick#stages' },
 				{ label: '친구와 대결', href: '/matchstick/duel' },
 				{ label: '그림 퍼즐', href: '/matchstick/picture' }
@@ -42,7 +42,7 @@
 			line: '초성만 보고 낱말 맞히기',
 			href: '/chosung',
 			sub: [
-				{ label: '오늘의 초성', href: '/chosung' },
+				{ label: '바로 풀기', href: '/chosung' },
 				{ label: '단계 도전', href: '/chosung/stages' },
 				{ label: '분야 골라 풀기', href: '/chosung#fields' },
 				{ label: '화면에 띄우기', href: '/chosung/show' }

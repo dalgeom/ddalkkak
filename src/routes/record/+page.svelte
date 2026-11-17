@@ -10,7 +10,6 @@
 	import { buildBackup, parseBackup, mergeBackup } from '$lib/backup';
 	import { pushState, enablePush, type PushState } from '$lib/push';
 	import { track } from '$lib/analytics';
-	import { todayMissions, type Mission } from '$lib/missions';
 
 	/* ───────── 알림 상시 토글 ─────────
 	   완주 화면의 제안은 세 경로에서 구조적으로 못 뜬다 — 인앱 브라우저는 무조건 공백,
@@ -40,7 +39,6 @@
 	   파일 한 장으로 옮긴다. */
 	let backupMsg = $state('');
 	let todayDone = $state(false);
-	let nextMission = $state<Mission | null>(null);
 	let fileInput = $state<HTMLInputElement | null>(null);
 
 	function say(m: string) {
@@ -91,9 +89,8 @@
 		month = t.m;
 		summary = summarize(today);
 		picked = readDayRecord(today);
-		// 오늘 10문제를 끝낸 사람에게도 「풀러 가기」가 떠서 같은 결과 화면만 다시 봤다(11/12 점검) — 남은 미션으로 보낸다
+		// 오늘 10문제를 끝낸 사람에게도 「풀러 가기」가 떠서 같은 결과 화면만 다시 봤다(11/12 점검) — 지난 날로 보낸다
 		todayDone = !!picked;
-		nextMission = todayMissions(today).find((m) => m.key !== 'daily' && !m.done) ?? null;
 	});
 
 	let cells = $derived(today ? monthGrid(year, month) : []);
@@ -254,8 +251,6 @@
 		<section class="sec ctas">
 			{#if !todayDone}
 				<a class="cta" href="/">오늘의 10문제 풀러 가기 <span aria-hidden="true">→</span></a>
-			{:else if nextMission}
-				<a class="cta" href={nextMission.href}>{nextMission.label} 풀러 가기 <span aria-hidden="true">→</span></a>
 			{:else}
 				<a class="cta" href="/archive">지난 날 문제 풀기 <span aria-hidden="true">→</span></a>
 			{/if}

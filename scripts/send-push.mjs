@@ -107,20 +107,7 @@ const payload = JSON.stringify({
 	body: '새 문제가 올라왔어요. 오늘도 딸깍?',
 	url: '/'
 });
-// /matchstick의 「오늘의 성냥개비」에서 켠 구독(api/push의 from). 기다린 것이 성냥개비다.
-const matchPayload = JSON.stringify({
-	title: '딸깍 — 오늘의 성냥개비',
-	body: '새 성냥개비 문제가 열렸어요. 연속 기록 이어 가기!',
-	url: '/matchstick'
-});
-// /chosung의 「오늘의 초성」에서 켠 구독
-const chosungPayload = JSON.stringify({
-	title: '딸깍 — 오늘의 초성',
-	body: '새 초성 퀴즈가 열렸어요. 연속 기록 이어 가기!',
-	url: '/chosung'
-});
-const payloadOf = (sub) =>
-	sub.from === 'match' ? matchPayload : sub.from === 'chosung' ? chosungPayload : payload;
+// 11/17 오늘의 성냥개비 · 초성을 없앴다 — 그 화면에서 켠 구독(from 'match' · 'chosung')도 10문제 알림을 받는다
 
 let sent = 0;
 let gone = 0;
@@ -134,7 +121,7 @@ for (const key of keys) {
 		continue;
 	}
 	try {
-		await webpush.sendNotification(sub, payloadOf(sub), {
+		await webpush.sendNotification(sub, payload, {
 			TTL: 12 * 3600
 		});
 		sent++;

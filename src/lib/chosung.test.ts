@@ -1,6 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { chosungOf, isCorrect, collisionsOf, chosungOfDay, CHOSUNG_WORDS, CHOSUNG_BATCHES, SPACED } from './chosung';
-import { seededOrder, SITE_START_DAY } from './game';
+import { chosungOf, isCorrect, collisionsOf, CHOSUNG_WORDS, CHOSUNG_BATCHES, SPACED } from './chosung';
 import { CHOSUNG_CATEGORIES } from './data/chosung';
 
 const byWord = (w: string) => CHOSUNG_WORDS.find((x) => x.word === w)!;
@@ -76,24 +75,7 @@ describe('채점', () => {
 	});
 });
 
-describe('오늘의 초성', () => {
-	it('같은 날은 같은 낱말, 한 바퀴 안에서는 겹치지 않는다', () => {
-		// 낱말이 늘면 그날부터 새 순서로 돈다 — 가장 최근 묶음의 시작일부터 한 바퀴를 본다
-		const start = CHOSUNG_BATCHES[CHOSUNG_BATCHES.length - 1].fromDay;
-		expect(chosungOfDay(start)).toBe(chosungOfDay(start));
-		const seen = new Set<number>();
-		for (let d = start; d < start + CHOSUNG_WORDS.length; d++) seen.add(chosungOfDay(d));
-		expect(seen.size).toBe(CHOSUNG_WORDS.length);
-	});
-
-	it('낱말을 늘려도 지난 날의 오늘의 초성은 그대로다(10/15 이전 공식과 같은 낱말)', () => {
-		const old = seededOrder(224, 20260404);
-		const oldWords = CHOSUNG_CATEGORIES.flatMap((c) => c.words.slice(0, CHOSUNG_BATCHES[0].counts[c.slug] ?? 0).map((w) => w[0]));
-		for (let d = 20725; d <= 20741; d++) {
-			expect(CHOSUNG_WORDS[chosungOfDay(d)].word, String(d)).toBe(oldWords[old[(d - SITE_START_DAY) % 224]]);
-		}
-	});
-
+describe('초성 묶음', () => {
 	it('마지막 묶음의 수가 분야 낱말 수와 같다(새 낱말을 묶음에 안 넣고 빠뜨리지 않게)', () => {
 		const last = CHOSUNG_BATCHES[CHOSUNG_BATCHES.length - 1].counts;
 		for (const c of CHOSUNG_CATEGORIES) expect(last[c.slug], c.slug).toBe(c.words.length);

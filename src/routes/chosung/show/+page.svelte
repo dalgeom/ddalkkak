@@ -3,8 +3,7 @@
 	import { pushState } from '$app/navigation';
 	import { page } from '$app/state';
 	import { track } from '$lib/analytics';
-	import { kstDayNumber } from '$lib/game';
-	import { CHOSUNG_WORDS, chosungOf, chosungOfDay, categoryBySlug, shownWord, type ChosungWord } from '$lib/chosung';
+	import { CHOSUNG_WORDS, chosungOf, categoryBySlug, shownWord, type ChosungWord } from '$lib/chosung';
 	import { CHOSUNG_TIERS } from '$lib/chosungTiers';
 	import OtherGames from '$lib/components/OtherGames.svelte';
 
@@ -51,9 +50,7 @@
 	const tierOf = (w: ChosungWord) => CHOSUNG_TIERS[w.word] ?? 3;
 
 	function build(): ChosungWord[] {
-		// 오늘의 초성은 뺀다 — 모임에서 먼저 보면 그날 혼자 푸는 재미가 샌다
-		const today = CHOSUNG_WORDS[chosungOfDay(kstDayNumber(Date.now()))]?.word;
-		let pool = CHOSUNG_WORDS.filter((w) => (cat === 'all' || w.category === cat) && w.word !== today);
+		let pool = CHOSUNG_WORDS.filter((w) => cat === 'all' || w.category === cat);
 		const leveled = pool.filter((w) => (level === 'easy' ? tierOf(w) <= 2 : level === 'hard' ? tierOf(w) >= 3 : true));
 		if (leveled.length >= Math.min(size, 10)) pool = leveled;
 		const shuffled = [...pool];
@@ -194,7 +191,7 @@
 		</div>
 
 		<button class="cta" onclick={start}>{catName} {size}문제 띄우기 <span aria-hidden="true">→</span></button>
-		<p class="sub">오늘의 초성 문제는 빼고 뽑아요. 뽑은 문제 안에서는 쉬운 낱말이 먼저 나와요.</p>
+		<p class="sub">뽑은 문제 안에서는 쉬운 낱말이 먼저 나와요.</p>
 	</section>
 
 	<section class="sec">

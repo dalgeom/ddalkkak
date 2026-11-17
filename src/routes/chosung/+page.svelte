@@ -7,13 +7,11 @@
 	import { track } from '$lib/analytics';
 	import { kstDayNumber } from '$lib/game';
 	import { CHOSUNG_CATEGORIES } from '$lib/data/chosung';
-	import { CHOSUNG_WORDS, chosungOf, isCorrect, chosungOfDay, categoryBySlug, shownWord } from '$lib/chosung';
-	import { nextStreak, shownStreak, type DayStreak } from '$lib/dailyStreak';
+	import { CHOSUNG_WORDS, chosungOf, isCorrect, categoryBySlug, shownWord } from '$lib/chosung';
 	import PushPrompt from '$lib/components/PushPrompt.svelte';
 	import DailyNext from '$lib/components/DailyNext.svelte';
-	import { shareResult as shareCardResult, outcomeMessage } from '$lib/shareCard';
 
-	type Mode = { type: 'today' } | { type: 'free'; cat: string };
+	type Mode = { type: 'free'; cat: string };
 
 	let screen = $state<'menu' | 'play'>('menu');
 	let scrollFields = false;
@@ -29,7 +27,6 @@
 
 	let done = $state<number[]>([]);
 	let solved = $state(0);
-	let daily = $state<DayStreak | null>(null);
 	let day = $state(0);
 
 	let idx = $state(-1);
@@ -49,24 +46,11 @@
 
 	let cur = $derived(idx >= 0 ? CHOSUNG_WORDS[idx] : null);
 	let curCat = $derived(cur ? categoryBySlug(cur.category) : null);
-	let todayIdx = $derived(day ? chosungOfDay(day) : -1);
-	let todayWord = $derived(todayIdx >= 0 ? CHOSUNG_WORDS[todayIdx] : null);
-	let todayDone = $derived(!!day && daily?.day === day);
-	/** 「오늘의 10문제로 이어 가기」 카드가 보이는지 — 보이면 이어서 풀기 버튼을 테두리로 낮춘다(DailyNext) */
-	let nextShown = $state(false);
-	let todayWon = $derived(todayDone && (daily?.streak ?? 0) > 0);
-	let dailyStreak = $derived(day ? shownStreak(daily, day) : 0);
-	let tomorrowPeek = $derived.by(() => {
-		if (!day) return null;
-		const w = CHOSUNG_WORDS[chosungOfDay(day + 1)];
-		return { chip: `초성 · ${categoryBySlug(w.category)?.name ?? ''}`, line: chosungOf(w.word) };
-	});
 
 	function load() {
 		try {
 			done = JSON.parse(localStorage.getItem('ddal.cho.done') || '[]');
 			solved = Number(localStorage.getItem('ddal.cho.solved') || 0);
-			daily = JSON.parse(localStorage.getItem('ddal.cho.daily') || 'null');
 		} catch {
 			/* 무시 */
 		}
@@ -76,7 +60,6 @@
 		try {
 			localStorage.setItem('ddal.cho.done', JSON.stringify(done));
 			localStorage.setItem('ddal.cho.solved', String(solved));
-			if (daily) localStorage.setItem('ddal.cho.daily', JSON.stringify(daily));
 		} catch {
 			/* 무시 */
 		}
@@ -90,10 +73,7 @@
 			done = done.filter((i) => !inCat.some((x) => x.i === i));
 			pool = inCat;
 		}
-		// 오늘의 초성은 연습에서 빼 둔다 — 연습하다 오늘 문제를 미리 보면 김이 샌다
-		const safe = pool.filter(({ i }) => i !== todayIdx);
-		const from = safe.length ? safe : pool;
-		return from[Math.floor(Math.random() * from.length)].i;
+		return pool[Math.floor(Math.random() * pool.length)].i;
 	}
 
 	function start(m: Mode) {
@@ -101,13 +81,11 @@
 		screen = 'play';
 		ph.enter();
 		next();
-		track(m.type === 'today' ? 'chosung_daily_start' : 'chosung_start', {
-			cat: m.type === 'free' ? m.cat : 'today'
-		});
+		track('chosung_start', { cat: m.cat });
 	}
 
 	function next() {
-		idx = mode.type === 'today' ? todayIdx : pick(mode.cat);
+		idx = pick(mode.cat);
 		input = '';
 		tries = 0;
 		hintOpen = false;
@@ -116,24 +94,15 @@
 		setTimeout(() => inputEl?.focus(), 0);
 	}
 
-	function finishToday(result: 'won' | 'revealed') {
-		if (todayDone) return;
-		daily = nextStreak(daily, day, result);
-		track(result === 'won' ? 'chosung_daily_solve' : 'chosung_daily_reveal', { streak: daily.streak });
-	}
-
 	function submit(e: SubmitEvent) {
 		e.preventDefault();
 		if (!cur || status !== 'no' || !input.trim()) return;
 		if (isCorrect(cur, input)) {
 			status = 'won';
 			solved++;
-			if (mode.type === 'free') {
-				freeWins++;
-				freeDone++;
-			}
+			freeWins++;
+			freeDone++;
 			if (!done.includes(idx)) done = [...done, idx];
-			if (mode.type === 'today') finishToday('won');
 			persist();
 			const same = input.replace(/\s+/g, '') === cur.word;
 			feedback = same
@@ -160,9 +129,8 @@
 	function reveal() {
 		if (!cur || status !== 'no') return;
 		status = 'revealed';
-		if (mode.type === 'free') freeDone++;
+		freeDone++;
 		if (!done.includes(idx)) done = [...done, idx];
-		if (mode.type === 'today') finishToday('revealed');
 		persist();
 		feedback = `정답: ${shownWord(cur.word)}`;
 		track('chosung_reveal');
@@ -180,45 +148,25 @@
 	onMount(() => {
 		load();
 		day = kstDayNumber(Date.now());
-		track('chosung_daily_seen', { done: todayDone, streak: dailyStreak });
 		// 분야 페이지의 「이 분야 풀기」가 ?c=<분야>로 들어온다
 		pushReturn = page.url.searchParams.get('push') === '1';
 		const c = page.url.searchParams.get('c');
 		if (c && categoryBySlug(c)) start({ type: 'free', cat: c });
-		// 오늘의 미션에서 왔으면 허브에서 「풀어 보기」를 한 번 더 누르지 않게 곧장 연다(11/12 점검)
-		else if (page.url.searchParams.get('today') === '1' && todayWord && !todayDone) start({ type: 'today' });
 	});
 
 	const total = CHOSUNG_WORDS.length;
 
-	// 오늘 초성을 맞힌 화면에 공유가 없었다(11/12 점검) — 성냥 · 끝말잇기와 같은 카드, 정답은 적지 않는다
-	let toastMsg = $state('');
-	let toastTimer: ReturnType<typeof setTimeout>;
-	async function share() {
-		const n = daily?.streak ?? 1;
-		const sub = tries === 0 ? '한 번에 맞혔어요' : `${tries + 1}번 만에 맞혔어요`;
-		const text = `딸깍! 오늘의 초성 · ${sub} · 🔥 ${n}일 연속
-${location.origin}/chosung?ref=cho
-#딸깍`;
-		const m = outcomeMessage(
-			await shareCardResult({ title: '오늘의 초성', scoreLabel: `${n}일 연속`, emojiRow: '🔥'.repeat(Math.min(n, 10)), subLine: sub, cta: '너도 도전해봐!' }, text)
-		);
-		if (!m) return;
-		toastMsg = m;
-		clearTimeout(toastTimer);
-		toastTimer = setTimeout(() => (toastMsg = ''), 2200);
-	}
 </script>
 
 <svelte:head>
 	<title>초성 퀴즈 {total}문제 — 동물·음식·나라·사자성어 초성 게임 | 딸깍</title>
 	<meta
 		name="description"
-		content="초성 퀴즈 {total}문제를 바로 풉니다. 동물·음식·과일·채소·나라·사자성어 초성을 보고 낱말을 맞히세요. 막히면 뜻 힌트, 매일 새 오늘의 초성과 연속 기록."
+		content="초성 퀴즈 {total}문제를 바로 풉니다. 동물·음식·과일·채소·나라·사자성어 초성을 보고 낱말을 맞히세요. 막히면 뜻 힌트가 한 줄 열립니다."
 	/>
 	<link rel="canonical" href="https://ddalkkak.app/chosung" />
 	<meta property="og:title" content="초성 퀴즈 {total}문제 — 동물·음식·나라·사자성어 초성 게임 | 딸깍" />
-	<meta property="og:description" content="초성만 보고 낱말을 맞히세요. 매일 새 오늘의 초성." />
+	<meta property="og:description" content="초성만 보고 낱말을 맞히세요. 분야를 고르면 바로 시작." />
 	<meta property="og:url" content="https://ddalkkak.app/chosung" />
 </svelte:head>
 
@@ -233,36 +181,12 @@ ${location.origin}/chosung?ref=cho
 				</p>
 				<div class="facts">
 					<div class="fact"><b>{solved}</b><span>맞힌 낱말</span></div>
-					<div class="fact"><b>{dailyStreak}</b><span>오늘의 초성 연속</span></div>
 					<div class="fact"><b>{CHOSUNG_CATEGORIES.length}</b><span>분야</span></div>
 				</div>
 			</header>
 
 			{#if pushReturn}
-				<PushPrompt dayNum={day} tomorrow={tomorrowPeek} slot="chosung_return" />
-			{/if}
-
-			{#if todayWord}
-				<section class="today" class:done={todayDone}>
-					<div class="t-top">
-						<span class="kicker">오늘의 초성 · {categoryBySlug(todayWord.category)?.name}</span>
-						{#if dailyStreak > 0}<span class="t-streak">🔥 {dailyStreak}일 연속</span>{/if}
-					</div>
-					{#if todayDone}
-						<p class="t-done">
-							{todayWon ? '오늘 초성을 풀었어요.' : '오늘 초성은 정답을 봤어요.'} 내일 자정에 새 문제가 열려요.
-						</p>
-						<DailyNext skip="cho" pitch="초성처럼 떠올려 맞히는 상식 2문제가 오늘의 10문제에 있어요" />
-					{:else}
-						<div class="tiles small">
-							{#each [...chosungOf(todayWord.word)] as ch, i (i)}<span class="tile">{ch}</span>{/each}
-						</div>
-						<button class="big" onclick={() => start({ type: 'today' })}>
-							풀어 보기 <span class="arr" aria-hidden="true">→</span>
-						</button>
-						<p class="t-note">하루 한 문제, 모두 같은 문제예요. 매일 풀면 연속 기록이 쌓입니다.</p>
-					{/if}
-				</section>
+				<PushPrompt dayNum={day} slot="chosung_return" />
 			{/if}
 
 			<!-- 10/20 딸깍 5단계: 쉬운 낱말부터 판을 깨며 올라가는 길 -->
@@ -330,7 +254,7 @@ ${location.origin}/chosung?ref=cho
 	{:else if cur}
 		<div class="topbar">
 			<span class="run">
-				{mode.type === 'today' ? '오늘의 초성' : '초성 퀴즈'} · {curCat?.name}
+				초성 퀴즈 · {curCat?.name}
 			</span>
 			<span class="cnt">{cur.word.length}글자</span>
 		</div>
@@ -372,39 +296,20 @@ ${location.origin}/chosung?ref=cho
 					<button class="btn ghost" onclick={reveal}>정답 보기</button>
 					<button class="btn ghost" onclick={toMenu}>나가기</button>
 				</div>
-			{:else if mode.type === 'today'}
-				<p class="t-after">
-					{#if todayWon}🔥 <b>{daily?.streak}일 연속</b> · 내일 자정에 새 문제{:else}내일 문제를 맞히면 연속 기록이 시작돼요{/if}
-				</p>
-				{#if todayWon}<button class="btn ghost wide" onclick={share}>기록 공유하기</button>{/if}
-				<DailyNext skip="cho" pitch="초성처럼 떠올려 맞히는 상식 2문제가 오늘의 10문제에 있어요" bind:shown={nextShown} />
-				<PushPrompt dayNum={day} streak={daily?.streak ?? 0} tomorrow={tomorrowPeek} slot="chosung" inAppBack="/chosung?push=1" />
-				<button class="btn wide" class:ghost={nextShown} onclick={() => start({ type: 'free', cat: cur.category })}>
-					{curCat?.name} 이어서 풀기 →
-				</button>
-				<button class="btn ghost wide" onclick={toFields}>분야 선택으로</button>
 			{:else}
 				{#if freeWins === 3 && status === 'won' && freeDone !== 5}
-					<PushPrompt dayNum={day} tomorrow={tomorrowPeek} slot="chosung_free" inAppBack="/chosung?push=1" />
+					<PushPrompt dayNum={day} slot="chosung_free" inAppBack="/chosung?push=1" />
 				{/if}
 				<!-- 초성 분야로 검색해 들어온 세션은 2%만 오늘의 10문제를 시작했다(10/1~10/13) — 다섯 문제째에 한 번.
 				     11/16부터 맞힘만이 아니라 정답 보기로 넘긴 것도 센다(착지 11/2~11/15: 정답 보기 60명 · 맞힘 31명) -->
 				{#if freeDone === 5}
-					<DailyNext skip="cho" pitch="초성처럼 떠올려 맞히는 상식 2문제가 오늘의 10문제에 있어요" />
-				{:else if todayWord && !todayDone && !(freeWins === 3 && status === 'won')}
-					<!-- 분야 쪽(?c=)에서 곧장 풀이로 들어온 사람은 메뉴의 「오늘의 초성」을 못 본다 — 다시 올 이유(매일 새 문제 · 연속)를 여기서 알린다. 2026-10-27 -->
-					<button class="todaynudge" onclick={() => { track('chosung_free_today'); start({ type: 'today' }); }}>
-						<span class="tn-k">오늘의 초성 · {categoryBySlug(todayWord.category)?.name}</span>
-						<span class="tn-c">{chosungOf(todayWord.word)}</span>
-						<span class="tn-s">하루 한 문제, 자정마다 바뀌어요 · 풀어 보기 →</span>
-					</button>
+					<DailyNext pitch="초성처럼 떠올려 맞히는 상식 2문제가 오늘의 10문제에 있어요" />
 				{/if}
 				<button class="btn wide" onclick={next}>다음 문제 →</button>
 				<button class="btn ghost wide" onclick={toFields}>분야 선택으로</button>
 			{/if}
 		</div>
 	{/if}
-	{#if toastMsg}<div class="toast" role="status" aria-live="polite">{toastMsg}</div>{/if}
 </div>
 
 <style>
@@ -424,77 +329,6 @@ ${location.origin}/chosung?ref=cho
 		display: flex;
 		flex-direction: column;
 		gap: 14px;
-	}
-
-	/* 오늘의 초성 — /matchstick의 오늘의 성냥개비 카드와 같은 모양 */
-	.today {
-		background: var(--panel);
-		border: 2px solid var(--accent);
-		border-radius: 18px;
-		padding: 16px;
-	}
-	.today.done {
-		border-color: var(--border-strong);
-	}
-	.t-top {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		flex-wrap: wrap;
-		gap: 6px 10px;
-	}
-	.t-streak {
-		font-size: 13.5px;
-		font-weight: 800;
-		color: var(--accent-text);
-	}
-	.t-done,
-	.t-note {
-		margin-top: 10px;
-		font-size: 13.5px;
-		line-height: 1.7;
-		color: var(--muted);
-		word-break: keep-all;
-	}
-	.t-done {
-		color: var(--text);
-		font-weight: 700;
-	}
-	.todaynudge {
-		display: grid;
-		gap: 2px;
-		width: 100%;
-		margin: 2px 0 10px;
-		padding: 12px 14px;
-		text-align: left;
-		background: var(--panel-2);
-		border: 1px dashed var(--border-strong);
-		border-radius: 12px;
-		color: var(--text);
-		font: inherit;
-		cursor: pointer;
-	}
-	.tn-k {
-		font-size: 12.5px;
-		font-weight: 700;
-		color: var(--accent-text);
-	}
-	.tn-c {
-		font-size: 22px;
-		font-weight: 800;
-		letter-spacing: 4px;
-	}
-	.tn-s {
-		font-size: 13px;
-		color: var(--muted);
-		word-break: keep-all;
-	}
-	.t-after {
-		margin: 4px 0 0;
-		text-align: center;
-		font-size: 14.5px;
-		line-height: 1.7;
-		word-break: keep-all;
 	}
 
 	.tiles {
@@ -522,14 +356,6 @@ ${location.origin}/chosung?ref=cho
 	}
 	.tile.open {
 		border-color: var(--accent);
-	}
-	.tiles.small {
-		margin: 14px 0;
-	}
-	.tiles.small .tile {
-		width: 46px;
-		height: 50px;
-		font-size: 25px;
 	}
 	.shaking {
 		animation: shake 0.4s;
@@ -624,23 +450,6 @@ ${location.origin}/chosung?ref=cho
 		background: var(--panel-2);
 	}
 
-	.big {
-		width: 100%;
-		padding: 15px;
-		border: none;
-		border-radius: 14px;
-		background: var(--accent);
-		color: #fff;
-		font-size: 16px;
-		font-weight: 800;
-		font-family: inherit;
-		cursor: pointer;
-		box-shadow: 0 5px 0 var(--accent-press);
-	}
-	.big:active {
-		transform: translateY(2px);
-		box-shadow: 0 3px 0 var(--accent-press);
-	}
 	.stagego {
 		display: block;
 		margin-top: 12px;
@@ -756,20 +565,5 @@ ${location.origin}/chosung?ref=cho
 	}
 	.btn.wide {
 		width: 100%;
-	}
-	.toast {
-		position: fixed;
-		bottom: calc(24px + var(--tab-h, 0px));
-		left: 50%;
-		transform: translateX(-50%);
-		width: max-content;
-		max-width: calc(100vw - 32px);
-		background: var(--text);
-		color: #fff;
-		border-radius: 12px;
-		padding: 12px 20px;
-		font-size: 14px;
-		z-index: 30;
-		box-shadow: 0 8px 30px rgba(44, 40, 34, 0.3);
 	}
 </style>

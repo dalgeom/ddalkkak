@@ -46,7 +46,6 @@
 	import CubeNetFigure from '$lib/components/CubeNetFigure.svelte';
 	import CubeDie from '$lib/components/CubeDie.svelte';
 	import GameCards from '$lib/components/GameCards.svelte';
-	import Missions from '$lib/components/Missions.svelte';
 	import NewsBar from '$lib/components/NewsBar.svelte';
 	import NewsSheet from '$lib/components/NewsSheet.svelte';
 	import CubeFold from '$lib/components/CubeFold.svelte';
@@ -943,6 +942,7 @@
 		return w && w.ok < w.total ? w : null;
 	});
 
+
 	// 내일 문제 미리 풀어 보기(10/22, CLAUDE.md 매일 루틴) — 로컬 dev 서버에서만 ?day=날짜번호로 그날을 연다.
 	// 운영 빌드에서는 dev가 false라 이 갈래가 통째로 빠진다
 	const todayNum = () => (dev && Number(new URL(location.href).searchParams.get('day'))) || kstDayNumber(Date.now());
@@ -1134,12 +1134,10 @@
 
 
 	<!-- v2(10/14): ② 「네 가지」 카드(링크 없음) · ③ 「더 풀고 싶다면?」 6칸 · ⑤ 분야 칩 19개가 모두
-	     「유형으로 들어가기」였다. 오늘의 미션 + 놀이 고르기 카드 6장 하나로 합친다. 카드는 어디서 눌러도
-	     그 유형의 홈으로 간다(GameCards). 상식 분야 19개는 상식 홈(/trivia#fields)에 있다. -->
-	<section class="hsec reveal d1">
-		<Missions ondaily={startOrResume} />
-	</section>
-
+	     「유형으로 들어가기」였다. 놀이 고르기 카드 하나로 합친다. 카드는 어디서 눌러도
+	     그 유형의 홈으로 간다(GameCards). 상식 분야 19개는 상식 홈(/trivia#fields)에 있다.
+	     11/17: 첫 화면의 「오늘의 미션」 세 칸(10문제 · 성냥 · 초성)은 걷었다 — 성냥은 10문제 안의 유형이고
+	     초성은 따로 노는 놀이라 「오늘 할 일」로 나란히 둘 까닭이 없다(사용자 지시). -->
 	<div class="adwrap reveal d1"><AdSlot label="랜딩 중단" /></div>
 
 	<section class="hsec reveal d2">
@@ -1585,10 +1583,12 @@
 		</div>
 	{/if}
 
-	<!-- 다 푼 사람이 갈 곳 — 오늘의 성냥 · 초성과 다른 놀이, 그리고 약했던 유형 연습 한 줄 -->
+	<!-- 다 푼 사람이 갈 곳 — 10문제에 없는 놀이 둘(11/17), 약했던 유형 연습 한 줄, 놀이 전체 -->
 	<section class="nextplay">
 		<h2 class="np-h">다음 놀이</h2>
-		<Missions ondaily={() => scrollTo({ top: 0, behavior: 'smooth' })} />
+		<p class="np-try">이런 건 어때요?</p>
+		<a class="np-practice" href="/chosung" onclick={() => track('daily_try_other', { to: 'cho' })}><b>초성 퀴즈</b> — 초성만 보고 낱말 맞히기 <span aria-hidden="true">→</span></a>
+		<a class="np-practice" href="/kkeut" onclick={() => track('daily_try_other', { to: 'kkeut' })}><b>끝말잇기</b> — 컴퓨터와 대결 · 퍼즐 <span aria-hidden="true">→</span></a>
 		{#if weakest}
 			<a class="np-practice" href="/play?filter={FILTER_OF[weakest.label]}">
 				오늘 {weakest.label} <b>{weakest.ok}/{weakest.total}</b> — {weakest.label} 연습하러 가기 <span aria-hidden="true">→</span>
@@ -2698,6 +2698,12 @@
 		font-size: 17px;
 		font-weight: 900;
 		margin-bottom: 10px;
+	}
+	.np-try {
+		margin: 0;
+		font-size: 14px;
+		font-weight: 800;
+		color: var(--text);
 	}
 	.np-all {
 		display: block;

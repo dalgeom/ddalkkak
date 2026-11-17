@@ -236,6 +236,7 @@ CTA = [
     ("cta_other_click", "다른 놀이 → 오늘의 10문제 누름"),
     ("cta_next_seen", "성냥·초성 다 푼 뒤 → 오늘의 10문제 카드 봄(10/15~)"),
     ("cta_next_click", "그 카드 누름"),
+    ("daily_try_other", "★ 10문제 결과 「이런 건 어때요?」 → 초성·끝말잇기 누름(11/17~)"),
     # 10/13~ 읽을거리 글의 분야 버튼 — 도입부 뒤(top)와 글 끝(end)
     ("cta_read_top_seen", "읽을거리 위 분야 버튼이 눈에 들어옴"),
     ("cta_read_top_click", "읽을거리 위 분야 버튼 누름"),
@@ -256,10 +257,10 @@ INAPP = [
 #   push_*_match / push_*_chosung은 PushPrompt의 slot을 붙여 만든 이름이다 — 코드를
 #   grep해도 통째로는 안 나온다(`${name}_${slot}`).
 NEW = [
-    ("match_daily_seen", "성냥개비 페이지 열람(오늘의 문제 카드)"),
-    ("match_daily_start", "오늘의 성냥개비 풀기 시작"),
-    ("match_daily_solve", "오늘의 성냥개비 맞힘"),
-    ("match_daily_reveal", "오늘의 성냥개비 정답 봄"),
+    ("match_daily_seen", "성냥개비 페이지 열람(오늘의 문제 카드, ~11/16)"),
+    ("match_daily_start", "오늘의 성냥개비 풀기 시작(~11/16)"),
+    ("match_daily_solve", "오늘의 성냥개비 맞힘(~11/16)"),
+    ("match_daily_reveal", "오늘의 성냥개비 정답 봄(~11/16)"),
     ("match_hint", "성냥개비 힌트 열어봄(오늘·무한·개수)"),
     ("match_stage_start", "성냥 단계 도전 시작(10/14~)"),
     ("match_stage_clear", "성냥 단계 통과"),
@@ -306,7 +307,7 @@ NEW = [
     ("msolve_play", "★ 정답 찾기 → 성냥 직접 풀러 감"),
     ("chosung_land_top", "초성 분야 쪽 → 위 「풀기」 버튼 누름(10/26~)"),
     ("chosung_land_end", "  └ 대표 문제 아래 「나머지 N문제 풀기」 누름"),
-    ("chosung_free_today", "★ 초성 분야 풀이 결과 → 오늘의 초성 카드 누름(10/27~)"),
+    ("chosung_free_today", "초성 분야 풀이 결과 → 오늘의 초성 카드 누름(10/27~11/16)"),
     ("chosung_show_in_hub", "초성 화면 → 화면에 띄우기 입구 누름(10/26~)"),
     ("chosung_show_in_cat", "  └ 분야 쪽에서"),
     ("chosung_show_start", "★ 초성 퀴즈 띄우기 진행 시작"),
@@ -358,10 +359,10 @@ NEW = [
     ("push_seen_match_free", "성냥 무한 연습 알림 제안이 눈에 들어옴"),
     ("push_click_match_free", "성냥 무한 연습 알림 켜기 누름"),
     ("push_result_match_free", "성냥 무한 연습 알림 설정 결과"),
-    ("chosung_daily_seen", "초성 퀴즈 페이지 열람"),
-    ("chosung_daily_start", "오늘의 초성 풀기 시작"),
-    ("chosung_daily_solve", "오늘의 초성 맞힘"),
-    ("chosung_daily_reveal", "오늘의 초성 정답 봄"),
+    ("chosung_daily_seen", "초성 퀴즈 페이지 열람(~11/16)"),
+    ("chosung_daily_start", "오늘의 초성 풀기 시작(~11/16)"),
+    ("chosung_daily_solve", "오늘의 초성 맞힘(~11/16)"),
+    ("chosung_daily_reveal", "오늘의 초성 정답 봄(~11/16)"),
     ("chosung_start", "초성 분야 골라 풀기 시작"),
     ("chosung_solve", "초성 낱말 맞힘"),
     ("chosung_hint", "초성 힌트 열어봄"),
@@ -417,7 +418,7 @@ def block(title, items):
 
 block("무엇을 했나", LABEL)
 block("맛보기(첫 화면)", SAMPLE)
-block("새 입구 — 오늘의 성냥개비·초성 퀴즈(9/29~)", NEW)
+block("새 입구 — 성냥개비·초성 퀴즈(9/29~, 오늘의 성냥·초성은 11/16까지)", NEW)
 block("문제 보내기 — 보낸 쪽·받은 쪽(10/1~)", SEND)
 block("알림·설치", ALERT)
 block("목록형 페이지 → 데일리", CTA)

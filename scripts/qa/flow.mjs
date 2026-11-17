@@ -30,23 +30,6 @@ ok('하단 탭 오늘·놀이·기록', m.tabs.length >= 3, m.tabs.join(' '));
 ok('메인 카드 속 카드 없음', m.dbl === 0, 'dbl=' + m.dbl);
 await b.shot(OUT + 'f-home.jpg');
 
-// 1b. 오늘의 성냥개비를 끝낸 순간 → 오늘의 10문제로 잇는 카드(10/15 성장 작업 · DailyNext)
-await b.go('/matchstick', 2500);
-m = await b.ev(`
-	for (let i = 0; i < 40 && !document.querySelector('.today .big'); i++) await new Promise(r=>setTimeout(r,200)); document.querySelector('.today .big').click(); await new Promise(r=>setTimeout(r,800));
-	[...document.querySelectorAll('button')].find(x=>x.textContent.trim()==='정답 보기').click(); await new Promise(r=>setTimeout(r,1500));
-	const card = document.querySelector('.dnext');
-	const free = [...document.querySelectorAll('button')].find(x=>/무한 연습 이어서/.test(x.textContent));
-	return { card: card?.innerText.replace(/\\s+/g,' ').slice(0,60) ?? null, freeGhost: !!free && free.classList.contains('ghost') };`);
-ok('오늘의 성냥 끝낸 뒤 「오늘의 10문제」 카드', !!m.card, m.card ?? '');
-ok('카드가 보이면 무한 연습 버튼은 테두리(초록 큰 버튼 하나)', m.freeGhost);
-await b.shot(OUT + 'f-match-next.jpg');
-await b.ev(`document.querySelector('.dnext').click(); return 1;`);
-await sleep(3500);
-m = await b.ev(`return { path: location.pathname, playing: !!document.querySelector('.exit') };`);
-ok('카드를 누르면 메인에서 오늘의 10문제가 바로 시작', m.path === '/' && m.playing, JSON.stringify(m));
-await b.go('/', 3500);
-
 // 2. 데일리 10문제 — 전부 「모르겠어요」로 넘겨 결과까지
 await b.ev(`document.querySelector('.cta').click(); return 1;`);
 await sleep(1500);
@@ -103,6 +86,16 @@ ok('전부 넘겨도 「완주」라 안 함', !m.wanju && m.took);
 ok('결과 화면 알림 권유 하나', m.notify.length <= 1, m.notify.join(' / '));
 ok('결과 화면 초록 큰 버튼 하나 이하', m.green.length <= 1, m.green.join(' / '));
 ok('결과 화면 「다음 놀이」로 이어짐', m.other);
+// 11/17 「이런 건 어때요?」 — 10문제에 없는 놀이(초성 · 끝말잇기)를 소개한다. 390 · 320 폭에서 넘치지 않는지
+for (const w of [390, 320]) {
+	await b.viewport(w);
+	await sleep(500);
+	m = await b.ev(`const t=document.querySelector('.np-try'); const as=t?[...t.parentElement.querySelectorAll('a')].filter(a=>['/chosung','/kkeut'].includes(a.getAttribute('href'))):[];
+		return { has: !!t, hrefs: as.map(a=>a.getAttribute('href')), inside: as.every(a=>{const r=a.getBoundingClientRect(); return r.left>=0 && r.right<=innerWidth;}), over: document.documentElement.scrollWidth-innerWidth };`);
+	ok(`${w} 결과 「이런 건 어때요?」 → 초성 · 끝말잇기 · 폭 안`, m.has && m.hrefs.join() === '/chosung,/kkeut' && m.inside && m.over <= 0, JSON.stringify(m));
+}
+await b.viewport(390);
+await sleep(300);
 // 11/5 결과 화면 움직임 — 점수 올라감 · 줄마다 차례로 · 8개 미만이면 종이 조각 없음 · 모션 줄이기면 멈춤
 m = await b.ev(`
 	const num = document.querySelector('.score .num');
@@ -274,22 +267,6 @@ if (m) {
 	const tap = await b.ev(`const s = document.querySelector('.mboard [data-lit="1"]'); s.dispatchEvent(new MouseEvent('click', { bubbles: true })); await new Promise(r=>setTimeout(r,200)); return document.querySelectorAll('.mboard .stick.picked').length;`);
 	ok('끌기 뒤에도 누르기로 집기가 그대로 됨', tap === 1, 'picked=' + tap);
 } else ok('끌기 시험 판을 못 찾음', false, 'null');
-// 같은 판을 쓰는 오늘의 성냥개비에서도 — 판이 움직이는 화면이 또 있는지
-await b.go('/matchstick', 3500);
-m = await b.ev(`for (let i = 0; i < 40 && !document.querySelector('.today .big'); i++) await new Promise(r=>setTimeout(r,200)); document.querySelector('.today .big')?.click(); await new Promise(r=>setTimeout(r,900));
-	const c = (el) => { const r = el.getBoundingClientRect(); return { x: r.x + r.width / 2, y: r.y + r.height / 2, loc: el.getAttribute('data-loc') }; };
-	// 오늘 문제는 날마다 바뀐다 — 셋째 숫자가 8이면 빈자리가 없다(10/21). 첫 숫자의 성냥 → 첫 숫자 밖의 아무 빈자리
-	const from = document.querySelector('.mboard [data-lit="1"][data-loc^="g0"]'); const to = [...document.querySelectorAll('.mboard [data-lit="0"]')].find((e) => !e.getAttribute('data-loc').startsWith('g0'));
-	return from && to ? { from: c(from), to: c(to) } : { board: !!document.querySelector('.mboard'), lit: document.querySelectorAll('.mboard [data-lit="1"]').length, ghost: document.querySelectorAll('.mboard [data-lit="0"]').length };`);
-if (m.from) {
-	const mouse = (type, p, buttons = 1) => b.send('Input.dispatchMouseEvent', { type, x: p.x, y: p.y, button: 'left', buttons, clickCount: 1 });
-	await mouse('mousePressed', m.from);
-	for (let i = 1; i <= 6; i++) await mouse('mouseMoved', { x: m.from.x + ((m.to.x - m.from.x) * i) / 6, y: m.from.y + ((m.to.y - m.from.y) * i) / 6 });
-	await mouse('mouseReleased', m.to, 0);
-	await sleep(80);
-	const after = await b.ev(`return { from: document.querySelector('.mboard [data-loc="${m.from.loc}"]').getAttribute('data-lit'), to: document.querySelector('.mboard [data-loc="${m.to.loc}"]').getAttribute('data-lit') };`);
-	ok('오늘의 성냥개비도 마우스로 끌어 옮기기', after.from === '0' && after.to === '1', JSON.stringify({ ...m, after }));
-} else ok('오늘의 성냥개비 판을 못 찾음', false, JSON.stringify(m));
 
 // 5g. 상식 단계 도전(10/20, 「딸깍 5단계」) — 지도 · 잠금 · 한 판 풀고 결과 · 진행 저장
 await b.go('/trivia/stages', 2500);
@@ -439,12 +416,19 @@ ok('타임어택 누르면 3·5·10분 펼침', m.opts === 3);
 ok('단계판 펼치기(10/21부터 100단계)', m.cells >= 100, 'cells=' + m.cells);
 ok('무한 연습 시작 → 판·힌트', m.board && m.hint);
 
-// 8b. 성냥 정답 찾기(10/21) — 성냥 화면 입구(오늘의 성냥보다 위) → 자판으로 식 넣기 → 답 · 다른 규칙 · 많이 찾는 식 · 주소로 열기
+// 8b. 성냥 정답 찾기(10/21) — 성냥 화면 입구 → 자판으로 식 넣기 → 답 · 다른 규칙 · 많이 찾는 식 · 주소로 열기
 await b.go('/matchstick', 2500);
 m = await b.ev(`
-	const e=document.querySelector('.solve-entry'), t=document.querySelector('.today');
-	return { has: !!e, above: !!e && (!t || e.getBoundingClientRect().top < t.getBoundingClientRect().top), href: e?.getAttribute('href') };`);
-ok('성냥 화면에 정답 찾기 입구 · 오늘의 성냥보다 위', m.has && m.above && m.href === '/matchstick/solve', JSON.stringify(m));
+	const e=document.querySelector('.solve-entry');
+	return { has: !!e, href: e?.getAttribute('href') };`);
+ok('성냥 화면에 정답 찾기 입구', m.has && m.href === '/matchstick/solve', JSON.stringify(m));
+// 11/17 하루 1문제짜리 「오늘의 성냥개비」 · 「오늘의 초성」을 없앴다 — 첫 화면에 다시 생기지 않는지
+for (const [path, word] of [['/matchstick', '오늘의 성냥개비'], ['/chosung', '오늘의 초성']]) {
+	await b.go(path, 2500);
+	const t = await b.ev(`return document.body.innerText;`);
+	ok(`${path} 첫 화면에 「${word}」 없음(11/17 없앰)`, !t.includes(word), t.includes(word) ? '있음' : '');
+}
+await b.go('/matchstick', 2500);
 await b.ev(`document.querySelector('.solve-entry').click(); return 1;`);
 await sleep(2500);
 const typeEq = (eq) => `
@@ -509,13 +493,13 @@ m = await b.ev(`
 `);
 ok('그림 퍼즐: 평소 빈 자리 숨김, 집으면 보임, 놓으면 옮긴 수 1', m.idle === 0 && m.held > 0 && m.moved === '1', JSON.stringify(m));
 
-// 10. 초성 — 오늘의 초성 · 분야 풀기
+// 10. 초성 — 분야 풀기(11/17 오늘의 초성 없앰 → 전체 분야로 시작)
 await b.go('/chosung', 2000);
 m = await b.ev(`
-	const btn=[...document.querySelectorAll('button, a')].find(b=>/풀어 보기/.test(b.textContent)); btn?.click(); await new Promise(r=>setTimeout(r,800));
+	document.querySelector('.cats .cat.all')?.click(); await new Promise(r=>setTimeout(r,800));
 	const input=document.querySelector('input'); return { started: !!input, tiles: document.querySelectorAll('.tile, [class*=cho]').length };
 `);
-ok('오늘의 초성 풀어 보기 → 입력칸', m.started);
+ok('초성 전체 분야 풀기 → 입력칸', m.started);
 await b.shot(OUT + 'f-cho.jpg');
 
 // 12. 탭 막대 이동

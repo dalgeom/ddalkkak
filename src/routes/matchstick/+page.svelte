@@ -21,7 +21,6 @@
 	import { MATCH_KINDS } from '$lib/matchstickKinds';
 	import { MATCH_LEVELS, levelOf, type MatchLevel } from '$lib/matchstickLevels';
 	import { kstDayNumber } from '$lib/game';
-	import { matchOfDay, nextStreak, shownStreak, type MatchStreak } from '$lib/matchDaily';
 	import PushPrompt from '$lib/components/PushPrompt.svelte';
 	import { shareResult as shareCardResult, outcomeMessage } from '$lib/shareCard';
 	import MatchstickBoard, { type PickLoc } from '$lib/components/MatchstickBoard.svelte';
@@ -35,7 +34,6 @@
 		| { type: 'free' }
 		| { type: 'time'; seconds: number }
 		| { type: 'count'; total: number }
-		| { type: 'today' }
 		| { type: 'stage'; no: number };
 
 	let screen = $state<'menu' | 'play' | 'result'>('menu');
@@ -48,21 +46,9 @@
 	let level = $state<MatchLevel | null>(null);
 	const inLevel = (i: number) => !level || levelOf(problems[i].displayed, problems[i].solution) === level;
 
-	// 오늘의 성냥개비(matchDaily.ts). 날짜는 onMount에서 잡는다 — 서버 렌더 시각과 어긋나지 않게.
+
+	/** 오늘 날짜 — 알림 카드(PushPrompt)에 쓴다. 서버 렌더 시각과 어긋나지 않게 onMount에서 잡는다 */
 	let day = $state(0);
-	let daily = $state<MatchStreak | null>(null);
-	let todayIdx = $derived(day ? matchOfDay(day) : -1);
-	let todayDone = $derived(!!day && daily?.day === day);
-	/** 「오늘의 10문제로 이어 가기」 카드가 보이는지 — 보이면 무한 연습 버튼을 테두리로 낮춘다(DailyNext) */
-	let nextShown = $state(false);
-	let todayWon = $derived(todayDone && (daily?.streak ?? 0) > 0);
-	let dailyStreak = $derived(day ? shownStreak(daily, day) : 0);
-	let todayLabel = $derived.by(() => {
-		if (!day) return '';
-		const d = new Date(day * 86400000);
-		return `${d.getUTCMonth() + 1}월 ${d.getUTCDate()}일`;
-	});
-	let tomorrowPeek = $derived(day ? { chip: '성냥개비', line: problems[matchOfDay(day + 1)].displayed } : null);
 
 	let pIdx = $state(-1);
 	/** 지금 판의 문제. 은행 문제는 move1, 단계 문제(matchStages.ts)는 자기 규칙을 갖는다 */
@@ -107,13 +93,11 @@
 	function modeKey(m: Mode): string {
 		if (m.type === 'time') return `time-${m.seconds}`;
 		if (m.type === 'count') return `count-${m.total}`;
-		if (m.type === 'today') return 'today';
 		return 'free';
 	}
 	function modeLabel(m: Mode): string {
 		if (m.type === 'time') return `타임어택 ${m.seconds / 60}분`;
 		if (m.type === 'count') return `${m.total}문제 도전`;
-		if (m.type === 'today') return '오늘의 성냥개비';
 		return '무한 연습';
 	}
 	function load() {
@@ -123,7 +107,6 @@
 				localStorage.getItem('ddal.match.stats') || '{"solved":0,"streak":0,"best":0}'
 			);
 			bests = JSON.parse(localStorage.getItem('ddal.match.bests') || '{}');
-			daily = JSON.parse(localStorage.getItem('ddal.match.daily') || 'null');
 		} catch {
 			/* 무시 */
 		}
@@ -134,7 +117,6 @@
 			localStorage.setItem('ddal.match.done', JSON.stringify(done));
 			localStorage.setItem('ddal.match.stats', JSON.stringify(stats));
 			localStorage.setItem('ddal.match.bests', JSON.stringify(bests));
-			if (daily) localStorage.setItem('ddal.match.daily', JSON.stringify(daily));
 		} catch {
 			/* 무시 */
 		}
@@ -199,9 +181,7 @@
 		}
 		const forced = Number(page.url.searchParams.get('p'));
 		let idx: number;
-		if (mode.type === 'today') {
-			idx = todayIdx;
-		} else if (first && mode.type === 'free' && page.url.searchParams.has('p') && !Number.isNaN(forced)) {
+		if (first && mode.type === 'free' && page.url.searchParams.has('p') && !Number.isNaN(forced)) {
 			idx = Math.max(0, Math.min(problems.length - 1, forced));
 		} else {
 			let pool = problems.map((_, i) => i).filter((i) => inLevel(i) && !done.includes(i));
@@ -286,9 +266,8 @@
 			return;
 		}
 
-		if (mode.type === 'today') finishToday('won');
 		if (mode.type === 'free') freeWins++;
-		if (mode.type === 'free' || mode.type === 'today') {
+		if (mode.type === 'free') {
 			// 점수 시스템은 없다 — 있지도 않은 점수를 암시하지 말고 시도 횟수만 알려준다
 			feedback = attempts === 0 ? '딸깍! 한 번에 맞혔어요' : `딸깍! ${attempts + 1}번 만에 맞혔어요`;
 			// 다른 길로 맞혔으면 준비한 답도 보여 준다 — 맞히고도 해설이 없었다(11/12 점검, 초성과 같은 꼴)
@@ -339,7 +318,6 @@
 		stats.streak = 0;
 		if (mode.type === 'stage') stageResults = [...stageResults, 'revealed'];
 		else markDone();
-		if (mode.type === 'today') finishToday('revealed');
 		persist();
 		// 1개 옮기기는 어느 성냥을 어디로 옮겼는지 한 문장 더(10/22 matchstick.ts moveSentence)
 		feedback = `정답: ${prob.solution.replace('-', '−')}${prob.rule === 'move1' ? '. ' + moveSentence(prob) : ''}`;
@@ -357,13 +335,6 @@
 		if (solvedThis !== 'no' || hintStep >= hintMax) return;
 		hintStep++;
 		track('match_hint', { step: hintStep, mode: mode.type });
-	}
-
-	function finishToday(result: 'won' | 'revealed') {
-		if (todayDone) return;
-		daily = nextStreak(daily, day, result);
-		persist();
-		track(result === 'won' ? 'match_daily_solve' : 'match_daily_reveal', { streak: daily.streak });
 	}
 
 	function startStage(no: number) {
@@ -390,11 +361,6 @@
 		screen = 'result';
 	}
 
-	function startToday() {
-		track('match_daily_start', { streak: dailyStreak });
-		startMode({ type: 'today' });
-	}
-
 	let toastTimer: ReturnType<typeof setTimeout>;
 	function toast(msg: string) {
 		toastMsg = msg;
@@ -409,15 +375,7 @@
 		let emojiRow: string;
 		let subLine: string;
 		let text: string;
-		if (mode.type === 'today') {
-			// 오늘의 성냥을 끝낸 화면에 공유가 없었다(11/12 점검) — 정답은 적지 않는다
-			const n = daily?.streak ?? 1;
-			title = '오늘의 성냥개비';
-			scoreLabel = `${n}일 연속`;
-			emojiRow = '🔥'.repeat(Math.min(n, 10));
-			subLine = attempts === 0 ? '한 번에 맞혔어요' : `${attempts + 1}번 만에 맞혔어요`;
-			text = `딸깍! 오늘의 성냥개비 · ${subLine} · 🔥 ${n}일 연속`;
-		} else if (mode.type === 'time') {
+		if (mode.type === 'time') {
 			title = `성냥개비 타임어택 ${mode.seconds / 60}분`;
 			scoreLabel = `${runSolved}문제`;
 			emojiRow = '🔥'.repeat(Math.min(Math.max(runSolved, 1), 10));
@@ -471,14 +429,11 @@ ${location.origin}/matchstick?p=${pIdx}&ref=match_send
 			picSolved = 0;
 		}
 		day = kstDayNumber(Date.now());
-		track('match_daily_seen', { done: todayDone, streak: dailyStreak });
 		const lv = page.url.searchParams.get('level');
 		if (lv === 'easy' || lv === 'hard') {
 			level = lv;
 			startMode({ type: 'free' });
 		} else if (page.url.searchParams.has('p')) startMode({ type: 'free' });
-		// 오늘의 미션에서 왔으면 허브에서 「풀어 보기」를 한 번 더 누르지 않게 곧장 연다(11/12 점검)
-		else if (page.url.searchParams.get('today') === '1' && todayIdx >= 0 && !todayDone) startToday();
 	});
 	onDestroy(() => clearInterval(timerId));
 </script>
@@ -516,40 +471,10 @@ ${location.origin}/matchstick?p=${pIdx}&ref=match_send
 			</div>
 		</header>
 
-		<!-- 「12-7=6 성냥」처럼 식을 검색해 들어온 사람은 그 식의 답을 찾고 있다(10/21) — 오늘의 성냥보다 먼저 보이게 -->
+		<!-- 「12-7=6 성냥」처럼 식을 검색해 들어온 사람은 그 식의 답을 찾고 있다(10/21) — 고르는 타일보다 먼저 보이게 -->
 		<SolveEntry from="match" />
 
-		<!-- 오늘의 성냥개비 — 검색으로 온 사람에게 매일 올 이유를 준다(matchDaily.ts) -->
-		{#if day && todayIdx >= 0}
-			<section class="today" class:done={todayDone}>
-				<div class="t-top">
-					<span class="kicker">오늘의 성냥개비 · {todayLabel}</span>
-					{#if dailyStreak > 0}<span class="t-streak">🔥 {dailyStreak}일 연속</span>{/if}
-				</div>
-				{#if todayDone}
-					<p class="t-done">
-						{todayWon ? '오늘 문제를 풀었어요.' : '오늘 문제는 정답을 봤어요.'} 내일 자정에 새 문제가 열려요.
-					</p>
-					<DailyNext skip="match" pitch="오늘의 10문제에 성냥개비 2문제가 더 있어요" />
-				{:else}
-					<div class="t-board">
-						<MatchstickBoard
-							board={parseEq(problems[todayIdx].displayed)}
-							picked={null}
-							onstick={() => {}}
-							interactive={false}
-							label={problems[todayIdx].displayed}
-						/>
-					</div>
-					<button class="big" onclick={startToday}>
-						풀어 보기 <span class="arr" aria-hidden="true">→</span>
-					</button>
-					<p class="t-note">하루 한 문제, 모두 같은 문제예요. 매일 풀면 연속 기록이 쌓입니다.</p>
-				{/if}
-			</section>
-		{/if}
-
-		<!-- v2(10/14): 오늘의 성냥 · 단계 · 그림 · 처음이라면 · 띠 · 무한 · 타임어택 · 개수 · 설명이 세로로 쌓여
+		<!-- v2(10/14): 오늘의 성냥(11/17 없앰) · 단계 · 그림 · 처음이라면 · 띠 · 무한 · 타임어택 · 개수 · 설명이 세로로 쌓여
 		     3,200px였다. 고르는 것은 타일 6칸 하나로 모으고, 시간·개수 선택지는 누른 타일 아래에만 펼친다. -->
 		<section class="sec">
 			<h2 class="mh">어떻게 풀까요?</h2>
@@ -677,8 +602,6 @@ ${location.origin}/matchstick?p=${pIdx}&ref=match_send
 		{#if mode.type === 'time'}
 			<div class="timer" class:danger={timeLeft <= 10}><Icon name="timer" size={15} />{timeStr}</div>
 			<div class="run-score"><Icon name="correct" size={15} />{runSolved}</div>
-		{:else if mode.type === 'today'}
-			<div class="run-score">오늘의 성냥개비 · {todayLabel}</div>
 		{:else if mode.type === 'count'}
 			<div class="run-score">문제 {runResults.length + 1} / {mode.total}</div>
 			<div class="emoji-mini">{runResults.map((r) => (r === 'win' ? '✅' : '🔓')).join('')}</div>
@@ -744,23 +667,13 @@ ${location.origin}/matchstick?p=${pIdx}&ref=match_send
 					<button class="btn ghost" onclick={toMenu}>나가기</button>
 				{/if}
 			</div>
-		{:else if mode.type === 'today'}
-			<p class="t-after">
-				{#if todayWon}🔥 <b>{daily?.streak}일 연속</b> · 내일 자정에 새 문제{:else}내일 문제를 맞히면 연속 기록이 시작돼요{/if}
-			</p>
-			<!-- 10/15: 오늘의 성냥을 끝낸 순간이 오늘의 10문제로 잇기 가장 좋은 때다(DailyNext 주석의 숫자) -->
-			<DailyNext skip="match" pitch="오늘의 10문제에 성냥개비 2문제가 더 있어요" bind:shown={nextShown} />
-			<PushPrompt dayNum={day} streak={daily?.streak ?? 0} tomorrow={tomorrowPeek} slot="match" />
-			{#if todayWon}<button class="btn ghost wide" onclick={share}>기록 공유하기</button>{/if}
-			<button class="btn wide" class:ghost={nextShown} onclick={() => startMode({ type: 'free' })}>무한 연습 이어서 →</button>
-			<button class="btn ghost wide" onclick={toMenu}>모드 선택으로</button>
 		{:else if mode.type === 'free'}
 			{#if freeWins === 3 && solvedThis === 'won'}
-				<PushPrompt dayNum={day} tomorrow={tomorrowPeek} slot="match_free" />
+				<PushPrompt dayNum={day} slot="match_free" />
 			{/if}
 			<!-- 검색으로 와서 무한 연습만 하는 사람(10/1~10/13 /matchstick 랜딩의 92%)에게 다섯 문제째에 한 번 -->
 			{#if freeWins === 5 && solvedThis === 'won'}
-				<DailyNext skip="match" pitch="오늘의 10문제에 성냥개비 2문제가 더 있어요" />
+				<DailyNext pitch="오늘의 10문제에 성냥개비 2문제가 더 있어요" />
 			{/if}
 			<button class="btn wide" onclick={() => nextProblem()}>다음 문제 →</button>
 			{#if pIdx >= 0}<button class="btn ghost wide" onclick={sendThis}>🤔 친구는 풀까요? 이 문제 보내기</button>{/if}
@@ -833,50 +746,6 @@ ${location.origin}/matchstick?p=${pIdx}&ref=match_send
 		display: flex;
 		flex-direction: column;
 		gap: 14px;
-	}
-	/* 오늘의 성냥개비 — 모드 카드보다 앞에 서는 자리라 강조선으로 구분한다 */
-	.today {
-		background: var(--panel);
-		border: 2px solid var(--accent);
-		border-radius: 18px;
-		padding: 16px;
-	}
-	.today.done {
-		border-color: var(--border-strong);
-	}
-	.t-top {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		flex-wrap: wrap;
-		gap: 6px 10px;
-	}
-	.t-streak {
-		font-size: 13.5px;
-		font-weight: 800;
-		color: var(--accent-text);
-	}
-	.t-board {
-		margin: 12px 0 14px;
-	}
-	.t-done,
-	.t-note {
-		margin-top: 10px;
-		font-size: 13.5px;
-		line-height: 1.7;
-		color: var(--muted);
-		word-break: keep-all;
-	}
-	.t-done {
-		color: var(--text);
-		font-weight: 700;
-	}
-	.t-after {
-		margin: 4px 0 0;
-		text-align: center;
-		font-size: 14.5px;
-		line-height: 1.7;
-		word-break: keep-all;
 	}
 
 

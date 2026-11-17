@@ -1,7 +1,6 @@
 <script lang="ts">
 	import GameCards from '$lib/components/GameCards.svelte';
 	import NewsBar from '$lib/components/NewsBar.svelte';
-	import Missions from '$lib/components/Missions.svelte';
 
 	/**
 	 * 놀이(v2, 2026-10-14) — 딸깍의 모든 퍼즐을 한 화면에서 고른다.
@@ -26,15 +25,10 @@
 	<p class="lead">딸깍의 퍼즐을 골라 풀어요. 가입 없이 바로 시작해요.</p>
 </header>
 
-<div class="msp"><Missions /></div>
-
 <GameCards counts={data.counts} full />
 
 <style>
 	.cover {
-		margin-bottom: 14px;
-	}
-	.msp {
 		margin-bottom: 14px;
 	}
 </style>

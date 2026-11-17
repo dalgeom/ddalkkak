@@ -1,12 +1,11 @@
 /**
- * 초성 퀴즈 — 초성 뽑기·채점·오늘의 초성.
+ * 초성 퀴즈 — 초성 뽑기·채점.
  *
  * 2026-09-29 자동완성 실측으로 만들었다. 「초성 퀴즈 사이트」「초성 퀴즈 게임」이
  * 네이버·구글 양쪽에 뜨고(바로 풀 곳을 찾는 수요), 구글 트렌드 한국 12개월 평균이
  * 「상식 퀴즈」의 1.8배였다. 네이버 절대 검색량은 재지 못했다 — 효과는 노출로 판정한다.
  */
 import { CHOSUNG_CATEGORIES, type ChosungEntry } from './data/chosung';
-import { seededOrder, SITE_START_DAY } from './game';
 
 const CHO = 'ㄱㄲㄴㄷㄸㄹㅁㅂㅃㅅㅆㅇㅈㅉㅊㅋㅌㅍㅎ';
 
@@ -133,15 +132,4 @@ export function collisionsOf(slug: string): { cho: string; words: string[] }[] {
 		by.set(k, [...(by.get(k) ?? []), w.word]);
 	}
 	return [...by].filter(([, ws]) => ws.length > 1).map(([cho, words]) => ({ cho, words }));
-}
-
-/**
- * 오늘의 초성 — 그날까지 열린 낱말을 시드 순열로 하루 한 칸씩. 한 바퀴 돌기 전엔 겹치지 않는다.
- * 낱말 수는 그날의 묶음(CHOSUNG_BATCHES)을 따른다 — 낱말을 늘려도 지난 날짜의 답은 그대로다.
- */
-export function chosungOfDay(day: number): number {
-	const b = [...CHOSUNG_BATCHES].reverse().find((x) => x.fromDay <= day) ?? CHOSUNG_BATCHES[0];
-	const n = Object.values(b.counts).reduce((a, v) => a + v, 0);
-	const order = seededOrder(n, 20260404);
-	return order[(((day - SITE_START_DAY) % n) + n) % n];
 }

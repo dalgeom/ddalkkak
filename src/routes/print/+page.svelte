@@ -6,16 +6,15 @@
 	import OtherGames from '$lib/components/OtherGames.svelte';
 	import PrintSheet from '$lib/components/PrintSheet.svelte';
 	import { CHOSUNG_CATEGORIES } from '$lib/data/chosung';
-	import { CHOSUNG_WORDS, chosungOf, chosungOfDay, type ChosungWord } from '$lib/chosung';
+	import { CHOSUNG_WORDS, chosungOf, type ChosungWord } from '$lib/chosung';
 	import { CHOSUNG_TIERS } from '$lib/chosungTiers';
-	import { kstDayNumber } from '$lib/game';
 	import { MAKE_RULES, makeProblems, type Made, type MakeRule } from '$lib/matchMake';
 	import { RULE_LABEL, parseCells, pretty } from '$lib/matchSolve';
 
 	/*
 	 * 학습지 만들기(2026-11-04) — 초성 퀴즈 · 성냥개비 문제를 A4 한 장으로 뽑고, 둘째 장에 답을 싣는다.
 	 * 왜: 띄우기(/chosung/show · /trivia/show)는 화면이 있는 교실용이다. 화면이 없는 곳(돌봄 교실 · 복지관 · 숙제)에는
-	 * 종이가 필요하다. 초성은 오늘의 초성을 빼고 뽑고, 성냥은 맞는 식을 무작위로 만들어 답이 하나뿐인 문제만 고른다.
+	 * 종이가 필요하다. 초성은 분야와 난이도로 뽑고, 성냥은 맞는 식을 무작위로 만들어 답이 하나뿐인 문제만 고른다.
 	 * 계측: print_make(종류 · 설정) · print_go(인쇄 버튼)
 	 */
 
@@ -47,9 +46,7 @@
 	}
 
 	function makeCho(): ChosungWord[] {
-		// 오늘의 초성은 뺀다 — 학습지로 먼저 보면 그날 혼자 푸는 재미가 샌다
-		const today = CHOSUNG_WORDS[chosungOfDay(kstDayNumber(Date.now()))]?.word;
-		let pool = CHOSUNG_WORDS.filter((w) => (cat === 'all' || w.category === cat) && w.word !== today);
+		let pool = CHOSUNG_WORDS.filter((w) => cat === 'all' || w.category === cat);
 		if (easy) {
 			const e = pool.filter((w) => tierOf(w) <= 2);
 			if (e.length >= Math.min(choSize, 10)) pool = e;
@@ -258,7 +255,7 @@
 		<button class="cta" onclick={go} disabled={!n}>인쇄하기 · 답지 포함 {n}문제 <span aria-hidden="true">→</span></button>
 		<p class="sub">
 			인쇄 창에서 「PDF로 저장」을 고르면 파일로도 받을 수 있어요. {kind === 'cho'
-				? '오늘의 초성 낱말은 빼고 뽑아요.'
+				? '분야와 난이도를 골라 뽑아요.'
 				: '답이 하나뿐인 문제만 골라요.'}
 		</p>
 	</section>

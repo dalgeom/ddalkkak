@@ -8,7 +8,7 @@ export async function load({ fetch }) {
 	const r = await fetch('/kkeut/words.json');
 	if (!r.ok) throw new Error('words.json 없음');
 	const j: { words: string[]; easy: string[] } = await r.json();
-	// 초성 퀴즈 정답 낱말은 뺀다 — 도구가 오늘의 초성을 풀어 주면 퀴즈가 무너진다
+	// 초성 퀴즈 정답 낱말은 뺀다 — 도구가 정답을 풀어 주면 퀴즈가 무너진다
 	const hide = [...new Set(CHOSUNG_WORDS.map((w) => w.word))];
 	const hidden = new Set(hide);
 	const easy = new Set(j.easy);
