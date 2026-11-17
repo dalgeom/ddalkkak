@@ -6,12 +6,12 @@
  */
 export type CrosswordPuzzle = { date: string; rows: string[]; clues: Record<string, string>; note?: string };
 
-/** 2026-11-19 */
-export const CROSSWORD_FIRST_DAY = 20776;
+/** 2026-11-17 */
+export const CROSSWORD_FIRST_DAY = 20774;
 
 export const CROSSWORD_PUZZLES: CrosswordPuzzle[] = [
 	{
-		date: '2026-11-19',
+		date: '2026-11-17',
 		rows: ['빨래집게■', '강■■임무', '■이야기책', '발야구■임', '전기장판■'],
 		clues: {
 			빨래집게: '젖은 옷을 줄에 널 때 바람에 날리지 않게 꽉 물려 두는 것',
@@ -28,7 +28,7 @@ export const CROSSWORD_PUZZLES: CrosswordPuzzle[] = [
 		}
 	},
 	{
-		date: '2026-11-20',
+		date: '2026-11-18',
 		rows: ['전자계산기', '기■■행운', '면도날■■', '도둑고양이', '기■기념사'],
 		clues: {
 			전자계산기: '숫자 단추를 눌러 셈을 해 주는 작은 기계',
@@ -46,7 +46,7 @@ export const CROSSWORD_PUZZLES: CrosswordPuzzle[] = [
 		}
 	},
 	{
-		date: '2026-11-21',
+		date: '2026-11-19',
 		rows: ['■대학교수', '열중■복도', '쇠가죽■꼭', '고요■단지', '리■남풍■'],
 		clues: {
 			대학교수: '대학에서 학생을 가르치고 학문을 연구하는 사람',
@@ -64,7 +64,7 @@ export const CROSSWORD_PUZZLES: CrosswordPuzzle[] = [
 		}
 	},
 	{
-		date: '2026-11-22',
+		date: '2026-11-20',
 		rows: ['감감무소식', '■상대방■', '기자■대사', '자■위원회', '재시험■자'],
 		clues: {
 			감감무소식: '연락이 뚝 끊겨 소식을 전혀 모르는 상태',
@@ -82,7 +82,7 @@ export const CROSSWORD_PUZZLES: CrosswordPuzzle[] = [
 		}
 	},
 	{
-		date: '2026-11-23',
+		date: '2026-11-21',
 		rows: ['아이라이너', '우비■해■', '■인간관계', '전후■계속', '제과점■적'],
 		clues: {
 			아이라이너: '눈매를 또렷하게 그리는 화장품',
@@ -99,7 +99,7 @@ export const CROSSWORD_PUZZLES: CrosswordPuzzle[] = [
 		}
 	},
 	{
-		date: '2026-11-24',
+		date: '2026-11-22',
 		rows: ['금연석■■', '연필■경영', '■꽂■비■', '종이비행기', '합■단기간'],
 		clues: {
 			금연석: '담배를 피울 수 없는 자리',
@@ -116,7 +116,7 @@ export const CROSSWORD_PUZZLES: CrosswordPuzzle[] = [
 		}
 	},
 	{
-		date: '2026-11-25',
+		date: '2026-11-23',
 		rows: ['개교식■고', '■통장■등', '식사■과학', '중고등학교', '독■산책■'],
 		clues: {
 			개교식: '학교를 처음 열 때 하는 기념 행사',
@@ -134,7 +134,7 @@ export const CROSSWORD_PUZZLES: CrosswordPuzzle[] = [
 		}
 	},
 	{
-		date: '2026-11-26',
+		date: '2026-11-24',
 		rows: ['액■전■링', '세발자전거', '서명■자■', '리■여사장', '■공중전화'],
 		clues: {
 			액세서리: '반지 · 목걸이처럼 멋을 내려고 다는 장식품',
@@ -151,7 +151,7 @@ export const CROSSWORD_PUZZLES: CrosswordPuzzle[] = [
 		}
 	},
 	{
-		date: '2026-11-27',
+		date: '2026-11-25',
 		rows: ['나무토막■', '비명■대학', '넥■동기생', '타이■■회', '이동도서관'],
 		clues: {
 			나무토막: '나무를 짤막하게 자른 조각',
@@ -168,7 +168,7 @@ export const CROSSWORD_PUZZLES: CrosswordPuzzle[] = [
 		}
 	},
 	{
-		date: '2026-11-28',
+		date: '2026-11-26',
 		rows: ['경■의도■', '고무지우개', '■능■미인', '청력■■택', '혼자■응시'],
 		clues: {
 			경고: '조심하라고 미리 알림',
@@ -186,7 +186,7 @@ export const CROSSWORD_PUZZLES: CrosswordPuzzle[] = [
 		}
 	},
 	{
-		date: '2026-11-29',
+		date: '2026-11-27',
 		rows: ['증가■■피', '명■여비서', '사■건전지', '진찰■문■', '■밥숟가락'],
 		clues: {
 			증가: '수나 양이 늘어남',
@@ -202,7 +202,7 @@ export const CROSSWORD_PUZZLES: CrosswordPuzzle[] = [
 		}
 	},
 	{
-		date: '2026-11-30',
+		date: '2026-11-28',
 		rows: ['결혼식장■', '■■물수건', '여사원■강', '선생■소식', '생활필수품'],
 		clues: {
 			결혼식장: '신랑 신부가 하객 앞에서 혼례를 올리는 곳',
@@ -220,7 +220,7 @@ export const CROSSWORD_PUZZLES: CrosswordPuzzle[] = [
 		}
 	},
 	{
-		date: '2026-12-01',
+		date: '2026-11-29',
 		rows: ['■사진작가', '사무실■스', '무직■모레', '기■동양인', '기사화■지'],
 		clues: {
 			사진작가: '카메라로 작품을 찍는 예술가',
@@ -238,7 +238,7 @@ export const CROSSWORD_PUZZLES: CrosswordPuzzle[] = [
 		}
 	},
 	{
-		date: '2026-12-02',
+		date: '2026-11-30',
 		rows: ['대중목욕탕', '중심적■■', '문■■이유', '화학조미료', '■■금지■'],
 		clues: {
 			대중목욕탕: '돈을 내고 여러 사람이 함께 씻는 곳. 동네 목욕탕',

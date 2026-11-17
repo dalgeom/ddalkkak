@@ -214,7 +214,7 @@
 
 	{#if day && !puzzle}
 		<section class="card">
-			<h2>{day < CROSSWORD_FIRST_DAY ? '첫 퍼즐은 11월 19일에 열려요' : '오늘 퍼즐을 준비하고 있어요'}</h2>
+			<h2>{day < CROSSWORD_FIRST_DAY ? '첫 퍼즐은 11월 17일에 열려요' : '오늘 퍼즐을 준비하고 있어요'}</h2>
 			<p class="note">그동안 오늘의 10문제나 끝말잇기를 풀어 보세요.</p>
 			<a class="big link" href="/kkeut">끝말잇기 하러 가기</a>
 		</section>
