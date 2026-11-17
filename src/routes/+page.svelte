@@ -1589,6 +1589,7 @@
 		<p class="np-try">이런 건 어때요?</p>
 		<a class="np-practice" href="/chosung" onclick={() => track('daily_try_other', { to: 'cho' })}><b>초성 퀴즈</b> — 초성만 보고 낱말 맞히기 <span aria-hidden="true">→</span></a>
 		<a class="np-practice" href="/kkeut" onclick={() => track('daily_try_other', { to: 'kkeut' })}><b>끝말잇기</b> — 컴퓨터와 대결 · 퍼즐 <span aria-hidden="true">→</span></a>
+		<a class="np-practice" href="/crossword" onclick={() => track('daily_try_other', { to: 'crossword' })}><b>낱말퍼즐</b> — 가로세로 열쇠로 낱말 채우기 <span aria-hidden="true">→</span></a>
 		{#if weakest}
 			<a class="np-practice" href="/play?filter={FILTER_OF[weakest.label]}">
 				오늘 {weakest.label} <b>{weakest.ok}/{weakest.total}</b> — {weakest.label} 연습하러 가기 <span aria-hidden="true">→</span>

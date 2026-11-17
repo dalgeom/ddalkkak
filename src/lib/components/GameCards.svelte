@@ -62,6 +62,17 @@
 			],
 			fresh: true
 		},
+		// 오늘의 낱말퍼즐(11/17) — 퍼즐 파일을 여기서 부르면 앞날 정답이 메인 번들에 실리므로 판 수 대신 칸 수를 적는다
+		{
+			key: 'cw',
+			name: '낱말퍼즐',
+			count: 25,
+			unit: '칸 · 매일 한 판',
+			line: '가로세로 열쇠로 낱말 채우기',
+			href: '/crossword',
+			sub: [{ label: '오늘의 낱말퍼즐', href: '/crossword' }],
+			fresh: true
+		},
 		{
 			key: 'trivia',
 			name: '상식 퀴즈',
@@ -129,6 +140,8 @@
 						<span class="rr">고구마 → <b>?</b></span>
 					{:else if g.key === 'kkeut'}
 						<span class="tile">기</span><span class="tile on">차</span><span class="arr">→</span><span class="tile on">차</span><span class="tile">표</span>
+					{:else if g.key === 'cw'}
+						{#each ['가', '나', '', '다', '', '라', '마', '바', '사'] as c, i (i)}<span class="cwc" class:blk={!c}>{c}</span>{/each}
 					{:else if g.key === 'cube'}
 						<CubeDie view={[2, 3, 4]} size={52} />
 					{:else}
@@ -221,6 +234,25 @@
 		justify-content: center;
 		font-weight: 900;
 		font-size: 15px;
+	}
+	.vis.cw {
+		display: grid;
+		grid-template-columns: repeat(3, 18px);
+		gap: 2px;
+	}
+	.cwc {
+		height: 18px;
+		border-radius: 4px;
+		border: 1.5px solid var(--border-strong);
+		background: var(--panel);
+		display: grid;
+		place-items: center;
+		font-size: 10px;
+		font-weight: 900;
+	}
+	.cwc.blk {
+		background: var(--text);
+		border-color: var(--text);
 	}
 	.vis.kkeut {
 		gap: 3px;

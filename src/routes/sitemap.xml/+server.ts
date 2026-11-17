@@ -7,6 +7,7 @@ import { MATCH_LEVELS } from '$lib/matchstickLevels';
 import { MATCH_ANSWERS, answerSlug } from '$lib/matchAnswers';
 import { CHOSUNG_CATEGORIES } from '$lib/data/chosung';
 import { KKEUT_FIRST_DAY, KKEUT_PUZZLES } from '$lib/data/kkeutPuzzles';
+import { CROSSWORD_FIRST_DAY, CROSSWORD_PUZZLES } from '$lib/data/crosswordPuzzles';
 import { ARTICLES } from '$lib/articles';
 import { FIX_LOG } from '$lib/fixLog';
 import type { RequestHandler } from './$types';
@@ -46,6 +47,7 @@ const PAGES: Entry[] = [
 	{ path: '/chosung', freq: 'daily', priority: '0.9', lastmod: '2026-11-11' },
 	{ path: '/cubenet', freq: 'daily', priority: '0.8', lastmod: '2026-11-11' },
 	{ path: '/kkeut', freq: 'daily', priority: '0.8', lastmod: '2026-11-11' },
+	{ path: '/crossword', freq: 'daily', priority: '0.8', lastmod: '2026-11-17' },
 	{ path: '/discover', freq: 'monthly', priority: '0.8' },
 	{ path: '/trivia', freq: 'monthly', priority: '0.8' },
 	{ path: '/matchstick/guide', freq: 'monthly', priority: '0.8' },
@@ -116,12 +118,19 @@ export const GET: RequestHandler = () => {
 		priority: '0.5',
 		lastmod: p.date
 	}));
+	// 지난 오늘의 낱말퍼즐 해설(11/17) — 끝말잇기 해설과 같은 까닭으로 빌드 날짜로 거른다
+	const crosswordAnswers = CROSSWORD_PUZZLES.filter((_, i) => CROSSWORD_FIRST_DAY + i < kstDayNumber(Number(version))).map((p) => ({
+		path: `/crossword/answer/${p.date}`,
+		freq: 'yearly',
+		priority: '0.5',
+		lastmod: p.date
+	}));
 	const articles: Entry[] = [
 		{ path: '/read', freq: 'weekly', priority: '0.7', lastmod: ARTICLES.map((a) => a.date).sort().at(-1) },
 		...ARTICLES.map((a) => ({ path: `/read/${a.slug}`, freq: 'monthly', priority: '0.7', lastmod: a.date }))
 	];
 	const daily = new Set(['/', '/archive']);
-	const all: Entry[] = [...PAGES, ...triviaCats, ...discoverFields, ...matchKinds, ...matchAnswers, ...kkeutAnswers, ...chosungCats, ...articles];
+	const all: Entry[] = [...PAGES, ...triviaCats, ...discoverFields, ...matchKinds, ...matchAnswers, ...kkeutAnswers, ...crosswordAnswers, ...chosungCats, ...articles];
 	for (const p of all) if (daily.has(p.path)) p.lastmod = todayIso;
 	const body = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">

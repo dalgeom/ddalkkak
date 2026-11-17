@@ -6,9 +6,10 @@ const config = {
 	kit: {
 		adapter: adapter(),
 		prerender: {
-			// 끝말잇기 해설(/kkeut/answer/[date])은 지난 날만 굽는다 — 첫 날(11/5) 전에는 0쪽이라 이 라우트만 봐준다
+			// 끝말잇기 · 낱말퍼즐 해설은 지난 날만 굽는다 — 첫 날(11/5 · 11/19) 전에는 0쪽이라 이 라우트만 봐준다
 			handleUnseenRoutes: ({ routes, message }) => {
-				if (routes.some((r) => r !== '/kkeut/answer/[date]')) throw new Error(message);
+				const ok = ['/kkeut/answer/[date]', '/crossword/answer/[date]'];
+				if (routes.some((r) => !ok.includes(r))) throw new Error(message);
 			}
 		}
 	}

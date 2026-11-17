@@ -22,6 +22,14 @@ export interface Notice {
 
 export const NOTICES: Notice[] = [
 	{
+		id: '2026-11-17-crossword',
+		date: '2026-11-17',
+		title: '오늘의 가로세로 낱말퍼즐이 생겨요',
+		body: '5×5 작은 판에 가로세로 열쇠를 보고 낱말을 채우는 새 놀이예요. 11월 19일부터 매일 한 판씩 열리고, 다 채우면 낱말마다 사전 뜻풀이를 보여 드려요.',
+		href: '/crossword',
+		cta: '낱말퍼즐 보러 가기'
+	},
+	{
 		id: '2026-11-17-trivia-pure-korean',
 		date: '2026-11-17',
 		title: '상식 퀴즈에 순우리말 분야가 생겼어요',

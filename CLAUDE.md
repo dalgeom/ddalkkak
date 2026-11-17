@@ -73,6 +73,7 @@
 - 언제: 매일 루틴 5번. 금요일에는 토 · 일 · 월 세 날을 푼다(주말엔 손대지 않는다).
 - **내일의 끝말잇기도 같이 푼다**(11/5부터) — `/kkeut?day=날짜번호`. 시작 단어만 보고 정답 길을 찾아본다. 막히면 그 퍼즐은 어렵다는 뜻이니 소감에 적는다. 공개 전이면 `kkeutPuzzles.ts`의 그날 줄을 바꾸고 `--check`를 다시 돌린다.
   퍼즐은 늘 **7일 앞까지** 있어야 한다(`kkeutPuzzles.test.ts`가 잡는다). 모자라면 `--cand <수>`로 고르고 `--check`를 통과시킨 뒤 끝에 붙인다.
+- **내일의 낱말퍼즐도 같이 푼다**(11/19부터) — `/crossword?day=날짜번호`. 열쇠만 보고 채운다. 열쇠가 모호하거나 답이 둘이면 공개 전에 `crosswordPuzzles.ts` 그날 줄을 고치고 `npx vite-node scripts/crossword-build.mjs -- --check`를 다시 돌린다. 퍼즐은 늘 **7일 앞까지**(`crosswordPuzzles.test.ts`).
 - 여는 법: 로컬 dev 서버(포트 5231)에서만 `?day=날짜번호`로 그날이 열린다(`src/routes/+page.svelte` todayNum, `/api/day`는 dev에서만 사흘 뒤까지). 운영 빌드에서는 `dev`가 false라 빠진다.
   날짜번호는 `Math.floor(Date.UTC(년, 월-1, 일)/86400000)` (10/23 = 20749).
 - **브라우저는 헤드리스로만**(사용자 요청 10/22 — 창이 자꾸 떠서 다른 일을 방해했다). `--headless=new`, 새 프로필(`E:	mpddal-play-<날짜>`), GA · 광고 주소는
