@@ -94,7 +94,9 @@ export const CHOSUNG_BATCHES: { fromDay: number; counts: Record<string, number> 
 	// 11/16 묶음 — 족제비 · 권선징악 · 진퇴양난 · 쌀로별 · 엘리멘탈 (새싹 채우기)
 	{ fromDay: 20774, counts: { animal: 95, food: 92, 'fruit-vegetable': 76, country: 63, idiom: 74, snack: 65, movie: 78 } },
 	// 11/17 묶음 — 고라니 · 오소리 · 산딸기 · 오징어땅콩 · 트랜스포머 (새싹 채우기)
-	{ fromDay: 20775, counts: { animal: 97, food: 92, 'fruit-vegetable': 77, country: 63, idiom: 74, snack: 66, movie: 79 } }
+	{ fromDay: 20775, counts: { animal: 97, food: 92, 'fruit-vegetable': 77, country: 63, idiom: 74, snack: 66, movie: 79 } },
+	// 11/18 묶음 — 바다표범 · 호박죽 · 간장게장 · 셀러리 · 과속스캔들 (새싹 채우기)
+	{ fromDay: 20776, counts: { animal: 98, food: 94, 'fruit-vegetable': 78, country: 63, idiom: 74, snack: 66, movie: 80 } }
 ];
 
 const toWord = (slug: string) => ([word, hint, alts]: ChosungEntry) => ({ word, hint, alts: alts ?? [], category: slug });

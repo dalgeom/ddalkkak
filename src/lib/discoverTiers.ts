@@ -449,6 +449,9 @@ export const DISCOVER_TIERS: Readonly<Record<string, Tier>> = {
 	'club-own-light': 1, // 11/17 새로 · 스스로 빛을 내는 것, 달은 환해도 거절
 	'club-see-through': 1, // 11/17 새로 · 너머가 비쳐 보이는 것, 거울은 유리여도 거절
 	'club-springs-back': 1, // 11/17 새로 · 눌렀다 놓으면 돌아오는 것, 찰흙은 말랑해도 거절
+	'club-has-teeth': 1, // 11/18 새로 · 가장자리가 톱니처럼 뾰족뾰족한 것, 핑킹가위는 가위여도 회원
+	'season-number': 1, // 11/18 새로 · 달 → 계절 번호, 1월 → 4가 몫을 죽인다
+	'club-folds': 1, // 11/18 새로 · 접어서 작게 넣어 두는 것, 안경도 다리를 접는다
 };
 
 /**
