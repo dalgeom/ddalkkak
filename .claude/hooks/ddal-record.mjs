@@ -59,14 +59,14 @@ if (mode === 'post') {
 	const cmd = String(input.tool_input?.command || '');
 	const res = input.tool_response || {};
 	const stdout = String(res.stdout ?? res.output ?? (typeof res === 'string' ? res : ''));
-	if (/ga-yesterday\.py/.test(cmd)) append('[자동 · GA 보고] ga-yesterday.py 돌림(보고는 답에서)');
+	if (/ga-yesterday\.py/.test(cmd)) append('[자동] ga-yesterday.py 돌림 — 보고를 끝내면 GA 보고 항목 줄을 따로 적는다');
 	if (/npm run qa/.test(cmd)) {
 		const only = (cmd.match(/--only\s+(\S+)/) || [])[1];
 		const r = /전부 통과/.test(stdout) ? '전부 통과' : (stdout.match(/실패 \d+개/) || ['결과 모름'])[0];
 		append(`[자동] qa${only ? ' --only ' + only : ' 전체'} ${/QA_BASE=http:\/\/localhost/.test(cmd) ? '로컬' : '운영'} — ${r}`);
 	}
 	const days = [...new Set([...cmd.matchAll(/[?&]day=(\d{5})/g)].map((m) => m[1]))];
-	for (const d of days) append(`[자동] ?day=${d}(${new Date(+d * 86400000).toISOString().slice(5, 10).replace('-', '/')}) 열어 봄 — 미리 풀기라면 끝낸 뒤 [미리 풀기] 줄을 따로 적는다`);
+	for (const d of days) append(`[자동] ?day=${d}(${new Date(+d * 86400000).toISOString().slice(5, 10).replace('-', '/')}) 열어 봄 — 미리 풀기라면 끝낸 뒤 미리 풀기 항목 줄을 따로 적는다`);
 	if (/\bgit\s+push\b/.test(cmd)) append('[자동] git push');
 	if (/promo-clean\.mjs\s+--지워/.test(cmd)) append('[자동] promo-clean --지워');
 	if (/indexnow\.mjs/.test(cmd)) append(`[자동] IndexNow ${cmd.split('indexnow.mjs')[1].trim().slice(0, 80)}`);
