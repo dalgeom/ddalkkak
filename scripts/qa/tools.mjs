@@ -90,6 +90,22 @@ for (const [w, h] of [[390, 844], [320, 568]]) {
 	// 도구 모음 — 도구 카드 10개, 링크가 모두 열리고, 홈에서 들어가는 길이 있다
 	await b.go('/chosung/animal', 800);
 	ok(`${w} 동물 분야 쪽에 「초성으로 동물 이름 찾기」 입구`, await b.ev(`return !!document.querySelector('a.show[href="/chosung/find?c=animal"]');`));
+	// 11/18 글자 수로 풀어 보기 — 절이 있고, 정답은 접혀 있어 안 보이고, 넘치지 않는다(사자성어는 절 없음)
+	// 「초성이 같은」 절이 낱말을 그대로 적으므로 정답 노출은 section.lens 안에서만 본다
+	const LENS = `const s = document.querySelector('section.lens'); const d = s && [...s.querySelectorAll('details')]; const word = d?.[0]?.querySelector('.ans b')?.textContent.trim(); return { has: !!s, h3: s ? s.querySelectorAll('h3').length : 0, closed: d ? d.every(x => !x.open) : false, hidden: !!word && !s.innerText.includes(word) };`;
+	for (const [slug, h3] of [['animal', 3], ['movie', 5]]) {
+		if (slug !== 'animal') await b.go(`/chosung/${slug}`, 800);
+		const ln = await b.ev(LENS);
+		ok(`${w} ${slug} 글자 수 절 — h3 ${h3}개 · 정답 접힘`, ln.has && ln.h3 === h3 && ln.closed && ln.hidden, JSON.stringify(ln));
+		ok(`${w} ${slug} 글자 수 절 가로 넘침 없음`, (await over()) <= 0);
+		if (process.env.QA_LENS_POS && slug === 'animal') {
+			// 양성 대조 — 펼치면 정답이 보여 위 검사가 실패해야 한다
+			const pos = await b.ev(`document.querySelector('section.lens details').open = true; ${LENS}`);
+			ok(`${w} [양성 대조] 펼친 글자 수 절은 실패해야 함`, !(pos.closed && pos.hidden), JSON.stringify(pos));
+		}
+	}
+	await b.go('/chosung/idiom', 800);
+	ok(`${w} 사자성어 쪽엔 글자 수 절 없음`, await b.ev(`return !document.querySelector('section.lens');`));
 	await b.go('/tools', 800);
 	const tl = await b.ev(`const a = [...document.querySelectorAll('.tl a')]; const st = await Promise.all(a.map(x => fetch(x.href).then(r => r.status))); return { n: a.length, bad: st.filter(s => s !== 200).length, ld: !!document.querySelector('script[type="application/ld+json"]') };`);
 	ok(`${w} 도구 모음 — 카드 10개 · 링크 모두 200 · JSON-LD`, tl.n === 10 && tl.bad === 0 && tl.ld, JSON.stringify(tl));

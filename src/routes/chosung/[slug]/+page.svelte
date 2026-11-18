@@ -74,6 +74,27 @@
 		</a>
 	</section>
 
+	{#if data.byLength.length}
+		<section class="sec lens">
+			<h2 class="sh">글자 수로 풀어 보기</h2>
+			<p class="sub">글자 수별로 몇 개씩 골랐습니다. 초성만 보고 떠올린 뒤 「정답 보기」를 누르세요. 글자 수는 띄어쓰기를 빼고 셉니다.</p>
+			{#each data.byLength as g (g.len)}
+				<h3 class="lh">{g.label}</h3>
+				<ol class="list">
+					{#each g.words as q (q.word)}
+						<li class="q">
+							<span class="cho">{q.cho}</span>
+							<details>
+								<summary>정답 보기</summary>
+								<p class="ans"><b>{shownWord(q.word)}</b> — {q.hint}</p>
+							</details>
+						</li>
+					{/each}
+				</ol>
+			{/each}
+		</section>
+	{/if}
+
 	{#if data.collisions.length}
 		<section class="sec">
 			<h2 class="sh">초성이 같은 {data.category.name}</h2>
@@ -134,6 +155,12 @@
 		border: 1px solid var(--border-strong);
 		border-radius: 14px;
 		padding: 15px 16px;
+	}
+	.lh {
+		font-size: 15px;
+		font-weight: 800;
+		margin: 16px 0 8px 2px;
+		word-break: keep-all;
 	}
 	.list {
 		list-style: none;
