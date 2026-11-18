@@ -24,6 +24,11 @@ const read = (p) => { try { return fs.readFileSync(p, 'utf8'); } catch { return 
 const append = (line) => { fs.mkdirSync(path.dirname(DONE), { recursive: true }); fs.appendFileSync(DONE, `- ${hhmm()} ${line}\n`); };
 const sh = (c) => { try { return execSync(c, { cwd: ROOT, encoding: 'utf8', timeout: 5000, stdio: ['ignore', 'pipe', 'ignore'] }).trim(); } catch { return ''; } };
 const doneItems = (txt) => ITEMS.filter((it) => new RegExp(`\\[[^\\]]*${it}[^\\]]*\\]`).test(txt));
+// 11/18 사용자: 「메모리말고 hook으로 해야지. 니 메모리는 이제 안믿어」 — 보고 형식 · 성장 작업 정의를 메모리가 아니라 여기서 강제한다.
+const GROWTH = '[성장 작업 정의 11/18 사용자] 딸깍의 유입량 늘리기 · 네이버에서 더 검색 잘되게 하기 · 구글에서 더 검색 잘되게 하기 · 사람들이 많이 찾아오게 하기 · 재방문율을 높일 아이디어 적용하기 · 새로운 콘텐츠 · 새로운 퀴즈 유형 · 새로운 할 것 · 새로운 놀 것 아이디어나 방향 제시하기 — 이런 게 핵심.\n(해석) hook · 지표 도구 · 운영 정리는 성장 작업으로 세지 않는다.';
+const FORMAT = '[보고 형식 11/18 사용자 「항상 이렇게 깔끔하게 보고」] 한 줄 결론 → 「매일 일 | 상태 | 근거」 마크다운 표(GA 보고 · 성장 작업 · 단계 채우기 · 미리 풀기 · 블로그, 근거 = 시각 · 커밋 · qa 숫자) → 표 밖에 한 일 한 줄 · 다음 시작점 한 줄.';
+const STATUS_RE = /끝\?|끝났|종료\s*(야|냐|임|\?)|남은\s*(일|거|것)|뭐\s*했|다 했|오늘 할 일|상태\s*(보고|는\?|야\?|알려)/;
+const TABLE_RE = /^\s*\|.*\|\s*$\n^\s*\|?\s*:?-{3,}/m;
 
 function record() {
 	const done = read(DONE).trim();
@@ -38,7 +43,8 @@ function record() {
 		`끝난 매일 일: ${have.length ? have.join(' · ') : '(done 파일에 적힌 것 없음)'} / 안 적힌 것: ${ITEMS.filter((i) => !have.includes(i)).join(' · ') || '없음'}`,
 		done ? `done 파일(.claude/tmp/done-${today}.md):\n${done.split('\n').slice(-25).join('\n')}` : `done 파일 없음 — 매일 일을 끝내면 \`- HH:MM [항목] 내용\` 한 줄을 .claude/tmp/done-${today}.md에 적는다.`,
 		`오늘 커밋: ${commits ? '\n' + commits.split('\n').slice(0, 15).join('\n') : '없음'}`,
-		`fixLog ${md}: ${fix.length ? fix.join(' · ') : '없음'} / 게시-기록 ${md}: ${posts.length ? '\n' + posts.join('\n') : '없음'}`
+		`fixLog ${md}: ${fix.length ? fix.join(' · ') : '없음'} / 게시-기록 ${md}: ${posts.length ? '\n' + posts.join('\n') : '없음'}`,
+		GROWTH
 	].join('\n');
 }
 
@@ -49,8 +55,8 @@ if (mode === 'prompt' || mode === 'session') {
 		extra.push('[날짜 인사] 어제 GA 보고부터 바로: ga-yesterday.py(키는 CLAUDE.md의 경로만) · feedback.mjs · gsc-pages.py / 7 → 성장 작업(fable-gate 먼저) → 단계 채우기(끝말잇기 · 낱말퍼즐 8일치) → 내일 미리 풀기(금요일이면 토 · 일 · 월). 블로그는 사용자가 정한다. 각 일을 끝내면 done 파일에 한 줄.');
 	if (/올렸어|올렸다|올렸음|게시했/.test(p))
 		extra.push('[올렸어] 기록이 먼저: promo/게시-기록.md에 행 추가 → node scripts/promo-clean.mjs --지워. 한 곳만 올렸으면 「대기」.');
-	if (/끝\?|끝났|남은|남았|뭐\s*했|다 했|오늘 할 일/.test(p))
-		extra.push('[상태 질문] 위 기록 · git log · 게시-기록 · fixLog · 대화 jsonl(커밋 없는 일)을 다 본 뒤에만 답한다. 한 군데라도 안 봤으면 단정하지 않는다.');
+	if (/끝\?|끝났|남은|남았|뭐\s*했|다 했|오늘 할 일|종료\s*(야|냐|임|\?)|상태\s*(보고|는\?|야\?|알려)/.test(p))
+		extra.push('[상태 질문] 위 기록 · git log · 게시-기록 · fixLog · 대화 jsonl(커밋 없는 일)을 다 본 뒤에만 답한다. 한 군데라도 안 봤으면 단정하지 않는다.\n' + FORMAT);
 	const ctx = [record(), ...extra].join('\n');
 	out({ hookSpecificOutput: { hookEventName: mode === 'prompt' ? 'UserPromptSubmit' : 'SessionStart', additionalContext: ctx } });
 }
@@ -76,7 +82,7 @@ if (mode === 'post') {
 if (mode === 'stop') {
 	if (input.stop_hook_active) process.exit(0);
 	const have = doneItems(read(DONE));
-	if (!have.length || !input.transcript_path) process.exit(0);
+	if (!input.transcript_path) process.exit(0);
 	// 대화 기록은 수백 MB다 — 끝 2MB만 읽는다.
 	let tail = '';
 	try {
@@ -89,18 +95,28 @@ if (mode === 'stop') {
 		tail = buf.toString('utf8');
 	} catch { process.exit(0); }
 	const texts = [];
+	let userText = '';
 	for (const line of tail.split('\n').reverse()) {
 		let e; try { e = JSON.parse(line); } catch { continue; }
 		const c = e.message?.content;
-		if (e.type === 'user' && (typeof c === 'string' || (Array.isArray(c) && c.some((b) => b.type === 'text')))) break;
+		// hand-back · 이미지 줄(isMeta) · 대화 요약(isCompactSummary)은 사람이 쓴 메시지가 아니다 — 건너뛴다.
+		if (e.isMeta || e.isCompactSummary) continue;
+		if (e.type === 'user' && (typeof c === 'string' || (Array.isArray(c) && c.some((b) => b.type === 'text')))) {
+			userText = typeof c === 'string' ? c : c.filter((b) => b.type === 'text').map((b) => b.text).join('\n');
+			break;
+		}
 		if (e.type === 'assistant' && Array.isArray(c)) for (const b of c) if (b.type === 'text') texts.unshift(b.text);
 	}
+	const reasons = [];
+	if (userText.trim().length < 40 && STATUS_RE.test(userText) && !TABLE_RE.test(texts.join('\n')))
+		reasons.push('[보고 형식] 상태 질문에는 한 줄 결론 → 「매일 일 | 상태 | 근거」 표로 답한다(11/18 사용자). 매일 일 상태 질문이 아니면 표 없이 그대로 끝낸다.');
 	// 「」 · "" · `` 안은 인용(시험 문장 · 사용자 말 옮기기)이라 뺀다 — 11/18 시험 결과를 옮긴 답이 막혔다.
 	const said = texts.join('\n').replace(/「[^」\n]*」|"[^"\n]*"|`[^`\n]*`/g, '');
 	const NEG = '(안\\s?했|안\\s?함|안\\s?됨|남았|남음|아직|못\\s?했|빠졌|해야\\s?(합니다|한다|해))';
 	const hits = have.filter((it) => new RegExp(`${it}[^.\\n,]{0,15}${NEG}`).test(said) || new RegExp(`다음(은|에|\\s*할\\s*일)[^.\\n]{0,20}${it}`).test(said));
 	if (hits.length)
-		out({ decision: 'block', reason: `[오늘 기록] done 파일(.claude/tmp/done-${today}.md)에 「${hits.join(' · ')}」가 이미 끝났다고 적혀 있는데 답이 안 했다 · 남았다 · 다음 할 일로 말한다. 파일을 열어 확인하고 답을 고친다(다른 날짜 이야기라면 날짜를 밝혀 다시 쓴다).` });
+		reasons.push(`[오늘 기록] done 파일(.claude/tmp/done-${today}.md)에 「${hits.join(' · ')}」가 이미 끝났다고 적혀 있는데 답이 안 했다 · 남았다 · 다음 할 일로 말한다. 파일을 열어 확인하고 답을 고친다(다른 날짜 이야기라면 날짜를 밝혀 다시 쓴다).`);
+	if (reasons.length) out({ decision: 'block', reason: reasons.join('\n') });
 	process.exit(0);
 }
 process.exit(0);
