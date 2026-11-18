@@ -155,6 +155,38 @@ for r in src[:10]:
     s, m = (v.value for v in r.dimension_values)
     print(f"        {s:<24} {m:<10} 세션 {r.metric_values[0].value:>3}  방문 {r.metric_values[1].value:>3}")
 
+# ── 검색 입구 ── (11/18 주 지표, CLAUDE.md 「★ 목표」 절)
+# 검색 유입 = naver · google · bing organic + search.naver.com 계열(m.search.naver.com은 referral로 잡힌다).
+# 하루는 검색 세션이 50개 남짓이라 흔들리니 DAY까지 7일로 센다. 3세션 이상인 첫 쪽만 「입구」.
+def rep_range(a, b, dims, mets, limit=1000):
+    return client.run_report(RunReportRequest(property=PROPERTY,
+        date_ranges=[DateRange(start_date=a.isoformat(), end_date=b.isoformat())],
+        dimensions=[Dimension(name=d) for d in dims], metrics=[Metric(name=m) for m in mets],
+        dimension_filter=KR, limit=limit)).rows
+
+def 검색입구(a, b):
+    쪽 = defaultdict(int)
+    for r in rep_range(a, b, ["landingPage", "sessionSource", "sessionMedium"], ["sessions"]):
+        lp, s, m = (v.value for v in r.dimension_values)
+        if (m == "organic" and s in ("naver", "google", "bing")) or "search.naver.com" in s:
+            쪽[lp] += int(r.metric_values[0].value)
+    return 쪽
+
+모름 = ("(not set)", "")
+d = datetime.timedelta
+지금 = 검색입구(DAY - d(days=6), DAY)
+앞 = 검색입구(DAY - d(days=13), DAY - d(days=7))
+입구 = {k: v for k, v in 지금.items() if v >= 3 and k not in 모름}
+앞입구 = {k for k, v in 앞.items() if v >= 3 and k not in 모름}
+print(f"\n[검색 입구 — {DAY - d(days=6):%m/%d}~{DAY:%m/%d}, 검색 세션 3 이상인 첫 쪽]")
+print(f"        {len(입구)}쪽 (검색 세션 {sum(지금.values())})   ← {DAY - d(days=13):%m/%d}~{DAY - d(days=7):%m/%d} {len(앞입구)}쪽 (검색 세션 {sum(앞.values())})")
+for k, v in sorted(입구.items(), key=lambda x: -x[1])[:15]:
+    print(f"        {k:<32} {v:>3}{'' if k in 앞입구 else '  새'}")
+빠짐 = sorted(앞입구 - set(입구))
+if 빠짐: print(f"        빠진 쪽: {' · '.join(빠짐)}")
+n = sum(v for k, v in 지금.items() if k in 모름)
+if n: print(f"        첫 쪽 모름 (not set) {n}세션 — 입구에서 뺌, 검색 세션 합에는 들어 있음")
+
 # ── 행동 ──
 LABEL = [
     # 9/3부터 누른 순간(press)과 화면이 뜬 순간(start)을 나눠 찍는다. 예전에는 문제은행
