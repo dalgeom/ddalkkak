@@ -1,9 +1,10 @@
 // fable 사전 검증 게이트(2026-11-12 사용자 지시) — 중요한 작업은 fable-gate 에이전트가 통과시킨 뒤에만.
 //   pre    PreToolUse(Edit|Write|Bash|PowerShell): 표식 없이 src · scripts · static · promo · CLAUDE.md를 고치거나
-//          커밋 · 푸시하면 막는다. fable-gate 에이전트가 `fable-gate.mjs pass`를 부르면 그때 표식을 쓴다.
-//   post   PostToolUse(Bash|PowerShell): git push가 끝나면 표식을 쓴다 → 다음 작업은 다시 검증받는다.
+//          커밋 · 푸시하면 막는다. fable-gate 에이전트가 `fable-gate.mjs pass`를 부르면 대기 줄만 남긴다.
+//   post   PostToolUse(Bash|PowerShell): pass 명령이 실제로 실행됐으면 대기 줄을 표식으로 옮긴다(거부된 명령엔
+//          PostToolUse가 오지 않으므로 표식이 안 생긴다, 11/18). git push가 끝나면 표식을 지운다 → 다음 작업은 다시 검증받는다.
 //   prompt UserPromptSubmit: 규칙을 상기시킨다.
-//   pass   에이전트가 Bash로 부르는 자리 — 실제 기록은 pre hook이 한다(여기서는 출력만).
+//   pass   에이전트가 Bash로 부르는 자리 — 실제 기록은 pre · post hook이 한다(여기서는 출력만).
 import fs from 'node:fs';
 import path from 'node:path';
 
@@ -22,8 +23,15 @@ const input = JSON.parse(fs.readFileSync(0, 'utf8') || '{}');
 const sid = input.session_id || 'unknown';
 const agent = input.agent_type || '';
 
-const load = () => { try { return JSON.parse(fs.readFileSync(MARK, 'utf8')); } catch { return {}; } };
-const save = (m) => { fs.mkdirSync(path.dirname(MARK), { recursive: true }); fs.writeFileSync(MARK, JSON.stringify(m, null, 1)); };
+const PEND = path.join(ROOT, '.claude', 'tmp', 'fable-pass-pending.json');
+const LOG = path.join(ROOT, '.claude', 'tmp', 'gate-debug.log');
+const PASS = /fable-gate\.mjs\s+pass\b/;
+const key = input.tool_use_id || input.agent_id || '';
+const readJson = (f) => { try { return JSON.parse(fs.readFileSync(f, 'utf8')); } catch { return {}; } };
+const writeJson = (f, m) => { fs.mkdirSync(path.dirname(f), { recursive: true }); fs.writeFileSync(f, JSON.stringify(m, null, 1)); };
+const log = (m) => fs.appendFileSync(LOG, JSON.stringify({ t: new Date().toISOString(), mode: m, sid, agent, tool_use_id: input.tool_use_id, agent_id: input.agent_id }) + '\n');
+const load = () => readJson(MARK);
+const save = (m) => writeJson(MARK, m);
 const valid = () => { const p = load()[sid]; return p && Date.now() - p.at < TTL ? p : null; };
 const out = (o) => { process.stdout.write(JSON.stringify(o)); process.exit(0); };
 const deny = (why) => out({ hookSpecificOutput: { hookEventName: 'PreToolUse', permissionDecision: 'deny', permissionDecisionReason: why } });
@@ -41,6 +49,12 @@ const ti = input.tool_input || {};
 
 if (mode === 'post') {
 	const cmd = String(ti.command || '');
+	if (PASS.test(cmd)) {
+		log('post');
+		const p = readJson(PEND);
+		const w = key && p[key];
+		if (w) { const m = load(); m[w.sid] = { at: Date.now(), summary: w.summary }; save(m); delete p[key]; writeJson(PEND, p); }
+	}
 	if (/\bgit\s+push\b/.test(cmd)) { const m = load(); delete m[sid]; save(m); }
 	process.exit(0);
 }
@@ -60,11 +74,14 @@ if (tool === 'Edit' || tool === 'Write' || tool === 'NotebookEdit') {
 
 if (tool === 'Bash' || tool === 'PowerShell') {
 	const cmd = String(ti.command || '');
-	if (/fable-gate\.mjs\s+pass\b/.test(cmd)) {
-		fs.appendFileSync(path.join(ROOT, '.claude', 'tmp', 'gate-debug.log'), JSON.stringify({ t: new Date().toISOString(), sid, agent, agent_id: input.agent_id }) + '\n');
+	if (PASS.test(cmd)) {
+		log('pre');
 		if (agent !== GATE) deny('fable 통과 표식은 fable-gate 에이전트만 남길 수 있습니다. ' + HOW);
+		if (!key) process.exit(0); // 키가 없으면 대기 줄을 쓰지 않는다 — 서로 다른 호출이 한 줄을 나눠 쓰지 않게
 		const summary = (cmd.match(/pass\s+["']?([^"'\n]*)/) || [])[1] || '';
-		const m = load(); m[sid] = { at: Date.now(), summary }; save(m);
+		const p = readJson(PEND);
+		for (const k in p) if (Date.now() - p[k].at > TTL) delete p[k];
+		p[key] = { sid, summary, at: Date.now() }; writeJson(PEND, p);
 		process.exit(0);
 	}
 	if (touchesMark(cmd) && agent !== GATE) deny('fable 통과 표식은 fable-gate 에이전트만 다룰 수 있습니다.');
