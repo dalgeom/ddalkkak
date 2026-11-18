@@ -49,6 +49,30 @@
 		{/each}
 	</section>
 
+	{#if data.category.proverbs}
+		{@const sameCount = data.category.proverbs.filter((p) => p[3] === 'same').length}
+		<!-- 「등잔 밑이 어둡다 사자성어」처럼 속담으로 성어를 찾는 검색을 받는 구역(11/18) -->
+		<section class="sec">
+			<h2 class="sh">속담으로 찾는 사자성어</h2>
+			<p class="sub">
+				우리 속담과 뜻이 짝인 성어 {data.category.proverbs.length}개예요. {sameCount}개는 뜻이 같고,
+				{data.category.proverbs.length - sameCount}개는 비슷한 뜻이에요.
+			</p>
+			<ul class="pv">
+				{#each data.category.proverbs as [word, hanja, proverb, kind] (word)}
+					<li>
+						<span class="pv-p">{proverb}</span>
+						<span class="pv-w"><b>{word}</b> {hanja}{#if kind === 'similar'}<em>비슷한 뜻</em>{/if}</span>
+					</li>
+				{/each}
+			</ul>
+			<p class="pv-links">
+				<a href="/chosung/idiom">사자성어 초성 퀴즈로 풀어 보기</a> ·
+				<a href="/trivia/proverb">속담 퀴즈</a>
+			</p>
+		</section>
+	{/if}
+
 	<!-- 검색으로 이 페이지에 떨어진 사람은 찾던 답만 읽고 나간다. 26문제와 해설을 다 지나야
 	     데일리로 가는 길이 나오면 늦다 — 목록에 들어가기 전에 한 줄로 알린다. -->
 
@@ -291,6 +315,45 @@
 	}
 
 	/* 목록 앞에 서는 한 줄. 광고처럼 보이면 안 되므로 배너가 아니라 안내 톤으로 둔다 */
+	/* 속담 ↔ 성어 짝 목록 */
+	.pv {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		background: var(--panel);
+		border: 1px solid var(--border-strong);
+		border-radius: 14px;
+	}
+	.pv li {
+		padding: 11px 16px;
+		display: flex;
+		flex-direction: column;
+		gap: 2px;
+		word-break: keep-all;
+	}
+	.pv li + li {
+		border-top: 1px solid var(--border-strong);
+	}
+	.pv-p {
+		font-size: 14px;
+		line-height: 1.6;
+	}
+	.pv-w {
+		font-size: 13px;
+		color: var(--muted);
+	}
+	.pv-w b {
+		color: var(--accent-text);
+	}
+	.pv-w em {
+		font-style: normal;
+		margin-left: 6px;
+		font-size: 12px;
+	}
+	.pv-links {
+		margin: 10px 0 0 2px;
+		font-size: 13px;
+	}
 	/* 분야별 편집 산문 — 문제 목록보다 먼저 읽히도록 본문 리듬으로 */
 	.deep + .deep {
 		margin-top: 14px;

@@ -1154,6 +1154,14 @@
 				<span class="ar" aria-hidden="true">→</span>
 			</a>
 		</div>
+		<!-- 많이 찾는 분야(11/18 사용자 요청) — 검색 착지 쪽으로 가는 안쪽 길. 카드가 아니라 한 줄 글 링크 -->
+		<p class="field-links">
+			<span class="fl-h">많이 찾는 분야</span>
+			<a href="/trivia/idiom" onclick={() => track('home_field_link', { field: 'idiom' })}>사자성어</a>
+			<a href="/trivia/literature" onclick={() => track('home_field_link', { field: 'literature' })}>문학</a>
+			<a href="/trivia/general" onclick={() => track('home_field_link', { field: 'general' })}>상식</a>
+			<a href="/trivia/sports" onclick={() => track('home_field_link', { field: 'sports' })}>스포츠</a>
+		</p>
 		<!-- 도구 모음(11/4) — 띄우기 · 만들기 · 학습지 · 찾기. 놀이 카드 아래 한 줄로 들어가는 길 -->
 		<a class="tools-in" href="/tools" onclick={() => track('tools_in_home')}>
 			<span><b>수업 · 모임에 쓰는 도구</b>퀴즈 띄우기 · 문제 만들기 · 학습지 인쇄</span>
@@ -1823,6 +1831,23 @@
 	/* ── 섹션 공통 ── */
 	.hsec {
 		margin-top: 26px;
+	}
+	.field-links {
+		margin: 12px 0 0 2px;
+		display: flex;
+		flex-wrap: wrap;
+		align-items: baseline;
+		gap: 4px 12px;
+		font-size: 14px;
+		word-break: keep-all;
+	}
+	.fl-h {
+		font-size: 13px;
+		color: var(--muted);
+	}
+	.field-links a {
+		font-weight: 700;
+		color: var(--accent-text);
 	}
 	.new-fields {
 		display: grid;
