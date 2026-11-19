@@ -192,6 +192,7 @@
 		const parts = await Promise.all(need.map((n) => fetch(`/kkeut/defs/${n}.json`).then((r) => r.json()).catch(() => ({}))));
 		const out: Record<string, string> = {};
 		for (const w of words) for (const p of parts) if (p[w]) out[w] = p[w];
+		for (const w of words) if (puzzle?.defs?.[w]) out[w] = puzzle.defs[w];
 		defs = { ...defs, ...out };
 	}
 

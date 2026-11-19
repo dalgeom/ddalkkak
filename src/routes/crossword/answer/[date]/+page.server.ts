@@ -29,7 +29,7 @@ export async function load({ params, fetch }) {
 		dir: w.dir,
 		answer: w.answer,
 		clue: p.clues[w.answer] ?? '',
-		def: parts.find((x) => x[w.answer])?.[w.answer] ?? ''
+		def: p.defs?.[w.answer] ?? parts.find((x) => x[w.answer])?.[w.answer] ?? ''
 	}));
 	const i = CROSSWORD_PUZZLES.indexOf(p);
 	return {

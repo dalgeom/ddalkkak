@@ -4,7 +4,8 @@
  * 공개된 날은 고치지 않는다. 7일 앞까지 있어야 한다(crosswordPuzzles.test.ts).
  * 넣기 전에 `npx vite-node scripts/crossword-build.mjs -- --check`를 통과시킨다.
  */
-export type CrosswordPuzzle = { date: string; rows: string[]; clues: Record<string, string>; note?: string };
+/** defs: 사전 첫 뜻이 열쇠와 다른 동음이의어일 때 다 푼 뒤 뜻풀이를 덮어쓴다. */
+export type CrosswordPuzzle = { date: string; rows: string[]; clues: Record<string, string>; note?: string; defs?: Record<string, string> };
 
 /** 2026-11-17 */
 export const CROSSWORD_FIRST_DAY = 20774;
@@ -43,7 +44,8 @@ export const CROSSWORD_PUZZLES: CrosswordPuzzle[] = [
 			양념: '음식 맛을 내려고 넣는 간장 · 마늘 · 파 같은 것',
 			이사: '살던 집을 떠나 다른 집으로 옮김',
 			기념사: '기념식에서 하는 연설'
-		}
+		},
+		defs: { 이사: '사는 곳을 다른 데로 옮김' }
 	},
 	{
 		date: '2026-11-19',
@@ -79,7 +81,8 @@ export const CROSSWORD_PUZZLES: CrosswordPuzzle[] = [
 			위원회: '어떤 일을 맡아 의논하고 처리하는 사람들의 모임',
 			위험: '다칠 수 있어 안전하지 못함',
 			재시험: '점수가 모자라 한 번 더 치르는 평가'
-		}
+		},
+		defs: { 대사: '연극이나 영화에서 배우가 하는 말' }
 	},
 	{
 		date: '2026-11-21',
@@ -113,7 +116,8 @@ export const CROSSWORD_PUZZLES: CrosswordPuzzle[] = [
 			비단: '누에고치 실로 짠 부드럽고 윤기 나는 천',
 			기간: '어느 때부터 어느 때까지의 동안',
 			단기간: '짧은 동안'
-		}
+		},
+		defs: { 기간: '어느 때부터 다른 어느 때까지의 동안' }
 	},
 	{
 		date: '2026-11-23',
@@ -148,7 +152,8 @@ export const CROSSWORD_PUZZLES: CrosswordPuzzle[] = [
 			여중: '여학생만 다니는 중학교를 줄인 말',
 			장화: '비 올 때 신는 목이 긴 신',
 			공중전화: '길거리에서 누구나 동전이나 카드로 쓰는 전화'
-		}
+		},
+		defs: { 전자: '원자를 이루는, 음전기를 띤 아주 작은 알갱이' }
 	},
 	{
 		date: '2026-11-25',
@@ -165,7 +170,8 @@ export const CROSSWORD_PUZZLES: CrosswordPuzzle[] = [
 			타이: '「태국」을 달리 부르는 이름',
 			이동: '움직여 옮김',
 			이동도서관: '책을 싣고 동네를 돌며 빌려주는 버스'
-		}
+		},
+		defs: { 비명: '몹시 놀라거나 괴롭거나 다급할 때 지르는 외마디 소리' }
 	},
 	{
 		date: '2026-11-26',
@@ -183,7 +189,8 @@ export const CROSSWORD_PUZZLES: CrosswordPuzzle[] = [
 			청혼: '결혼하자고 함',
 			혼자: '다른 사람 없이 홀로',
 			응시: '시험을 보러 나감'
-		}
+		},
+		defs: { 의지: '어떤 일을 이루려는 마음', 응시: '시험에 응함' }
 	},
 	{
 		date: '2026-11-27',
@@ -235,7 +242,8 @@ export const CROSSWORD_PUZZLES: CrosswordPuzzle[] = [
 			동양인: '아시아 사람',
 			동화: '어린이를 위해 지은 이야기',
 			기사화: '어떤 일이 신문이나 방송에 기사로 실림'
-		}
+		},
+		defs: { 동화: '어린이를 위하여 지은 이야기' }
 	},
 	{
 		date: '2026-11-30',

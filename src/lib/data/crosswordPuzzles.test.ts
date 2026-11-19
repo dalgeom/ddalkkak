@@ -27,6 +27,10 @@ describe('오늘의 가로세로 낱말퍼즐', () => {
 				seen.set(w.answer, p.date);
 			}
 	});
+	it('덮어쓴 뜻풀이(defs)는 그 판의 낱말에만 있다', () => {
+		for (const p of CROSSWORD_PUZZLES)
+			for (const w of Object.keys(p.defs ?? {})) expect(p.clues[w], `${p.date} ${w}`).toBeDefined();
+	});
 	it('양성 대조 — 검사기가 실제 판을 읽고 있다(한 칸 바꾸면 걸린다)', () => {
 		const p = CROSSWORD_PUZZLES[0];
 		const broken = { ...p, rows: [p.rows[0].replace(/^./, '뷁'), ...p.rows.slice(1)] };

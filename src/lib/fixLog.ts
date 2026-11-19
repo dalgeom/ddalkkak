@@ -17,6 +17,12 @@ export type FixEntry = {
 // 새 기록은 맨 위에 붙인다
 export const FIX_LOG: FixEntry[] = [
 	{
+		date: '2026-11-19',
+		kind: '화면',
+		title: '낱말퍼즐 다 푼 뒤 뜻풀이 맞춤',
+		body: '소리가 같은 다른 낱말의 뜻이 나오던 몇 칸을 열쇠에 맞는 뜻으로 바로잡았어요.'
+	},
+	{
 		date: '2026-11-18',
 		kind: '문제',
 		title: '달력 문제 보기 글 맞춤',
