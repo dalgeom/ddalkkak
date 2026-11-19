@@ -3,6 +3,7 @@
 	import type { PageData } from './$types';
 	import { ctaTrack } from '$lib/analytics';
 	import SolveEntry from '$lib/components/SolveEntry.svelte';
+	import MagicSquarePlay from '$lib/components/MagicSquarePlay.svelte';
 
 	let { data }: { data: PageData } = $props();
 
@@ -86,6 +87,8 @@
 		<!-- eslint-disable-next-line svelte/no-at-html-tags -- 본문은 articles.ts에 빌드 시점에 박힌 우리 글이다 -->
 		{@html rest}
 	</div>
+
+	{#if data.article.slug === 'magic-square'}<MagicSquarePlay />{/if}
 
 	{#if data.article.play}
 		<!-- 글에서 배운 것을 바로 써 보는 문제. 위아래 초록 버튼은 분야로 가니 테두리 카드로 구분한다(초록 큰 버튼은 하나) -->

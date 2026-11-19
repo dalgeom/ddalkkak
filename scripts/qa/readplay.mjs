@@ -10,6 +10,7 @@ for (const [w, h] of [[390, 844], [320, 568]]) {
 	await b.viewport(w, h, true);
 	await b.go('/read/clock-angle', 800);
 	ok(`${w} 카드 없는 글엔 안 뜸`, (await b.ev(`return document.querySelectorAll('a.play').length;`)) === 0);
+	ok(`${w} 다른 글엔 마방진 판 없음`, (await b.ev(`return document.querySelectorAll('.mplay').length;`)) === 0);
 	await b.go('/read/magic-square', 800);
 	const cta = await b.ev(`const c = getComputedStyle(document.querySelector('a.cta')); return [c.color, c.backgroundColor].join(' / ');`);
 	ok(`${w} 글 버튼 글자가 흰색(본문 링크 색이 번지지 않음)`, cta.startsWith('rgb(255, 255, 255)'), cta);
@@ -18,6 +19,23 @@ for (const [w, h] of [[390, 844], [320, 568]]) {
 	ok(`${w} 글 끝 카드 · 폭 안`, !!r && r.left >= 0 && r.right <= w && r.over <= 0, JSON.stringify(r));
 	await sleep(300);
 	await b.shot(`${OUT}readplay-${w}.jpg`);
+
+	// 「직접 채워 보기」 판(11/19) — 로슈를 넣으면 완성, 한 칸 남기면 아직(양성 대조), 5×5도 폭 안
+	const fill = (vals) => b.ev(`const xs = [...document.querySelectorAll('.mplay input.cell')]; const v = ${JSON.stringify(vals)};
+		xs.forEach((x, i) => { if (v[i] == null) return; x.focus(); x.select(); document.execCommand('insertText', false, String(v[i])); }); return xs.length;`);
+	ok(`${w} 마방진 판이 있음 · 3×3 빈칸 9`, (await fill([])) === 9);
+	await fill([2, 7, 6, 9, 5, 1, 4, 3]);
+	await sleep(150);
+	ok(`${w} 한 칸 남기면 완성 아님`, !(await b.ev(`return !!document.querySelector('.mplay .done');`)));
+	await fill([null, null, null, null, null, null, null, null, 8]);
+	ok(`${w} 로슈를 다 넣으면 완성`, await until(`document.querySelector('.mplay .done')`));
+	await b.ev(`[...document.querySelectorAll('.mplay .tabs button')].find((x) => x.innerText.startsWith('5')).click(); return 1;`);
+	await sleep(200);
+	const g = await b.ev(`const s = document.querySelector('.mplay'); s.scrollIntoView({ block: 'center' }); const r = s.querySelector('.grid').getBoundingClientRect();
+		return { left: r.left, right: r.right, inputs: s.querySelectorAll('input.cell').length, over: document.documentElement.scrollWidth - innerWidth };`);
+	ok(`${w} 5×5 판 · 빈칸 15 · 폭 안`, g.inputs === 15 && g.left >= 0 && g.right <= w && g.over <= 0, JSON.stringify(g));
+	await b.shot(`${OUT}readplay-magic-${w}.jpg`);
+
 	await b.ev(`document.querySelector('a.play').click(); return 1;`);
 	await until(`location.pathname === '/q/card-15-fork' && document.querySelector('.from')`);
 	const from = await b.ev(`return document.querySelector('.from')?.innerText ?? '';`);
