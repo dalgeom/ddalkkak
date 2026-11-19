@@ -63,7 +63,7 @@ describe('초성 분야 두 번째 글의 수치', () => {
 	});
 
 	it('나라: 「아」 12 · 「국」 6 · 「드」 6 · 「아」 중 세 글자는 러시아뿐', () => {
-		expect(words('country').length).toBe(63);
+		expect(words('country').length).toBe(68);
 		const a = ending('country', '아');
 		expect(a.length).toBe(12);
 		expect(a.filter((w) => w.length <= 4 - 1)).toEqual(['러시아']);

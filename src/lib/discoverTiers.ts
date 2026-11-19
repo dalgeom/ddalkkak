@@ -452,6 +452,9 @@ export const DISCOVER_TIERS: Readonly<Record<string, Tier>> = {
 	'club-has-teeth': 1, // 11/18 새로 · 가장자리가 톱니처럼 뾰족뾰족한 것, 핑킹가위는 가위여도 회원
 	'season-number': 1, // 11/18 새로 · 달 → 계절 번호, 1월 → 4가 몫을 죽인다
 	'club-folds': 1, // 11/18 새로 · 접어서 작게 넣어 두는 것, 안경도 다리를 접는다
+	'club-on-a-string': 1, // 11/19 새로 · 줄을 당기거나 풀어서 움직이는 것, 부메랑은 날아도 거절
+	'clock-red-3': 5, // 11/19 새로 · 3이 보이는 시간, 없는 시각을 세서 뺀다
+	'club-has-hole': 1, // 11/19 새로 · 가운데가 뚫려 통하는 것, 빨대도 회원
 };
 
 /**
