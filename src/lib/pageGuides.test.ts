@@ -29,7 +29,7 @@ describe('초성 분야 두 번째 글의 수치', () => {
 	});
 
 	it('음식: 꼬리 찌개 4 · 밥 6 · 탕 4(솜사탕 뺌) · 면 5 · 국수 4 · 국 3 = 26, 세 글자 47, 두 글자 30, 다섯 글자 4', () => {
-		expect(words('food').length).toBe(94);
+		expect(words('food').length).toBe(99);
 		const tails = ['찌개', '밥', '탕', '면', '국수', '국'].map((t) => ending('food', t).filter((w) => w !== '솜사탕').length);
 		expect(tails).toEqual([4, 6, 4, 5, 4, 3]);
 		expect(tails.reduce((a, b) => a + b)).toBe(26);
