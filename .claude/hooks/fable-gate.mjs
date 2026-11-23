@@ -28,7 +28,12 @@ const LOG = path.join(ROOT, '.claude', 'tmp', 'gate-debug.log');
 const PASS = /fable-gate\.mjs\s+pass\b/;
 const key = input.tool_use_id || input.agent_id || '';
 const readJson = (f) => { try { return JSON.parse(fs.readFileSync(f, 'utf8')); } catch { return {}; } };
-const writeJson = (f, m) => { fs.mkdirSync(path.dirname(f), { recursive: true }); fs.writeFileSync(f, JSON.stringify(m, null, 1)); };
+// 윈도에서 숨김 속성 파일은 writeFileSync(덮어쓰기)가 EPERM으로 실패한다 — 11/19 뒤 .claude/tmp가 숨김이 돼 표식이 안 생겼다(11/23). 지우고 다시 쓴다.
+const writeJson = (f, m) => {
+	fs.mkdirSync(path.dirname(f), { recursive: true });
+	const s = JSON.stringify(m, null, 1);
+	try { fs.writeFileSync(f, s); } catch (e) { if (e.code !== 'EPERM') throw e; fs.rmSync(f, { force: true }); fs.writeFileSync(f, s); }
+};
 const log = (m) => fs.appendFileSync(LOG, JSON.stringify({ t: new Date().toISOString(), mode: m, sid, agent, tool_use_id: input.tool_use_id, agent_id: input.agent_id }) + '\n');
 const load = () => readJson(MARK);
 const save = (m) => writeJson(MARK, m);
