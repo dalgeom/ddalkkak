@@ -17,12 +17,42 @@
 	let matchReveal = $state<boolean[]>([]);
 	let cubeReveal = $state<boolean[]>([]);
 	let bonusReveal = $state(false);
+	let scrambleReveal = $state<boolean[]>([]);
+	let equationReveal = $state<boolean[]>([]);
+	let sudokuReveal = $state<boolean[]>([]);
 	$effect(() => {
 		matchReveal = view.match.map(() => false);
 		cubeReveal = view.cube.map(() => false);
+		scrambleReveal = view.scramble.map(() => false);
+		equationReveal = view.equation.map(() => false);
+		sudokuReveal = view.sudoku.map(() => false);
 		bonusReveal = false;
 	});
 </script>
+
+{#if view.scramble.length}
+	<section class="grp">
+		<div class="grp-h"><Icon name="hint" size={16} /><h2>오늘의 글자 섞기</h2></div>
+		<div class="grid">
+			{#each view.scramble as s, i (i)}
+				<article class="mv">
+					<div class="sc-letters">
+						{#each s.letters as l, j (j)}<span>{l}</span>{/each}
+					</div>
+					<div class="mv-cap">음절을 섞었어요 · {s.category}</div>
+					{#if scrambleReveal[i]}
+						<div class="mv-answer">
+							<div class="mv-answer-head"><Icon name="correct" size={15} /><span>정답</span></div>
+							<b class="sc-word">{s.word}</b>
+						</div>
+					{:else}
+						<button class="mv-reveal" onclick={() => (scrambleReveal[i] = true)}>정답 보기</button>
+					{/if}
+				</article>
+			{/each}
+		</div>
+	</section>
+{/if}
 
 <section class="grp">
 	<div class="grp-h"><Icon name="search" size={16} /><h2>오늘의 발견</h2></div>
@@ -41,6 +71,61 @@
 		{/each}
 	</div>
 </section>
+
+{#if view.equation.length}
+	<section class="grp">
+		<div class="grp-h"><Icon name="hint" size={16} /><h2>오늘의 그림 방정식</h2></div>
+		<div class="grid">
+			{#each view.equation as e, i (i)}
+				<article class="mv">
+					<div class="eq-lines">
+						{#each e.lines as l, j (j)}<div>{l.expr} = <b>{l.total}</b></div>{/each}
+						<div>{e.question} = <b>?</b></div>
+					</div>
+					<div class="mv-cap">그림마다 1~9 가운데 수가 하나씩</div>
+					{#if equationReveal[i]}
+						<div class="mv-answer">
+							<div class="mv-answer-head"><Icon name="correct" size={15} /><span>정답 {e.answer}</span></div>
+							<ul class="eq-steps">
+								{#each e.steps as st, j (j)}<li>{st}</li>{/each}
+							</ul>
+						</div>
+					{:else}
+						<button class="mv-reveal" onclick={() => (equationReveal[i] = true)}>정답 보기</button>
+					{/if}
+				</article>
+			{/each}
+		</div>
+	</section>
+{/if}
+
+{#if view.sudoku.length}
+	<section class="grp">
+		<div class="grp-h"><Icon name="hint" size={16} /><h2>오늘의 미니 스도쿠</h2></div>
+		<div class="grid">
+			{#each view.sudoku as s, i (i)}
+				<article class="mv">
+					<div class="sd-grid" style="--n:{s.size}">
+						{#each s.givens as g, j (j)}
+							{@const c = j % s.size}
+							{@const r = Math.floor(j / s.size)}
+							<span
+								class:given={!!g}
+								class:r={(c + 1) % s.boxC === 0 && c < s.size - 1}
+								class:b={(r + 1) % s.boxR === 0 && r < s.size - 1}
+								>{g ? g : sudokuReveal[i] ? s.solution[j] : ''}</span
+							>
+						{/each}
+					</div>
+					<div class="mv-cap">{s.size}×{s.size} · 줄과 묶음마다 1~{s.size} 한 번씩</div>
+					{#if !sudokuReveal[i]}
+						<button class="mv-reveal" onclick={() => (sudokuReveal[i] = true)}>정답 보기</button>
+					{/if}
+				</article>
+			{/each}
+		</div>
+	</section>
+{/if}
 
 <section class="grp">
 	<div class="grp-h"><Icon name="match" size={16} /><h2>오늘의 성냥개비</h2></div>
@@ -202,5 +287,66 @@
 		font-size: var(--fs-2xs);
 		font-weight: var(--fw-emphasis);
 		color: #1f6b41;
+	}
+	.sc-letters {
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: center;
+		gap: 6px;
+	}
+	.sc-letters span {
+		min-width: 40px;
+		min-height: 40px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		border: 1.5px solid var(--border-strong);
+		border-radius: 10px;
+		font-size: 20px;
+		font-weight: 800;
+		background: var(--panel-2);
+	}
+	.sc-word {
+		font-size: 20px;
+	}
+	.eq-lines {
+		display: grid;
+		gap: 4px;
+		font-size: 18px;
+		text-align: center;
+	}
+	.eq-steps {
+		margin: 0;
+		padding-left: 18px;
+		font-size: var(--fs-2xs);
+		color: var(--muted);
+	}
+	.sd-grid {
+		display: grid;
+		grid-template-columns: repeat(var(--n), 1fr);
+		width: min(100%, calc(var(--n) * 36px));
+		border: 2px solid var(--text);
+		border-radius: 6px;
+		overflow: hidden;
+	}
+	.sd-grid span {
+		aspect-ratio: 1;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		border-right: 1px solid var(--border-strong);
+		border-bottom: 1px solid var(--border-strong);
+		font-weight: 800;
+		color: var(--accent);
+	}
+	.sd-grid span.given {
+		background: var(--panel-2);
+		color: var(--text);
+	}
+	.sd-grid span.r {
+		border-right: 2px solid var(--text);
+	}
+	.sd-grid span.b {
+		border-bottom: 2px solid var(--text);
 	}
 </style>

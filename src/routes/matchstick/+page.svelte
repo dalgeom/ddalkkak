@@ -673,7 +673,7 @@ ${location.origin}/matchstick?p=${pIdx}&ref=match_send
 			{/if}
 			<!-- 검색으로 와서 무한 연습만 하는 사람(10/1~10/13 /matchstick 랜딩의 92%)에게 다섯 문제째에 한 번 -->
 			{#if freeWins === 5 && solvedThis === 'won'}
-				<DailyNext pitch="오늘의 10문제에 성냥개비 2문제가 더 있어요" />
+				<DailyNext pitch="오늘의 10문제에 성냥개비 문제가 하나 더 있어요" />
 			{/if}
 			<button class="btn wide" onclick={() => nextProblem()}>다음 문제 →</button>
 			{#if pIdx >= 0}<button class="btn ghost wide" onclick={sendThis}>🤔 친구는 풀까요? 이 문제 보내기</button>{/if}

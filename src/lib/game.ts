@@ -296,8 +296,60 @@ export const DAILY_COUNTS_LEGACY = { discover: 3, trivia: 3, match: 3 } as const
 export const DAILY_COUNTS = { discover: 3, trivia: 2, match: 2, cube: 2 } as const;
 export const DAILY_SIZE = 10;
 
-export type DailyKind = 'discover' | 'trivia' | 'match' | 'cube';
+export type DailyKind = 'discover' | 'trivia' | 'match' | 'cube' | 'scramble' | 'equation' | 'sudoku';
 export type DailyPick = { kind: DailyKind; index: number; bonus?: boolean };
+
+/**
+ * 새 구성 — 2026-11-24(KST, 20781)부터. 그 앞날은 한 칸도 바뀌지 않는다(dailyFrozen.test.ts).
+ *   1 글자 섞기 · 2~3 상식 · 4 그림 방정식 · 5 미니 스도쿠 · 6~7 발견형 · 8 성냥 · 9 전개도(십자) · 10 보너스
+ *
+ * 왜: 11/20~22 「전개도 너무 어려워요」 의견 둘, 1번 칸 이탈 34%. 규칙 찾기 · 공간 문제가 열 중 넷이라
+ * 처음 온 사람에게 문턱이 높았다. 바로 손이 가는 세 유형(낱말 · 계산 · 숫자 채우기)을 앞쪽에 넣고,
+ * 전개도는 하나 · 십자 모양만, 보너스에서는 뺀다.
+ * 새 세 유형은 날짜 번호로 바로 만든다(은행 · 커서가 없다). 네 옛 유형은 커서를 이어서 쓴다 — 재출제 간격 유지.
+ */
+export const NEW_SET_DAY = 20781;
+export const NEW_COUNTS = { discover: 2, trivia: 2, match: 1, cube: 1 } as const;
+const NEW_BONUS: DailyKind[] = ['discover', 'trivia', 'match'];
+
+/** 그날 네 옛 유형의 정규 칸 수 */
+export function countsAt(d: number): Record<DailyKind, number> {
+	const base = d >= NEW_SET_DAY ? NEW_COUNTS : d >= CUBE_START_DAY ? DAILY_COUNTS : { ...DAILY_COUNTS_LEGACY, cube: 0 };
+	return { scramble: 0, equation: 0, sudoku: 0, ...base };
+}
+
+/** 그날 보너스 유형 */
+export function bonusKindAt(d: number): DailyKind {
+	if (d >= NEW_SET_DAY) return NEW_BONUS[d % NEW_BONUS.length];
+	const ks = dailyKinds(d);
+	return ks[d % ks.length];
+}
+
+/** 새 구성의 칸 순서(보너스 제외) */
+const NEW_SLOTS: DailyKind[] = ['scramble', 'trivia', 'trivia', 'equation', 'sudoku', 'discover', 'discover', 'match', 'cube'];
+
+/** 화면에 적는 그날 구성 한 줄 */
+export function compositionShort(d: number): string {
+	return d >= NEW_SET_DAY
+		? '글자 섞기 · 상식 2 · 그림 방정식 · 미니 스도쿠 · 발견형 2 · 성냥 · 전개도 · 보너스 1'
+		: '발견형 3 · 상식 2 · 성냥 2 · 전개도 2 · 보너스 1';
+}
+
+/** 전개도 십자(1-4-1) 목록 — 새 구성은 이 안에서만 돈다 */
+let crossListCache: number[] | null = null;
+function crossList(): number[] {
+	if (!crossListCache) crossListCache = Array.from({ length: CUBE_TOTAL }, (_, i) => i).filter((i) => crossNet(i));
+	return crossListCache;
+}
+
+/** 새 구성의 전개도 — 20780까지 쓴 커서 다음의 십자부터 하루에 하나씩 */
+export function newSetCube(d: number): number {
+	const list = crossList();
+	const base = cursorAt('cube', NEW_SET_DAY);
+	let k0 = list.findIndex((i) => i >= base % CUBE_TOTAL);
+	if (k0 < 0) k0 = 0;
+	return list[(k0 + d - NEW_SET_DAY) % list.length];
+}
 
 /** 그날 어떤 유형들이 나오는지 — 결과 화면과 아카이브가 이 순서를 그대로 쓴다. */
 export function dailyKinds(dayNum: number): DailyKind[] {
@@ -375,9 +427,9 @@ function laneOrder(d: number, kinds: DailyKind[]): DailyKind[] {
  */
 export function dailyKindOrder(dayNum: number): DailyKind[] {
 	const d = Math.max(0, dayNum);
+	if (d >= NEW_SET_DAY) return [...NEW_SLOTS, bonusKindAt(d)];
 	const kinds = dailyKinds(d);
-	const counts: Record<DailyKind, number> =
-		d >= CUBE_START_DAY ? { ...DAILY_COUNTS } : { ...DAILY_COUNTS_LEGACY, cube: 0 };
+	const counts = countsAt(d);
 	const lanes = laneOrder(d, kinds).map((k) => Array.from({ length: counts[k] }, () => k));
 	const out: DailyKind[] = [];
 	for (let r = 0; r < Math.max(...lanes.map((l) => l.length)); r++)
@@ -472,8 +524,8 @@ export function buildDailySet<D, T>(
 	const kinds = dailyKinds(d);
 	const counts: Record<DailyKind, number> =
 		d >= CUBE_START_DAY
-			? { ...DAILY_COUNTS }
-			: { ...DAILY_COUNTS_LEGACY, cube: 0 };
+			? { ...DAILY_COUNTS, scramble: 0, equation: 0, sudoku: 0 }
+			: { ...DAILY_COUNTS_LEGACY, cube: 0, scramble: 0, equation: 0, sudoku: 0 };
 
 	// 보너스는 유형을 하루씩 돌아가며 붙는다
 	const bonusKind = kinds[d % kinds.length];
@@ -493,7 +545,8 @@ export function buildDailySet<D, T>(
 		const legacyDays = Math.min(d, CUBE_START_DAY);
 		const newDays = Math.max(0, d - CUBE_START_DAY);
 		const legacyPer = (DAILY_COUNTS_LEGACY as Record<string, number>)[kind] ?? 0;
-		return legacyPer * legacyDays + DAILY_COUNTS[kind] * newDays + bonusUsed[kind];
+		const per = (DAILY_COUNTS as Record<string, number>)[kind] ?? 0;
+		return legacyPer * legacyDays + per * newDays + bonusUsed[kind];
 	};
 
 	const matchIdx = Array.from({ length: matchTotal }, (_, i) => i);
@@ -510,7 +563,10 @@ export function buildDailySet<D, T>(
 		discover: dAll,
 		trivia: tAll,
 		match: mAll,
-		cube: cAll
+		cube: cAll,
+		scramble: [],
+		equation: [],
+		sudoku: []
 	};
 
 	const extra = picked[bonusKind][counts[bonusKind]];
@@ -548,22 +604,19 @@ export type BankSizesAt = (day: number) => { discover: number; trivia: number };
 /** v1 cursorOf와 동일한 값 — 그날 시작 시점까지 그 유형이 쓴 슬롯 수 */
 export function cursorAt(kind: DailyKind, d: number): number {
 	const bonusUsed: Record<string, number> = { discover: 0, trivia: 0, match: 0, cube: 0 };
-	for (let e = 0; e < d; e++) {
-		const ks = dailyKinds(e);
-		bonusUsed[ks[e % ks.length]] += 1;
-	}
+	for (let e = 0; e < d; e++) bonusUsed[bonusKindAt(e)] += 1;
 	const legacyDays = Math.min(d, CUBE_START_DAY);
-	const newDays = Math.max(0, d - CUBE_START_DAY);
-	const legacyPer = (DAILY_COUNTS_LEGACY as Record<string, number>)[kind] ?? 0;
-	return legacyPer * legacyDays + DAILY_COUNTS[kind] * newDays + bonusUsed[kind];
+	const cubeDays = Math.max(0, Math.min(d, NEW_SET_DAY) - CUBE_START_DAY);
+	const newDays = Math.max(0, d - NEW_SET_DAY);
+	const per = (o: Record<string, number>) => o[kind] ?? 0;
+	return (
+		per(DAILY_COUNTS_LEGACY) * legacyDays + per(DAILY_COUNTS) * cubeDays + per(NEW_COUNTS) * newDays + (bonusUsed[kind] ?? 0)
+	);
 }
 
 /** 그날 이 유형이 쓰는 슬롯 수(보너스 포함) */
 function takeAt(kind: DailyKind, d: number): number {
-	const kinds = dailyKinds(d);
-	const counts: Record<DailyKind, number> =
-		d >= CUBE_START_DAY ? { ...DAILY_COUNTS } : { ...DAILY_COUNTS_LEGACY, cube: 0 };
-	return counts[kind] + (kinds[d % kinds.length] === kind ? 1 : 0);
+	return countsAt(d)[kind] + (bonusKindAt(d) === kind ? 1 : 0);
 }
 
 /**
@@ -728,9 +781,8 @@ export function buildDailySetStable<D, T>(
 
 	const d = Math.max(0, dayNum);
 	const kinds = dailyKinds(d);
-	const counts: Record<DailyKind, number> =
-		d >= CUBE_START_DAY ? { ...DAILY_COUNTS } : { ...DAILY_COUNTS_LEGACY, cube: 0 };
-	const bonusKind = kinds[d % kinds.length];
+	const counts = countsAt(d);
+	const bonusKind = bonusKindAt(d);
 
 	const dAll = pickStable(discoverAll, (e) => sizesAt(e).discover, fieldOf, 20260101, 'discover', d);
 	// 문지기: 정규 발견형 안에서만 자리를 돌린다(보너스 칸은 마지막이라 건드리지 않는다).
@@ -812,6 +864,27 @@ export function buildDailySetStable<D, T>(
 			seen.add(mKey(mAll[k]));
 		}
 	}
+	if (d >= NEW_SET_DAY) {
+		// 새 구성 — 칸 순서는 NEW_SLOTS. 새 세 유형은 날짜 번호가 곧 문제다(scramble · equation · sudoku.ts)
+		const take: Record<string, number[]> = {
+			discover: dAll.slice(0, counts.discover),
+			trivia: tAll.slice(0, counts.trivia),
+			match: mAll.slice(0, counts.match),
+			cube: [newSetCube(d)],
+			scramble: [d],
+			equation: [d],
+			sudoku: [d]
+		};
+		const used: Record<string, number> = {};
+		const out: DailyPick[] = NEW_SLOTS.map((kind) => {
+			const k = used[kind] ?? 0;
+			used[kind] = k + 1;
+			return { kind, index: take[kind][k] };
+		});
+		const extra = ({ discover: dAll, trivia: tAll, match: mAll } as Record<string, number[]>)[bonusKind][counts[bonusKind]];
+		if (extra !== undefined) out.push({ kind: bonusKind, index: extra, bonus: true });
+		return out;
+	}
 	const cStart = cursorAt('cube', d);
 	const cAll = Array.from({ length: takeAt('cube', d) }, (_, i) => (cStart + i) % CUBE_TOTAL);
 	// 전개도 계단(CUBE_STAIR_DAY 주석) — 정규 칸 안에서만 십자 모양을 앞으로. 같은 모양끼리는 원래 순서
@@ -823,7 +896,15 @@ export function buildDailySetStable<D, T>(
 		head.forEach((h, k) => (cAll[k] = h.i));
 	}
 
-	const picked: Record<DailyKind, number[]> = { discover: dAll, trivia: tAll, match: mAll, cube: cAll };
+	const picked: Record<DailyKind, number[]> = {
+		discover: dAll,
+		trivia: tAll,
+		match: mAll,
+		cube: cAll,
+		scramble: [],
+		equation: [],
+		sudoku: []
+	};
 	const extra = picked[bonusKind][counts[bonusKind]];
 	const bonus: DailyPick | null =
 		extra === undefined ? null : { kind: bonusKind, index: extra, bonus: true };
@@ -950,7 +1031,15 @@ export function shareMessage(o: {
 }
 
 /** elapsedMs는 화면을 보고 있던 시간의 누적치. 이 기능 이전에 푼 날에는 없다(undefined). */
-export type DailyProgress = { pos: number; marks: Mark[]; done: boolean; elapsedMs?: number };
+export type DailyProgress = { pos: number; marks: Mark[]; done: boolean; elapsedMs?: number; set?: 2 };
+
+/**
+ * 11/24(NEW_SET_DAY)부터의 진행은 set:2를 달고 저장한다. 새 구성 전에 열어 둔 탭(옛 JS)은
+ * /api/day에서 안내 한 칸만 받아 그걸 풀면 「1/1 완주」를 남긴다. set:2가 없는 기록은 빈 것으로 본다.
+ */
+export function isStaleProgress(dayNum: number, raw: unknown): boolean {
+	return dayNum >= NEW_SET_DAY && (raw as { set?: unknown } | null)?.set !== 2;
+}
 
 export function dailyProgressKey(dayNum: number): string {
 	return `ddal.day.${dayNum}`;
@@ -962,7 +1051,9 @@ export function readDailyProgress(dayNum: number): DailyProgress {
 	try {
 		const raw = JSON.parse(localStorage.getItem(dailyProgressKey(dayNum)) || 'null');
 		if (!raw || typeof raw.pos !== 'number' || !Array.isArray(raw.marks)) return empty;
+		if (isStaleProgress(dayNum, raw)) return empty;
 		const p: DailyProgress = { pos: raw.pos, marks: raw.marks, done: !!raw.done };
+		if (raw.set === 2) p.set = 2;
 		if (typeof raw.elapsedMs === 'number' && Number.isFinite(raw.elapsedMs) && raw.elapsedMs >= 0) {
 			p.elapsedMs = raw.elapsedMs;
 		}
@@ -1048,7 +1139,8 @@ export function hasPlayedBefore(todayNum: number): boolean {
 export function writeDailyProgress(dayNum: number, p: DailyProgress): void {
 	if (typeof localStorage === 'undefined') return;
 	try {
-		localStorage.setItem(dailyProgressKey(dayNum), JSON.stringify(p));
+		const v = dayNum >= NEW_SET_DAY ? { ...p, set: 2 } : p;
+		localStorage.setItem(dailyProgressKey(dayNum), JSON.stringify(v));
 	} catch {
 		/* 저장 실패는 무시 — 진행은 메모리로 이어진다 */
 	}

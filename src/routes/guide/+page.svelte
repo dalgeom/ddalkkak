@@ -231,7 +231,7 @@
 	<section class="sec closing">
 		<h2 class="sh">매일 자정에 새로 열립니다</h2>
 		<p class="sub">
-			발견형·상식·성냥개비·전개도를 섞은 10문제가 매일 새로 열리고, 그날은 모두가 같은 문제를 풉니다.
+			글자 섞기·상식·그림 방정식·미니 스도쿠·발견형·성냥개비·전개도를 섞은 10문제가 매일 새로 열리고, 그날은 모두가 같은 문제를 풉니다.
 		</p>
 		<a class="cta" href="/">오늘의 10문제 풀러 가기 <span class="arr" aria-hidden="true">→</span></a>
 	</section>

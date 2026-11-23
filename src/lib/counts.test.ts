@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { PROBLEMS } from './problems';
 import { TRIVIA } from './trivia';
-import { MATCH_TOTAL, CUBE_TOTAL, DAILY_COUNTS } from './game';
+import { MATCH_TOTAL, CUBE_TOTAL, compositionShort, NEW_SET_DAY } from './game';
 
 /**
  * 문제 수를 화면에 숫자로 박아두면, 문제를 추가할 때마다 그 화면만 옛 숫자로 남는다.
@@ -67,7 +67,7 @@ describe('문제 수는 화면에 박아두지 않는다', () => {
 		expect(line, '카드 부제 줄을 못 찾았다').toBeTruthy();
 		const listed = line!.split('—')[1].split('·').length;
 		expect(listed, `카드에 ${listed}개만 적혀 있다 — node scripts/og-gen.mjs 다시 돌릴 것`).toBe(
-			Object.keys(DAILY_COUNTS).length
+			compositionShort(NEW_SET_DAY).split(" · ").filter((s) => s !== "보너스 1").length
 		);
 	});
 });

@@ -1,6 +1,6 @@
 import { json, error } from '@sveltejs/kit';
 import { dev } from '$app/environment';
-import { assembleDayQueue } from '$lib/dayview';
+import { dayQueueForClient } from '$lib/dayview';
 import { kstDayNumber, SITE_START_DAY } from '$lib/game';
 import type { RequestHandler } from './$types';
 
@@ -18,7 +18,7 @@ import type { RequestHandler } from './$types';
  */
 export const prerender = false;
 
-export const GET: RequestHandler = ({ params, setHeaders }) => {
+export const GET: RequestHandler = ({ params, url, setHeaders }) => {
 	const day = Number(params.day);
 	const today = kstDayNumber(Date.now());
 
@@ -30,5 +30,5 @@ export const GET: RequestHandler = ({ params, setHeaders }) => {
 
 	// 같은 날짜는 같은 답이라 잠깐 캐시해도 된다. 자정에 바뀌는 것보다 짧게 잡는다.
 	setHeaders({ 'cache-control': 'public, max-age=300' });
-	return json(assembleDayQueue(day));
+	return json(dayQueueForClient(day, url.searchParams.get('v')));
 };

@@ -8,6 +8,7 @@
  *
  * 백엔드가 없으니 파일 한 장으로 옮긴다. 딸깍이 쓰는 키만 골라 담는다.
  */
+import { isStaleProgress } from './game';
 
 /** 백업 대상 키인가 — 접두사로 판별해 날짜별 진행(ddal.day.N)까지 함께 담는다 */
 export function isBackupKey(key: string): boolean {
@@ -70,8 +71,12 @@ export function mergeBackup(store: Storage, backup: Backup): number {
 /** 충돌 규칙: 하루치 진행은 '더 많이 푼 쪽', 누적 통계는 '더 큰 쪽'을 남긴다 */
 function shouldOverwrite(key: string, cur: string, incoming: string): boolean {
 	if (key.startsWith('ddal.day.')) {
-		const a = safeParse(cur);
-		const b = safeParse(incoming);
+		// 11/24부터 set:2 없는 기록(옛 탭이 남긴 안내 한 칸)은 없는 것으로 본다
+		const day = Number(key.slice('ddal.day.'.length));
+		const a = isStaleProgress(day, safeParse(cur)) ? null : safeParse(cur);
+		const b = isStaleProgress(day, safeParse(incoming)) ? null : safeParse(incoming);
+		if (!b) return false;
+		if (!a) return true;
 		const ac = Array.isArray(a?.marks) ? a.marks.length : -1;
 		const bc = Array.isArray(b?.marks) ? b.marks.length : -1;
 		if (a?.done && !b?.done) return false;

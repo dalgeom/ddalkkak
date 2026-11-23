@@ -4,6 +4,7 @@ import { TRIVIA } from './trivia';
 import { bankSizesAt } from './bankHistory';
 import { isOpener } from './opener';
 import { tierOf } from './discoverTiers';
+import { problemAt } from './cubenet';
 import {
 	buildDailySet,
 	buildDailySetStable,
@@ -16,7 +17,9 @@ import {
 	dailyKindOrder,
 	CUBE_TOTAL,
 	TRIVIA_FIRST_DAY,
-	EASY_FIRST_DAY
+	EASY_FIRST_DAY,
+	NEW_SET_DAY,
+	cursorAt
 } from './game';
 
 /** 실제 문제은행으로 "오늘의 딸깍" 하루 세트를 검증한다(합성 데이터로는 분포 편향을 못 잡는다). */
@@ -126,7 +129,7 @@ describe('오늘의 딸깍 — 실제 문제은행 검증', () => {
 		const stable = (day: number) =>
 			buildDailySetStable(PROBLEMS, TRIVIA, MATCH_TOTAL, day, (p) => fieldOfChip(p.chip), (t) => t.category ?? '기타', bankSizesAt, isOpener);
 		for (let day = TRIVIA_FIRST_DAY - 30; day < TRIVIA_FIRST_DAY; day++) expect(stable(day)[0].kind, `day ${day}`).toBe('discover');
-		for (let day = TRIVIA_FIRST_DAY; day < TRIVIA_FIRST_DAY + 60; day++) {
+		for (let day = TRIVIA_FIRST_DAY; day < Math.min(TRIVIA_FIRST_DAY + 60, NEW_SET_DAY); day++) {
 			const set = stable(day);
 			expect(set[0].kind, `day ${day}`).toBe('trivia');
 			expect(set[0].bonus, `day ${day}`).toBeFalsy();
@@ -152,7 +155,7 @@ describe('오늘의 딸깍 — 실제 문제은행 검증', () => {
 	it('10/22(EASY_FIRST_DAY)부터 1번은 늘 새싹 · 쉬움 상식, 하루 안에 같은 문제 없음', () => {
 		const stable = (day: number) =>
 			buildDailySetStable(PROBLEMS, TRIVIA, MATCH_TOTAL, day, (p) => fieldOfChip(p.chip), (t) => t.category ?? '기타', bankSizesAt, isOpener);
-		for (let day = EASY_FIRST_DAY; day < EASY_FIRST_DAY + 120; day++) {
+		for (let day = EASY_FIRST_DAY; day < Math.min(EASY_FIRST_DAY + 120, NEW_SET_DAY); day++) {
 			const set = stable(day);
 			expect(set[0].kind, `day ${day}`).toBe('trivia');
 			expect(tierOf(TRIVIA[set[0].index]), `day ${day} ${TRIVIA[set[0].index].id}`).toBeLessThanOrEqual(2);
@@ -172,6 +175,45 @@ describe('오늘의 딸깍 — 실제 문제은행 검증', () => {
 			expect(dailyKindOrder(day), `day ${day}`).toEqual(actual);
 			expect(set[set.length - 1].bonus, `day ${day} 마지막이 보너스`).toBe(true);
 		}
+	});
+
+	it('11/24(NEW_SET_DAY)부터 새 구성 — 칸 순서 · 보너스 · 1년 안 재출제 없음 · 전개도는 십자만', () => {
+		const stable = (day: number) =>
+			buildDailySetStable(PROBLEMS, TRIVIA, MATCH_TOTAL, day, (p) => fieldOfChip(p.chip), (t) => t.category ?? '기타', bankSizesAt, isOpener);
+		const slots = ['scramble', 'trivia', 'trivia', 'equation', 'sudoku', 'discover', 'discover', 'match', 'cube'];
+		const crossCount = Array.from({ length: CUBE_TOTAL }, (_, i) => i).filter(
+			(i) => problemAt(i).net.rows.map((r) => (r.match(/#/g) || []).length).join('-') === '1-4-1'
+		).length;
+		expect(crossCount).toBeGreaterThan(150);
+		const oldCubes = new Set<number>();
+		for (let day = 20750; day < NEW_SET_DAY; day++) for (const p of stable(day)) if (p.kind === 'cube') oldCubes.add(p.index);
+		expect(oldCubes.size).toBeGreaterThan(30); // 양성 대조 — 옛 날의 전개도를 실제로 모았다
+		const seen: Record<string, Set<number>> = { match: new Set(), cube: new Set(), discover: new Set(), trivia: new Set() };
+		const used: Record<string, number> = { discover: 0, trivia: 0, match: 0, cube: 0 };
+		for (let day = NEW_SET_DAY; day < NEW_SET_DAY + 365; day++) {
+			const set = stable(day);
+			expect(set.length, `day ${day}`).toBe(DAILY_SIZE);
+			expect(set.slice(0, 9).map((p) => p.kind), `day ${day}`).toEqual(slots);
+			expect(set[9].bonus, `day ${day}`).toBe(true);
+			expect(set[9].kind, `day ${day}`).not.toBe('cube');
+			expect(dailyKindOrder(day), `day ${day}`).toEqual(set.map((p) => p.kind));
+			expect(tierOf(TRIVIA[set[1].index]), `day ${day} 2번 상식`).toBeLessThanOrEqual(2);
+			for (const p of set) {
+				if (!(p.kind in seen)) continue;
+				// 전개도 십자는 700문제 중 crossCount개뿐 — 한 바퀴 안에서만 겹치지 않으면 된다
+				if (p.kind === 'match' || (p.kind === 'cube' && day < NEW_SET_DAY + crossCount)) {
+					expect(seen[p.kind].has(p.index), `day ${day} ${p.kind} ${p.index} 재출제`).toBe(false);
+					seen[p.kind].add(p.index);
+				}
+				used[p.kind]++;
+			}
+			const cube = set[8].index;
+			expect(problemAt(cube).net.rows.map((r) => (r.match(/#/g) || []).length).join('-'), `day ${day}`).toBe('1-4-1');
+			if (day < NEW_SET_DAY + 60) expect(oldCubes.has(cube), `day ${day} 전개도 ${cube}가 11/23 전에 나왔다`).toBe(false);
+		}
+		// 커서는 그날까지 실제로 쓴 수와 같다 — 이어 붙는 날이 어긋나지 않게
+		for (const k of ['discover', 'trivia', 'match'] as const)
+			expect(cursorAt(k, NEW_SET_DAY + 365) - cursorAt(k, NEW_SET_DAY), k).toBe(used[k]);
 	});
 
 	it('전 방문자가 같은 날 같은 문제를 푼다(같은 입력 → 같은 출력)', () => {

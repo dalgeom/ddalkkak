@@ -130,7 +130,7 @@ const html = `<!doctype html><html lang="ko"><head><meta charset="utf-8">
     <div class="pulse">${pulse}</div>
   </div>
   <div class="sub">
-    하루 <b>10문제</b> — 발견형 퍼즐 · 상식 퀴즈 · 성냥개비 · 전개도<br>
+    하루 <b>10문제</b> — 글자 섞기 · 상식 · 그림 방정식 · 스도쿠 · 발견형 · 성냥 · 전개도<br>
     매일 자정, 모두가 같은 문제로.
   </div>
 </div></body></html>`;

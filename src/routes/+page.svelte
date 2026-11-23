@@ -24,12 +24,19 @@
 		shareMessage,
 		bestDailyTime,
 		dailyKindOrder,
+		compositionShort as compositionOf,
 		CUBE_TOTAL,
 		type DailyProgress,
 		type Mark,
 		type DailyKind
 	} from '$lib/game';
 	import PickChips from '$lib/components/PickChips.svelte';
+	import ScrambleCard from '$lib/components/ScrambleCard.svelte';
+	import EquationCard from '$lib/components/EquationCard.svelte';
+	import SudokuCard from '$lib/components/SudokuCard.svelte';
+	import type { Scramble } from '$lib/scramble';
+	import type { Equation } from '$lib/equation';
+	import type { Sudoku } from '$lib/sudoku';
 	import { playHistory } from '$lib/playHistory.svelte';
 	import { shareResult, outcomeMessage } from '$lib/shareCard';
 	import { ctaTrack, takeGoDaily, leaveEventName, openDwellEventName } from '$lib/analytics';
@@ -99,6 +106,10 @@
 		problem?: Problem;
 		eq?: { displayed: string; solution: string };
 		cube?: CubeNetProblem;
+		/** 11/24 새 구성의 세 유형 — 날짜로 하나씩 정해진다 */
+		scramble?: Scramble;
+		equation?: Equation;
+		sudoku?: Sudoku;
 	};
 	let queue = $state<Item[]>([]);
 	let pos = $state(0);
@@ -161,7 +172,14 @@
 	/** 그 문제의 힌트. v2(10/14): 성냥개비도 /matchstick과 같은 두 단계 힌트(빼는 곳 → 꽂는 곳)를 쓴다 —
 	    데일리 성냥에는 힌트가 없어 같은 유형인데 화면마다 기능이 달랐다(10/14 점검) */
 	let hintList = $derived<string[] | null>(
-		current?.problem?.hints ?? (current?.eq ? moveHints(current.eq) : null)
+		current?.problem?.hints ??
+			(current?.eq
+				? moveHints(current.eq)
+				: current?.scramble
+					? [current.scramble.hint]
+					: current?.equation
+						? [current.equation.steps[0]]
+						: null)
 	);
 	let shownHints = $derived(hintList ? hintList.slice(0, hintsUsed) : []);
 	let correctCount = $derived(marks.filter((m) => m !== 'miss').length);
@@ -223,7 +241,10 @@
 		discover: '발견',
 		trivia: '상식',
 		match: '성냥',
-		cube: '전개도'
+		cube: '전개도',
+		scramble: '글자 섞기',
+		equation: '그림 방정식',
+		sudoku: '스도쿠'
 	};
 	// 랜딩 소개용 — 문제은행을 랜딩에서 받지 않으려고 개수는 상수로 둔다(레이아웃 서버 로드와 같은 값)
 	/* 개수는 레이아웃 서버 로드가 실제 문제은행에서 세어 내려준다.
@@ -235,18 +256,10 @@
 	// 성냥개비 소개 카드에 띄우는 읽기전용 보드
 	const demoBoard = parseEq('8 - 0 = 8');
 
-	/** 오늘 구성 — 유형이 늘어도 문구가 저절로 따라오게 계산해서 쓴다 */
-	let todayCounts = $derived.by(() => {
-		const order = dailyKindOrder(dayNum);
-		const c: Partial<Record<DailyKind, number>> = {};
-		for (const k of order.slice(0, -1)) c[k] = (c[k] ?? 0) + 1;
-		return order.slice(0, -1).filter((k, i, a) => a.indexOf(k) === i).map((k) => ({ kind: k, n: c[k]! }));
-	});
 	/** 콘텐츠 쪽 버튼에서 곧장 1번으로 온 사람에게만 1번 위 안내 한 줄(11/12 실험) */
 	let goIntro = $state(false);
-	let compositionShort = $derived(
-		todayCounts.map((x) => `${KIND_LABEL[x.kind]} ${x.n}`).join(' · ') + ' · 보너스 1'
-	);
+	/** 오늘 구성 문구 — 11/24부터 구성이 바뀌어 game.ts 한 곳에서 날짜로 정한다 */
+	let compositionShort = $derived(compositionOf(dayNum));
 
 	/** 상단 유형 칩: "발견 · 2/3" — 같은 유형 안에서 몇 번째인지 */
 	let typeChip = $derived.by(() => {
@@ -266,6 +279,9 @@
 			trivia: { label: '상식', ok: 0, total: 0 },
 			match: { label: '성냥개비', ok: 0, total: 0 },
 			cube: { label: '전개도', ok: 0, total: 0 },
+			scramble: { label: '글자 섞기', ok: 0, total: 0 },
+			equation: { label: '그림 방정식', ok: 0, total: 0 },
+			sudoku: { label: '스도쿠', ok: 0, total: 0 },
 			bonus: { label: '보너스', ok: 0, total: 0 }
 		};
 		// 배치 순서는 그날 구성만 알면 복원된다(다 풀고 새로고침하면 queue가 비어 있다)
@@ -279,12 +295,16 @@
 					? 'bonus'
 					: (order[i] ?? 'discover');
 		const n = Math.max(queue.length, marks.length);
+		// 행은 그날 처음 나온 순서대로 — 11/24 새 구성은 글자 섞기가 1번이다
+		const seen: string[] = [];
 		for (let i = 0; i < n; i++) {
-			const row = base[kindAt(i)];
+			const k = kindAt(i);
+			if (!seen.includes(k)) seen.push(k);
+			const row = base[k];
 			row.total += 1;
 			if (marks[i] && marks[i] !== 'miss') row.ok += 1;
 		}
-		return Object.values(base).filter((r) => r.total > 0);
+		return seen.map((k) => base[k]);
 	});
 
 	/** 다음 힌트가 열리기까지 남은 초. 잠긴 이유를 숫자로 보여줘야 죽은 버튼으로 안 읽힌다. */
@@ -319,7 +339,8 @@
 		 * 길을 하나만 두지 않는다.
 		 */
 		try {
-			const r = await fetch(`/api/day/${dayNum}`);
+			// ?v=2: 새 구성을 그릴 줄 아는 화면이라는 표시 — 없으면 서버가 옛 탭에 안내 한 칸만 준다
+			const r = await fetch(`/api/day/${dayNum}?v=2`);
 			if (r.ok) {
 				const q = await r.json();
 				if (Array.isArray(q) && q.length) {
@@ -332,11 +353,14 @@
 			/* 아래 전체 은행 경로로 */
 		}
 		track('daily_bank', { via: 'full' });
-		const [p, t, m, cn] = await Promise.all([
+		const [p, t, m, cn, sc, eqn, sd] = await Promise.all([
 			import('$lib/problems'),
 			import('$lib/trivia'),
 			import('$lib/data/matchstick-problems.json'),
-			import('$lib/cubenet')
+			import('$lib/cubenet'),
+			import('$lib/scramble'),
+			import('$lib/equation'),
+			import('$lib/sudoku')
 		]);
 		const eqs = (m.default ?? m) as { displayed: string; solution: string }[];
 		// 날짜별 은행 크기 이력째로 — 안정 뽑기(v2)가 과거 하루하루의 크기로 세트를 고정한다
@@ -362,7 +386,10 @@
 						? t.TRIVIA[pick.index]
 						: undefined,
 			eq: pick.kind === 'match' ? eqs[pick.index] : undefined,
-			cube: pick.kind === 'cube' ? cn.problemAt(pick.index) : undefined
+			cube: pick.kind === 'cube' ? cn.problemAt(pick.index) : undefined,
+			scramble: pick.kind === 'scramble' ? sc.scrambleAt(pick.index) : undefined,
+			equation: pick.kind === 'equation' ? eqn.equationAt(pick.index) : undefined,
+			sudoku: pick.kind === 'sudoku' ? sd.sudokuAt(pick.index) : undefined
 		}));
 	}
 
@@ -445,7 +472,8 @@
 			browser &&
 			it &&
 			!it.eq &&
-			it.problem?.type !== 'choice' &&
+			it.problem &&
+			it.problem.type !== 'choice' &&
 			window.matchMedia?.('(hover: hover)').matches
 		) {
 			tick().then(() => inputEl?.focus());
@@ -586,6 +614,18 @@
 				settle('miss', '정답을 확인했어요', false);
 			else feedback = { msg: '아쉬워요 — 한 번 더 골라볼까요?', ok: false };
 		}
+	}
+
+	/** 11/24 새 유형(글자 섞기 · 그림 방정식 · 스도쿠)은 카드가 스스로 판정하고 결과만 알린다 — 오답 횟수 제한은 글자 답과 같이 없다 */
+	function cardSolved() {
+		if (judged) return;
+		const clean = hintsUsed === 0 && wrongAttempts === 0;
+		settle(clean ? 'clean' : 'hinted', clean ? '딸깍! 맞혔어요' : '맞혔어요', true);
+	}
+	function cardWrong() {
+		if (judged) return;
+		wrongAttempts += 1;
+		feedback = { msg: '아직이에요 — 다시 들여다볼까요?', ok: false };
 	}
 
 	function showHint() {
@@ -1057,7 +1097,7 @@
 	<title>딸깍 퍼즐 — 매일 두뇌 퍼즐 10문제 · 퀴즈 띄우기 · 성냥개비 · 끝말잇기 도구</title>
 	<meta
 		name="description"
-		content="매일 자정 새로 열리는 두뇌 퍼즐 10문제(발견형·상식·성냥개비·전개도). 수업·모임에서 TV로 띄우는 퀴즈, 성냥개비 정답 찾기, 끝말잇기 단어 찾기 같은 무료 도구도 있어요. 문제마다 검수하고 해설을 달아요."
+		content="매일 자정 새로 열리는 두뇌 퍼즐 10문제(글자 섞기·상식·그림 방정식·미니 스도쿠·발견형·성냥개비·전개도). 수업·모임에서 TV로 띄우는 퀴즈, 성냥개비 정답 찾기, 끝말잇기 단어 찾기 같은 무료 도구도 있어요. 문제마다 검수하고 해설을 달아요."
 	/>
 	<link rel="canonical" href="https://ddalkkak.app/" />
 	<meta property="og:url" content="https://ddalkkak.app/" />
@@ -1246,6 +1286,12 @@
 							{mPicked ? '집었어요 — 놓을 빈 자리를 눌러요' : '옮길 성냥을 눌러 집어요'}
 						</p>
 					{/if}
+				{:else if current.scramble}
+					<ScrambleCard data={current.scramble} {judged} onwrong={cardWrong} onsolve={cardSolved} />
+				{:else if current.equation}
+					<EquationCard data={current.equation} {judged} onwrong={cardWrong} onsolve={cardSolved} />
+				{:else if current.sudoku}
+					<SudokuCard data={current.sudoku} {judged} onwrong={cardWrong} onsolve={cardSolved} />
 				{:else if current.problem}
 					{#each current.problem.blocks as b, i (i)}
 						{#if b.kind === 'text'}
@@ -1370,6 +1416,12 @@
 								>{CUBE_FACES[a].name} ↔ {CUBE_FACES[b].name}</span
 							>{k < current.cube.opposites.length - 1 ? ', ' : ''}{/each}
 						세 쌍이에요. 마주 본 두 면은 한 화면에 같이 보이지 않아요.{#if wrongAttempts > 0} 마주 보는 두 면이 같이 보이지 않는데도 틀렸다면, 그 틀린 보기는 정답의 거울상이에요 — 세 면이 도는 방향이 반대라 아무리 돌려도 못 만들어요.{/if}
+					{:else if current.scramble}
+						정답은 <b>{current.scramble.word}</b> ({current.scramble.category}). {current.scramble.hint}
+					{:else if current.equation}
+						{#each current.equation.steps as s, k (k)}<span class="eqstep">{s}</span>{/each}
+					{:else if current.sudoku}
+						가로줄 · 세로줄 · 굵은 칸 묶음에 하나씩 빠진 수를 찾아 채우면 돼요. 판에 정답을 채워 두었어요.
 					{:else if current.problem}
 						{@html current.problem.explain}
 					{/if}
@@ -1413,7 +1465,7 @@
 					<button class="ghost" disabled={!mPicked} onclick={resetBoard}>처음부터</button>
 					<button class="ghost" onclick={giveUp}>모르겠어요</button>
 				</div>
-			{:else if current.cube || current.problem?.type === 'choice'}
+			{:else if current.cube || current.scramble || current.equation || current.sudoku || current.problem?.type === 'choice'}
 				<!-- 보기를 눌러 답하는 유형에는 제출 버튼이 필요 없다 -->
 				<button class="ghost wide" onclick={giveUp}>모르겠어요</button>
 			{:else}
@@ -2425,6 +2477,10 @@
 	}
 	.cubeopt.bad .badge {
 		color: var(--accent-2);
+	}
+	.eqstep {
+		display: block;
+		margin-top: 4px;
 	}
 	.oppair {
 		font-weight: 700;

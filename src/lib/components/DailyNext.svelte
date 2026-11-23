@@ -28,7 +28,7 @@
 	<a class="dnext" href="/" use:ctaTrack={'next'}>
 		<span class="dn-k">오늘의 10문제</span>
 		<b class="dn-t">{view === 'resume' ? '풀던 오늘의 10문제를 이어서 풀어요' : pitch}</b>
-		<span class="dn-s">발견형 3 · 상식 2 · 성냥개비 2 · 전개도 2 · 보너스 1 · 10분이면 끝나요</span>
+		<span class="dn-s">글자 섞기 · 상식 2 · 그림 방정식 · 미니 스도쿠 · 발견형 2 · 성냥 · 전개도 · 보너스</span>
 		<span class="dn-go">{view === 'resume' ? '이어 풀기' : '바로 시작'} <span aria-hidden="true">→</span></span>
 	</a>
 {/if}

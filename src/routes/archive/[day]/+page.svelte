@@ -16,8 +16,11 @@
 	/** 그날 실제 구성 — 전개도가 들어오기 전 날짜는 옛 구성 그대로 표기해야 한다 */
 	const composition = $derived(
 		[
+			...(data.scramble.length ? [`글자 섞기 ${data.scramble.length}`] : []),
 			`발견형 ${data.discover.length}`,
 			`상식 ${data.trivia.length}`,
+			...(data.equation.length ? [`그림 방정식 ${data.equation.length}`] : []),
+			...(data.sudoku.length ? [`미니 스도쿠 ${data.sudoku.length}`] : []),
 			`성냥개비 ${data.match.length}`,
 			...(data.cube.length ? [`전개도 ${data.cube.length}`] : []),
 			'보너스 1'
@@ -39,6 +42,12 @@
 				q: '전개도 퍼즐: 이 전개도를 접으면 어떤 주사위가 되는지 고르기',
 				a: '보기 ' + ['A', 'B', 'C', 'D'][c.answer]
 			});
+		for (const s of data.scramble)
+			qs.push({ q: `글자 섞기: 음절 「${s.letters.join(' ')}」을 바로 놓아 ${s.category} 낱말 만들기`, a: s.word });
+		for (const e of data.equation)
+			qs.push({ q: `그림 방정식: ${e.lines.map((l) => `${l.expr} = ${l.total}`).join(', ')}일 때 ${e.question}`, a: String(e.answer) });
+		for (const s of data.sudoku)
+			qs.push({ q: `미니 스도쿠 ${s.size}×${s.size}: 빈칸 채우기`, a: s.solution.join('') });
 		if (data.bonus) {
 			if (data.bonus.kind === 'match')
 				qs.push({

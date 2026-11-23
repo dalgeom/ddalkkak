@@ -1,7 +1,7 @@
 {
 	"name": "딸깍 — 두뇌 퍼즐",
 	"short_name": "딸깍",
-	"description": "하루 10문제, 매일 자정에 새로 열리는 두뇌 퍼즐. 발견형·상식·성냥개비.",
+	"description": "하루 10문제, 매일 자정에 새로 열리는 두뇌 퍼즐. 글자 섞기·상식·스도쿠·발견형·성냥개비·전개도.",
 	"start_url": "/",
 	"display": "standalone",
 	"background_color": "#efe7d8",
