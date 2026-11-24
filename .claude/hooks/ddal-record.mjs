@@ -6,6 +6,7 @@
 //   post    PostToolUse(Bash|PowerShell): 기계로 알 수 있는 일(GA 보고 · qa · ?day= 미리 열기 · 푸시 · 정리)을 done 파일에 자동으로 적는다.
 //   stop    Stop: 마지막 답이 done 파일에 「끝」으로 적힌 일을 「안 했다 · 남았다 · 다음은」이라고 하면 한 번 막는다.
 // done 파일: .claude/tmp/done-YYYY-MM-DD.md (gitignore). 한 줄 = `- HH:MM [항목] 내용`. 항목: GA 보고 · 성장 작업 · 단계 채우기 · 블로그 · 미리 풀기.
+// 성장 작업은 네 갈래(11/24 사용자): `[성장 작업 · 콘텐츠|검색|외부링크|홍보]`, 라벨 없으면 콘텐츠. 내용이 「안 함」으로 시작하면 안 한 것(이유 적음) — 끝난 일로 세지 않는다.
 import fs from 'node:fs';
 import path from 'node:path';
 import { execSync } from 'node:child_process';
@@ -16,6 +17,8 @@ const today = new Date().toLocaleDateString('sv-SE');
 const hhmm = () => new Date().toTimeString().slice(0, 5);
 const DONE = path.join(ROOT, '.claude', 'tmp', `done-${today}.md`);
 const ITEMS = ['GA 보고', '성장 작업', '단계 채우기', '블로그', '미리 풀기'];
+const BRANCHES = ['콘텐츠', '검색', '외부링크', '홍보'];
+const SKIP_RE = /\]\s*안\s?함/;
 
 let input = {};
 try { input = JSON.parse(fs.readFileSync(0, 'utf8') || '{}'); } catch { process.exit(0); }
@@ -23,10 +26,18 @@ const out = (o) => { process.stdout.write(JSON.stringify(o)); process.exit(0); }
 const read = (p) => { try { return fs.readFileSync(p, 'utf8'); } catch { return ''; } };
 const append = (line) => { fs.mkdirSync(path.dirname(DONE), { recursive: true }); fs.appendFileSync(DONE, `- ${hhmm()} ${line}\n`); };
 const sh = (c) => { try { return execSync(c, { cwd: ROOT, encoding: 'utf8', timeout: 5000, stdio: ['ignore', 'pipe', 'ignore'] }).trim(); } catch { return ''; } };
-const doneItems = (txt) => ITEMS.filter((it) => new RegExp(`\\[[^\\]]*${it}[^\\]]*\\]`).test(txt));
+const doneItems = (txt) => {
+	const t = txt.split('\n').filter((l) => !SKIP_RE.test(l)).join('\n');
+	return ITEMS.filter((it) => new RegExp(`\\[[^\\]]*${it}[^\\]]*\\]`).test(t));
+};
+// 갈래별 상태: 함 · 안 함(이유 적음) · 안 적힘.
+const branchState = (txt) => Object.fromEntries(BRANCHES.map((b) => {
+	const ls = txt.split('\n').filter((l) => (b === '콘텐츠' && /\[성장 작업\]/.test(l)) || new RegExp(`\\[성장 작업\\s*·\\s*${b}\\]`).test(l));
+	return [b, ls.some((l) => !SKIP_RE.test(l)) ? '함' : ls.length ? '안 함(이유 적음)' : '안 적힘'];
+}));
 // 11/18 사용자: 「메모리말고 hook으로 해야지. 니 메모리는 이제 안믿어」 — 보고 형식 · 성장 작업 정의를 메모리가 아니라 여기서 강제한다.
 const GROWTH = '[성장 작업 정의 11/18 사용자] 딸깍의 유입량 늘리기 · 네이버에서 더 검색 잘되게 하기 · 구글에서 더 검색 잘되게 하기 · 사람들이 많이 찾아오게 하기 · 재방문율을 높일 아이디어 적용하기 · 새로운 콘텐츠 · 새로운 퀴즈 유형 · 새로운 할 것 · 새로운 놀 것 아이디어나 방향 제시하기 — 이런 게 핵심.\n(해석) hook · 지표 도구 · 운영 정리는 성장 작업으로 세지 않는다.';
-const FORMAT = '[보고 형식 11/18 사용자 「항상 이렇게 깔끔하게 보고」] 한 줄 결론 → 「매일 일 | 상태 | 근거」 마크다운 표(GA 보고 · 성장 작업 · 단계 채우기 · 미리 풀기 · 블로그, 근거 = 시각 · 커밋 · qa 숫자) → 표 밖에 한 일 한 줄 · 다음 시작점 한 줄.';
+const FORMAT = '[보고 형식 11/18 사용자 「항상 이렇게 깔끔하게 보고」] 한 줄 결론 → 「매일 일 | 상태 | 근거」 마크다운 표(GA 보고 · 성장 작업 콘텐츠 · 검색 · 외부링크 · 홍보 네 줄 · 단계 채우기 · 미리 풀기 · 블로그, 근거 = 시각 · 커밋 · qa 숫자) → 표 밖에 한 일 한 줄 · 다음 시작점 한 줄.';
 const STATUS_RE = /끝\?|끝났|종료\s*(야|냐|임|\?)|남은\s*(일|거|것)|뭐\s*했|다 했|오늘 할 일|상태\s*(보고|는\?|야\?|알려)/;
 const TABLE_RE = /^\s*\|.*\|\s*$\n^\s*\|?\s*:?-{3,}/m;
 
@@ -41,6 +52,7 @@ function record() {
 	return [
 		`[오늘 기록 ${today}] 상태 · 남은 일 · 「다음 할 일」을 말하기 전에 이것부터 본다. 여기 없는 일은 「안 했다」가 아니라 대화 jsonl을 찾아보거나 「모른다」다.`,
 		`끝난 매일 일: ${have.length ? have.join(' · ') : '(done 파일에 적힌 것 없음)'} / 안 적힌 것: ${ITEMS.filter((i) => !have.includes(i)).join(' · ') || '없음'}`,
+		`성장 작업 갈래: ${Object.entries(branchState(done)).map(([b, st]) => `${b} ${st}`).join(' · ')} — 갈래마다 하거나 \`[성장 작업 · 갈래] 안 함 — 이유\`를 적는다.`,
 		done ? `done 파일(.claude/tmp/done-${today}.md):\n${done.split('\n').slice(-25).join('\n')}` : `done 파일 없음 — 매일 일을 끝내면 \`- HH:MM [항목] 내용\` 한 줄을 .claude/tmp/done-${today}.md에 적는다.`,
 		`오늘 커밋: ${commits ? '\n' + commits.split('\n').slice(0, 15).join('\n') : '없음'}`,
 		`fixLog ${md}: ${fix.length ? fix.join(' · ') : '없음'} / 게시-기록 ${md}: ${posts.length ? '\n' + posts.join('\n') : '없음'}`,
@@ -113,7 +125,12 @@ if (mode === 'stop') {
 	// 「」 · "" · `` 안은 인용(시험 문장 · 사용자 말 옮기기)이라 뺀다 — 11/18 시험 결과를 옮긴 답이 막혔다.
 	const said = texts.join('\n').replace(/「[^」\n]*」|"[^"\n]*"|`[^`\n]*`/g, '');
 	const NEG = '(안\\s?했|안\\s?함|안\\s?됨|남았|남음|아직|못\\s?했|빠졌|해야\\s?(합니다|한다|해))';
-	const hits = have.filter((it) => new RegExp(`${it}[^.\\n,]{0,15}${NEG}`).test(said) || new RegExp(`다음(은|에|\\s*할\\s*일)[^.\\n]{0,20}${it}`).test(said));
+	// 갈래: 「함」인 갈래를 안 했다고 하면 잡는다. 그 뒤 갈래 문구를 지워 「성장 작업 · 검색은 아직」이 성장 작업 전체로 잡히지 않게 한다.
+	// 빈틈(알고 둔다): 갈래 문구를 지운 뒤라 「성장 작업 · 콘텐츠는 아직」은 콘텐츠가 「함」일 때만 bHits로 잡힌다.
+	const bs = branchState(read(DONE));
+	const bHits = BRANCHES.filter((b) => bs[b] === '함' && new RegExp(`성장 작업\\s*·\\s*${b}[^.\\n,]{0,15}${NEG}`).test(said)).map((b) => `성장 작업 · ${b}`);
+	const said2 = said.replace(new RegExp(`성장 작업\\s*·\\s*(${BRANCHES.join('|')})|성장 작업 갈래`, 'g'), '갈래');
+	const hits = [...bHits, ...have.filter((it) => new RegExp(`${it}[^.\\n,]{0,15}${NEG}`).test(said2) || new RegExp(`다음(은|에|\\s*할\\s*일)[^.\\n]{0,20}${it}`).test(said2))];
 	if (hits.length)
 		reasons.push(`[오늘 기록] done 파일(.claude/tmp/done-${today}.md)에 「${hits.join(' · ')}」가 이미 끝났다고 적혀 있는데 답이 안 했다 · 남았다 · 다음 할 일로 말한다. 파일을 열어 확인하고 답을 고친다(다른 날짜 이야기라면 날짜를 밝혀 다시 쓴다).`);
 	if (reasons.length) out({ decision: 'block', reason: reasons.join('\n') });
