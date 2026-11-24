@@ -159,12 +159,21 @@ for (const w of [320, 360]) {
 await b.viewport(390, 844);
 
 // 4b. 딸깍 5단계(10/20) — 오늘의 10문제 카드에 단계 칩(새싹~고수)
+// 11/24 새 구성부터 1번은 글자 섞기(칩 없음), 6번이 발견형이다(game.ts NEW_SLOTS)
+const chipProbe = `document.querySelector('.cta')?.click(); await new Promise(r=>setTimeout(r,2500));
+	return { row: !!document.querySelector('.chiprow'), tier: document.querySelector('.chiprow .tier-chip')?.textContent.trim() ?? null, cat: document.querySelector('.chiprow .cat-chip')?.textContent.trim() ?? null, top: document.querySelector('.type-chip')?.textContent.trim() };`;
 await b.ev(`localStorage.clear(); return 1;`);
 await b.go('/', 3500);
-m = await b.ev(`document.querySelector('.cta')?.click(); await new Promise(r=>setTimeout(r,2500));
-	return { tier: document.querySelector('.chiprow .tier-chip')?.textContent.trim() ?? null, cat: document.querySelector('.chiprow .cat-chip')?.textContent.trim() ?? null, top: document.querySelector('.type-chip')?.textContent.trim() };`);
-ok('오늘의 10문제 1번 카드에 단계 칩 · 분야 칩이 나란히', /^(새싹|쉬움|보통|어려움|고수)$/.test(m.tier ?? '') && !!m.cat, JSON.stringify(m));
+m = await b.ev(chipProbe);
+ok('오늘의 10문제 1번(글자 섞기) 카드에는 칩 줄이 없다', /^1 \/ 10 · 글자 섞기/.test(m.top ?? '') && !m.row, JSON.stringify(m));
+await b.go('/games', 2000); // 풀던 화면에서 심으면 떠날 때 앱이 진행을 덮어쓴다
+await b.ev(`localStorage.clear(); const d = Math.floor((Date.now() + 9 * 3600000) / 86400000);
+	localStorage.setItem('ddal.day.' + d, JSON.stringify({ pos: 5, marks: [false, false, false, false, false], set: 2, done: false })); return 1;`);
+await b.go('/', 3500);
+m = await b.ev(chipProbe);
+ok('오늘의 10문제 6번(발견형) 카드에 단계 칩 · 분야 칩이 나란히', /^6 \/ 10/.test(m.top ?? '') && /^(새싹|쉬움|보통|어려움|고수)$/.test(m.tier ?? '') && !!m.cat, JSON.stringify(m));
 await b.shot(OUT + 'f-daily-tier.jpg');
+await b.ev(`localStorage.clear(); return 1;`);
 
 // 5. /play 필터
 for (const [f, want] of [['cube', 'cube'], ['match', 'match'], ['trivia', 'choice']]) {
