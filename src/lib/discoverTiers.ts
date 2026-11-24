@@ -457,6 +457,8 @@ export const DISCOVER_TIERS: Readonly<Record<string, Tier>> = {
 	'club-has-hole': 1, // 11/19 새로 · 가운데가 뚫려 통하는 것, 빨대도 회원
 	'candle-digits': 5, // 11/23 새로 · 숫자 초 다시 쓰기, 6/9 뒤집기 → 17
 	'club-has-handle': 1, // 11/23 새로 · 손으로 쥐는 손잡이가 달린 것, 문도 회원
+	'club-has-shell': 1, // 11/24 새로 · 단단한 껍데기를 쓰고 있는 것
+	'floor-no-4': 5, // 11/24 새로 · 4가 든 번호를 건너뛴 50번째 층 번호
 	'club-needs-two': 1, // 11/23 새로 · 혼자서는 못 하고 둘 이상 있어야 하는 것
 };
 

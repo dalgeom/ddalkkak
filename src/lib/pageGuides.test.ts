@@ -183,13 +183,13 @@ describe('성냥개비 두 번째 글의 수치', () => {
 		const ct = CHOSUNG_CATEGORIES.map((c) => c.guide.title);
 		expect(new Set(ct).size).toBe(ct.length);
 	});
-	it('과자: 66개 · 글자 수 14/36/12/4 · 「칩」 6 · 「스」 8 · 된소리 14 · 「과」 3', () => {
-		expect(words('snack').length).toBe(66);
-		expect([2, 3, 4, 5].map((n) => byLen('snack', n).length)).toEqual([14, 36, 12, 4]);
+	it('과자: 71개 · 글자 수 14/38/15/4 · 「칩」 7 · 「스」 9 · 된소리 15 · 「과」 3', () => {
+		expect(words('snack').length).toBe(71);
+		expect([2, 3, 4, 5].map((n) => byLen('snack', n).length)).toEqual([14, 38, 15, 4]);
 		expect(byLen('snack', 5).sort()).toEqual(['허니버터칩', '후렌치파이', '엄마손파이', '오징어땅콩'].sort());
-		expect(ending('snack', '칩').length).toBe(6);
-		expect(ending('snack', '스').length).toBe(8);
-		expect(words('snack').filter((w) => /[ㄲㄸㅃㅆㅉ]/.test(chosungOf(w))).length).toBe(14);
+		expect(ending('snack', '칩').length).toBe(7);
+		expect(ending('snack', '스').length).toBe(9);
+		expect(words('snack').filter((w) => /[ㄲㄸㅃㅆㅉ]/.test(chosungOf(w))).length).toBe(15);
 		expect(ending('snack', '과').sort()).toEqual(['약과', '유과', '한과'].sort());
 		expect(chosungOf('약과')).toBe(chosungOf('유과'));
 	});
@@ -219,7 +219,7 @@ describe('글이 위 수치를 그대로 적고 있다', () => {
 		[guide('fruit-vegetable'), ['78개 중 47개', '98개 중 43개', '과일이 35개, 채소가 41개', '「추」가 일곱']],
 		[guide('country'), ['「아」로 끝나는 나라가 열둘', '「국」이 여섯', '「드」가 여섯']],
 		[guide('idiom'), ['ㅇ인 것이 19개']],
-		[guide('snack'), ['66개 가운데 세 글자가 36개', '6개(', '8개(', '14개']],
+		[guide('snack'), ['71개 가운데 세 글자가 38개', '7개(', '9개(', '든 과자가 15개']],
 		[guide('movie'), ['80개', '두 글자가 17개', '네 글자가 26개', '다섯 글자 이상이 20개', 'ㅇ이 16개', 'ㄱ이 12개']],
 		[extra('self'), ['293문제', '36번씩', '21번', '190개', '103개']],
 		[extra('transfer'), ['237문제', '106번', '43번', '46번', '38번씩', '171문제', '98번', '73번', '66번']],
