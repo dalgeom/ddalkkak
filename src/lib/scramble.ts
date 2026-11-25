@@ -72,3 +72,54 @@ export function scrambleCorrect(s: Scramble, answer: string): boolean {
 	const a = answer.replace(/\s+/g, '');
 	return a === s.word || s.alts.includes(a);
 }
+
+/*
+ * 놀이 탭 /scramble 연습 판(11/25) — 오늘의 10문제와 겹치지 않는 낱말만 쓴다(SCRAMBLE_POOL 제외).
+ * 단계 3~4도 받아 쉬운 것부터 놓는다. 20783까지 들어온 묶음으로 앞부분을 고정하고,
+ * 뒤에 들어오는 초성 낱말은 들어온 순서대로 끝에 붙인다 — 이미 푼 판 번호가 다른 낱말로 바뀌지 않게.
+ */
+const PRACTICE_DAY = 20783;
+/** 연습 판 시드 = PRACTICE_BASE + 판 번호 — 데일리 날짜 번호(2만대)와 겹치지 않는다. 스도쿠 · 그림 방정식 연습 판도 같은 값을 쓴다 */
+export const PRACTICE_BASE = 1_000_000;
+
+export const SCRAMBLE_PRACTICE = (() => {
+	const daily = new Set(SCRAMBLE_POOL.map((w) => w.word));
+	const fits = (w: (typeof CHOSUNG_WORDS)[number]) => {
+		const n = [...w.word].length;
+		return !SKIP.has(w.category) && n >= 3 && n <= 4 && CHOSUNG_TIERS[w.word] !== undefined && new Set(w.word).size === n;
+	};
+	const snap = CHOSUNG_BATCHES.filter((b) => b.fromDay <= PRACTICE_DAY).at(-1)!;
+	const size = Object.values(snap.counts).reduce((a, b) => a + b, 0);
+	const head = CHOSUNG_WORDS.slice(0, size).filter(fits);
+	const count = new Map<string, number>();
+	for (const w of head) count.set(sortedKey(w.word), (count.get(sortedKey(w.word)) ?? 0) + 1);
+	const r = rng(20261125);
+	const byTier = new Map<number, typeof head>();
+	for (const w of head.filter((w) => count.get(sortedKey(w.word)) === 1 && !daily.has(w.word))) {
+		const t = CHOSUNG_TIERS[w.word];
+		byTier.set(t, [...(byTier.get(t) ?? []), w]);
+	}
+	const out = [...byTier.keys()].sort((a, b) => a - b).flatMap((t) => shuffle(byTier.get(t)!, r));
+	const seen = new Set(head.map((w) => sortedKey(w.word)));
+	for (const w of CHOSUNG_WORDS.slice(size).filter(fits)) {
+		if (seen.has(sortedKey(w.word))) continue;
+		seen.add(sortedKey(w.word));
+		out.push(w);
+	}
+	return out;
+})();
+
+/** 연습 k번째 판. 다 풀었으면 null */
+export function scramblePracticeAt(k: number): Scramble | null {
+	const w = SCRAMBLE_PRACTICE[k];
+	if (!w) return null;
+	const src = [...w.word];
+	const r = rng((PRACTICE_BASE + k) * 7907 + 3);
+	let letters = src;
+	for (let i = 0; i < 50; i++) {
+		letters = shuffle([...src], r);
+		if (letters.every((ch, j) => ch !== src[j])) break;
+	}
+	const alts = w.alts.filter((a) => sortedKey(a) === sortedKey(w.word));
+	return { word: w.word, letters, category: categoryBySlug(w.category)?.name ?? '', hint: w.hint, alts };
+}

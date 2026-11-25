@@ -48,6 +48,10 @@ const PAGES: Entry[] = [
 	{ path: '/cubenet', freq: 'daily', priority: '0.8', lastmod: '2026-11-11' },
 	{ path: '/kkeut', freq: 'daily', priority: '0.8', lastmod: '2026-11-11' },
 	{ path: '/crossword', freq: 'daily', priority: '0.8', lastmod: '2026-11-17' },
+	// 놀이 탭 연습 세 쪽(11/25) — 오늘의 10문제에만 있던 스도쿠 · 글자 섞기 · 그림 방정식을 따로 푸는 쪽
+	{ path: '/sudoku', freq: 'weekly', priority: '0.8', lastmod: '2026-11-25' },
+	{ path: '/scramble', freq: 'weekly', priority: '0.7', lastmod: '2026-11-25' },
+	{ path: '/equation', freq: 'weekly', priority: '0.7', lastmod: '2026-11-25' },
 	{ path: '/discover', freq: 'monthly', priority: '0.8' },
 	{ path: '/trivia', freq: 'monthly', priority: '0.8' },
 	{ path: '/matchstick/guide', freq: 'monthly', priority: '0.8' },

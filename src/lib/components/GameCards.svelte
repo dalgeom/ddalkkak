@@ -73,6 +73,37 @@
 			sub: [{ label: '오늘의 낱말퍼즐', href: '/crossword' }],
 			fresh: true
 		},
+		// 연습 세 쪽(11/25) — 오늘의 10문제에만 있던 세 유형. 판이 생성기로 끝없이 나오니 수 대신 cnt 글을 적는다
+		{
+			key: 'sdk',
+			name: '미니 스도쿠',
+			count: 0,
+			cnt: '4×4 · 6×6',
+			line: '한 판 2~5분, 끝없이 연습',
+			href: '/sudoku',
+			sub: [{ label: '바로 풀기', href: '/sudoku' }],
+			fresh: true
+		},
+		{
+			key: 'scr',
+			name: '글자 섞기',
+			count: 0,
+			cnt: '쉬운 낱말부터',
+			line: '섞인 글자로 낱말 맞히기',
+			href: '/scramble',
+			sub: [{ label: '바로 풀기', href: '/scramble' }],
+			fresh: true
+		},
+		{
+			key: 'eq',
+			name: '그림 방정식',
+			count: 0,
+			cnt: '풀이 한 줄씩',
+			line: '그림이 숨긴 수 찾기',
+			href: '/equation',
+			sub: [{ label: '바로 풀기', href: '/equation' }],
+			fresh: true
+		},
 		{
 			key: 'trivia',
 			name: '상식 퀴즈',
@@ -142,6 +173,12 @@
 						<span class="tile">기</span><span class="tile on">차</span><span class="arr">→</span><span class="tile on">차</span><span class="tile">표</span>
 					{:else if g.key === 'cw'}
 						{#each ['가', '나', '', '다', '', '라', '마', '바', '사'] as c, i (i)}<span class="cwc" class:blk={!c}>{c}</span>{/each}
+					{:else if g.key === 'sdk'}
+						{#each ['1', '', '3', '', '', '3', '', '1', '3', '', '', '2', '', '2', '1', ''] as c, i (i)}<span class="cwc">{c}</span>{/each}
+					{:else if g.key === 'scr'}
+						<span class="tile">기</span><span class="tile">사</span><span class="tile">과</span><span class="arr">→</span><span class="tile on">?</span>
+					{:else if g.key === 'eq'}
+						<span class="eqv">🍎+🍎=6<br />🍎+🍌=<b>?</b></span>
 					{:else if g.key === 'cube'}
 						<CubeDie view={[2, 3, 4]} size={52} />
 					{:else}
@@ -150,7 +187,7 @@
 				</div>
 				<div class="txt">
 					<b>{g.name}{#if g.fresh}<i>새 놀이</i>{/if}</b>
-					<span class="cnt">{g.count.toLocaleString()}{g.unit ?? '문제'}</span>
+					<span class="cnt">{g.cnt ?? `${g.count.toLocaleString()}${g.unit ?? '문제'}`}</span>
 					<span class="line">{g.line}</span>
 				</div>
 			</a>
@@ -253,6 +290,29 @@
 	.cwc.blk {
 		background: var(--text);
 		border-color: var(--text);
+	}
+	.vis.sdk {
+		display: grid;
+		grid-template-columns: repeat(4, 14px);
+		gap: 2px;
+	}
+	.vis.sdk .cwc {
+		height: 14px;
+		font-size: 9px;
+	}
+	.vis.scr {
+		gap: 3px;
+		white-space: nowrap;
+	}
+	.vis.scr .tile {
+		width: 20px;
+		font-size: 13px;
+	}
+	.eqv {
+		font-size: 13px;
+		font-weight: 800;
+		line-height: 1.5;
+		text-align: center;
 	}
 	.vis.kkeut {
 		gap: 3px;
