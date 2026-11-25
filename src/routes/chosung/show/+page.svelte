@@ -142,7 +142,7 @@
 	<title>초성 퀴즈 띄우기 — 수업 · 모임에서 화면에 크게 띄워 다 같이 맞히기 | 딸깍</title>
 	<meta
 		name="description"
-		content="분야와 문제 수를 고르면 초성이 화면 가득 나와요. 힌트와 정답은 진행자가 한 번씩 눌러 넘기고, 같은 초성인 다른 낱말도 함께 보여 줘요. 동물 · 음식 · 과일·채소 · 나라 · 사자성어 {total}낱말."
+		content="분야와 문제 수를 고르면 초성이 화면 가득 나와요. 힌트와 정답은 진행자가 한 번씩 눌러 넘기고, 같은 초성인 다른 낱말도 함께 보여 줘요. 동물 · 음식 · 과일·채소 · 나라 · 사자성어 · 과자 · 영화 {total}낱말."
 	/>
 	<link rel="canonical" href="https://ddalkkak.app/chosung/show" />
 	<meta property="og:title" content="초성 퀴즈 띄우기 — 수업 · 모임에서 화면에 띄워 다 같이 | 딸깍" />
