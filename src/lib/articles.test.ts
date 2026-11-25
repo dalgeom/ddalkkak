@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { ARTICLES, articleBySlug } from './articles';
 import { DISCOVER_FIELD_META } from './discoverFields';
+import { CROSSWORD_PUZZLES } from './data/crosswordPuzzles';
 
 describe('읽을거리', () => {
 	it('슬러그가 중복되지 않고 URL에 그대로 쓸 수 있다', () => {
@@ -43,9 +44,18 @@ describe('읽을거리', () => {
 			'/play',
 			'/trivia',
 			'/chosung',
+			'/crossword',
 			...DISCOVER_FIELD_META.map((f) => `/discover/${f.slug}`)
 		];
 		for (const a of ARTICLES) expect(valid, a.slug).toContain(a.cta.href);
+	});
+
+	it('낱말퍼즐 요령 글의 판 · 열쇠가 11/18 퍼즐과 같다', () => {
+		const p = CROSSWORD_PUZZLES.find((x) => x.date === '2026-11-18')!;
+		const body = articleBySlug('crossword-tips')!.body;
+		for (const clue of Object.values(p.clues)) expect(body, clue).toContain(`「${clue}」`);
+		expect(body).toContain(p.rows.map((r) => [...r].map((c) => (c === '■' ? '■' : '□')).join(' ')).join('\n'));
+		expect(body).toContain(p.rows.map((r) => [...r].join(' ')).join('\n'));
 	});
 
 	it('슬러그로 되찾을 수 있다', () => {
