@@ -1,7 +1,7 @@
 <script lang="ts">
 	import CubeNetFigure from '$lib/components/CubeNetFigure.svelte';
 	import CubeDie from '$lib/components/CubeDie.svelte';
-	import { FACES, type CubeNetProblem } from '$lib/cubenet';
+	import { FACES, whyWrong, type CubeNetProblem } from '$lib/cubenet';
 
 	/**
 	 * 전개도 한 문제(2026-10-20, 단계 도전용) — 판정은 무한 연습과 같다: 두 번 틀리면 정답을 보여 준다.
@@ -46,7 +46,10 @@
 	<p class="explain">
 		<b>해설</b> 마주 보는 면은
 		{#each problem.opposites as [a, b], k (k)}{FACES[a].name} ↔ {FACES[b].name}{k < problem.opposites.length - 1 ? ', ' : ''}{/each}
-		세 쌍이에요. 마주 본 두 면은 한 화면에 같이 보이지 않아요.{#if wrong > 0} 마주 보는 두 면이 같이 보이지 않는데도 틀렸다면, 그 틀린 보기는 정답의 거울상이에요 — 세 면이 도는 방향이 반대라 아무리 돌려도 못 만들어요.{/if}
+		세 쌍이에요. 마주 본 두 면은 한 화면에 같이 보이지 않아요.
+		{#each problem.options as opt, i (i)}{#if i !== problem.answer}{@const w = whyWrong(problem, opt)}<span class="why"
+					><b>{['A', 'B', 'C', 'D'][i]}</b> — {#if w.kind === 'opp'}마주 보는 {FACES[w.a].name} ↔ {FACES[w.b].name} 두 면이 같이 보여요 — 주사위에선 안 돼요{:else}만들 수 있는 모양을 거울에 비춘 것이라 세 면이 도는 방향이 반대예요{/if}</span
+				>{/if}{/each}
 	</p>
 {/if}
 
@@ -116,5 +119,9 @@
 	.explain b {
 		color: var(--text);
 		margin-right: 6px;
+	}
+	.why {
+		display: block;
+		margin-top: 4px;
 	}
 </style>

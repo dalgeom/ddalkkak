@@ -417,3 +417,10 @@ export function problemAt(index: number): CubeNetProblem {
 	}
 	throw new Error('전개도 문제를 만들지 못했습니다');
 }
+
+/** 오답 보기가 왜 안 되는지 — 마주 보는 두 면이 같이 보이거나, 만들 수 있는 모양의 거울상이다(cubenet.test.ts가 전부 둘 중 하나임을 확인). */
+export type WrongWhy = { kind: 'opp'; a: number; b: number } | { kind: 'mirror' };
+export function whyWrong(p: CubeNetProblem, v: View): WrongWhy {
+	for (const [a, b] of p.opposites) if (v.includes(a) && v.includes(b)) return { kind: 'opp', a, b };
+	return { kind: 'mirror' };
+}

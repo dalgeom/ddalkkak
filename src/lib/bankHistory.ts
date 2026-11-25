@@ -81,7 +81,8 @@ const BANK_HISTORY: ({ fromDay: number } & BankSizes)[] = [
 	{ fromDay: 20776, discover: 439, trivia: 651 }, // 11/18 순우리말 분야 신설(상식 20개 tv-655~674, /trivia/pure-korean) + 단계 채우기(발견형 3 club-has-teeth · season-number · club-folds, 상식 5 tv-675~679) — 11/19부터
 	{ fromDay: 20777, discover: 442, trivia: 656 }, // 11/19 단계 채우기(발견형 3 club-on-a-string · clock-red-3 · club-has-hole — 후보 5개 중 2개 반려, 상식 5 어려움 tv-680~682 · 고수 tv-683~684) — 11/20부터
 	{ fromDay: 20781, discover: 445, trivia: 661 }, // 11/23 단계 채우기(발견형 3 candle-digits · club-has-handle · club-needs-two, 상식 5 어른 tv-685~689) — 11/24부터
-	{ fromDay: 20782, discover: 447, trivia: 666 } // 11/24 단계 채우기(발견형 2 club-has-shell · floor-no-4 — 후보 3개 중 1개 반려, 상식 고수 5 tv-690~694) — 11/25부터
+	{ fromDay: 20782, discover: 447, trivia: 666 }, // 11/24 단계 채우기(발견형 2 club-has-shell · floor-no-4 — 후보 3개 중 1개 반려, 상식 고수 5 tv-690~694) — 11/25부터
+	{ fromDay: 20783, discover: 448, trivia: 671 } // 11/25 단계 채우기(발견형 1 club-one-use — 후보 3개 중 2개 반려, 상식 고수 5 tv-695~699) — 11/26부터
 ];
 
 /** day의 세트를 계산할 때 쓸 은행 크기 — fromDay가 day 이하인 마지막 엔트리 */

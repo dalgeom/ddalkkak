@@ -75,3 +75,19 @@ export function sudokuAt(day: number): Sudoku {
 	}
 	return { size, boxR: br, boxC: bc, givens, solution: sol };
 }
+
+/**
+ * 해설용 첫 수(11/25) — 주어진 수만 보고 바로 채울 수 있는 칸: 같은 가로줄 · 세로줄 · 묶음에 나머지 수가 다 있어 남는 수가 하나뿐인 칸.
+ * 그런 칸이 없으면 null(해설은 일반 문장만).
+ */
+export function firstStep(s: Sudoku): { cell: number; value: number; seen: number[] } | null {
+	const { size: n, boxR: br, boxC: bc, givens: g } = s;
+	for (let i = 0; i < n * n; i++) {
+		if (g[i]) continue;
+		const cand = [...Array(n)].map((_, k) => k + 1).filter((v) => ok(g, n, br, bc, i, v));
+		if (cand.length !== 1) continue;
+		const seen = [...Array(n)].map((_, k) => k + 1).filter((v) => v !== cand[0]);
+		return { cell: i, value: cand[0], seen };
+	}
+	return null;
+}

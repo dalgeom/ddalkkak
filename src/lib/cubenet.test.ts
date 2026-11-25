@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { parseNet, foldNet, allRotations, achievableViews, oppositePairs, viewOf, NETS, FACES, makeProblem, problemAt, objectParticle } from './cubenet';
+import { parseNet, foldNet, allRotations, achievableViews, oppositePairs, viewOf, NETS, FACES, makeProblem, problemAt, objectParticle, whyWrong } from './cubenet';
 
 describe('접기 수학', () => {
 	it('십자 전개도는 접힌다', () => {
@@ -288,5 +288,31 @@ describe('면 이름 조사', () => {
 	it('받침 없는 이름에 을이 붙으면 잡힌다', () => {
 		expect(objectParticle('십자')).not.toBe('을');
 		expect(objectParticle('사각')).not.toBe('를');
+	});
+});
+
+describe('오답 해설', () => {
+	it('오답은 전부 「마주 보는 면이 같이 보임」 아니면 「만들 수 있는 모양의 거울상」이다', () => {
+		let opp = 0;
+		let mirror = 0;
+		for (let i = 0; i < 800; i++) {
+			const p = problemAt(i);
+			const net = NETS.find((n) => n.rows.join() === p.net.rows.join())!;
+			const ach = new Set(allRotations(net.cube).map((c) => viewOf(c).map((k) => p.net.faceOf[k]).join(',')));
+			p.options.forEach((v, j) => {
+				if (j === p.answer) return;
+				const w = whyWrong(p, v);
+				if (w.kind === 'opp') {
+					opp++;
+					expect(v).toContain(w.a);
+					expect(v).toContain(w.b);
+				} else {
+					mirror++;
+					expect(ach.has([v[0], v[2], v[1]].join(','))).toBe(true);
+				}
+			});
+		}
+		expect(opp).toBeGreaterThan(0);
+		expect(mirror).toBeGreaterThan(0);
 	});
 });

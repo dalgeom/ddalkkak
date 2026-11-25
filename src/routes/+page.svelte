@@ -36,7 +36,7 @@
 	import SudokuCard from '$lib/components/SudokuCard.svelte';
 	import type { Scramble } from '$lib/scramble';
 	import type { Equation } from '$lib/equation';
-	import type { Sudoku } from '$lib/sudoku';
+	import { firstStep, type Sudoku } from '$lib/sudoku';
 	import { playHistory } from '$lib/playHistory.svelte';
 	import { shareResult, outcomeMessage } from '$lib/shareCard';
 	import { ctaTrack, takeGoDaily, leaveEventName, openDwellEventName } from '$lib/analytics';
@@ -56,7 +56,7 @@
 	import NewsBar from '$lib/components/NewsBar.svelte';
 	import NewsSheet from '$lib/components/NewsSheet.svelte';
 	import CubeFold from '$lib/components/CubeFold.svelte';
-	import { FACES as CUBE_FACES, type CubeNetProblem } from '$lib/cubenet';
+	import { FACES as CUBE_FACES, whyWrong, type CubeNetProblem } from '$lib/cubenet';
 	import SevenSeg from '$lib/components/SevenSeg.svelte';
 	import ColorBlocks from '$lib/components/ColorBlocks.svelte';
 	import Glyph from '$lib/components/Glyph.svelte';
@@ -1415,13 +1415,20 @@
 						{#each current.cube.opposites as [a, b], k (k)}<span class="oppair"
 								>{CUBE_FACES[a].name} ↔ {CUBE_FACES[b].name}</span
 							>{k < current.cube.opposites.length - 1 ? ', ' : ''}{/each}
-						세 쌍이에요. 마주 본 두 면은 한 화면에 같이 보이지 않아요.{#if wrongAttempts > 0} 마주 보는 두 면이 같이 보이지 않는데도 틀렸다면, 그 틀린 보기는 정답의 거울상이에요 — 세 면이 도는 방향이 반대라 아무리 돌려도 못 만들어요.{/if}
+						세 쌍이에요. 마주 본 두 면은 한 화면에 같이 보이지 않아요.
+						{#each current.cube.options as opt, i (i)}{#if i !== current.cube.answer}{@const w = whyWrong(current.cube, opt)}<span class="eqstep"
+									><b>{['A', 'B', 'C', 'D'][i]}</b> — {#if w.kind === 'opp'}마주 보는 {CUBE_FACES[w.a].name} ↔ {CUBE_FACES[w.b].name} 두 면이 같이 보여요 — 주사위에선 안 돼요{:else}만들 수 있는 모양을 거울에 비춘 것이라 세 면이 도는 방향이 반대예요{/if}</span
+								>{/if}{/each}
 					{:else if current.scramble}
 						정답은 <b>{current.scramble.word}</b> ({current.scramble.category}). {current.scramble.hint}
 					{:else if current.equation}
 						{#each current.equation.steps as s, k (k)}<span class="eqstep">{s}</span>{/each}
 					{:else if current.sudoku}
-						가로줄 · 세로줄 · 굵은 칸 묶음에 하나씩 빠진 수를 찾아 채우면 돼요. 판에 정답을 채워 두었어요.
+						{@const fs = firstStep(current.sudoku)}
+						{#if fs}<span class="eqstep"
+								>첫 수: <b>{Math.floor(fs.cell / current.sudoku.size) + 1}행 {(fs.cell % current.sudoku.size) + 1}열</b>은 같은 가로줄 · 세로줄 · 묶음에 이미 {fs.seen.join(' · ')}까지 다 있어서 남는 수는 <b>{fs.value}</b>뿐이에요.</span
+							>{/if}
+						가로줄 · 세로줄 · 굵은 칸 묶음에 하나씩 빠진 수를 찾아 채우면 돼요. 이렇게 한 칸씩 정해 가면 끝까지 풀려요 — <a href="/read/sudoku-tips">스도쿠 요령</a>. 판에 정답을 채워 두었어요.
 					{:else if current.problem}
 						{@html current.problem.explain}
 					{/if}
