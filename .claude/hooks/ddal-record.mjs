@@ -6,7 +6,7 @@
 //   post    PostToolUse(Bash|PowerShell): 기계로 알 수 있는 일(GA 보고 · qa · ?day= 미리 열기 · 푸시 · 정리)을 done 파일에 자동으로 적는다.
 //   stop    Stop: 마지막 답이 done 파일에 「끝」으로 적힌 일을 「안 했다 · 남았다 · 다음은」이라고 하면 한 번 막는다.
 // done 파일: .claude/tmp/done-YYYY-MM-DD.md (gitignore). 한 줄 = `- HH:MM [항목] 내용`. 항목: GA 보고 · 성장 작업 · 단계 채우기 · 블로그 · 미리 풀기.
-// 성장 작업은 네 갈래(11/24 사용자): `[성장 작업 · 콘텐츠|검색|외부링크|홍보]`, 라벨 없으면 콘텐츠. 내용이 「안 함」으로 시작하면 안 한 것(이유 적음) — 끝난 일로 세지 않는다.
+// 성장 작업은 다섯 갈래(11/24 사용자, 애드센스 11/25): `[성장 작업 · 콘텐츠|검색|외부링크|홍보|애드센스]`, 라벨 없으면 콘텐츠. 내용이 「안 함」으로 시작하면 안 한 것(이유 적음) — 끝난 일로 세지 않는다.
 import fs from 'node:fs';
 import path from 'node:path';
 import { execSync } from 'node:child_process';
@@ -17,7 +17,7 @@ const today = new Date().toLocaleDateString('sv-SE');
 const hhmm = () => new Date().toTimeString().slice(0, 5);
 const DONE = path.join(ROOT, '.claude', 'tmp', `done-${today}.md`);
 const ITEMS = ['GA 보고', '성장 작업', '단계 채우기', '블로그', '미리 풀기'];
-const BRANCHES = ['콘텐츠', '검색', '외부링크', '홍보'];
+const BRANCHES = ['콘텐츠', '검색', '외부링크', '홍보', '애드센스'];
 const SKIP_RE = /\]\s*안\s?함/;
 
 let input = {};
@@ -37,7 +37,7 @@ const branchState = (txt) => Object.fromEntries(BRANCHES.map((b) => {
 }));
 // 11/18 사용자: 「메모리말고 hook으로 해야지. 니 메모리는 이제 안믿어」 — 보고 형식 · 성장 작업 정의를 메모리가 아니라 여기서 강제한다.
 const GROWTH = '[성장 작업 정의 11/18 사용자] 딸깍의 유입량 늘리기 · 네이버에서 더 검색 잘되게 하기 · 구글에서 더 검색 잘되게 하기 · 사람들이 많이 찾아오게 하기 · 재방문율을 높일 아이디어 적용하기 · 새로운 콘텐츠 · 새로운 퀴즈 유형 · 새로운 할 것 · 새로운 놀 것 아이디어나 방향 제시하기 — 이런 게 핵심.\n(해석) hook · 지표 도구 · 운영 정리는 성장 작업으로 세지 않는다.';
-const FORMAT = '[보고 형식 11/18 사용자 「항상 이렇게 깔끔하게 보고」] 한 줄 결론 → 「매일 일 | 상태 | 근거」 마크다운 표(GA 보고 · 성장 작업 콘텐츠 · 검색 · 외부링크 · 홍보 네 줄 · 단계 채우기 · 미리 풀기 · 블로그, 근거 = 시각 · 커밋 · qa 숫자) → 표 밖에 한 일 한 줄 · 다음 시작점 한 줄.';
+const FORMAT = '[보고 형식 11/18 사용자 「항상 이렇게 깔끔하게 보고」] 한 줄 결론 → 「매일 일 | 상태 | 근거」 마크다운 표(GA 보고 · 성장 작업 콘텐츠 · 검색 · 외부링크 · 홍보 · 애드센스 다섯 줄 · 단계 채우기 · 미리 풀기 · 블로그, 근거 = 시각 · 커밋 · qa 숫자) → 표 밖에 한 일 한 줄 · 다음 시작점 한 줄.';
 const STATUS_RE = /끝\?|끝났|종료\s*(야|냐|임|\?)|남은\s*(일|거|것)|뭐\s*했|다 했|오늘 할 일|상태\s*(보고|는\?|야\?|알려)/;
 const TABLE_RE = /^\s*\|.*\|\s*$\n^\s*\|?\s*:?-{3,}/m;
 
@@ -52,7 +52,7 @@ function record() {
 	return [
 		`[오늘 기록 ${today}] 상태 · 남은 일 · 「다음 할 일」을 말하기 전에 이것부터 본다. 여기 없는 일은 「안 했다」가 아니라 대화 jsonl을 찾아보거나 「모른다」다.`,
 		`끝난 매일 일: ${have.length ? have.join(' · ') : '(done 파일에 적힌 것 없음)'} / 안 적힌 것: ${ITEMS.filter((i) => !have.includes(i)).join(' · ') || '없음'}`,
-		`성장 작업 갈래: ${Object.entries(branchState(done)).map(([b, st]) => `${b} ${st}`).join(' · ')} — 갈래마다 하거나 \`[성장 작업 · 갈래] 안 함 — 이유\`를 적는다.`,
+		`성장 작업 갈래: ${Object.entries(branchState(done)).map(([b, st]) => `${b} ${st}`).join(' · ')} — 갈래마다 하거나 \`[성장 작업 · 갈래] 안 함 — 이유\`를 적는다. 애드센스는 매일 하나, 안 함은 막힌 날만.`,
 		done ? `done 파일(.claude/tmp/done-${today}.md):\n${done.split('\n').slice(-25).join('\n')}` : `done 파일 없음 — 매일 일을 끝내면 \`- HH:MM [항목] 내용\` 한 줄을 .claude/tmp/done-${today}.md에 적는다.`,
 		`오늘 커밋: ${commits ? '\n' + commits.split('\n').slice(0, 15).join('\n') : '없음'}`,
 		`fixLog ${md}: ${fix.length ? fix.join(' · ') : '없음'} / 게시-기록 ${md}: ${posts.length ? '\n' + posts.join('\n') : '없음'}`,
