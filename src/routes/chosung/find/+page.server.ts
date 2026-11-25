@@ -38,5 +38,5 @@ export async function load({ fetch }) {
 		if (f) fields[f].push(w);
 	}
 	if (fields.animal.length < 100) throw new Error('분야 낱말이 너무 적음 — 뜻풀이 조각을 못 읽었나');
-	return { fields, total: j.words.length - j.words.filter((w) => hidden.has(w)).length, hide, common };
+	return { fields, dict: j.words.length, total: j.words.length - j.words.filter((w) => hidden.has(w)).length, hide, common };
 }

@@ -99,7 +99,7 @@
 		inLanguage: 'ko',
 		isAccessibleForFree: true,
 		offers: { '@type': 'Offer', price: '0', priceCurrency: 'KRW' },
-		description: `초성(ㅅㄱ)이나 초성과 글자를 섞어(사ㄱ) 넣으면 국립국어원 한국어기초사전 명사 ${data.total.toLocaleString()}개에서 맞는 말을 찾아 주는 무료 도구.`,
+		description: `초성(ㅅㄱ)이나 초성과 글자를 섞어(사ㄱ) 넣으면 국립국어원 한국어기초사전 명사 ${data.total.toLocaleString()}개(초성 퀴즈 정답 제외)에서 맞는 말을 찾아 주는 무료 도구.`,
 		publisher: { '@type': 'Organization', name: '딸깍', url: 'https://ddalkkak.app' }
 	});
 </script>
@@ -108,7 +108,7 @@
 	<title>초성으로 단어 찾기 — ㅅㄱ을 넣으면 사고 · 시계 · 수건 | 딸깍</title>
 	<meta
 		name="description"
-		content="초성만 넣으면 그 초성으로 된 낱말을 사전에서 찾아 줘요. 아는 글자를 섞어(사ㄱ) 좁힐 수도 있어요. 초성 퀴즈 만들기, 수업 낱말 모으기에. 한국어기초사전 명사 {data.total.toLocaleString()}개."
+		content="초성만 넣으면 그 초성으로 된 낱말을 사전에서 찾아 줘요. 아는 글자를 섞어(사ㄱ) 좁힐 수도 있어요. 초성 퀴즈 만들기, 수업 낱말 모으기에. 한국어기초사전 명사 {data.dict.toLocaleString()}개 중 초성 퀴즈 정답과 겹치는 {(data.dict - data.total).toLocaleString()}개를 뺀 {data.total.toLocaleString()}개."
 	/>
 	<link rel="canonical" href="https://ddalkkak.app/chosung/find" />
 	<meta property="og:title" content="초성으로 단어 찾기 | 딸깍" />
@@ -223,7 +223,7 @@
 
 		<h2 class="sh">어떤 사전을 쓰나요</h2>
 		<p class="deep">
-			국립국어원 <b>한국어기초사전</b>의 명사 {data.total.toLocaleString()}개를 써요. 두 글자 이상인 한글 명사만 남겼고, 딸깍
+			국립국어원 <b>한국어기초사전</b>의 명사 {data.dict.toLocaleString()}개 가운데 초성 퀴즈 정답과 겹치는 {(data.dict - data.total).toLocaleString()}개를 뺀 {data.total.toLocaleString()}개를 써요. 두 글자 이상인 한글 명사만 남겼고, 딸깍
 			<a class="inl" href="/chosung">초성 퀴즈</a>의 정답 낱말은 빼 두었어요 — 퀴즈는 직접 풀어야 재미있으니까요. 뜻풀이도 같은
 			사전에서 가져왔어요(CC BY-SA 2.0 KR, <a class="inl" href="/kkeut/LICENSE.txt">이용 조건</a>).
 		</p>
