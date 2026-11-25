@@ -38,6 +38,7 @@ export const KKEUT_PUZZLES: KkeutPuzzle[] = [
 	{ date: '2026-11-29', start: '구월', line: ['월드컵', '컵라면', '면접시험', '험구', '구레나룻'] },
 	{ date: '2026-11-30', start: '가로줄', line: ['줄무늬'] },
 	{ date: '2026-12-01', start: '걸레질', line: ['질그릇'] },
+	{ date: '2026-12-02', start: '가마솥', line: ['솥뚜껑'] },
 ];
 
 export function puzzleFor(day: number): KkeutPuzzle | null {
