@@ -2,7 +2,7 @@
 	import { track } from '$lib/analytics';
 	import MatchEquation from '$lib/components/MatchEquation.svelte';
 	import { MATCH_ANSWERS, answerSlug, cellsOf, mainRule } from '$lib/matchAnswers';
-	import { RULES, RULE_LABEL, changeLine, pretty, solve } from '$lib/matchSolve';
+	import { RULES, RULE_LABEL, changeLine, pretty, slotsOf, solve } from '$lib/matchSolve';
 
 	/*
 	 * 자주 찾는 성냥 식 하나의 정답(2026-10-29). 검색에서 바로 이 식으로 들어온 사람이 답 그림과 풀이를 보고,
@@ -20,6 +20,18 @@
 	const ansText = $derived(answers.map((s) => pretty(s.text)).join(', '));
 	// 「= 6예요」처럼 받침 있는 숫자 뒤 조사가 틀렸다(11/11 점검) — 0·1·3·6·7·8은 받침이 있다
 	const josa = $derived(/[013678]$/.test(ansText) ? '이에요' : '예요');
+	// 성냥 세기(11/26) — 규칙마다 따져 볼 경우의 수와 그중 맞는 식 수. 풀이기가 실제로 다 따져 본 숫자다
+	const slots = $derived(slotsOf(cells));
+	const lit = $derived(slots.lit.length);
+	const empty = $derived(slots.empty.length);
+	const c2 = (n: number) => (n * (n - 1)) / 2;
+	const counts = $derived(
+		RULES.map((r) => ({
+			rule: r,
+			ways: r === 'move1' ? lit * empty : r === 'move2' ? c2(lit) * c2(empty) : r === 'remove1' ? lit : empty,
+			hits: solve(cells, r).length
+		}))
+	);
 </script>
 
 <svelte:head>
@@ -66,6 +78,29 @@
 	<section class="sec">
 		<h2 class="sh">풀이</h2>
 		<p class="mp">{data.note}</p>
+	</section>
+
+	<section class="sec">
+		<h2 class="sh">먼저 떠오르는 오답</h2>
+		<p class="mp">{data.trap}</p>
+	</section>
+
+	<section class="sec">
+		<h2 class="sh">성냥 세기</h2>
+		<p class="mp">
+			이 식은 성냥 {lit}개로 되어 있고, 성냥을 더 놓을 수 있는 빈 자리가 {empty}곳 있어요(숫자 칸의 비어 있는 획, − 가
+			있으면 그 세로 자리까지). 성냥 1개 옮기기라면 뺄 성냥 {lit}개 × 놓을 자리 {empty}곳, 모두 {lit * empty}가지만 따져 보면 답이
+			빠짐없이 나와요. 머릿속으로 다 세기는 어렵지만, 「어느 숫자가 성냥 하나로 무엇이 되나」를 알면 금방 줄어들어요.
+		</p>
+		<div class="exs">
+			{#each counts as c (c.rule)}
+				<div class="ex">
+					<span class="eq-q">성냥 {RULE_LABEL[c.rule]}</span>
+					<span class="eq-r">{c.ways.toLocaleString('ko-KR')}가지</span>
+					<span class="eq-a" class:none={!c.hits}>{c.hits ? `그중 맞는 식 ${c.hits}개` : '맞는 식이 없어요'}</span>
+				</div>
+			{/each}
+		</div>
 	</section>
 
 	<section class="sec">

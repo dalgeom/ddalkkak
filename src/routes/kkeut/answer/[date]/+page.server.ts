@@ -2,6 +2,7 @@ import { error } from '@sveltejs/kit';
 import { kstDayNumber } from '$lib/game';
 import { dueum, last, makeDict, movesFrom } from '$lib/kkeut';
 import { KKEUT_FIRST_DAY, KKEUT_PUZZLES } from '$lib/data/kkeutPuzzles';
+import { KKEUT_NOTES } from '$lib/data/kkeutNotes';
 import type { EntryGenerator } from './$types';
 
 // 지난 오늘의 끝말잇기 해설(2026-11-03) — 오간 말과 사전 뜻을 HTML에 굽는다. 오늘 · 앞날 퍼즐은 굽지 않는다.
@@ -62,6 +63,7 @@ export async function load({ params, fetch }) {
 		end: last(p.line[p.line.length - 1]),
 		du: dueum(last(p.line[p.line.length - 1])) !== null,
 		prev: KKEUT_PUZZLES[i - 1]?.date ?? null,
-		next: past()[i + 1]?.date ?? null
+		next: past()[i + 1]?.date ?? null,
+		note: KKEUT_NOTES[p.date] ?? null
 	};
 }

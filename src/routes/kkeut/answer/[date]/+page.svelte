@@ -42,6 +42,10 @@
 			{#each data.traps as t (t.w)}<li>{t.w} → 컴퓨터 「{t.r}」</li>{/each}
 		</ul>
 	{/if}
+	{#if data.note}
+		<h2>풀이 요령</h2>
+		<p>{data.note}</p>
+	{/if}
 	<h2>마지막 수, 다른 정답</h2>
 	<p>마지막 자리에서 낼 수 있던 말 {data.options[data.options.length - 1].toLocaleString()}개 중 컴퓨터를 그 자리에서 막는 말은 {data.blockCount}개예요.
 		{#if data.others.length}「{data.p.line[data.p.line.length - 1]}」 말고도 이 말들이 통해요.{:else}「{data.p.line[data.p.line.length - 1]}」 하나뿐이에요.{/if}</p>

@@ -105,7 +105,7 @@ export function isTrueText(text: string | null): boolean {
 	return a !== null && b !== null && a === b;
 }
 
-function slotsOf(cells: Cell[]): { lit: Slot[]; empty: Slot[] } {
+export function slotsOf(cells: Cell[]): { lit: Slot[]; empty: Slot[] } {
 	const lit: Slot[] = [];
 	const empty: Slot[] = [];
 	cells.forEach((c, ci) => {

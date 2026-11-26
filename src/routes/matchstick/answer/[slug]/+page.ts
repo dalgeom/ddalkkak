@@ -10,5 +10,5 @@ export const entries: EntryGenerator = () => MATCH_ANSWERS.map((a) => ({ slug: a
 export function load({ params }) {
 	const a = answerBySlug(params.slug);
 	if (!a) error(404, '없는 식입니다');
-	return { q: a.q, note: a.note };
+	return { q: a.q, note: a.note, trap: a.trap };
 }
