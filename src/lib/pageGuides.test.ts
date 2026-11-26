@@ -16,13 +16,13 @@ const ending = (slug: string, tail: string) => words(slug).filter((w) => w.endsW
 const byLen = (slug: string, n: number) => words(slug).filter((w) => w.length === n);
 
 describe('초성 분야 두 번째 글의 수치', () => {
-	it('동물: 「리」 10 · 「이」 9 · 「어」 7 · 「새」 2 · 글자 수 43/45/10', () => {
-		expect(words('animal').length).toBe(98);
+	it('동물: 「리」 10 · 「이」 9 · 「어」 7 · 「새」 2 · 글자 수 46/47/10', () => {
+		expect(words('animal').length).toBe(103);
 		expect(ending('animal', '리').length).toBe(10);
 		expect(ending('animal', '이').length).toBe(9);
 		expect(ending('animal', '어').sort()).toEqual(['악어', '오징어', '문어', '상어', '금붕어', '붕어', '고등어'].sort());
 		expect(ending('animal', '새')).toEqual(['앵무새', '참새']);
-		expect([2, 3, 4].map((n) => byLen('animal', n).length)).toEqual([43, 45, 10]);
+		expect([2, 3, 4].map((n) => byLen('animal', n).length)).toEqual([46, 47, 10]);
 		expect(byLen('animal', 4).sort()).toEqual(['고슴도치', '불가사리', '반딧불이', '카멜레온', '하이에나', '무당벌레', '미꾸라지', '사슴벌레', '나무늘보', '바다표범'].sort());
 		expect(chosungOf('독수리')).toBe('ㄷㅅㄹ');
 		expect(chosungOf('부엉이')).toBe('ㅂㅇㅇ');
@@ -59,7 +59,7 @@ describe('초성 분야 두 번째 글의 수치', () => {
 		expect(ws.slice(65)).toEqual(['청포도', '완두콩', '샤인머스캣', '자몽', '땅콩', '쑥갓', '토란', '냉이', '쪽파', '열무', '애호박', '산딸기', '셀러리', '거봉', '천혜향', '양송이', '강낭콩', '청양고추']);
 		expect(ws.slice(0, 20).length + ws.slice(42, 52).length + 1 + 1 + 1 + 1 + 1 + 2).toBe(37);
 		expect(ws.slice(21, 42).length + ws.slice(52, 62).length + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 3).toBe(44);
-		expect(byLen('animal', 2).length).toBe(43);
+		expect(byLen('animal', 2).length).toBe(46);
 	});
 
 	it('나라: 「아」 12 · 「국」 6 · 「드」 6 · 「아」 중 세 글자는 러시아뿐', () => {
@@ -215,9 +215,9 @@ describe('글이 위 수치를 그대로 적고 있다', () => {
 	const guide = (slug: string) => CHOSUNG_CATEGORIES.find((c) => c.slug === slug)!.guide.body;
 	const extra = (slug: string) => [...MATCH_KINDS, ...MATCH_LEVELS].find((k) => k.slug === slug)!.extra.body;
 	it.each([
-		[guide('animal'), ['98개 중 19개', '두 글자가 43개, 세 글자가 45개']],
+		[guide('animal'), ['103개 중 19개', '두 글자가 46개, 세 글자가 47개']],
 		[guide('food'), ['스물여섯 개', '세 글자가 47개', '두 글자가 30개']],
-		[guide('fruit-vegetable'), ['83개 중 48개', '98개 중 43개', '과일이 37개, 채소가 44개', '「추」가 여덟']],
+		[guide('fruit-vegetable'), ['83개 중 48개', '103개 중 46개', '과일이 37개, 채소가 44개', '「추」가 여덟']],
 		[guide('country'), ['「아」로 끝나는 나라가 열둘', '「국」이 여섯', '「드」가 여섯']],
 		[guide('idiom'), ['74개는', 'ㅇ인 것이 19개']],
 		[guide('snack'), ['71개 가운데 세 글자가 38개', '7개(', '9개(', '든 과자가 15개']],

@@ -461,6 +461,7 @@ export const DISCOVER_TIERS: Readonly<Record<string, Tier>> = {
 	'floor-no-4': 5, // 11/24 새로 · 4가 든 번호를 건너뛴 50번째 층 번호
 	'club-one-use': 1, // 11/25 새로 · 한 번 쓰면 다시 못 쓰는 것
 	'club-needs-two': 1, // 11/23 새로 · 혼자서는 못 하고 둘 이상 있어야 하는 것
+	'club-plugs-in': 1, // 11/26 새로 · 콘센트에 꽂아 둬야만 작동하는 것
 };
 
 /**
