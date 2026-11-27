@@ -3,7 +3,7 @@
 // 새 콘텐츠와 함께 다시 내보내지 않으려고 둔다. 목록(허브) 쪽은 링크 모음이라 기준에서 뺀다.
 const BASE = process.env.QA_BASE || 'https://ddalkkak.app';
 const MIN = 200;
-const HUB = new Set(['/', '/archive', '/matchstick/answer']);
+const HUB = new Set(['/', '/archive']);
 const sm = await (await fetch(BASE + '/sitemap.xml?nocache=' + Date.now())).text();
 const pages = [...new Set([...sm.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1].replace(/^https?:\/\/[^/]+/, '') || '/'))];
 const rows = await Promise.all(pages.map(async (p) => {
