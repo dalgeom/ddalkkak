@@ -40,6 +40,7 @@ export const KKEUT_PUZZLES: KkeutPuzzle[] = [
 	{ date: '2026-12-01', start: '걸레질', line: ['질그릇'] },
 	{ date: '2026-12-02', start: '거리감', line: ['감귤'] },
 	{ date: '2026-12-03', start: '개그맨', line: ['맨션'] },
+	{ date: '2026-12-04', start: '가위', line: ['위험', '험로', '노을'] },
 ];
 
 export function puzzleFor(day: number): KkeutPuzzle | null {
