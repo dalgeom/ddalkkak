@@ -73,10 +73,10 @@ describe('초성 분야 두 번째 글의 수치', () => {
 		expect(chosungOf('핀란드')).toBe(chosungOf('폴란드'));
 	});
 
-	it('사자성어: 첫 초성 ㅇ 19 · 되풀이 짝 · 첫 글자 묶음', () => {
+	it('사자성어: 첫 초성 ㅇ 21 · 되풀이 짝 · 첫 글자 묶음', () => {
 		const ws = words('idiom');
-		expect(ws.length).toBe(74);
-		expect(ws.filter((w) => chosungOf(w)[0] === 'ㅇ').length).toBe(19);
+		expect(ws.length).toBe(79);
+		expect(ws.filter((w) => chosungOf(w)[0] === 'ㅇ').length).toBe(21);
 		for (const w of ['우왕좌왕', '이심전심', '설상가상', '애지중지']) expect(w[1], w).toBe(w[3]);
 		for (const w of ['막상막하', '백발백중', '동고동락', '자업자득', '반신반의', '자화자찬']) expect(w[0], w).toBe(w[2]);
 		for (const w of ['시시비비', '전전긍긍', '유유상종']) expect(w[0], w).toBe(w[1]);
@@ -219,7 +219,7 @@ describe('글이 위 수치를 그대로 적고 있다', () => {
 		[guide('food'), ['스물여섯 개', '세 글자가 47개', '두 글자가 30개']],
 		[guide('fruit-vegetable'), ['83개 중 48개', '103개 중 46개', '과일이 37개, 채소가 44개', '「추」가 여덟']],
 		[guide('country'), ['「아」로 끝나는 나라가 열둘', '「국」이 여섯', '「드」가 여섯']],
-		[guide('idiom'), ['74개는', 'ㅇ인 것이 19개']],
+		[guide('idiom'), ['79개는', 'ㅇ인 것이 21개']],
 		[guide('snack'), ['71개 가운데 세 글자가 38개', '7개(', '9개(', '든 과자가 15개']],
 		[guide('movie'), ['80개', '두 글자가 17개', '네 글자가 26개', '다섯 글자 이상이 20개', 'ㅇ이 16개', 'ㄱ이 12개']],
 		[extra('self'), ['293문제', '36번씩', '21번', '190개', '103개']],

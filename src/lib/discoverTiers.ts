@@ -462,6 +462,7 @@ export const DISCOVER_TIERS: Readonly<Record<string, Tier>> = {
 	'club-one-use': 1, // 11/25 새로 · 한 번 쓰면 다시 못 쓰는 것
 	'club-needs-two': 1, // 11/23 새로 · 혼자서는 못 하고 둘 이상 있어야 하는 것
 	'club-plugs-in': 1, // 11/26 새로 · 콘센트에 꽂아 둬야만 작동하는 것
+	'club-wind-moves': 1, // 11/27 새로 · 바람을 받아 실려 움직이는 것
 };
 
 /**

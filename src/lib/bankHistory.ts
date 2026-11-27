@@ -83,7 +83,8 @@ const BANK_HISTORY: ({ fromDay: number } & BankSizes)[] = [
 	{ fromDay: 20781, discover: 445, trivia: 661 }, // 11/23 단계 채우기(발견형 3 candle-digits · club-has-handle · club-needs-two, 상식 5 어른 tv-685~689) — 11/24부터
 	{ fromDay: 20782, discover: 447, trivia: 666 }, // 11/24 단계 채우기(발견형 2 club-has-shell · floor-no-4 — 후보 3개 중 1개 반려, 상식 고수 5 tv-690~694) — 11/25부터
 	{ fromDay: 20783, discover: 448, trivia: 671 }, // 11/25 단계 채우기(발견형 1 club-one-use — 후보 3개 중 2개 반려, 상식 고수 5 tv-695~699) — 11/26부터
-	{ fromDay: 20784, discover: 449, trivia: 676 } // 11/26 단계 채우기(발견형 1 club-plugs-in, 상식 고수 5 tv-700~704) — 11/27부터
+	{ fromDay: 20784, discover: 449, trivia: 676 }, // 11/26 단계 채우기(발견형 1 club-plugs-in, 상식 고수 5 tv-700~704) — 11/27부터
+	{ fromDay: 20785, discover: 450, trivia: 681 } // 11/27 단계 채우기(발견형 1 club-wind-moves, 상식 고수 5 tv-705~709) — 11/28부터
 ];
 
 /** day의 세트를 계산할 때 쓸 은행 크기 — fromDay가 day 이하인 마지막 엔트리 */
